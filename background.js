@@ -225,12 +225,13 @@ async function updateData() {
     
     // DEBUG: Log temporal para ver por qué no hay arbitrajes
     if (netProfitPercent < 0.1 && netProfitPercent > -5) {
-      console.log(`🔍 ${exchangeName}: ${netProfitPercent.toFixed(2)}% (umbral: 0.1%)`);
+      console.log(`🔍 ${exchangeName}: ${netProfitPercent.toFixed(2)}% (umbral: -5% a 0.1%)`);
     }
     
-    // Mostrar TODOS los arbitrajes (incluso <1%) en el popup
+    // Mostrar TODOS los arbitrajes incluso NEGATIVOS (para análisis de mercado)
+    // Usuario pidió ver incluso cuando son pérdidas
     // Solo notificaremos los que superen 1% en la función showNotification
-    if (netProfitPercent >= 0.1) {
+    if (netProfitPercent >= -5.0) {
       arbitrages.push({
         broker: exchangeName,
         officialPrice: officialSellPrice,

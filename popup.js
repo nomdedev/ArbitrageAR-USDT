@@ -89,11 +89,17 @@ function displayArbitrages(arbitrages, official) {
   let html = '';
   
   arbitrages.forEach((arb, index) => {
-    const profitClass = arb.profitPercent > 5 ? 'high-profit' : '';
-    const profitBadgeClass = arb.profitPercent > 5 ? 'high' : '';
+    // Determinar si es ganancia o pérdida
+    const isNegative = arb.profitPercent < 0;
+    const profitClass = isNegative ? 'negative-profit' : (arb.profitPercent > 5 ? 'high-profit' : '');
+    const profitBadgeClass = isNegative ? 'negative' : (arb.profitPercent > 5 ? 'high' : '');
     
-    // Indicador para arbitrajes menores a 1% (visibles pero no notificados)
-    const lowProfitIndicator = arb.profitPercent < 1 ? '<span class="low-profit-tag">👁️ Solo vista</span>' : '';
+    // Indicadores especiales
+    const lowProfitIndicator = arb.profitPercent >= 0 && arb.profitPercent < 1 ? '<span class="low-profit-tag">👁️ Solo vista</span>' : '';
+    const negativeIndicator = isNegative ? '<span class="negative-tag">⚠️ Pérdida</span>' : '';
+    
+    // Símbolo según ganancia/pérdida
+    const profitSymbol = isNegative ? '' : '+';
     
     // Verificar si hay diferencia entre ganancia bruta y neta
     const hasFees = arb.fees && arb.fees.total > 0;
@@ -102,7 +108,7 @@ function displayArbitrages(arbitrages, official) {
       <div class="arbitrage-card ${profitClass}" data-index="${index}">
         <div class="card-header">
           <h3>🏦 ${arb.broker}</h3>
-          <div class="profit-badge ${profitBadgeClass}">+${formatNumber(arb.profitPercent)}% ${lowProfitIndicator}</div>
+          <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${formatNumber(arb.profitPercent)}% ${lowProfitIndicator}${negativeIndicator}</div>
         </div>
         <div class="card-body">
           <div class="price-row">

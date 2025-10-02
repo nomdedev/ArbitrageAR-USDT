@@ -276,6 +276,13 @@ main::-webkit-scrollbar-thumb {
   animation: pulseGlow 2s ease-in-out infinite;
 }
 
+/* Badge para pérdidas (negativo) */
+.profit-badge.negative {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
 /* Tag para arbitrajes < 1% (solo visibles, no notificados) */
 .low-profit-tag {
   display: inline-block;
@@ -288,6 +295,26 @@ main::-webkit-scrollbar-thumb {
   border-radius: 8px;
   border: 1px solid rgba(148, 163, 184, 0.3);
   vertical-align: middle;
+}
+
+/* Tag para pérdidas */
+.negative-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 4px 8px;
+  font-size: 0.7em;
+  font-weight: 600;
+  background: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  vertical-align: middle;
+}
+
+/* Card con pérdida */
+.arbitrage-card.negative-profit {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(15, 23, 42, 0.5) 100%);
 }
 
 @keyframes pulseGlow {
