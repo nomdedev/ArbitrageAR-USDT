@@ -48,12 +48,26 @@ function displayMarketHealth(health) {
   `;
 }
 
-// Navegación entre tabs
-function setupTabNavigation() {
-  const tabs = document.querySelectorAll('.tab');
-  console.log(`📑 Configurando ${tabs.length} pestañas de navegación`);
+// NUEVO: Configurar botones de filtro P2P
+function setupFilterButtons() {
+  const filterButtons = document.querySelectorAll('.filter-btn');
+  console.log(`🔍 Configurando ${filterButtons.length} botones de filtro P2P`);
   
-  tabs.forEach(tab => {
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const filter = btn.dataset.filter;
+      console.log(`🔍 Filtro seleccionado: ${filter}`);
+      
+      // Actualizar estado activo
+      filterButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      // Aplicar filtro
+      currentFilter = filter;
+      applyP2PFilter();
+    });
+  });
+}
 
 // NUEVO: Configurar botones de filtro P2P
 function setupFilterButtons() {
