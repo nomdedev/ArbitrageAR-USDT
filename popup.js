@@ -547,10 +547,25 @@ function displayBanks(banks) {
   let html = '';
   
   banks.forEach(bank => {
+    // Usar logo si está disponible, sino usar emoji
+    const logoHtml = bank.logo ? 
+      `<img src="${bank.logo}" alt="${bank.name}" class="bank-logo" onerror="this.style.display='none'">` : 
+      '🏦';
+    
+    // Mostrar spread si está disponible
+    const spreadHtml = bank.spread ? 
+      `<div class="bank-spread">Spread: $${bank.spread}</div>` : '';
+    
+    // Mostrar fuente si está disponible
+    const sourceHtml = bank.source ? 
+      `<div class="bank-source">Fuente: ${bank.source}</div>` : '';
+    
     html += `
       <div class="bank-card">
         <div class="bank-header">
-          <div class="bank-name">🏦 ${bank.name}</div>
+          <div class="bank-logo-container">${logoHtml}</div>
+          <div class="bank-name">${bank.name}</div>
+          ${spreadHtml}
         </div>
         <div class="bank-prices">
           <div class="bank-price">
@@ -562,6 +577,7 @@ function displayBanks(banks) {
             <div class="bank-price-value">$${formatNumber(bank.venta)}</div>
           </div>
         </div>
+        ${sourceHtml}
       </div>
     `;
   });

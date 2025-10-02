@@ -677,13 +677,106 @@ async function fetchBanksData() {
   }
 }
 
-// Actualizar datos de bancos periódicamente
+// Función para obtener datos de bancos mediante scraping de Dolarito
+async function fetchBanksDataFromDolarito() {
+  try {
+    const response = await fetchWithRateLimit('https://www.dolarito.ar/cotizacion/bancos');
+    
+    if (!response) {
+      console.warn('No se pudo obtener respuesta de Dolarito');
+      return [];
+    }
+    
+    const html = await response.text();
+    const banks = [];
+    
+    // Usar expresiones regulares para extraer datos de bancos
+    // Patrón para encontrar bloques de bancos con su información
+    const bankPattern = /!\[([^\]]+)\]\(([^)]+)\)[^]*?Spread:\s*\$(\d+)[^]*?VENDÉ A:\s*\$([\d.]+)[^]*?COMPRÁ A:\s*\$([\d.]+)/g;
+    
+    let match;
+    while ((match = bankPattern.exec(html)) !== null) {
+      const [, bankName, logoUrl, spread, sellPrice, buyPrice] = match;
+      
+      // Limpiar y validar datos
+      const cleanBankName = bankName.trim();
+      const cleanLogoUrl = logoUrl.trim();
+      const cleanSpread = parseInt(spread);
+      const cleanSellPrice = parseFloat(sellPrice);
+      const cleanBuyPrice = parseFloat(buyPrice);
+      
+      // Validar que los precios sean razonables
+      if (cleanSellPrice > 0 && cleanBuyPrice > 0 && cleanSellPrice < cleanBuyPrice) {
+        banks.push({
+          name: cleanBankName,
+          logo: cleanLogoUrl,
+          compra: cleanSellPrice, // Precio al que el banco compra (venta para el cliente)
+          venta: cleanBuyPrice,   // Precio al que el banco vende (compra para el cliente)
+          spread: cleanSpread,
+          timestamp: new Date().toISOString(),
+          source: 'dolarito'
+        });
+      }
+    }
+    
+    if (DEBUG_MODE) {
+      console.log(`📊 Dolarito scraping: ${banks.length} bancos encontrados`);
+      if (banks.length > 0) {
+        console.log('   Ejemplo:', banks[0]);
+      }
+    }
+    
+    return banks;
+    
+  } catch (error) {
+    console.error('Error scraping Dolarito:', error);
+    return [];
+  }
+}
+
+// Actualizar datos de bancos periódicamente (combina DolarAPI + Dolarito scraping)
 async function updateBanksData() {
-  const banks = await fetchBanksData();
-  await chrome.storage.local.set({ 
-    banks: banks,
-    banksLastUpdate: Date.now()
-  });
+  try {
+    // Obtener datos de ambas fuentes en paralelo
+    const [dolarApiBanks, dolaritoBanks] = await Promise.all([
+      fetchBanksData(),        // DolarAPI (tipos de dólar generales)
+      fetchBanksDataFromDolarito() // Dolarito scraping (bancos específicos)
+    ]);
+    
+    // Combinar resultados, dando prioridad a Dolarito para bancos específicos
+    const combinedBanks = [];
+    
+    // Agregar bancos de Dolarito (con logos)
+    combinedBanks.push(...dolaritoBanks);
+    
+    // Agregar tipos de dólar de DolarAPI que no estén ya incluidos
+    const dolaritoBankNames = new Set(dolaritoBanks.map(b => b.name.toLowerCase()));
+    const additionalDolarTypes = dolarApiBanks.filter(bank => 
+      !dolaritoBankNames.has(bank.name.toLowerCase())
+    );
+    combinedBanks.push(...additionalDolarTypes);
+    
+    // Si no hay datos de ninguna fuente, usar fallback
+    const finalBanks = combinedBanks.length > 0 ? combinedBanks : getBanksDataFallback();
+    
+    await chrome.storage.local.set({ 
+      banks: finalBanks,
+      banksLastUpdate: Date.now()
+    });
+    
+    if (DEBUG_MODE) {
+      console.log(`🏦 updateBanksData: ${finalBanks.length} bancos actualizados (${dolaritoBanks.length} de Dolarito, ${additionalDolarTypes.length} de DolarAPI)`);
+    }
+    
+  } catch (error) {
+    console.error('Error en updateBanksData:', error);
+    // En caso de error, usar datos de fallback
+    const fallbackBanks = getBanksDataFallback();
+    await chrome.storage.local.set({ 
+      banks: fallbackBanks,
+      banksLastUpdate: Date.now()
+    });
+  }
 }
 
 // ============================================

@@ -865,6 +865,88 @@ main::-webkit-scrollbar-thumb {
   text-decoration: underline;
 }
 
+/* NUEVO: Estilos para logos y detalles de bancos */
+.bank-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.bank-logo-container {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.bank-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.bank-name {
+  color: #e1e8ed;
+  font-size: 1.1em;
+  font-weight: 700;
+  flex-grow: 1;
+}
+
+.bank-spread {
+  color: #fbbf24;
+  font-size: 0.85em;
+  font-weight: 600;
+  background: rgba(251, 191, 36, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.bank-source {
+  color: #94a3b8;
+  font-size: 0.8em;
+  text-align: center;
+  margin-top: 8px;
+  padding: 4px 8px;
+  background: rgba(148, 163, 184, 0.1);
+  border-radius: 6px;
+}
+
+.bank-prices {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.bank-price {
+  flex: 1;
+  text-align: center;
+  padding: 8px 12px;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.bank-price-label {
+  color: #94a3b8;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.bank-price-value {
+  color: #e1e8ed;
+  font-size: 1.2em;
+  font-weight: 700;
+}
+
 /* FOOTER */
 footer {
   background: rgba(15, 23, 42, 0.9);
