@@ -1,3 +1,5 @@
+// Modo debug: cambiar a true para ver logs detallados en desarrollo
+const DEBUG_MODE = false;
 
 const REQUEST_INTERVAL = 600; // ms (110 req/min max)
 let lastRequestTime = 0;
@@ -136,7 +138,7 @@ async function updateData() {
     
     if (exchangeUsdRate && typeof exchangeUsdRate === 'object') {
       usdToUsdtRate = parseFloat(exchangeUsdRate.totalAsk) || parseFloat(exchangeUsdRate.ask) || DEFAULT_USD_USDT_RATE;
-    } else {
+    } else if (DEBUG_MODE) {
       console.log(`⚠️ ${exchangeName}: Usando USD/USDT rate por defecto (${DEFAULT_USD_USDT_RATE})`);
     }
     
@@ -144,12 +146,11 @@ async function updateData() {
     const usdtArsAsk = parseFloat(exchange.totalAsk) || parseFloat(exchange.ask) || 0; // Comprar USDT con ARS
     const usdtArsBid = parseFloat(exchange.totalBid) || parseFloat(exchange.bid) || 0; // Vender USDT por ARS
     
-    // DEBUG: Log exchanges que pasan validación inicial
-    console.log(`✅ ${exchangeName}: USDT/ARS=${usdtArsBid}, USD/USDT=${usdToUsdtRate}`);
-    
     // Validaciones estrictas
     if (usdtArsBid <= 0 || usdToUsdtRate <= 0) {
-      console.log(`❌ ${exchangeName}: Precios inválidos (USDT/ARS=${usdtArsBid}, USD/USDT=${usdToUsdtRate})`);
+      if (DEBUG_MODE) {
+        console.log(`❌ ${exchangeName}: Precios inválidos (USDT/ARS=${usdtArsBid}, USD/USDT=${usdToUsdtRate})`);
+      }
       return;
     }
     if (officialSellPrice <= 0) return;
@@ -219,13 +220,10 @@ async function updateData() {
     
     // Validar que los números sean finitos y razonables
     if (!isFinite(netProfitPercent) || !isFinite(grossProfitPercent)) {
-      console.error(`Cálculo inválido para ${exchangeName}`);
+      if (DEBUG_MODE) {
+        console.error(`Cálculo inválido para ${exchangeName}`);
+      }
       return;
-    }
-    
-    // DEBUG: Log temporal para ver por qué no hay arbitrajes
-    if (netProfitPercent < 0.1 && netProfitPercent > -5) {
-      console.log(`🔍 ${exchangeName}: ${netProfitPercent.toFixed(2)}% (umbral: -5% a 0.1%)`);
     }
     
     // Mostrar TODOS los arbitrajes incluso NEGATIVOS (para análisis de mercado)
@@ -268,16 +266,79 @@ async function updateData() {
   arbitrages.sort((a, b) => b.profitPercent - a.profitPercent);
   const top20 = arbitrages.slice(0, 20); // Guardar hasta 20 oportunidades
 
+  // Calcular salud del mercado
+  const marketHealth = calculateMarketHealth(top20);
+
   await chrome.storage.local.set({ 
     official: oficial, 
     usdt: usdt, 
-    arbitrages: top20, 
+    arbitrages: top20,
+    marketHealth: marketHealth, // NUEVO: Estado del mercado
     lastUpdate: Date.now(),
     error: null // Limpiar errores previos
   });
   
   // Verificar si debe enviar notificaciones
   await checkAndNotify(top20);
+}
+
+// Calcular salud del mercado basado en oportunidades
+function calculateMarketHealth(arbitrages) {
+  if (!arbitrages || arbitrages.length === 0) {
+    return {
+      status: 'SIN DATOS',
+      color: 'gray',
+      icon: '⚪',
+      message: 'No hay datos de mercado disponibles'
+    };
+  }
+
+  const best = arbitrages[0];
+  const profitable = arbitrages.filter(a => a.profitPercent > 0).length;
+  const good = arbitrages.filter(a => a.profitPercent > 2).length;
+  const excellent = arbitrages.filter(a => a.profitPercent > 5).length;
+
+  if (excellent > 0) {
+    return {
+      status: 'EXCELENTE',
+      color: '#10b981',
+      icon: '🟢',
+      message: `${excellent} oportunidad${excellent > 1 ? 'es' : ''} >5% - ¡Momento ideal!`,
+      bestProfit: best.profitPercent,
+      bestExchange: best.broker
+    };
+  }
+
+  if (good > 0) {
+    return {
+      status: 'BUENO',
+      color: '#10b981',
+      icon: '🟢',
+      message: `${good} oportunidad${good > 1 ? 'es' : ''} >2% - Rentable`,
+      bestProfit: best.profitPercent,
+      bestExchange: best.broker
+    };
+  }
+
+  if (profitable > 0) {
+    return {
+      status: 'REGULAR',
+      color: '#f59e0b',
+      icon: '🟡',
+      message: `${profitable} oportunidad${profitable > 1 ? 'es' : ''} <2% - Margen bajo`,
+      bestProfit: best.profitPercent,
+      bestExchange: best.broker
+    };
+  }
+
+  return {
+    status: 'MALO',
+    color: '#ef4444',
+    icon: '🔴',
+    message: `Todas las opciones negativas - Mejor: ${best.broker} (${best.profitPercent.toFixed(2)}%)`,
+    bestProfit: best.profitPercent,
+    bestExchange: best.broker
+  };
 }
 
 // Actualización periódica

@@ -15,6 +15,28 @@ function formatNumber(num) {
   return num.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+// Mostrar indicador de salud del mercado
+function displayMarketHealth(health) {
+  const container = document.getElementById('marketHealth');
+  
+  if (!health) {
+    container.style.display = 'none';
+    return;
+  }
+
+  container.style.display = 'block';
+  container.style.backgroundColor = `${health.color}15`; // 15 = opacity
+  container.style.borderColor = `${health.color}40`;
+  
+  container.innerHTML = `
+    <span class="market-icon">${health.icon}</span>
+    <div class="market-info">
+      <span class="market-status">Mercado: <strong>${health.status}</strong></span>
+      <span class="market-message">${health.message}</span>
+    </div>
+  `;
+}
+
 // Navegación entre tabs
 function setupTabNavigation() {
   const tabs = document.querySelectorAll('.tab');
@@ -63,6 +85,9 @@ function fetchAndDisplay() {
     
     currentData = data;
     updateLastUpdateTimestamp(data.lastUpdate);
+    
+    // Mostrar indicador de salud del mercado
+    displayMarketHealth(data.marketHealth);
     
     if (data.error) {
       container.innerHTML = `<p class="error">❌ Error: ${data.error}</p>`;
