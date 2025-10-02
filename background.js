@@ -120,6 +120,8 @@ async function updateData() {
            !excludedKeys.includes(key.toLowerCase());
   });
 
+  const skippedExchanges = [];
+
   exchanges.forEach(exchangeName => {
     const exchange = usdt[exchangeName];
     const exchangeUsdRate = usdtUsd[exchangeName];
@@ -127,7 +129,7 @@ async function updateData() {
     // Validar que existan los precios en ambas APIs
     if (!exchange || typeof exchange !== 'object') return;
     if (!exchangeUsdRate || typeof exchangeUsdRate !== 'object') {
-      console.warn(`${exchangeName} no tiene cotización USD/USDT, omitiendo`);
+      skippedExchanges.push(exchangeName);
       return;
     }
     
@@ -241,6 +243,12 @@ async function updateData() {
     }
   });
 
+  // Logging resumido
+  if (skippedExchanges.length > 0) {
+    console.log(`ℹ️ ${skippedExchanges.length} exchanges omitidos (sin USD/USDT): ${skippedExchanges.slice(0, 5).join(', ')}${skippedExchanges.length > 5 ? '...' : ''}`);
+  }
+  console.log(`✅ ${arbitrages.length} oportunidades de arbitraje encontradas`);
+
   arbitrages.sort((a, b) => b.profitPercent - a.profitPercent);
   const top5 = arbitrages.slice(0, 5);
 
@@ -274,66 +282,67 @@ chrome.runtime.onInstalled.addListener(() => {
   updateBanksData();
 });
 
-// Función para obtener datos de bancos mediante web scraping/API
+// Helper: Formatear nombre de banco/tipo de dólar
+function formatBankName(name) {
+  const nameMap = {
+    'oficial': 'Dólar Oficial',
+    'blue': 'Dólar Blue',
+    'tarjeta': 'Dólar Tarjeta',
+    'mayorista': 'Dólar Mayorista',
+    'mep': 'Dólar MEP',
+    'ccl': 'Dólar CCL'
+  };
+  return nameMap[name?.toLowerCase()] || name;
+}
+
+// Helper: Datos de fallback si la API falla
+function getBanksDataFallback() {
+  return [
+    {
+      name: 'Dólar Oficial',
+      compra: 0,
+      venta: 0,
+      timestamp: new Date().toISOString(),
+      note: 'Datos no disponibles. Intente actualizar más tarde.'
+    }
+  ];
+}
+
+// Función para obtener datos de bancos mediante API
 async function fetchBanksData() {
   try {
-    // Intentar obtener datos de múltiples bancos desde DolarAPI
-    const bankEndpoints = [
-      'https://dolarapi.com/v1/dolares/oficial',
-      'https://dolarapi.com/v1/bancos/nacion',
-      'https://dolarapi.com/v1/bancos/bbva',
-      'https://dolarapi.com/v1/bancos/galicia',
-      'https://dolarapi.com/v1/bancos/santander',
-      'https://dolarapi.com/v1/bancos/ciudad',
-      'https://dolarapi.com/v1/bancos/supervielle',
-      'https://dolarapi.com/v1/bancos/patagonia',
-      'https://dolarapi.com/v1/bancos/comafi',
-      'https://dolarapi.com/v1/bancos/industrial'
-    ];
+    // Obtener todos los tipos de dólar desde DolarAPI
+    const dolares = await fetchWithRateLimit('https://dolarapi.com/v1/dolares');
+    
+    if (!dolares || !Array.isArray(dolares)) {
+      console.warn('No se pudieron obtener datos de DolarAPI');
+      return getBanksDataFallback();
+    }
 
     const banks = [];
     
-    // Obtener datos de cada banco
-    for (const endpoint of bankEndpoints) {
-      const data = await fetchWithRateLimit(endpoint);
-      if (data?.compra && data?.venta) {
-        const bankName = data.nombre || endpoint.split('/').pop().toUpperCase();
-        banks.push({
-          name: bankName === 'oficial' ? 'Banco Central (Oficial)' : `Banco ${bankName.charAt(0).toUpperCase() + bankName.slice(1)}`,
-          compra: parseFloat(data.compra),
-          venta: parseFloat(data.venta),
-          timestamp: data.fechaActualizacion || new Date().toISOString()
-        });
-      }
-    }
+    // Mapear tipos de dólar relevantes
+    const relevantTypes = ['oficial', 'blue', 'tarjeta', 'mayorista'];
+    
+    dolares
+      .filter(d => relevantTypes.includes(d.casa?.toLowerCase()))
+      .forEach(dolar => {
+        if (dolar.compra && dolar.venta) {
+          banks.push({
+            name: formatBankName(dolar.casa || dolar.nombre),
+            compra: parseFloat(dolar.compra),
+            venta: parseFloat(dolar.venta),
+            timestamp: dolar.fechaActualizacion || new Date().toISOString()
+          });
+        }
+      });
 
-    // Si no hay datos de bancos específicos, usar datos de Dolarito
+    // Si no hay datos, usar fallback
     if (banks.length === 0) {
-      const dolaritoData = await fetchWithRateLimit('https://dolarapi.com/v1/dolares');
-      if (dolaritoData && Array.isArray(dolaritoData)) {
-        dolaritoData.forEach(dolar => {
-          if (dolar.casa && dolar.compra && dolar.venta) {
-            banks.push({
-              name: dolar.casa,
-              compra: parseFloat(dolar.compra),
-              venta: parseFloat(dolar.venta),
-              timestamp: dolar.fechaActualizacion || new Date().toISOString()
-            });
-          }
-        });
-      }
+      return getBanksDataFallback();
     }
 
-    // Filtrar solo bancos (no incluir blue, MEP, etc.)
-    const validBanks = banks.filter(bank => 
-      bank.name.toLowerCase().includes('banco') || 
-      bank.name.toLowerCase().includes('oficial') ||
-      bank.name.toLowerCase().includes('nacion') ||
-      bank.name.toLowerCase().includes('bbva') ||
-      bank.name.toLowerCase().includes('galicia')
-    );
-
-    return validBanks.length > 0 ? validBanks : banks.slice(0, 10);
+    return banks;
   } catch (error) {
     console.error('Error fetching banks data:', error);
     return [];
