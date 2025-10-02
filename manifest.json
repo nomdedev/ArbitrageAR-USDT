@@ -15,7 +15,8 @@
     "https://*.dolarito.ar/*"
   ],
   "background": {
-    "service_worker": "src/background-refactored.js"
+    "service_worker": "src/background/main.js",
+    "type": "module"
   },
   "action": {
     "default_popup": "src/popup.html",

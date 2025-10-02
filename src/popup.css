@@ -73,6 +73,7 @@ header::before {
   margin: 0;
   background: linear-gradient(135deg, #fff 0%, #e0f2fe 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: -0.5px;
 }
@@ -1299,12 +1300,12 @@ footer {
 .profit-display-enhanced {
   text-align: right;
 }
-
 .profit-percentage {
   font-size: 2.2em;
   font-weight: 800;
   background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   line-height: 1;
   margin-bottom: 4px;
@@ -1411,42 +1412,41 @@ footer {
   padding-left: 8px;
 }
 
+/* ============================================
+   GUIDE RESPONSIVE STYLES
+   ============================================ */
+
+#selected-arbitrage-guide {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.step-container {
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
 .step-item {
   position: relative;
   display: flex;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 12px;
+  margin-bottom: 20px;
   animation: slideInLeft 0.5s ease-out both;
-}
-
-.step-item:nth-child(1) { animation-delay: 0.1s; }
-.step-item:nth-child(2) { animation-delay: 0.2s; }
-.step-item:nth-child(3) { animation-delay: 0.3s; }
-.step-item:nth-child(4) { animation-delay: 0.4s; }
-
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  width: 100%;
+  max-width: 100%;
 }
 
 .step-timeline-connector {
   position: absolute;
-  left: 28px;
-  top: 56px;
-  bottom: -24px;
-  width: 3px;
+  left: 24px;
+  top: 48px;
+  bottom: -20px;
+  width: 2px;
   background: linear-gradient(180deg, rgba(59, 130, 246, 0.4) 0%, rgba(59, 130, 246, 0.1) 100%);
-  border-radius: 2px;
-}
-
-.step-timeline-connector.last {
-  display: none;
+  border-radius: 1px;
 }
 
 .step-icon-wrapper {
@@ -1455,37 +1455,32 @@ footer {
 }
 
 .step-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(30, 58, 138, 0.3) 100%);
   border: 2px solid rgba(59, 130, 246, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.8em;
+  font-size: 1.5em;
   box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
   transition: all 0.3s ease;
 }
 
-.step-item:hover .step-icon {
-  transform: scale(1.1) rotate(5deg);
-  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
-}
-
 .step-number-badge {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  width: 24px;
-  height: 24px;
+  top: -4px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   border: 2px solid #0f172a;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75em;
+  font-size: 0.7em;
   font-weight: 800;
   color: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -1495,87 +1490,36 @@ footer {
   flex: 1;
   background: linear-gradient(135deg, rgba(30, 58, 138, 0.15) 0%, rgba(15, 23, 42, 0.3) 100%);
   backdrop-filter: blur(20px);
-  border-radius: 16px;
-  padding: 20px;
+  border-radius: 12px;
+  padding: 16px;
   border: 1px solid rgba(59, 130, 246, 0.2);
   transition: all 0.3s ease;
-}
-
-.step-item:hover .step-content-card {
-  transform: translateY(-2px);
-  border-color: rgba(59, 130, 246, 0.4);
-  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
-}
-
-.step-header-enhanced {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.step-header-enhanced h4 {
-  color: #e2e8f0;
-  font-size: 1.15em;
-  font-weight: 700;
-  margin: 0;
-}
-
-.step-status {
-  background: rgba(71, 85, 105, 0.5);
-  color: #94a3b8;
-  font-size: 0.7em;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.step-status-success {
-  background: rgba(34, 197, 94, 0.2);
-  color: #4ade80;
-}
-
-.step-status-final {
-  background: rgba(168, 85, 247, 0.2);
-  color: #c084fc;
-}
-
-.step-description {
-  color: #cbd5e1;
-  font-size: 0.9em;
-  line-height: 1.6;
-  margin-bottom: 16px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .step-details-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  grid-template-columns: 1fr; /* Una columna para mejor adaptabilidad */
+  gap: 8px;
   margin-bottom: 12px;
 }
 
 .detail-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background: rgba(15, 23, 42, 0.5);
-  padding: 10px;
-  border-radius: 10px;
+  padding: 8px;
+  border-radius: 8px;
   border: 1px solid rgba(51, 65, 85, 0.5);
   transition: all 0.3s ease;
-}
-
-.detail-item:hover {
-  background: rgba(30, 41, 59, 0.6);
-  border-color: rgba(59, 130, 246, 0.3);
-  transform: translateX(4px);
-}
-
-.detail-icon {
-  font-size: 1.3em;
-  flex-shrink: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .detail-content {
@@ -1584,28 +1528,62 @@ footer {
   gap: 2px;
   flex: 1;
   min-width: 0;
+  overflow: hidden;
 }
 
 .detail-label {
   color: #94a3b8;
-  font-size: 0.7em;
+  font-size: 0.65em;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-}
-
-.detail-value {
-  color: #e2e8f0;
-  font-size: 0.85em;
-  font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.detail-value {
+  color: #e2e8f0;
+  font-size: 0.8em;
+  font-weight: 700;
+  word-break: break-word;
+  line-height: 1.2;
+}
+
 .detail-value.highlight {
-  color: #34d399;
-  font-size: 0.95em;
+  color: #3b82f6;
+  font-size: 0.85em;
+}
+
+/* Responsive para extensiones pequeñas */
+@media (max-width: 450px) {
+  .step-item {
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .step-content-card {
+    padding: 12px;
+  }
+
+  .step-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2em;
+  }
+
+  .step-timeline-connector {
+    left: 20px;
+    top: 40px;
+  }
+
+  .step-number-badge {
+    width: 18px;
+    height: 18px;
+    font-size: 0.6em;
+    top: -3px;
+    right: -3px;
+  }
 }
 
 .detail-value.fee {
