@@ -223,4 +223,5 @@ class ArbitrageCalculator {
 }
 
 // Exportar clase
-// const arbitrageCalculator = new ArbitrageCalculator(storageManager);
+// Exportar clase
+export default ArbitrageCalculator;

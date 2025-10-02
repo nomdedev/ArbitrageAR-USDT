@@ -66,3 +66,4 @@ class DataService {
 
 // Exportar instancia singleton
 const dataService = new DataService();
+export default dataService;

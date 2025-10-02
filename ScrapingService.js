@@ -166,4 +166,5 @@ class ScrapingService {
 }
 
 // Exportar clase
-// const scrapingService = new ScrapingService(dataService);
+// Exportar clase
+export default ScrapingService;

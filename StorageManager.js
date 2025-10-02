@@ -56,3 +56,4 @@ class StorageManager {
 
 // Exportar instancia singleton
 const storageManager = new StorageManager();
+export default storageManager;

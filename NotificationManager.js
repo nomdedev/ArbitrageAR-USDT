@@ -101,4 +101,5 @@ class NotificationManager {
 }
 
 // Exportar clase
-// const notificationManager = new NotificationManager(storageManager);
+// Exportar clase
+export default NotificationManager;
