@@ -109,21 +109,37 @@ async function updateData() {
 
   exchanges.forEach(exchangeName => {
     const exchange = usdt[exchangeName];
+    const exchangeUsdRate = usdtUsd[exchangeName];
     
-    // Validar que existan los precios
+    // Validar que existan los precios en ambas APIs
     if (!exchange || typeof exchange !== 'object') return;
+    if (!exchangeUsdRate || typeof exchangeUsdRate !== 'object') {
+      console.warn(`${exchangeName} no tiene cotización USD/USDT, omitiendo`);
+      return;
+    }
     
-    const usdtBuyPrice = parseFloat(exchange.totalAsk) || parseFloat(exchange.ask) || 0; // Precio para comprar USDT en pesos
-    const usdtSellPrice = parseFloat(exchange.totalBid) || parseFloat(exchange.bid) || 0; // Precio para vender USDT en pesos
+    // Precios USDT/ARS
+    const usdtArsAsk = parseFloat(exchange.totalAsk) || parseFloat(exchange.ask) || 0; // Comprar USDT con ARS
+    const usdtArsBid = parseFloat(exchange.totalBid) || parseFloat(exchange.bid) || 0; // Vender USDT por ARS
     
-    // Validaciones más estrictas
-    if (usdtBuyPrice <= 0 || usdtSellPrice <= 0) return;
-    if (officialSellPrice <= 0) return; // Doble verificación
+    // Precios USD/USDT (¡CRÍTICO para el arbitraje!)
+    const usdToUsdtRate = parseFloat(exchangeUsdRate.totalAsk) || parseFloat(exchangeUsdRate.ask) || 0; // Cuántos USD necesito para comprar 1 USDT
+    const usdtToUsdRate = parseFloat(exchangeUsdRate.totalBid) || parseFloat(exchangeUsdRate.bid) || 0; // Cuántos USD recibo si vendo 1 USDT
     
-    // Filtrar si el spread es muy alto (posible P2P o datos inválidos)
-    const spread = ((usdtBuyPrice - usdtSellPrice) / usdtSellPrice) * 100;
-    if (Math.abs(spread) > 10) { // Spread mayor a 10% es sospechoso
-      console.warn(`Exchange ${exchangeName} tiene spread muy alto (${spread.toFixed(2)}%), posible P2P`);
+    // Validaciones estrictas
+    if (usdtArsBid <= 0 || usdToUsdtRate <= 0) return;
+    if (officialSellPrice <= 0) return;
+    
+    // Filtrar spreads muy altos en ARS (posible P2P)
+    const spreadArs = ((usdtArsAsk - usdtArsBid) / usdtArsBid) * 100;
+    if (Math.abs(spreadArs) > 10) {
+      console.warn(`${exchangeName} tiene spread ARS muy alto (${spreadArs.toFixed(2)}%), posible P2P`);
+      return;
+    }
+    
+    // Filtrar spreads absurdos en USD/USDT
+    if (usdToUsdtRate > 1.15 || usdToUsdtRate < 0.95) {
+      console.warn(`${exchangeName} tiene ratio USD/USDT anormal (${usdToUsdtRate}), omitiendo`);
       return;
     }
 
@@ -131,36 +147,51 @@ async function updateData() {
     const exchangeNameLower = exchangeName.toLowerCase();
     const fees = EXCHANGE_FEES[exchangeNameLower] || EXCHANGE_FEES['default'];
     
-    // Advertir si se usa fee por defecto
     if (!EXCHANGE_FEES[exchangeNameLower]) {
       console.info(`Exchange ${exchangeName} no encontrado en DB de fees, usando valores por defecto`);
     }
     
-    // Cálculo real de arbitraje con comisiones:
-    // Ejemplo con $100,000 ARS:
+    // ============================================
+    // CÁLCULO CORRECTO DEL ARBITRAJE
+    // ============================================
+    // Flujo: ARS → USD (oficial) → USDT (exchange) → ARS (venta)
+    
     const initialAmount = 100000; // ARS
     
-    // Paso 1: Comprar USD oficial
-    const usdAmount = initialAmount / officialSellPrice;
+    // PASO 1: Comprar USD en banco oficial
+    const usdPurchased = initialAmount / officialSellPrice;
+    // Ej: $100,000 / $1,050 = 95.24 USD
     
-    // Paso 2: Convertir USD a USDT (considerando que en algunos exchanges hay spread USD/USDT)
-    // En la mayoría de exchanges argentinos: depósito USD → compra directa USDT/ARS
-    // Asumimos conversión 1:1 pero con fee de trading
-    const usdtAfterBuyFee = usdAmount * (1 - fees.trading / 100);
+    // PASO 2: Depositar USD en exchange y comprar USDT
+    // CRÍTICO: El exchange cobra para convertir USD → USDT
+    const usdtPurchased = usdPurchased / usdToUsdtRate;
+    // Ej: 95.24 USD / 1.049 = 90.79 USDT
     
-    // Paso 3: Vender USDT por ARS
-    const arsFromUsdtSale = usdtAfterBuyFee * usdtSellPrice;
+    // PASO 2b: Fee de trading al comprar USDT
+    const usdtAfterBuyFee = usdtPurchased * (1 - fees.trading / 100);
+    // Ej: 90.79 × (1 - 0.001) = 90.70 USDT
+    
+    // PASO 3: Vender USDT por ARS
+    const arsFromUsdtSale = usdtAfterBuyFee * usdtArsBid;
+    // Ej: 90.70 USDT × $1,529.66 = $138,740 ARS
+    
+    // PASO 3b: Fee de trading al vender USDT
     const arsAfterSellFee = arsFromUsdtSale * (1 - fees.trading / 100);
+    // Ej: $138,740 × (1 - 0.001) = $138,601 ARS
     
-    // Paso 4: Considerar fee de retiro (si aplica)
+    // PASO 4: Fee de retiro
     const finalAmount = arsAfterSellFee * (1 - fees.withdrawal / 100);
+    // Ej: $138,601 × (1 - 0.005) = $137,908 ARS
     
-    // Ganancia neta
+    // GANANCIA NETA
     const netProfit = finalAmount - initialAmount;
     const netProfitPercent = (netProfit / initialAmount) * 100;
+    // Ej: ($137,908 - $100,000) / $100,000 = 37.91%
     
-    // Ganancia bruta (sin comisiones, para comparación)
-    const grossProfitPercent = ((usdtSellPrice - officialSellPrice) / officialSellPrice) * 100;
+    // GANANCIA BRUTA (sin fees, para comparación)
+    // Precio efectivo del USDT en USD: usdtArsBid / officialSellPrice
+    const effectiveUsdtPriceInUsd = usdtArsBid / officialSellPrice;
+    const grossProfitPercent = ((effectiveUsdtPriceInUsd / usdToUsdtRate - 1)) * 100;
     
     // Validar que los números sean finitos y razonables
     if (!isFinite(netProfitPercent) || !isFinite(grossProfitPercent)) {
@@ -173,20 +204,23 @@ async function updateData() {
       arbitrages.push({
         broker: exchangeName,
         officialPrice: officialSellPrice,
-        buyPrice: usdtBuyPrice,
-        sellPrice: usdtSellPrice,
+        usdToUsdtRate: usdToUsdtRate, // NUEVO: Ratio de conversión USD → USDT
+        usdtArsBid: usdtArsBid, // Precio de venta USDT por ARS
+        usdtArsAsk: usdtArsAsk, // Precio de compra USDT con ARS
         profitPercent: netProfitPercent, // Ganancia NETA
         grossProfitPercent: grossProfitPercent, // Ganancia bruta
         fees: {
           trading: fees.trading,
           withdrawal: fees.withdrawal,
-          total: fees.trading * 2 + fees.withdrawal // Trading x2 (compra y venta) + retiro
+          total: fees.trading * 2 + fees.withdrawal
         },
         calculation: {
           initial: initialAmount,
-          usdPurchased: usdAmount,
-          usdtAfterFees: usdtAfterBuyFee,
+          usdPurchased: usdPurchased,
+          usdtPurchased: usdtPurchased,
+          usdtAfterBuyFee: usdtAfterBuyFee,
           arsFromSale: arsFromUsdtSale,
+          arsAfterSellFee: arsAfterSellFee,
           finalAmount: finalAmount,
           netProfit: netProfit
         }

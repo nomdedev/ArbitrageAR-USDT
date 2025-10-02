@@ -2,6 +2,64 @@
 
 Todos los cambios notables de este proyecto serán documentados en este archivo.
 
+## [3.0.0] - 2025-10-02
+
+### 🚨 CAMBIO CRÍTICO - Corrección de Lógica Fundamental
+
+#### ❌ PROBLEMA CORREGIDO
+- **ERROR CRÍTICO:** Las versiones anteriores NO consideraban el costo real de convertir USD a USDT
+- **IMPACTO:** Sobreestimaba la ganancia en ~6.76% (~$6,758 por cada $100k)
+- **EJEMPLO:** Mostraba 44.66% cuando la ganancia real era 37.91%
+
+#### ✅ SOLUCIÓN IMPLEMENTADA
+- **Agregada API USD/USDT:** Ahora consulta el precio real de conversión
+- **Cálculo corregido:** Considera ratio USD/USDT (~1.049 en Buenbit)
+- **Resultados REALES:** Las ganancias mostradas ahora son ejecutables
+
+### 🔴 Breaking Changes
+- **Objeto arbitrage modificado:**
+  - ❌ Removidos: `buyPrice`, `sellPrice`
+  - ⭐ Agregados: `usdToUsdtRate`, `usdtArsAsk`, `usdtArsBid`
+- **Nueva API requerida:** `https://criptoya.com/api/usdt/usd/1`
+- **Ganancia típica ajustada:** ~38% (antes mostraba ~45% incorrecto)
+
+### ⭐ Nuevas Características
+- Muestra ratio USD/USDT en tarjetas de oportunidad
+- Detalle de conversión USD→USDT en guía paso a paso
+- Advertencia de costo de conversión en UI
+- Validación de ratios anormales (>1.15 o <0.95)
+
+### 🐛 Correcciones
+- **Cálculo de USDT comprados:** Ahora divide por ratio (antes multiplicaba por 1)
+- **Validación de exchanges:** Omite exchanges sin cotización USD/USDT
+- **Filtrado mejorado:** Detecta ratios P2P sospechosos
+
+### 🧪 Testing
+- **Test suite v3.0:** 6 tests, 100% passed
+- **Validado con datos reales:** Buenbit, SatoshiTango, Decrypto
+- **Análisis de sensibilidad:** Impacto del ratio documentado
+
+### 📊 Comparación v2.x vs v3.0
+| Métrica | v2.x | v3.0 | Diferencia |
+|---------|------|------|------------|
+| Ganancia con $100k | $144,664 | $137,906 | -$6,758 |
+| % Ganancia | 44.66% | 37.91% | -6.76% |
+| USDT comprados | 95.14 | 90.70 | -4.44 |
+| Considera USD→USDT | ❌ | ✅ | CRÍTICO |
+
+### 📄 Documentación
+- **ACTUALIZACION_V3.0.md:** Documentación completa del cambio
+- **ANALISIS_ERROR_LOGICA.md:** Análisis detallado del problema
+- **test-extension-v3.js:** Suite de tests actualizada
+
+### ⚠️ Nota para Usuarios
+- ✅ El arbitraje SIGUE siendo rentable (~38%)
+- ✅ Los cálculos ahora son CORRECTOS (antes sobrestimados)
+- ⚠️ Las ganancias mostradas son MENORES pero REALES
+- 📉 Esto NO es un bug, es una corrección necesaria
+
+---
+
 ## [2.2.0] - 2025-01-XX
 
 ### 🔒 Seguridad

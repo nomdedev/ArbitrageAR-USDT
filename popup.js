@@ -102,12 +102,12 @@ function displayArbitrages(arbitrages, official) {
             <span class="price-value">$${formatNumber(arb.officialPrice)}</span>
           </div>
           <div class="price-row">
-            <span class="price-label">💰 USDT Compra</span>
-            <span class="price-value">$${formatNumber(arb.buyPrice)}</span>
+            <span class="price-label">� USD → USDT</span>
+            <span class="price-value">${formatNumber(arb.usdToUsdtRate)} USD/USDT</span>
           </div>
           <div class="price-row">
-            <span class="price-label">💸 USDT Venta</span>
-            <span class="price-value highlight">$${formatNumber(arb.sellPrice)}</span>
+            <span class="price-label">💸 USDT → ARS</span>
+            <span class="price-value highlight">$${formatNumber(arb.usdtArsBid)}</span>
           </div>
           ${hasFees ? `
           <div class="price-row fees-row">
@@ -195,16 +195,16 @@ function displayStepByStepGuide(arb) {
       <div class="step">
         <div class="step-header">
           <div class="step-number">2</div>
-          <div class="step-title">Convertir USD a USDT</div>
+          <div class="step-title">Depositar USD y Comprar USDT</div>
         </div>
         <div class="step-content">
-          <p>Deposita tus dólares en ${arb.broker} y compra USDT.</p>
+          <p>Deposita tus USD en ${arb.broker} y cómpralos por USDT.</p>
           <div class="step-detail">
             <strong>Exchange:</strong> ${arb.broker}<br>
-            <strong>Par:</strong> USD/USDT o USDT/ARS<br>
-            <strong>Precio referencia:</strong> $${formatNumber(arb.buyPrice)} ARS por USDT<br>
+            <strong>Ratio conversión:</strong> ${formatNumber(arb.usdToUsdtRate)} USD por 1 USDT<br>
+            <strong>Precio USDT:</strong> $${formatNumber(arb.usdtArsBid)} ARS (venta)<br>
             ${arb.fees ? `<strong>Comisión trading:</strong> ${formatNumber(arb.fees.trading)}%<br>` : ''}
-            <strong>Importante:</strong> ❌ NO usar P2P, usar el exchange oficial
+            <strong>⚠️ Importante:</strong> El exchange cobra ~${formatNumber((arb.usdToUsdtRate - 1) * 100)}% para convertir USD a USDT
           </div>
         </div>
       </div>
@@ -217,9 +217,9 @@ function displayStepByStepGuide(arb) {
         <div class="step-content">
           <p>Vende tus USDT en ${arb.broker} por pesos argentinos (ARS).</p>
           <div class="step-detail">
-            <strong>Precio de venta:</strong> $${formatNumber(arb.sellPrice)} ARS por USDT<br>
+            <strong>Precio de venta:</strong> $${formatNumber(arb.usdtArsBid)} ARS por USDT<br>
             ${arb.fees ? `<strong>Comisión venta:</strong> ${formatNumber(arb.fees.trading)}%<br>` : ''}
-            <strong>Método:</strong> Venta directa en el exchange<br>
+            <strong>Método:</strong> Venta directa en el exchange (NO P2P)<br>
             <strong>Retiro:</strong> Transferencia bancaria a tu cuenta
           </div>
         </div>
@@ -252,11 +252,15 @@ function displayStepByStepGuide(arb) {
           <span>$${formatNumber(usdAmount)} USD</span>
         </div>
         <div class="calculation-line">
-          <span>3️⃣ Conviertes a USDT ${arb.fees ? `(fee ${arb.fees.trading}%)` : ''}:</span>
+          <span>3️⃣ Compras USDT con USD (${formatNumber(arb.usdToUsdtRate)} USD/USDT):</span>
+          <span>${formatNumber(calc.usdtPurchased || usdAmount / arb.usdToUsdtRate)} USDT</span>
+        </div>
+        <div class="calculation-line">
+          <span>   Después fee trading (${arb.fees ? formatNumber(arb.fees.trading) : '0'}%):</span>
           <span>${formatNumber(usdtAfterFees)} USDT</span>
         </div>
         <div class="calculation-line">
-          <span>4️⃣ Vendes USDT por ARS:</span>
+          <span>4️⃣ Vendes USDT por ARS ($${formatNumber(arb.usdtArsBid)}):</span>
           <span>$${formatNumber(arsFromSale)} ARS</span>
         </div>
         ${arb.fees ? `
