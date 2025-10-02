@@ -5,8 +5,11 @@ let userSettings = null; // NUEVO v5.0: Configuración del usuario
 let currentFilter = 'no-p2p'; // NUEVO: Filtro P2P activo ('all', 'p2p', 'no-p2p') - Por defecto Sin P2P
 let allRoutes = []; // NUEVO: Cache de todas las rutas sin filtrar
 
+console.log('🚀 Popup.js cargado correctamente');
+
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('📄 DOM Content Loaded - Iniciando setup...');
   setupTabNavigation();
   setupRefreshButton();
   setupFilterButtons(); // NUEVO: Configurar filtros P2P
@@ -196,6 +199,8 @@ function setupRefreshButton() {
 
 // Obtener y mostrar datos de arbitraje
 async function fetchAndDisplay() {
+  console.log('🔄 fetchAndDisplay() ejecutándose...');
+  
   const container = document.getElementById('optimized-routes');
   const loading = document.getElementById('loading');
   
