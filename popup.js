@@ -78,6 +78,14 @@ function fetchAndDisplay() {
   chrome.runtime.sendMessage({ action: 'getArbitrages' }, data => {
     loading.style.display = 'none';
     
+    console.log('📥 Popup recibió datos:', {
+      hasData: !!data,
+      optimizedRoutes: data?.optimizedRoutes?.length || 0,
+      arbitrages: data?.arbitrages?.length || 0,
+      marketHealth: data?.marketHealth?.status,
+      error: data?.error
+    });
+    
     if (!data) {
       container.innerHTML = '<p class="error">❌ No se pudo comunicar con el servicio de fondo.</p>';
       return;
@@ -99,11 +107,13 @@ function fetchAndDisplay() {
     }
     
     if (!data.optimizedRoutes || !Array.isArray(data.optimizedRoutes)) {
+      console.warn('⚠️ optimizedRoutes no es array:', typeof data.optimizedRoutes);
       container.innerHTML = '<p class="warning">⏳ No hay rutas disponibles. Espera un momento...</p>';
       return;
     }
     
     if (data.optimizedRoutes.length === 0) {
+      console.warn('⚠️ optimizedRoutes está vacío');
       container.innerHTML = '<p class="info">📊 No se encontraron rutas rentables en este momento.</p>';
       return;
     }

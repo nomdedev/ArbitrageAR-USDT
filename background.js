@@ -829,7 +829,26 @@ async function checkAndNotify(arbitrages) {
 // Solicitud desde popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'getArbitrages') {
-    chrome.storage.local.get(['official', 'usdt', 'arbitrages', 'lastUpdate', 'error'], sendResponse);
+    // 🔴 FIX CRÍTICO: Enviar optimizedRoutes y marketHealth al popup
+    chrome.storage.local.get([
+      'official', 
+      'usdt', 
+      'arbitrages', 
+      'optimizedRoutes', 
+      'marketHealth', 
+      'lastUpdate', 
+      'error',
+      'usingCache'
+    ], (data) => {
+      if (DEBUG_MODE) {
+        console.log('📤 Enviando al popup:', {
+          optimizedRoutes: data.optimizedRoutes?.length || 0,
+          arbitrages: data.arbitrages?.length || 0,
+          marketHealth: data.marketHealth?.status
+        });
+      }
+      sendResponse(data);
+    });
     return true;
   }
   
