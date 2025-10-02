@@ -52,21 +52,28 @@ function displayMarketHealth(health) {
 function setupFilterButtons() {
   const filterButtons = document.querySelectorAll('.filter-btn');
   log(`🔍 Configurando ${filterButtons.length} botones de filtro P2P`);
-  
+
   filterButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const filter = btn.dataset.filter;
       console.log(`🔍 Filtro seleccionado: ${filter}`);
-      
+
       // Actualizar estado activo
       filterButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      
+
       // Aplicar filtro
       currentFilter = filter;
       applyP2PFilter();
     });
   });
+
+  // NUEVO: Marcar el filtro por defecto como activo visualmente
+  const defaultButton = document.querySelector(`[data-filter="${currentFilter}"]`);
+  if (defaultButton) {
+    defaultButton.classList.add('active');
+    log(`🎯 Filtro por defecto '${currentFilter}' marcado como activo`);
+  }
 }
 
 // NUEVO: Determinar si una ruta usa P2P

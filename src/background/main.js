@@ -168,21 +168,37 @@ async function getBanksData() {
 
 // Inicialización del background script
 async function initialize() {
-  log('🚀 Inicializando background script...');
+  console.log('🚀 [BACKGROUND] Inicializando background script...');
 
-  // Primera actualización de datos
-  await updateData();
+  try {
+    // Primera actualización de datos
+    console.log('📡 [BACKGROUND] Intentando primera actualización de datos...');
+    await updateData();
+    console.log('✅ [BACKGROUND] Primera actualización completada');
+  } catch (error) {
+    console.error('❌ [BACKGROUND] Error en inicialización:', error);
+  }
 
   // Configurar actualización periódica cada 2 minutos
-  setInterval(updateData, 2 * 60 * 1000);
+  setInterval(async () => {
+    try {
+      await updateData();
+    } catch (error) {
+      console.error('❌ [BACKGROUND] Error en actualización periódica:', error);
+    }
+  }, 2 * 60 * 1000);
 
-  log('✅ Background script inicializado');
+  console.log('✅ [BACKGROUND] Background script inicializado completamente');
 }
 
 // Event listeners para mensajes del popup/options
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+  console.log('📨 [BACKGROUND] Mensaje recibido:', request.action);
+
   if (request.action === 'getArbitrages') {
+    console.log('🔍 [BACKGROUND] Procesando solicitud de arbitrajes...');
     const data = await getCurrentData();
+    console.log('📤 [BACKGROUND] Enviando respuesta con', data?.optimizedRoutes?.length || 0, 'rutas');
     sendResponse(data);
   } else if (request.action === 'getBanks') {
     const data = await getBanksData();
