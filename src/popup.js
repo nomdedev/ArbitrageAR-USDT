@@ -51,12 +51,10 @@ function displayMarketHealth(health) {
 // NUEVO: Configurar botones de filtro P2P
 function setupFilterButtons() {
   const filterButtons = document.querySelectorAll('.filter-btn');
-  log(`🔍 Configurando ${filterButtons.length} botones de filtro P2P`);
 
   filterButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const filter = btn.dataset.filter;
-      console.log(`🔍 Filtro seleccionado: ${filter}`);
 
       // Actualizar estado activo
       filterButtons.forEach(b => b.classList.remove('active'));
@@ -72,7 +70,6 @@ function setupFilterButtons() {
   const defaultButton = document.querySelector(`[data-filter="${currentFilter}"]`);
   if (defaultButton) {
     defaultButton.classList.add('active');
-    log(`🎯 Filtro por defecto '${currentFilter}' marcado como activo`);
   }
 }
 
@@ -92,13 +89,9 @@ function applyP2PFilter() {
     return;
   }
   
-  console.log(`🔍 Aplicando filtro: ${currentFilter} sobre ${allRoutes.length} rutas`);
-  
-  // DEBUG: Mostrar clasificación de rutas
-  allRoutes.forEach((route, index) => {
-    const isP2P = isP2PRoute(route);
-    console.log(`📊 Ruta ${index + 1}: ${route.broker || route.sellExchange} - P2P: ${isP2P}`);
-  });
+  // Contar rutas P2P vs no-P2P sin logs individuales
+  const p2pCount = allRoutes.filter(route => isP2PRoute(route)).length;
+  const nonP2pCount = allRoutes.length - p2pCount;
   
   let filteredRoutes = [];
   
@@ -150,12 +143,10 @@ function updateFilterCounts() {
 // Navegación entre tabs
 function setupTabNavigation() {
   const tabs = document.querySelectorAll('.tab');
-  console.log(`📑 Configurando ${tabs.length} pestañas de navegación`);
   
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       const tabId = tab.dataset.tab;
-      console.log(`🔄 Cambiando a pestaña: ${tabId}`);
       
       // Remover active de todos
       tabs.forEach(t => t.classList.remove('active'));
@@ -167,7 +158,6 @@ function setupTabNavigation() {
       
       if (targetContent) {
         targetContent.classList.add('active');
-        console.log(`✅ Pestaña ${tabId} activada correctamente`);
       } else {
         console.error(`❌ No se encontró el contenido para tab-${tabId}`);
       }
@@ -199,7 +189,7 @@ function setupRefreshButton() {
 
 // Obtener y mostrar datos de arbitraje
 async function fetchAndDisplay() {
-  console.log('🔄 fetchAndDisplay() ejecutándose...');
+  console.log('🔄 Cargando datos de arbitraje...');
   
   const container = document.getElementById('optimized-routes');
   const loading = document.getElementById('loading');
@@ -212,14 +202,14 @@ async function fetchAndDisplay() {
   userSettings = settings.notificationSettings || {};
   
   try {
-    console.log('📤 Enviando mensaje getArbitrages al background...');
+    console.log('📤 Solicitando datos al background...');
     chrome.runtime.sendMessage({ action: 'getArbitrages' }, data => {
-      console.log('📥 Callback ejecutado, data:', data ? 'recibida' : 'undefined');
+      console.log('📥 Datos recibidos del background');
       
       loading.style.display = 'none';
       
       if (!data) {
-        console.error('❌ CRÍTICO: data es falsy');
+        console.error('❌ Error: No se recibió respuesta del background');
         container.innerHTML = '<p class="error">❌ No se pudo comunicar con el servicio de fondo.</p>';
         return;
       }
@@ -255,7 +245,6 @@ async function fetchAndDisplay() {
     
     // NUEVO: Guardar todas las rutas en cache global para filtrado P2P
     allRoutes = data.optimizedRoutes || [];
-    console.log(`💾 Guardadas ${allRoutes.length} rutas en cache para filtrado`);
     
     // NUEVO: Actualizar contadores de filtros
     updateFilterCounts();
@@ -452,7 +441,6 @@ function displayOptimizedRoutes(routes, official) {
   
   // Agregar event listeners a las tarjetas - Click va directo a la guía
   const routeCards = document.querySelectorAll('.route-card');
-  console.log(`🎯 Agregando event listeners a ${routeCards.length} tarjetas de ruta`);
   
   routeCards.forEach((card, idx) => {
     card.addEventListener('click', function(e) {
@@ -460,19 +448,15 @@ function displayOptimizedRoutes(routes, official) {
       e.stopPropagation();
       
       const index = parseInt(this.dataset.index);
-      console.log(`🖱️ Click en tarjeta ${idx}, index: ${index}`);
       
       // Remover selección previa
       document.querySelectorAll('.route-card').forEach(c => c.classList.remove('selected'));
       this.classList.add('selected');
-      console.log(`✅ Tarjeta ${index} marcada como seleccionada`);
       
       // Mostrar guía paso a paso
       showRouteGuide(index);
     });
   });
-  
-  console.log(`✅ Event listeners agregados a ${routeCards.length} tarjetas`);
 }
 
 // NUEVA FUNCIÓN v5.0.5: Mostrar guía de una ruta optimizada
@@ -483,14 +467,6 @@ function showRouteGuide(index) {
   }
   
   const route = currentData.optimizedRoutes[index];
-  console.log('📖 Mostrando guía para ruta completa:', route);
-  console.log('📊 Datos de la ruta:', {
-    buyExchange: route.buyExchange,
-    sellExchange: route.sellExchange,
-    profitPercent: route.profitPercent,
-    profitPercentage: route.profitPercentage,
-    calculation: route.calculation
-  });
   
   // Convertir ruta a formato de arbitraje para la guía
   const arbitrage = {
