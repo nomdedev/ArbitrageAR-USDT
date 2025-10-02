@@ -6,45 +6,45 @@ let lastRequestTime = 0;
 
 // Comisiones típicas por exchange (en porcentaje)
 const EXCHANGE_FEES = {
-  'binance': { trading: 0.1, withdrawal: 0.5 },
+  'binance': { trading: 0.1, withdrawal: 0 },
   'buenbit': { trading: 0.5, withdrawal: 0 },
   'ripio': { trading: 1.0, withdrawal: 0 },
   'ripioexchange': { trading: 1.0, withdrawal: 0 },
-  'letsbit': { trading: 0.9, withdrawal: 0 },
-  'satoshitango': { trading: 1.5, withdrawal: 0 },
-  'belo': { trading: 1.0, withdrawal: 0 },
-  'tiendacrypto': { trading: 0.8, withdrawal: 0 },
-  'cryptomkt': { trading: 0.8, withdrawal: 0 },
-  'cryptomktpro': { trading: 0.8, withdrawal: 0 },
+  'letsbit': { trading: 0.5, withdrawal: 0 },
+  'satoshitango': { trading: 1.0, withdrawal: 0 },
+  'belo': { trading: 0.8, withdrawal: 0 },
+  'tiendacrypto': { trading: 0.5, withdrawal: 0 },
+  'cryptomkt': { trading: 0.5, withdrawal: 0 },
+  'cryptomktpro': { trading: 0.5, withdrawal: 0 },
   'bitso': { trading: 0.5, withdrawal: 0 },
   'bitsoalpha': { trading: 0.5, withdrawal: 0 },
-  'lemoncash': { trading: 1.0, withdrawal: 0 },
-  'universalcoins': { trading: 1.2, withdrawal: 0 },
-  'decrypto': { trading: 1.0, withdrawal: 0 },
-  'fiwind': { trading: 1.0, withdrawal: 0 },
-  'vitawallet': { trading: 1.0, withdrawal: 0 },
-  'saldo': { trading: 0.8, withdrawal: 0 },
-  'pluscrypto': { trading: 1.0, withdrawal: 0 },
-  'bybit': { trading: 0.1, withdrawal: 0.5 },
-  'eluter': { trading: 1.0, withdrawal: 0 },
-  'trubit': { trading: 1.0, withdrawal: 0 },
-  'cocoscrypto': { trading: 1.0, withdrawal: 0 },
-  'wallbit': { trading: 1.0, withdrawal: 0 },
-  // P2P exchanges (fees más altos por spread)
-  'binancep2p': { trading: 2.0, withdrawal: 0 },
-  'okexp2p': { trading: 2.0, withdrawal: 0 },
-  'paxfulp2p': { trading: 2.5, withdrawal: 0 },
-  'huobip2p': { trading: 2.0, withdrawal: 0 },
-  'bybitp2p': { trading: 2.0, withdrawal: 0 },
-  'kucoinp2p': { trading: 2.0, withdrawal: 0 },
-  'bitgetp2p': { trading: 2.0, withdrawal: 0 },
-  'paydecep2p': { trading: 2.0, withdrawal: 0 },
-  'eldoradop2p': { trading: 2.5, withdrawal: 0 },
-  'bingxp2p': { trading: 2.0, withdrawal: 0 },
-  'lemoncashp2p': { trading: 2.0, withdrawal: 0 },
-  'coinexp2p': { trading: 2.0, withdrawal: 0 },
-  'mexcp2p': { trading: 2.0, withdrawal: 0 },
-  'default': { trading: 1.0, withdrawal: 0.5 } // Valores por defecto
+  'lemoncash': { trading: 0.8, withdrawal: 0 },
+  'universalcoins': { trading: 0.8, withdrawal: 0 },
+  'decrypto': { trading: 0.8, withdrawal: 0 },
+  'fiwind': { trading: 0.8, withdrawal: 0 },
+  'vitawallet': { trading: 0.8, withdrawal: 0 },
+  'saldo': { trading: 0.5, withdrawal: 0 },
+  'pluscrypto': { trading: 0.8, withdrawal: 0 },
+  'bybit': { trading: 0.1, withdrawal: 0 },
+  'eluter': { trading: 0.8, withdrawal: 0 },
+  'trubit': { trading: 0.8, withdrawal: 0 },
+  'cocoscrypto': { trading: 0.8, withdrawal: 0 },
+  'wallbit': { trading: 0.8, withdrawal: 0 },
+  // P2P exchanges (fees más altos por spread inherente)
+  'binancep2p': { trading: 1.5, withdrawal: 0 },
+  'okexp2p': { trading: 1.5, withdrawal: 0 },
+  'paxfulp2p': { trading: 2.0, withdrawal: 0 },
+  'huobip2p': { trading: 1.5, withdrawal: 0 },
+  'bybitp2p': { trading: 1.5, withdrawal: 0 },
+  'kucoinp2p': { trading: 1.5, withdrawal: 0 },
+  'bitgetp2p': { trading: 1.5, withdrawal: 0 },
+  'paydecep2p': { trading: 1.5, withdrawal: 0 },
+  'eldoradop2p': { trading: 2.0, withdrawal: 0 },
+  'bingxp2p': { trading: 1.5, withdrawal: 0 },
+  'lemoncashp2p': { trading: 1.5, withdrawal: 0 },
+  'coinexp2p': { trading: 1.5, withdrawal: 0 },
+  'mexcp2p': { trading: 1.5, withdrawal: 0 },
+  'default': { trading: 0.5, withdrawal: 0 } // Valores por defecto conservadores
 };
 
 async function fetchWithRateLimit(url) {
@@ -454,10 +454,10 @@ function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
         return;
       }
 
-      // PASO 1: Comprar USD oficial
+      // PASO 1: Comprar USD oficial (sin fees, ya incluido en el precio oficial)
       const usdPurchased = initialAmount / officialSellPrice;
 
-      // PASO 2: Comprar USDT en buyExchange
+      // PASO 2: Comprar USDT en buyExchange con USD
       const usdToUsdtRate = parseFloat(buyUsdRate.totalAsk) || parseFloat(buyUsdRate.ask) || 1.05;
       
       // 🔴 FIX CRÍTICO: Validar división por cero
@@ -466,31 +466,52 @@ function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
         return;
       }
       
-      const buyFees = EXCHANGE_FEES[buyExchange.toLowerCase()] || EXCHANGE_FEES['default'];
-      
+      // Calcular USDT obtenidos (USD ÷ rate)
       const usdtPurchased = usdPurchased / usdToUsdtRate;
+      
+      // Aplicar fee de compra (solo una vez)
+      const buyFees = EXCHANGE_FEES[buyExchange.toLowerCase()] || EXCHANGE_FEES['default'];
       const usdtAfterBuyFee = usdtPurchased * (1 - buyFees.trading / 100);
 
       // PASO 3: Transferir USDT (o $0 si es mismo exchange)
       const transferFeeUSD = isSingleExchange ? 0 : TRANSFER_FEES['TRC20'];
-      const transferFeeUSDT = transferFeeUSD / usdToUsdtRate; // Convertir a USDT
+      
+      // Convertir fee USD a USDT para restar
+      const transferFeeUSDT = transferFeeUSD / usdToUsdtRate;
       const usdtAfterTransfer = usdtAfterBuyFee - transferFeeUSDT;
 
       if (usdtAfterTransfer <= 0) return; // No vale la pena
 
-      // PASO 4: Vender USDT en sellExchange
-      const sellFees = EXCHANGE_FEES[sellExchange.toLowerCase()] || EXCHANGE_FEES['default'];
+      // PASO 4: Vender USDT por ARS en sellExchange
       const usdtArsBid = parseFloat(sellData.totalBid) || parseFloat(sellData.bid) || 0;
       
       if (usdtArsBid <= 0) return;
 
+      // Vender USDT directo (USDT × precio_ARS)
       const arsFromSale = usdtAfterTransfer * usdtArsBid;
+      
+      // Aplicar fees de venta y retiro
+      const sellFees = EXCHANGE_FEES[sellExchange.toLowerCase()] || EXCHANGE_FEES['default'];
       const arsAfterSellFee = arsFromSale * (1 - sellFees.trading / 100);
       const finalAmount = arsAfterSellFee * (1 - sellFees.withdrawal / 100);
 
       // Calcular ganancia neta
       const netProfit = finalAmount - initialAmount;
       const netProfitPercent = (netProfit / initialAmount) * 100;
+
+      // DEBUG: Log de ejemplo para verificar cálculo
+      if (DEBUG_MODE && routes.length === 0) {
+        console.log('📊 EJEMPLO DE CÁLCULO:');
+        console.log(`   1. Inversión: $${initialAmount.toLocaleString()} ARS`);
+        console.log(`   2. Comprar USD: ${initialAmount} / ${officialSellPrice} = ${usdPurchased.toFixed(2)} USD`);
+        console.log(`   3. Comprar USDT: ${usdPurchased.toFixed(2)} / ${usdToUsdtRate} = ${usdtPurchased.toFixed(2)} USDT`);
+        console.log(`   4. Fee compra (${buyFees.trading}%): ${usdtAfterBuyFee.toFixed(2)} USDT`);
+        console.log(`   5. Fee transfer: -${transferFeeUSDT.toFixed(2)} USDT = ${usdtAfterTransfer.toFixed(2)} USDT`);
+        console.log(`   6. Vender USDT: ${usdtAfterTransfer.toFixed(2)} × ${usdtArsBid} = $${arsFromSale.toFixed(2)} ARS`);
+        console.log(`   7. Fee venta (${sellFees.trading}%): $${arsAfterSellFee.toFixed(2)} ARS`);
+        console.log(`   8. Fee retiro (${sellFees.withdrawal}%): $${finalAmount.toFixed(2)} ARS`);
+        console.log(`   ✅ GANANCIA: $${netProfit.toFixed(2)} ARS (${netProfitPercent.toFixed(2)}%)`);
+      }
 
       // Solo guardar si es >= -5% para análisis
       if (netProfitPercent >= -5) {
