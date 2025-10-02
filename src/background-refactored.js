@@ -165,7 +165,15 @@ chrome.alarms.onAlarm.addListener(alarm => {
 // Manejar mensajes del popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'getArbitrages') {
-    storageManager.getArbitrages().then(data => sendResponse(data));
+    console.log('📤 Background: Recibida solicitud getArbitrages');
+    storageManager.getArbitrages().then(data => {
+      console.log('📤 Background: Enviando datos al popup:', {
+        hasData: !!data,
+        optimizedRoutes: data?.optimizedRoutes?.length || 0,
+        arbitrages: data?.arbitrages?.length || 0
+      });
+      sendResponse(data);
+    });
     return true; // Mantener conexión abierta para respuesta async
   }
 

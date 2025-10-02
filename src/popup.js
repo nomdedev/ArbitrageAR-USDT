@@ -2,7 +2,7 @@
 let currentData = null;
 let selectedArbitrage = null;
 let userSettings = null; // NUEVO v5.0: Configuración del usuario
-let currentFilter = 'all'; // TEMPORAL: Cambiar a 'all' para debug - luego volver a 'no-p2p'
+let currentFilter = 'no-p2p'; // NUEVO: Filtro P2P activo ('all', 'p2p', 'no-p2p') - Por defecto Sin P2P
 let allRoutes = []; // NUEVO: Cache de todas las rutas sin filtrar
 
 // Inicialización
@@ -217,6 +217,11 @@ async function fetchAndDisplay() {
       error: data?.error,
       userSettings: userSettings
     });
+    
+    // DEBUG: Mostrar estructura completa de las primeras rutas
+    if (data?.optimizedRoutes?.length > 0) {
+      console.log('🔍 Primera ruta de ejemplo:', JSON.stringify(data.optimizedRoutes[0], null, 2));
+    }
     
     if (!data) {
       container.innerHTML = '<p class="error">❌ No se pudo comunicar con el servicio de fondo.</p>';

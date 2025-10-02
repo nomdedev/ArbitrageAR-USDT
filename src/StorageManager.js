@@ -35,10 +35,19 @@ class StorageManager {
 
   async getArbitrages() {
     const data = await this.get('currentData');
+    console.log('💾 StorageManager.getArbitrages():', {
+      hasData: !!data,
+      optimizedRoutes: data?.optimizedRoutes?.length || 0,
+      arbitrages: data?.arbitrages?.length || 0
+    });
     return data || {};
   }
 
   async saveArbitrages(data) {
+    console.log('💾 StorageManager.saveArbitrages():', {
+      optimizedRoutes: data?.optimizedRoutes?.length || 0,
+      arbitrages: data?.arbitrages?.length || 0
+    });
     return await this.set('currentData', data);
   }
 
