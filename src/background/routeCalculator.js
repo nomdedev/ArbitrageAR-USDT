@@ -60,16 +60,15 @@ function getValidExchanges(usdt, usdtUsd) {
       return false;
     }
 
-    // NUEVO: Validar que tenga datos válidos en USD/USDT
+    // NUEVO: Validar que tenga datos válidos en USD/USDT (OPCIONAL)
+    // Si no hay datos USD/USDT, se usará 1.0 como fallback en calculateRoute
     if (usdtUsd?.[key]) {
       const askPrice = parseFloat(usdtUsd[key].totalAsk || usdtUsd[key].ask);
-      if (!askPrice || askPrice <= 0 || askPrice === 1) {
-        log(`⚠️ ${key} tiene USD/USDT inválido: ${askPrice}, excluyendo...`);
+      if (askPrice && askPrice > 0 && askPrice < 0.5) {
+        // Excluir solo si el precio es claramente inválido (< 0.5)
+        log(`⚠️ ${key} tiene USD/USDT sospechoso: ${askPrice}, excluyendo...`);
         return false;
       }
-    } else {
-      log(`⚠️ ${key} no tiene datos USD/USDT, excluyendo...`);
-      return false;
     }
 
     return true;
@@ -109,14 +108,15 @@ function calculateRoute(buyExchange, sellExchange, oficial, usdt, usdtUsd, userF
     // CORREGIDO: Usar 'totalAsk' o 'ask' (precio de COMPRA de USDT en USD)
     // CriptoYA muestra: totalAsk = cuántos USD necesito para comprar 1 USDT
     let usdToUsdtRate = 1;
-    if (usdtUsd[buyExchange]) {
+    if (usdtUsd?.[buyExchange]) {
       const askPrice = parseFloat(usdtUsd[buyExchange].totalAsk || usdtUsd[buyExchange].ask);
       if (askPrice && askPrice > 0) {
         usdToUsdtRate = askPrice;
-        log(`💱 ${buyExchange} USD/USDT compra: ${usdToUsdtRate}`);
       } else {
-        log(`⚠️ ${buyExchange} no tiene precio USD/USDT válido, usando 1:1`);
+        log(`⚠️ ${buyExchange} - USD/USDT inválido, usando fallback 1.0`);
       }
+    } else {
+      log(`⚠️ ${buyExchange} - Sin datos USD/USDT, usando fallback 1.0`);
     }
 
     // Paso 4: Comprar USDT
@@ -213,23 +213,43 @@ async function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
 
   if (buyExchanges.length === 0 || sellExchanges.length === 0) {
     log('⚠️ No hay exchanges válidos disponibles');
+    log('📊 Total exchanges en USDT/ARS:', Object.keys(usdt).length);
+    log('📊 Total exchanges en USD/USDT:', Object.keys(usdtUsd || {}).length);
     return [];
   }
 
-  log(`🏦 Exchanges disponibles: ${buyExchanges.length}`);
+  log(`🏦 Exchanges válidos: ${buyExchanges.length} (${buyExchanges.join(', ')})`);
 
   const routes = [];
+  let totalCalculated = 0;
+  let nullRoutes = 0;
+  let lowProfitRoutes = 0;
 
   // Calcular todas las combinaciones posibles
   for (const buyExchange of buyExchanges) {
     for (const sellExchange of sellExchanges) {
+      totalCalculated++;
       const route = calculateRoute(buyExchange, sellExchange, oficial, usdt, usdtUsd, userFees, transferFees);
 
-      if (route && route.profitPercent > 0.1) { // Solo rutas rentables (> 0.1%)
-        routes.push(route);
+      if (!route) {
+        nullRoutes++;
+        continue;
       }
+
+      if (route.profitPercent <= 0.1) {
+        lowProfitRoutes++;
+        continue;
+      }
+
+      routes.push(route);
     }
   }
+
+  log(`📊 Análisis de rutas:`);
+  log(`   - Total calculadas: ${totalCalculated}`);
+  log(`   - Rutas nulas: ${nullRoutes}`);
+  log(`   - Rentabilidad baja (≤0.1%): ${lowProfitRoutes}`);
+  log(`   - Rutas rentables: ${routes.length}`);
 
   // Ordenar por rentabilidad
   routes.sort((a, b) => b.profitPercent - a.profitPercent);
