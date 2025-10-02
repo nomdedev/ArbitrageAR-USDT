@@ -1,6 +1,7 @@
 // Estado global
 let currentData = null;
 let selectedArbitrage = null;
+let userSettings = null; // NUEVO v5.0: Configuración del usuario
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
@@ -50,6 +51,15 @@ function setupTabNavigation() {
       tab.classList.add('active');
       const tabId = tab.dataset.tab;
       document.getElementById(`tab-${tabId}`).classList.add('active');
+      
+      // NUEVO v5.0: Si se abre el simulador, aplicar monto default
+      if (tabId === 'simulator' && userSettings?.defaultSimAmount) {
+        const amountInput = document.getElementById('sim-amount');
+        if (amountInput && !amountInput.value) {
+          amountInput.value = userSettings.defaultSimAmount;
+          console.log(`🔧 Monto default del simulador: $${userSettings.defaultSimAmount.toLocaleString()}`);
+        }
+      }
     });
   });
 }
@@ -68,12 +78,16 @@ function setupRefreshButton() {
 }
 
 // Obtener y mostrar datos de arbitraje
-function fetchAndDisplay() {
+async function fetchAndDisplay() {
   const container = document.getElementById('optimized-routes');
   const loading = document.getElementById('loading');
   
   loading.style.display = 'block';
   container.innerHTML = '';
+  
+  // NUEVO v5.0: Cargar preferencias del usuario
+  const settings = await chrome.storage.local.get('notificationSettings');
+  userSettings = settings.notificationSettings || {};
   
   chrome.runtime.sendMessage({ action: 'getArbitrages' }, data => {
     loading.style.display = 'none';
@@ -83,7 +97,8 @@ function fetchAndDisplay() {
       optimizedRoutes: data?.optimizedRoutes?.length || 0,
       arbitrages: data?.arbitrages?.length || 0,
       marketHealth: data?.marketHealth?.status,
-      error: data?.error
+      error: data?.error,
+      userSettings: userSettings
     });
     
     if (!data) {
@@ -101,7 +116,9 @@ function fetchAndDisplay() {
       const errorClass = data.usingCache ? 'warning' : 'error';
       container.innerHTML = `<p class="${errorClass}">❌ ${data.error}</p>`;
       if (data.usingCache) {
-        displayOptimizedRoutes(data.optimizedRoutes || []);
+        // NUEVO v5.0: Aplicar preferencias antes de mostrar
+        const filteredRoutes = applyUserPreferences(data.optimizedRoutes || []);
+        displayOptimizedRoutes(filteredRoutes);
       }
       return;
     }
@@ -118,12 +135,53 @@ function fetchAndDisplay() {
       return;
     }
     
-    // Mostrar rutas optimizadas (incluye single + multi-exchange)
-    displayOptimizedRoutes(data.optimizedRoutes, data.official);
+    // NUEVO v5.0: Aplicar preferencias del usuario antes de mostrar
+    const filteredRoutes = applyUserPreferences(data.optimizedRoutes);
+    console.log(`🔧 Rutas después de aplicar preferencias: ${filteredRoutes.length} de ${data.optimizedRoutes.length}`);
     
-    // Poblar selector del simulador
+    // Mostrar rutas optimizadas (incluye single + multi-exchange)
+    displayOptimizedRoutes(filteredRoutes, data.official);
+    
+    // Poblar selector del simulador (con todas las rutas)
     populateSimulatorRoutes(data.optimizedRoutes);
   });
+}
+
+// NUEVA FUNCIÓN v5.0: Aplicar preferencias del usuario
+function applyUserPreferences(routes) {
+  if (!Array.isArray(routes) || routes.length === 0) {
+    return routes;
+  }
+  
+  let filtered = [...routes]; // Copia para no mutar original
+  
+  // 1. Filtrar rutas negativas si el usuario no quiere verlas
+  if (userSettings.showNegativeRoutes === false) {
+    filtered = filtered.filter(r => r.profitPercent >= 0);
+    console.log(`🔧 Filtradas ${routes.length - filtered.length} rutas negativas`);
+  }
+  
+  // 2. Ordenar priorizando rutas single-exchange si el usuario lo prefiere
+  if (userSettings.preferSingleExchange === true) {
+    filtered.sort((a, b) => {
+      // Primero ordenar por tipo de ruta
+      if (a.isSingleExchange !== b.isSingleExchange) {
+        return b.isSingleExchange - a.isSingleExchange; // Single primero
+      }
+      // Luego por rentabilidad
+      return b.profitPercent - a.profitPercent;
+    });
+    console.log('🔧 Rutas ordenadas priorizando mismo broker');
+  }
+  
+  // 3. Limitar cantidad de rutas mostradas
+  const maxDisplay = userSettings.maxRoutesDisplay || 20;
+  if (filtered.length > maxDisplay) {
+    filtered = filtered.slice(0, maxDisplay);
+    console.log(`🔧 Limitadas a ${maxDisplay} rutas`);
+  }
+  
+  return filtered;
 }
 
 // Mostrar tarjetas de arbitraje
@@ -199,7 +257,7 @@ function displayArbitrages(arbitrages, official) {
   });
 }
 
-// NUEVO v5.0.0: Mostrar rutas (single + multi-exchange)
+// NUEVO v5.0.0: Mostrar rutas (single + multi-exchange) - Vista compacta
 function displayOptimizedRoutes(routes, official) {
   const container = document.getElementById('optimized-routes');
   
@@ -224,13 +282,13 @@ function displayOptimizedRoutes(routes, official) {
       ? '<span class="single-exchange-badge">🎯 Mismo Broker</span>' 
       : '';
     
-    // Determinar texto del transfer
-    const transferText = route.isSingleExchange 
-      ? '⬇️ Sin transfer' 
-      : `🔁 Transfer ${formatNumber(route.transferFeeUSD)} USD`;
+    // Ruta simplificada (comprar → transferir → vender)
+    const routeDescription = route.isSingleExchange
+      ? `<strong>${route.buyExchange}</strong>`
+      : `<strong>${route.buyExchange}</strong> → <strong>${route.sellExchange}</strong>`;
     
     html += `
-      <div class="route-card ${profitClass}" data-index="${index}" data-route='${JSON.stringify(route)}'>
+      <div class="route-card ${profitClass}" data-index="${index}" onclick="expandRoute(${index})">
         <div class="route-header">
           <div class="route-title">
             <h3>${route.isSingleExchange ? '🎯' : '🔀'} Ruta ${index + 1}</h3>
@@ -239,7 +297,20 @@ function displayOptimizedRoutes(routes, official) {
           </div>
         </div>
         
-        <div class="route-body">
+        <div class="route-compact">
+          <div class="route-summary-line">
+            <span class="route-exchanges">🏦 ${routeDescription}</span>
+          </div>
+          <div class="route-profit-line">
+            <span class="profit-amount">${profitSymbol}$${formatNumber(Math.abs(route.calculation.netProfit))} ARS</span>
+            <span class="investment-info">sobre $${formatNumber(route.calculation.initial)} ARS</span>
+          </div>
+          <div class="route-action">
+            <span class="click-to-expand">👆 Click para ver detalles</span>
+          </div>
+        </div>
+        
+        <div class="route-details" id="route-details-${index}" style="display: none;">
           <div class="route-step">
             <span class="step-number">1️⃣</span>
             <div class="step-info">
@@ -258,7 +329,7 @@ function displayOptimizedRoutes(routes, official) {
             </div>
           </div>
           
-          <div class="route-arrow">${transferText}</div>
+          <div class="route-arrow">${route.isSingleExchange ? '⬇️ Sin transfer' : `🔁 Transfer ${formatNumber(route.transferFeeUSD)} USD`}</div>
           
           <div class="route-step">
             <span class="step-number">3️⃣</span>
@@ -297,6 +368,30 @@ function displayOptimizedRoutes(routes, official) {
   });
   
   container.innerHTML = html;
+}
+
+// NUEVA FUNCIÓN v5.0.3: Expandir/contraer detalles de ruta
+function expandRoute(index) {
+  const detailsDiv = document.getElementById(`route-details-${index}`);
+  const allDetails = document.querySelectorAll('.route-details');
+  
+  // Contraer todas las demás rutas
+  allDetails.forEach((div, i) => {
+    if (i !== index) {
+      div.style.display = 'none';
+      const card = div.closest('.route-card');
+      if (card) card.classList.remove('expanded');
+    }
+  });
+  
+  // Toggle la ruta actual
+  if (detailsDiv.style.display === 'none') {
+    detailsDiv.style.display = 'block';
+    detailsDiv.closest('.route-card').classList.add('expanded');
+  } else {
+    detailsDiv.style.display = 'none';
+    detailsDiv.closest('.route-card').classList.remove('expanded');
+  }
 }
 
 // Seleccionar un arbitraje y mostrar guía

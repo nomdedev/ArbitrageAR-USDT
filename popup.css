@@ -318,11 +318,104 @@ main::-webkit-scrollbar-thumb {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(148, 163, 184, 0.05);
   border: 1px solid rgba(59, 130, 246, 0.25);
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .route-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 32px rgba(59, 130, 246, 0.3);
+}
+
+.route-card.expanded {
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+}
+
+/* VISTA COMPACTA (default) */
+.route-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.route-summary-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.route-exchanges {
+  font-size: 0.95em;
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+.route-exchanges strong {
+  color: #3b82f6;
+  font-weight: 700;
+}
+
+.route-profit-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.profit-amount {
+  font-size: 1.1em;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.route-card.negative-profit .profit-amount {
+  color: #ef4444;
+}
+
+.investment-info {
+  font-size: 0.85em;
+  color: #94a3b8;
+}
+
+.route-action {
+  text-align: center;
+  padding-top: 4px;
+}
+
+.click-to-expand {
+  font-size: 0.8em;
+  color: #60a5fa;
+  font-weight: 500;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.route-card:hover .click-to-expand {
+  opacity: 1;
+}
+
+.route-card.expanded .click-to-expand::before {
+  content: '👇 Click para ocultar';
+}
+
+/* VISTA EXPANDIDA (detalles) */
+.route-details {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(59, 130, 246, 0.2);
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .route-header {
