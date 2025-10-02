@@ -105,6 +105,9 @@ function fetchAndDisplay() {
     }
     
     displayArbitrages(data.arbitrages, data.official);
+    
+    // NUEVO: Mostrar rutas optimizadas
+    displayOptimizedRoutes(data.optimizedRoutes, data.official);
   });
 }
 
@@ -179,6 +182,95 @@ function displayArbitrages(arbitrages, official) {
       document.querySelector('[data-tab="guide"]').click();
     });
   });
+}
+
+// NUEVO: Mostrar rutas optimizadas multi-exchange
+function displayOptimizedRoutes(routes, official) {
+  const container = document.getElementById('optimized-routes');
+  
+  if (!routes || routes.length === 0) {
+    container.innerHTML = '<p class="info">📊 No hay rutas optimizadas disponibles en este momento.</p>';
+    return;
+  }
+
+  let html = '';
+  
+  routes.forEach((route, index) => {
+    const isNegative = route.profitPercent < 0;
+    const profitClass = isNegative ? 'negative-profit' : (route.profitPercent > 5 ? 'high-profit' : '');
+    const profitBadgeClass = isNegative ? 'negative' : (route.profitPercent > 5 ? 'high' : '');
+    
+    // Indicadores
+    const negativeIndicator = isNegative ? '<span class="negative-tag">⚠️ Pérdida</span>' : '';
+    const profitSymbol = isNegative ? '' : '+';
+    
+    html += `
+      <div class="route-card ${profitClass}" data-index="${index}">
+        <div class="route-header">
+          <div class="route-title">
+            <h3>🔀 Ruta ${index + 1}</h3>
+            <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${formatNumber(route.profitPercent)}% ${negativeIndicator}</div>
+          </div>
+        </div>
+        
+        <div class="route-body">
+          <div class="route-step">
+            <span class="step-number">1️⃣</span>
+            <div class="step-info">
+              <span class="step-label">Comprar USD Oficial</span>
+              <span class="step-value">$${formatNumber(route.officialPrice)} ARS</span>
+            </div>
+          </div>
+          
+          <div class="route-arrow">⬇️</div>
+          
+          <div class="route-step">
+            <span class="step-number">2️⃣</span>
+            <div class="step-info">
+              <span class="step-label">USD → USDT en <strong>${route.buyExchange}</strong></span>
+              <span class="step-value">${formatNumber(route.usdToUsdtRate)} USD/USDT</span>
+            </div>
+          </div>
+          
+          <div class="route-arrow">🔁 Transfer ${formatNumber(route.transferFeeUSD)} USD</div>
+          
+          <div class="route-step">
+            <span class="step-number">3️⃣</span>
+            <div class="step-info">
+              <span class="step-label">USDT → ARS en <strong>${route.sellExchange}</strong></span>
+              <span class="step-value highlight">$${formatNumber(route.usdtArsBid)} ARS</span>
+            </div>
+          </div>
+          
+          <div class="route-summary">
+            <div class="summary-row">
+              <span>💰 Inversión inicial:</span>
+              <span>$${formatNumber(route.calculation.initial)} ARS</span>
+            </div>
+            <div class="summary-row">
+              <span>📊 Fee transferencia:</span>
+              <span class="fee-value">~$${formatNumber(route.transferFeeUSD)} USD (TRC20)</span>
+            </div>
+            <div class="summary-row">
+              <span>💵 Resultado final:</span>
+              <span class="${isNegative ? 'loss' : 'profit'}">$${formatNumber(route.calculation.finalAmount)} ARS</span>
+            </div>
+            <div class="summary-row highlight-row">
+              <span><strong>${isNegative ? 'Pérdida' : 'Ganancia'} neta:</strong></span>
+              <span class="${isNegative ? 'loss' : 'profit'}"><strong>${profitSymbol}$${formatNumber(Math.abs(route.calculation.netProfit))} ARS (${profitSymbol}${formatNumber(route.profitPercent)}%)</strong></span>
+            </div>
+          </div>
+          
+          <div class="route-warning">
+            <span>⏱️</span>
+            <span><small>Tiempo estimado: 2-4 horas (confirmaciones blockchain)</small></span>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
 }
 
 // Seleccionar un arbitraje y mostrar guía

@@ -269,11 +269,15 @@ async function updateData() {
   // Calcular salud del mercado
   const marketHealth = calculateMarketHealth(top20);
 
+  // NUEVO: Calcular rutas multi-exchange optimizadas
+  const optimizedRoutes = calculateOptimizedRoutes(oficial, usdt, usdtUsd);
+
   await chrome.storage.local.set({ 
     official: oficial, 
     usdt: usdt, 
     arbitrages: top20,
-    marketHealth: marketHealth, // NUEVO: Estado del mercado
+    optimizedRoutes: optimizedRoutes, // NUEVO: Rutas multi-exchange
+    marketHealth: marketHealth,
     lastUpdate: Date.now(),
     error: null // Limpiar errores previos
   });
@@ -339,6 +343,116 @@ function calculateMarketHealth(arbitrages) {
     bestProfit: best.profitPercent,
     bestExchange: best.broker
   };
+}
+
+// NUEVO: Calcular rutas optimizadas multi-exchange
+function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
+  if (!oficial || !usdt || !usdtUsd) return [];
+
+  const officialSellPrice = parseFloat(oficial.venta) || 0;
+  const initialAmount = 100000; // $100,000 ARS base
+  const excludedKeys = ['time', 'timestamp', 'fecha', 'date', 'p2p', 'total'];
+  
+  // Fees de transferencia entre exchanges (en USD)
+  const TRANSFER_FEES = {
+    'TRC20': 1,      // USDT Tron - más barato
+    'ERC20': 15,     // USDT Ethereum - caro
+    'BEP20': 0.8,    // USDT BSC - barato
+    'default': 1     // Por defecto
+  };
+
+  const routes = [];
+
+  // Obtener todos los exchanges válidos
+  const buyExchanges = Object.keys(usdt).filter(key => {
+    return typeof usdt[key] === 'object' && 
+           usdt[key] !== null && 
+           !excludedKeys.includes(key.toLowerCase());
+  });
+
+  const sellExchanges = [...buyExchanges];
+
+  // Para cada combinación de exchange de compra y venta
+  buyExchanges.forEach(buyExchange => {
+    const buyData = usdt[buyExchange];
+    const buyUsdRate = usdtUsd[buyExchange];
+    
+    if (!buyData || !buyUsdRate) return;
+
+    sellExchanges.forEach(sellExchange => {
+      // Skip si es el mismo exchange (eso es single-exchange)
+      if (buyExchange === sellExchange) return;
+
+      const sellData = usdt[sellExchange];
+      if (!sellData) return;
+
+      // PASO 1: Comprar USD oficial
+      const usdPurchased = initialAmount / officialSellPrice;
+
+      // PASO 2: Comprar USDT en buyExchange
+      const usdToUsdtRate = parseFloat(buyUsdRate.totalAsk) || parseFloat(buyUsdRate.ask) || 1.05;
+      const buyFees = EXCHANGE_FEES[buyExchange] || EXCHANGE_FEES['default'];
+      
+      const usdtPurchased = usdPurchased / usdToUsdtRate;
+      const usdtAfterBuyFee = usdtPurchased * (1 - buyFees.trading / 100);
+
+      // PASO 3: Transferir USDT de buyExchange a sellExchange
+      const transferFeeUSD = TRANSFER_FEES['TRC20']; // Asumimos TRC20 (más barato)
+      const transferFeeUSDT = transferFeeUSD / usdToUsdtRate; // Convertir a USDT
+      const usdtAfterTransfer = usdtAfterBuyFee - transferFeeUSDT;
+
+      if (usdtAfterTransfer <= 0) return; // No vale la pena
+
+      // PASO 4: Vender USDT en sellExchange
+      const sellFees = EXCHANGE_FEES[sellExchange] || EXCHANGE_FEES['default'];
+      const usdtArsBid = parseFloat(sellData.totalBid) || parseFloat(sellData.bid) || 0;
+      
+      if (usdtArsBid <= 0) return;
+
+      const arsFromSale = usdtAfterTransfer * usdtArsBid;
+      const arsAfterSellFee = arsFromSale * (1 - sellFees.trading / 100);
+      const finalAmount = arsAfterSellFee * (1 - sellFees.withdrawal / 100);
+
+      // Calcular ganancia neta
+      const netProfit = finalAmount - initialAmount;
+      const netProfitPercent = (netProfit / initialAmount) * 100;
+
+      // Solo guardar si es >= -5% para análisis
+      if (netProfitPercent >= -5) {
+        routes.push({
+          buyExchange: buyExchange,
+          sellExchange: sellExchange,
+          profitPercent: netProfitPercent,
+          officialPrice: officialSellPrice,
+          usdToUsdtRate: usdToUsdtRate,
+          usdtArsBid: usdtArsBid,
+          transferFeeUSD: transferFeeUSD,
+          transferFeeUSDT: transferFeeUSDT,
+          calculation: {
+            initial: initialAmount,
+            usdPurchased: usdPurchased,
+            usdtPurchased: usdtPurchased,
+            usdtAfterBuyFee: usdtAfterBuyFee,
+            usdtAfterTransfer: usdtAfterTransfer,
+            arsFromSale: arsFromSale,
+            finalAmount: finalAmount,
+            netProfit: netProfit
+          },
+          fees: {
+            buy: buyFees.trading,
+            sell: sellFees.trading,
+            transfer: transferFeeUSD,
+            withdrawal: sellFees.withdrawal,
+            total: buyFees.trading * 2 + sellFees.trading * 2 + sellFees.withdrawal
+          }
+        });
+      }
+    });
+  });
+
+  // Ordenar por ganancia y devolver top 10
+  routes.sort((a, b) => b.profitPercent - a.profitPercent);
+  return routes.slice(0, 10);
 }
 
 // Actualización periódica

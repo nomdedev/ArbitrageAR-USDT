@@ -28,19 +28,31 @@
   <div id="marketHealth" class="market-health"></div>
 
   <div class="tabs">
-    <button class="tab active" data-tab="opportunities">🎯 Oportunidades</button>
-    <button class="tab" data-tab="guide">📚 Guía Paso a Paso</button>
+    <button class="tab active" data-tab="opportunities">🎯 Single Exchange</button>
+    <button class="tab" data-tab="optimized">🔀 Rutas Optimizadas</button>
+    <button class="tab" data-tab="guide">📚 Guía</button>
     <button class="tab" data-tab="banks">🏦 Bancos</button>
   </div>
 
   <main>
-    <!-- TAB: Oportunidades de Arbitraje -->
+    <!-- TAB: Oportunidades de Arbitraje (Single Exchange) -->
     <section id="tab-opportunities" class="tab-content active">
+      <div class="info-banner">
+        <strong>Modo Simple:</strong> Todo en una misma plataforma
+      </div>
       <div id="loading" class="loading">
         <div class="spinner"></div>
         <p>Cargando oportunidades...</p>
       </div>
       <div id="arbitrages"></div>
+    </section>
+
+    <!-- TAB: Rutas Optimizadas (Multi-Exchange) -->
+    <section id="tab-optimized" class="tab-content">
+      <div class="info-banner success">
+        <strong>Modo Optimizado:</strong> Maximiza ganancia usando múltiples exchanges
+      </div>
+      <div id="optimized-routes"></div>
     </section>
 
     <!-- TAB: Guía Paso a Paso -->
