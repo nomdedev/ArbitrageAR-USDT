@@ -173,6 +173,7 @@ class ArbitrageCalculator {
     return {
       buyExchange: buyExchange.replace(/[<>"']/g, ''),
       sellExchange: sellExchange.replace(/[<>"']/g, ''),
+      broker: sellExchange.replace(/[<>"']/g, ''), // NUEVO: Agregar propiedad broker para filtrado P2P
       profitPercent: netProfitPercent,
       officialPrice: officialSellPrice,
       usdToUsdtRate: usdToUsdtRate,

@@ -96,7 +96,13 @@ async function updateBanksData() {
     // Guardar usando StorageManager
     await storageManager.saveBanks(result.banks, result.lastUpdate);
 
-    console.log(`✅ Bancos actualizados: ${result.banks.length} bancos (${result.sources.dolarito || 0} de Dolarito, ${result.sources.dolarApi || 0} de DolarAPI)`);
+    const dolaritoCount = result.sources.dolarito || 0;
+    const dolarApiCount = result.sources.dolarApi || 0;
+    const sourceInfo = dolaritoCount > 0 
+      ? `${dolaritoCount} de Dolarito + ${dolarApiCount} de DolarAPI` 
+      : `${dolarApiCount} de DolarAPI (Dolarito no disponible)`;
+
+    console.log(`✅ Bancos actualizados: ${result.banks.length} bancos (${sourceInfo})`);
 
   } catch (error) {
     console.error('❌ Error en updateBanksData:', error);

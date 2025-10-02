@@ -28,9 +28,39 @@ class DataService {
       return await res.json();
     } catch(e) {
       if (e.name === 'AbortError') {
-        console.error('Fetch timeout:', url);
+        console.warn('⏱️ Timeout en fetch:', url);
+      } else if (e instanceof SyntaxError) {
+        console.warn('⚠️ Respuesta no es JSON válido:', url, '(probablemente HTML)');
       } else {
-        console.error('Fetch error:', url, e);
+        console.warn('⚠️ Error en fetch:', url, e.message);
+      }
+      return null;
+    }
+  }
+
+  // NUEVO: Método para obtener HTML sin parsear JSON
+  async fetchHTML(url) {
+    const now = Date.now();
+    const delay = this.REQUEST_INTERVAL - (now - this.lastRequestTime);
+    if (delay > 0) {
+      await new Promise(r => setTimeout(r, delay));
+    }
+    this.lastRequestTime = Date.now();
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+      return await res.text();
+    } catch(e) {
+      if (e.name === 'AbortError') {
+        console.warn('⏱️ Timeout en fetch HTML:', url);
+      } else {
+        console.warn('⚠️ Error en fetch HTML:', url, e.message);
       }
       return null;
     }

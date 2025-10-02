@@ -73,14 +73,14 @@ class ScrapingService {
 
   async _fetchBanksFromDolarito() {
     try {
-      const response = await this.dataService.fetchWithRateLimit('https://www.dolarito.ar/cotizacion/bancos');
+      // Usar fetchHTML para obtener HTML sin intentar parsear JSON
+      const html = await this.dataService.fetchHTML('https://www.dolarito.ar/cotizacion/bancos');
 
-      if (!response) {
-        console.warn('No se pudo obtener respuesta de Dolarito');
+      if (!html) {
+        console.warn('⚠️ No se pudo obtener HTML de Dolarito (timeout o error de red)');
         return [];
       }
 
-      const html = await response.text();
       const banks = [];
 
       // Buscar el JSON embebido con los datos de bancos

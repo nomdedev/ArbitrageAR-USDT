@@ -13,6 +13,7 @@
     <div class="header-content">
       <h1>💰 ArbitrageAR</h1>
       <p class="subtitle">Dólar Oficial → USDT</p>
+      <div id="dataStatus" class="data-status"></div>
     </div>
     <div class="header-buttons">
       <button id="settings" class="btn-settings" title="Configurar notificaciones">
@@ -37,6 +38,45 @@
   <main>
     <!-- TAB: Todas las Rutas (Single + Multi-Exchange) -->
     <section id="tab-routes" class="tab-content active">
+      <!-- Controles de filtro -->
+      <div class="filter-controls">
+        <div class="filter-section">
+          <label class="filter-label">
+            <span class="filter-icon">🔄</span>
+            Tipo de operación:
+          </label>
+          <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">
+              <span class="btn-icon">🎯</span>
+              <span class="btn-text">Todas</span>
+              <span class="btn-count" id="count-all">0</span>
+            </button>
+            <button class="filter-btn" data-filter="no-p2p">
+              <span class="btn-icon">🏦</span>
+              <span class="btn-text">Sin P2P</span>
+              <span class="btn-count" id="count-no-p2p">0</span>
+              <span class="btn-badge fast">⚡ Rápido</span>
+            </button>
+            <button class="filter-btn" data-filter="p2p">
+              <span class="btn-icon">🤝</span>
+              <span class="btn-text">Con P2P</span>
+              <span class="btn-count" id="count-p2p">0</span>
+              <span class="btn-badge flexible">📈 Mayor spread</span>
+            </button>
+          </div>
+        </div>
+        <div class="filter-info">
+          <div class="info-item">
+            <span class="info-icon">⚡</span>
+            <span class="info-text"><strong>Sin P2P (por defecto):</strong> Operaciones instantáneas (24-48hs)</span>
+          </div>
+          <div class="info-item">
+            <span class="info-icon">🕒</span>
+            <span class="info-text"><strong>Con P2P:</strong> Requiere coordinación vendedor (horas/días)</span>
+          </div>
+        </div>
+      </div>
+      
       <div id="loading" class="loading">
         <div class="spinner"></div>
         <p>Calculando rutas optimizadas...</p>
