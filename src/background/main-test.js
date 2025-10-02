@@ -16,9 +16,9 @@ import {
 } from './dataFetcher.js';
 console.log('✅ [BACKGROUND-TEST] dataFetcher.js importado exitosamente');
 
-// Paso 3: Probar routeCalculator.js (comentado)
-// import { calculateOptimizedRoutes } from './routeCalculator.js';
-// console.log('✅ [BACKGROUND-TEST] routeCalculator.js importado exitosamente');
+// Paso 3: Probar routeCalculator.js
+import { calculateOptimizedRoutes } from './routeCalculator.js';
+console.log('✅ [BACKGROUND-TEST] routeCalculator.js importado exitosamente');
 
 // Paso 4: Probar notifications.js (comentado)
 // import { checkAndNotify } from './notifications.js';
