@@ -288,7 +288,7 @@ function displayOptimizedRoutes(routes, official) {
       : `<strong>${route.buyExchange}</strong> → <strong>${route.sellExchange}</strong>`;
     
     html += `
-      <div class="route-card ${profitClass}" data-index="${index}" onclick="expandRoute(${index})">
+      <div class="route-card ${profitClass}" data-index="${index}">
         <div class="route-header">
           <div class="route-title">
             <h3>${route.isSingleExchange ? '🎯' : '🔀'} Ruta ${index + 1}</h3>
@@ -368,6 +368,14 @@ function displayOptimizedRoutes(routes, official) {
   });
   
   container.innerHTML = html;
+  
+  // Agregar event listeners a las tarjetas (sin onclick inline)
+  document.querySelectorAll('.route-card').forEach(card => {
+    card.addEventListener('click', function() {
+      const index = parseInt(this.dataset.index);
+      expandRoute(index);
+    });
+  });
 }
 
 // NUEVA FUNCIÓN v5.0.3: Expandir/contraer detalles de ruta
@@ -438,7 +446,7 @@ function displayStepByStepGuide(arb) {
             <strong>Límite:</strong> USD 200 mensuales por persona<br>
             <strong>Requisitos:</strong> CBU, cuenta bancaria, CUIT/CUIL
           </p>
-          <a href="#" class="platform-link" onclick="document.querySelector('[data-tab=\\"banks\\"]').click(); return false;">
+          <a href="#" class="platform-link" data-action="show-banks">
             🏦 Ver bancos disponibles
           </a>
         </div>
@@ -549,6 +557,15 @@ function displayStepByStepGuide(arb) {
   `;
   
   container.innerHTML = html;
+  
+  // Agregar event listener al link de bancos (sin onclick inline)
+  const bankLink = container.querySelector('[data-action="show-banks"]');
+  if (bankLink) {
+    bankLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelector('[data-tab="banks"]').click();
+    });
+  }
 }
 
 // Cargar datos de bancos
