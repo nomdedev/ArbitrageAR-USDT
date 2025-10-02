@@ -37,27 +37,6 @@ async function fetchWithRateLimit(url) {
   }
 }
 
-  try {
-    // Añadir timeout de 10 segundos
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-    const res = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeoutId);
-
-    if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
-    const data = await res.json();
-    return data;
-  } catch(e) {
-    if (e.name === 'AbortError') {
-      log('⏱️ Fetch timeout:', url);
-    } else {
-      log('❌ Fetch error:', url, e);
-    }
-    return null;
-  }
-}
-
 // Fetch precio dólar oficial
 async function fetchDolaritoOficial() {
   log('📊 Fetching dólar oficial...');
