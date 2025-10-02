@@ -4,7 +4,7 @@
 
 console.log('🔧 [BACKGROUND] main.js se está cargando en:', new Date().toISOString());
 
-import { log } from './config.js';
+import { log, CACHE_CONFIG } from './config.js';
 import {
   fetchDolaritoOficial,
   fetchCriptoyaUSDT,
@@ -130,38 +130,65 @@ function calculateMarketHealth(arbitrages) {
 
 // Función para obtener datos actuales
 async function getCurrentData() {
-  // Si no hay datos, intentar actualizar
-  if (!currentData) {
-    log('📊 No hay datos en cache, intentando actualizar...');
-    try {
-      const freshData = await updateData();
-      if (freshData) {
-        return {
-          ...freshData,
-          marketHealth: calculateMarketHealth(freshData.optimizedRoutes),
-          arbitrages: freshData.optimizedRoutes || []
-        };
-      }
-    } catch (error) {
-      log('❌ Error al actualizar datos:', error);
+  const now = Date.now();
+  
+  // Si tenemos datos cacheados y son recientes, usarlos
+  if (currentData && lastUpdate) {
+    const cacheAge = (now - lastUpdate) / (1000 * 60); // en minutos
+    const isCacheValid = cacheAge < CACHE_CONFIG.maxCacheAge;
+    
+    if (isCacheValid && !CACHE_CONFIG.forceRefreshOnPopupOpen) {
+      log(`📊 Usando datos cacheados (${cacheAge.toFixed(1)} min antiguos)`);
+      
+      // Calcular salud del mercado
+      const marketHealth = calculateMarketHealth(currentData.optimizedRoutes);
+      
+      return {
+        ...currentData,
+        marketHealth,
+        arbitrages: currentData.optimizedRoutes || [],
+        usingCache: true
+      };
     }
-
-    // Si aún no hay datos, devolver mensaje de espera
-    return {
-      error: 'Inicializando datos... Espera unos segundos e intenta de nuevo.',
-      usingCache: false,
-      optimizedRoutes: [],
-      arbitrages: []
-    };
+  }
+  
+  // Si no hay cache válido, intentar actualizar
+  log('📊 No hay cache válido, intentando actualizar...');
+  try {
+    const freshData = await updateData();
+    if (freshData) {
+      return {
+        ...freshData,
+        marketHealth: calculateMarketHealth(freshData.optimizedRoutes),
+        arbitrages: freshData.optimizedRoutes || []
+      };
+    }
+  } catch (error) {
+    log('❌ Error al actualizar datos:', error);
+    
+    // Si hay cache antiguo disponible, devolverlo con una advertencia
+    if (currentData && CACHE_CONFIG.showCacheWhileUpdating) {
+      const cacheAge = lastUpdate ? (now - lastUpdate) / (1000 * 60) : 0;
+      log(`⚠️ Usando cache antiguo (${cacheAge.toFixed(1)} min) por error en actualización`);
+      
+      const marketHealth = calculateMarketHealth(currentData.optimizedRoutes);
+      
+      return {
+        ...currentData,
+        marketHealth,
+        arbitrages: currentData.optimizedRoutes || [],
+        usingCache: true,
+        error: `Datos antiguos (${cacheAge.toFixed(1)} min). Error al actualizar.`
+      };
+    }
   }
 
-  // Calcular salud del mercado
-  const marketHealth = calculateMarketHealth(currentData.optimizedRoutes);
-
+  // Si no hay nada, devolver mensaje de espera
   return {
-    ...currentData,
-    marketHealth,
-    arbitrages: currentData.optimizedRoutes || [] // Para compatibilidad
+    error: 'Inicializando datos... Espera unos segundos e intenta de nuevo.',
+    usingCache: false,
+    optimizedRoutes: [],
+    arbitrages: []
   };
 }
 
@@ -191,14 +218,14 @@ async function initialize() {
     console.error('❌ [BACKGROUND] Stack trace:', error.stack);
   }
 
-  // Configurar actualización periódica cada 2 minutos
+  // Configurar actualización periódica cada X minutos
   setInterval(async () => {
     try {
       await updateData();
     } catch (error) {
       console.error('❌ [BACKGROUND] Error en actualización periódica:', error);
     }
-  }, 2 * 60 * 1000);
+  }, CACHE_CONFIG.autoUpdateInterval * 60 * 1000);
 
   log('✅ [BACKGROUND] Background script inicializado completamente');
 }

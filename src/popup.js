@@ -220,7 +220,30 @@ async function fetchAndDisplay() {
     // Mostrar indicador de salud del mercado
     displayMarketHealth(data.marketHealth);
     
-    if (data.error) {
+    // NUEVO: Mostrar indicador si son datos cacheados
+    if (data.usingCache) {
+      const cacheIndicator = document.getElementById('cache-indicator');
+      if (cacheIndicator) {
+        cacheIndicator.style.display = 'block';
+        cacheIndicator.textContent = data.error ? `⚠️ ${data.error}` : '📱 Datos cacheados';
+        
+        // Si hay error en cache, intentar actualizar automáticamente
+        if (data.error) {
+          setTimeout(() => {
+            console.log('🔄 Intentando actualizar datos automáticamente...');
+            fetchAndDisplay();
+          }, 2000); // Esperar 2 segundos antes de intentar actualizar
+        }
+      }
+    } else {
+      // Ocultar indicador si no son datos cacheados
+      const cacheIndicator = document.getElementById('cache-indicator');
+      if (cacheIndicator) {
+        cacheIndicator.style.display = 'none';
+      }
+    }
+    
+    if (data.error && !data.usingCache) {
       const errorClass = data.usingCache ? 'warning' : 'error';
       setSafeHTML(container, `<p class="${errorClass}">❌ ${sanitizeHTML(data.error)}</p>`);
       if (data.usingCache) {

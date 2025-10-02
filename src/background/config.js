@@ -15,6 +15,21 @@ function log(...args) {
 const REQUEST_INTERVAL = 600; // ms (110 req/min max)
 let lastRequestTime = 0;
 
+// Configuración de cache y actualización automática
+const CACHE_CONFIG = {
+  // Tiempo máximo que los datos cacheados se consideran válidos (en minutos)
+  maxCacheAge: 5, // 5 minutos
+  
+  // Mostrar datos cacheados inmediatamente mientras se actualiza
+  showCacheWhileUpdating: true,
+  
+  // Forzar actualización al abrir popup (false = usar cache si está disponible)
+  forceRefreshOnPopupOpen: false,
+  
+  // Intervalo de actualización automática en background (en minutos)
+  autoUpdateInterval: 2
+};
+
 // Comisiones típicas por exchange (en porcentaje)
 // IMPORTANTE: Los fees de trading (compra/venta) generalmente YA ESTÁN INCLUIDOS en el spread (bid/ask)
 // Solo se agregan fees explícitos si el exchange los cobra ADEMÁS del spread
@@ -69,6 +84,7 @@ export {
   DEBUG_MODE,
   REQUEST_INTERVAL,
   lastRequestTime,
+  CACHE_CONFIG,
   EXCHANGE_FEES,
   log,
   getExchangeFees
