@@ -117,7 +117,54 @@
         </div>
       </section>
 
-      <!-- SECCIÓN 4: Exchanges Favoritos -->
+      <!-- SECCIÓN 4: Preferencias de Rutas (NUEVO v5.0) -->
+      <section class="settings-section">
+        <h2>🎯 Preferencias de Rutas</h2>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="show-negative-routes" class="setting-label">Mostrar rutas negativas</label>
+            <p class="setting-description">Ver rutas con pérdida para análisis de mercado</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="show-negative-routes" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="prefer-single-exchange" class="setting-label">Priorizar rutas en mismo broker</label>
+            <p class="setting-description">Mostrar primero las rutas sin transferencia blockchain</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="prefer-single-exchange">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="default-sim-amount" class="setting-label">Monto por defecto simulador (ARS)</label>
+            <p class="setting-description">Monto inicial al abrir el simulador</p>
+          </div>
+          <div class="input-group">
+            <input type="number" id="default-sim-amount" min="1000" max="10000000" step="1000" value="100000">
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="max-routes-display" class="setting-label">Máximo de rutas a mostrar</label>
+            <p class="setting-description">Cantidad de rutas visibles en el popup (1-50)</p>
+          </div>
+          <div class="input-group">
+            <input type="number" id="max-routes-display" min="1" max="50" value="20">
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 5: Exchanges Favoritos -->
       <section class="settings-section">
         <h2>🏦 Exchanges Preferidos</h2>
         <div class="setting-info">
@@ -134,12 +181,20 @@
             <span>Ripio</span>
           </label>
           <label class="exchange-checkbox">
+            <input type="checkbox" name="exchange" value="binance">
+            <span>Binance</span>
+          </label>
+          <label class="exchange-checkbox">
             <input type="checkbox" name="exchange" value="satoshitango">
             <span>SatoshiTango</span>
           </label>
           <label class="exchange-checkbox">
             <input type="checkbox" name="exchange" value="letsbit">
             <span>Letsbit</span>
+          </label>
+          <label class="exchange-checkbox">
+            <input type="checkbox" name="exchange" value="lemoncash">
+            <span>Lemon</span>
           </label>
           <label class="exchange-checkbox">
             <input type="checkbox" name="exchange" value="decrypto">
@@ -156,6 +211,14 @@
           <label class="exchange-checkbox">
             <input type="checkbox" name="exchange" value="tiendacrypto">
             <span>TiendaCrypto</span>
+          </label>
+          <label class="exchange-checkbox">
+            <input type="checkbox" name="exchange" value="bitso">
+            <span>Bitso</span>
+          </label>
+          <label class="exchange-checkbox">
+            <input type="checkbox" name="exchange" value="cryptomkt">
+            <span>CryptoMKT</span>
           </label>
         </div>
       </section>

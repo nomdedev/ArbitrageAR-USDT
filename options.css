@@ -438,3 +438,39 @@ input[type="time"]:focus {
     width: 100%;
   }
 }
+
+/* ============================================
+   NUEVO v5.0: Estilos para campos numéricos
+   ============================================ */
+
+.input-group {
+  margin-top: 8px;
+}
+
+.input-group input[type="number"] {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid #e0e7ff;
+  border-radius: 8px;
+  font-size: 1em;
+  font-family: 'Segoe UI', sans-serif;
+  transition: all 0.3s ease;
+  background: #f8fafc;
+}
+
+.input-group input[type="number"]:focus {
+  outline: none;
+  border-color: #667eea;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.input-group input[type="number"]:hover {
+  border-color: #a5b4fc;
+}
+
+/* Ocultar spinners en número */
+.input-group input[type="number"]::-webkit-inner-spin-button,
+.input-group input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+}

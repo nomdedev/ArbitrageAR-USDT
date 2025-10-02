@@ -12,7 +12,12 @@ const DEFAULT_SETTINGS = {
   preferredExchanges: [],
   quietHoursEnabled: false,
   quietStart: '22:00',
-  quietEnd: '08:00'
+  quietEnd: '08:00',
+  // NUEVO v5.0: Preferencias de rutas
+  showNegativeRoutes: true,
+  preferSingleExchange: false,
+  defaultSimAmount: 100000,
+  maxRoutesDisplay: 20
 };
 
 // Cargar configuración al iniciar
@@ -60,6 +65,12 @@ async function loadSettings() {
     document.getElementById('quiet-hours-enabled').checked = settings.quietHoursEnabled;
     document.getElementById('quiet-start').value = settings.quietStart;
     document.getElementById('quiet-end').value = settings.quietEnd;
+    
+    // NUEVO v5.0: Preferencias de rutas
+    document.getElementById('show-negative-routes').checked = settings.showNegativeRoutes ?? true;
+    document.getElementById('prefer-single-exchange').checked = settings.preferSingleExchange ?? false;
+    document.getElementById('default-sim-amount').value = settings.defaultSimAmount ?? 100000;
+    document.getElementById('max-routes-display').value = settings.maxRoutesDisplay ?? 20;
     
     // Actualizar UI según estado de notificaciones
     updateUIState();
@@ -150,7 +161,12 @@ async function saveSettings() {
         .map(cb => cb.value),
       quietHoursEnabled: document.getElementById('quiet-hours-enabled').checked,
       quietStart: document.getElementById('quiet-start').value,
-      quietEnd: document.getElementById('quiet-end').value
+      quietEnd: document.getElementById('quiet-end').value,
+      // NUEVO v5.0: Preferencias de rutas
+      showNegativeRoutes: document.getElementById('show-negative-routes').checked,
+      preferSingleExchange: document.getElementById('prefer-single-exchange').checked,
+      defaultSimAmount: parseInt(document.getElementById('default-sim-amount').value),
+      maxRoutesDisplay: parseInt(document.getElementById('max-routes-display').value)
     };
     
     // Guardar en storage
