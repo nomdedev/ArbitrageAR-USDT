@@ -681,57 +681,86 @@ async function fetchBanksData() {
 async function fetchBanksDataFromDolarito() {
   try {
     const response = await fetchWithRateLimit('https://www.dolarito.ar/cotizacion/bancos');
-    
+
     if (!response) {
       console.warn('No se pudo obtener respuesta de Dolarito');
       return [];
     }
-    
+
     const html = await response.text();
     const banks = [];
-    
-    // Usar expresiones regulares para extraer datos de bancos
-    // Patrón para encontrar bloques de bancos con su información
-    const bankPattern = /!\[([^\]]+)\]\(([^)]+)\)[^]*?Spread:\s*\$(\d+)[^]*?VENDÉ A:\s*\$([\d.]+)[^]*?COMPRÁ A:\s*\$([\d.]+)/g;
-    
-    let match;
-    while ((match = bankPattern.exec(html)) !== null) {
-      const [, bankName, logoUrl, spread, sellPrice, buyPrice] = match;
-      
-      // Limpiar y validar datos
-      const cleanBankName = bankName.trim();
-      const cleanLogoUrl = logoUrl.trim();
-      const cleanSpread = parseInt(spread);
-      const cleanSellPrice = parseFloat(sellPrice);
-      const cleanBuyPrice = parseFloat(buyPrice);
-      
-      // Validar que los precios sean razonables
-      if (cleanSellPrice > 0 && cleanBuyPrice > 0 && cleanSellPrice < cleanBuyPrice) {
-        banks.push({
-          name: cleanBankName,
-          logo: cleanLogoUrl,
-          compra: cleanSellPrice, // Precio al que el banco compra (venta para el cliente)
-          venta: cleanBuyPrice,   // Precio al que el banco vende (compra para el cliente)
-          spread: cleanSpread,
-          timestamp: new Date().toISOString(),
-          source: 'dolarito'
-        });
-      }
+
+    // Buscar el JSON embebido con los datos de bancos
+    const jsonMatch = html.match(/"bankQuotations":\s*({[^}]*"quotations":\s*\[[^\]]*\][^}]*})/);
+    if (!jsonMatch) {
+      console.warn('No se encontró el JSON de bancos en la página');
+      return [];
     }
-    
+
+    try {
+      const bankData = JSON.parse(`{${jsonMatch[1]}}`);
+      const quotations = bankData.quotations || [];
+
+      for (const quote of quotations) {
+        const bankName = quote.name?.trim();
+        const buyPrice = parseFloat(quote.buy);
+        const sellPrice = parseFloat(quote.sell);
+
+        if (bankName && !isNaN(buyPrice) && !isNaN(sellPrice) && buyPrice > 0 && sellPrice > 0) {
+          // Generar URL del logo basado en el nombre del banco
+          const logoUrl = generateBankLogoUrl(bankName);
+
+          banks.push({
+            name: bankName,
+            logo: logoUrl,
+            compra: buyPrice, // Precio al que el banco compra (venta para el cliente)
+            venta: sellPrice, // Precio al que el banco vende (compra para el cliente)
+            spread: sellPrice - buyPrice,
+            timestamp: new Date().toISOString(),
+            source: 'dolarito'
+          });
+        }
+      }
+    } catch (parseError) {
+      console.error('Error parseando JSON de bancos:', parseError);
+      return [];
+    }
+
     if (DEBUG_MODE) {
       console.log(`📊 Dolarito scraping: ${banks.length} bancos encontrados`);
       if (banks.length > 0) {
         console.log('   Ejemplo:', banks[0]);
       }
     }
-    
+
     return banks;
-    
+
   } catch (error) {
     console.error('Error scraping Dolarito:', error);
     return [];
   }
+}
+
+// Función auxiliar para generar URLs de logos de bancos
+function generateBankLogoUrl(bankName) {
+  const logoMap = {
+    'Banco Nación': 'https://www.bna.com.ar/Imagenes/logo-banco-nacion.png',
+    'Banco Provincia': 'https://www.bancoprovincia.com.ar/logo.png',
+    'BBVA Banco Francés': 'https://www.bbva.com.ar/content/dam/public-web/global/images/logos/bbva-logo.svg',
+    'Banco Galicia': 'https://www.bancogalicia.com/logo.svg',
+    'Banco Santander Río': 'https://www.santander.com.ar/logo.png',
+    'Banco Macro': 'https://www.macro.com.ar/logo.png',
+    'ICBC': 'https://www.icbc.com.ar/logo.svg',
+    'Banco Ciudad': 'https://www.bancociudad.com.ar/logo.png',
+    'Banco Patagonia': 'https://www.bancopatagonia.com.ar/logo.svg',
+    'Banco Supervielle': 'https://www.supervielle.com.ar/logo.png',
+    'Banco Columbia': 'https://www.bancocolumbia.com.ar/logo.png',
+    'Banco Piano': 'https://www.piano.com.ar/logo.png',
+    'Banco Provincia del Neuquén': 'https://www.bpn.com.ar/logo.png',
+    'Plus Cambio': 'https://www.plus.com.ar/logo.png'
+  };
+
+  return logoMap[bankName] || null;
 }
 
 // Actualizar datos de bancos periódicamente (combina DolarAPI + Dolarito scraping)
