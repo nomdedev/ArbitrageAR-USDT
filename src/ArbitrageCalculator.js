@@ -61,7 +61,7 @@ class ArbitrageCalculator {
     // Cargar fees personalizados
     const userFees = await this._loadUserFees();
     const officialSellPrice = parseFloat(official.venta) || 0;
-    const initialAmount = 100000;
+    const initialAmount = 1000000; // 1 millón ARS por defecto
     const excludedKeys = ['time', 'timestamp', 'fecha', 'date', 'p2p', 'total'];
 
     if (!officialSellPrice || officialSellPrice <= 0) {

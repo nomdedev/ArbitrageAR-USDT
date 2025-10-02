@@ -16,7 +16,7 @@ const DEFAULT_SETTINGS = {
   // NUEVO v5.0: Preferencias de rutas
   showNegativeRoutes: true,
   preferSingleExchange: false,
-  defaultSimAmount: 100000,
+  defaultSimAmount: 1000000,
   maxRoutesDisplay: 20,
   // NUEVO v5.0.4: Fees personalizados
   extraTradingFee: 0,
@@ -74,7 +74,7 @@ async function loadSettings() {
     // NUEVO v5.0: Preferencias de rutas
     document.getElementById('show-negative-routes').checked = settings.showNegativeRoutes ?? true;
     document.getElementById('prefer-single-exchange').checked = settings.preferSingleExchange ?? false;
-    document.getElementById('default-sim-amount').value = settings.defaultSimAmount ?? 100000;
+    document.getElementById('default-sim-amount').value = settings.defaultSimAmount ?? 1000000;
     document.getElementById('max-routes-display').value = settings.maxRoutesDisplay ?? 20;
     
     // NUEVO v5.0.4: Fees personalizados
