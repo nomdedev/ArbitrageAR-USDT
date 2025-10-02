@@ -1,5 +1,5 @@
 // Modo debug: cambiar a true para ver logs detallados en desarrollo
-const DEBUG_MODE = false;
+const DEBUG_MODE = true; // ⚠️ Temporalmente activado para diagnosticar
 
 const REQUEST_INTERVAL = 600; // ms (110 req/min max)
 let lastRequestTime = 0;
@@ -9,13 +9,41 @@ const EXCHANGE_FEES = {
   'binance': { trading: 0.1, withdrawal: 0.5 },
   'buenbit': { trading: 0.5, withdrawal: 0 },
   'ripio': { trading: 1.0, withdrawal: 0 },
+  'ripioexchange': { trading: 1.0, withdrawal: 0 },
   'letsbit': { trading: 0.9, withdrawal: 0 },
   'satoshitango': { trading: 1.5, withdrawal: 0 },
   'belo': { trading: 1.0, withdrawal: 0 },
   'tiendacrypto': { trading: 0.8, withdrawal: 0 },
   'cryptomkt': { trading: 0.8, withdrawal: 0 },
+  'cryptomktpro': { trading: 0.8, withdrawal: 0 },
   'bitso': { trading: 0.5, withdrawal: 0 },
+  'bitsoalpha': { trading: 0.5, withdrawal: 0 },
   'lemoncash': { trading: 1.0, withdrawal: 0 },
+  'universalcoins': { trading: 1.2, withdrawal: 0 },
+  'decrypto': { trading: 1.0, withdrawal: 0 },
+  'fiwind': { trading: 1.0, withdrawal: 0 },
+  'vitawallet': { trading: 1.0, withdrawal: 0 },
+  'saldo': { trading: 0.8, withdrawal: 0 },
+  'pluscrypto': { trading: 1.0, withdrawal: 0 },
+  'bybit': { trading: 0.1, withdrawal: 0.5 },
+  'eluter': { trading: 1.0, withdrawal: 0 },
+  'trubit': { trading: 1.0, withdrawal: 0 },
+  'cocoscrypto': { trading: 1.0, withdrawal: 0 },
+  'wallbit': { trading: 1.0, withdrawal: 0 },
+  // P2P exchanges (fees más altos por spread)
+  'binancep2p': { trading: 2.0, withdrawal: 0 },
+  'okexp2p': { trading: 2.0, withdrawal: 0 },
+  'paxfulp2p': { trading: 2.5, withdrawal: 0 },
+  'huobip2p': { trading: 2.0, withdrawal: 0 },
+  'bybitp2p': { trading: 2.0, withdrawal: 0 },
+  'kucoinp2p': { trading: 2.0, withdrawal: 0 },
+  'bitgetp2p': { trading: 2.0, withdrawal: 0 },
+  'paydecep2p': { trading: 2.0, withdrawal: 0 },
+  'eldoradop2p': { trading: 2.5, withdrawal: 0 },
+  'bingxp2p': { trading: 2.0, withdrawal: 0 },
+  'lemoncashp2p': { trading: 2.0, withdrawal: 0 },
+  'coinexp2p': { trading: 2.0, withdrawal: 0 },
+  'mexcp2p': { trading: 2.0, withdrawal: 0 },
   'default': { trading: 1.0, withdrawal: 0.5 } // Valores por defecto
 };
 
@@ -168,8 +196,9 @@ async function updateData() {
     
     // Filtrar spreads muy altos en ARS (posible P2P)
     const spreadArs = ((usdtArsAsk - usdtArsBid) / usdtArsBid) * 100;
-    if (Math.abs(spreadArs) > 10) {
-      console.warn(`${exchangeName} tiene spread ARS muy alto (${spreadArs.toFixed(2)}%), posible P2P`);
+    // 🔧 Relajado de 10% a 50% para incluir P2P
+    if (Math.abs(spreadArs) > 50) {
+      if (DEBUG_MODE) console.warn(`${exchangeName} spread ARS extremo (${spreadArs.toFixed(2)}%), omitiendo`);
       return;
     }
     
@@ -358,7 +387,12 @@ function calculateMarketHealth(arbitrages) {
 
 // NUEVO v5.0.0: Calcular TODAS las rutas (single + multi-exchange)
 function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
-  if (!oficial || !usdt || !usdtUsd) return [];
+  if (DEBUG_MODE) console.log('🔀 Iniciando calculateOptimizedRoutes...');
+  
+  if (!oficial || !usdt || !usdtUsd) {
+    if (DEBUG_MODE) console.warn('⚠️ Datos faltantes en calculateOptimizedRoutes');
+    return [];
+  }
 
   const officialSellPrice = parseFloat(oficial.venta) || 0;
   const initialAmount = 100000; // $100,000 ARS base
@@ -369,6 +403,8 @@ function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
     if (DEBUG_MODE) console.warn('⚠️ Precio oficial inválido');
     return [];
   }
+  
+  if (DEBUG_MODE) console.log(`   Precio oficial: $${officialSellPrice} ARS`);
   
   // Fees de transferencia entre exchanges (en USD)
   const TRANSFER_FEES = {
@@ -394,6 +430,8 @@ function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
     if (DEBUG_MODE) console.warn('⚠️ No hay exchanges disponibles');
     return [];
   }
+  
+  if (DEBUG_MODE) console.log(`   Exchanges disponibles: ${buyExchanges.length}`);
 
   // Para cada combinación de exchange de compra y venta
   buyExchanges.forEach(buyExchange => {
@@ -428,7 +466,7 @@ function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
         return;
       }
       
-      const buyFees = EXCHANGE_FEES[buyExchange] || EXCHANGE_FEES['default'];
+      const buyFees = EXCHANGE_FEES[buyExchange.toLowerCase()] || EXCHANGE_FEES['default'];
       
       const usdtPurchased = usdPurchased / usdToUsdtRate;
       const usdtAfterBuyFee = usdtPurchased * (1 - buyFees.trading / 100);
@@ -441,7 +479,7 @@ function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
       if (usdtAfterTransfer <= 0) return; // No vale la pena
 
       // PASO 4: Vender USDT en sellExchange
-      const sellFees = EXCHANGE_FEES[sellExchange] || EXCHANGE_FEES['default'];
+      const sellFees = EXCHANGE_FEES[sellExchange.toLowerCase()] || EXCHANGE_FEES['default'];
       const usdtArsBid = parseFloat(sellData.totalBid) || parseFloat(sellData.bid) || 0;
       
       if (usdtArsBid <= 0) return;
@@ -491,6 +529,14 @@ function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
 
   // Ordenar por ganancia y devolver top 20 (incluye single + multi-exchange)
   routes.sort((a, b) => b.profitPercent - a.profitPercent);
+  
+  if (DEBUG_MODE) {
+    console.log(`🔀 calculateOptimizedRoutes: ${routes.length} rutas calculadas`);
+    if (routes.length > 0) {
+      console.log(`   Mejor ruta: ${routes[0].buyExchange} → ${routes[0].sellExchange} (${routes[0].profitPercent.toFixed(2)}%)`);
+    }
+  }
+  
   return routes.slice(0, 20);
 }
 
