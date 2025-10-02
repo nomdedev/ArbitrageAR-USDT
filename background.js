@@ -262,7 +262,7 @@ async function updateData() {
   });
   
   // Verificar si debe enviar notificaciones
-  await checkAndNotify(top5);
+  await checkAndNotify(top20);
 }
 
 // Actualización periódica
