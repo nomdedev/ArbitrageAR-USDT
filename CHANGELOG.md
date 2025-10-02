@@ -2,6 +2,26 @@
 
 Todos los cambios notables de este proyecto serán documentados en este archivo.
 
+## [3.2.1] - 2025-10-02 - HOTFIX CRÍTICO
+
+### 🐛 BUG FIX CRÍTICO
+- **SOLUCIONADO:** ReferenceError: usdtUsd is not defined
+- **Agregada función faltante:** `fetchCriptoyaUSDTtoUSD()` en background.js
+- **Impacto:** Sin este fix, v3.0-v3.2.0 NO FUNCIONABAN
+- **Estado:** ✅ Extensión ahora carga correctamente
+
+### 📝 Detalles Técnicos
+- La función `updateData()` usaba `usdtUsd` pero nunca la obtenía de la API
+- Agregado endpoint: `https://criptoya.com/api/usdt/usd/1`
+- Validación añadida en updateData() para verificar que usdtUsd existe
+- Este dato es CRÍTICO desde v3.0 para calcular el ratio USD/USDT (~1.049)
+
+### 📚 Documentación
+- Agregado `FIX_V3.2.1_CRITICAL.md` con análisis completo del problema
+- Agregado `INSTRUCCIONES_RECARGA.md` para debugging
+
+---
+
 ## [3.2.0] - 2025-10-02
 
 ### 🎨 REDISEÑO COMPLETO - Dark Mode Premium UI
