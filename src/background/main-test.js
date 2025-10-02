@@ -30,7 +30,18 @@ console.log('🎯 [BACKGROUND-TEST] Imports completados - inicializando...');
 function getCurrentData() {
   return {
     optimizedRoutes: [
-      { broker: 'Test Broker', profitPercent: 5.0, steps: [] }
+      {
+        broker: 'Test Broker',
+        profitPercent: 5.0,
+        steps: [],
+        calculation: {
+          netProfit: 5000,
+          initial: 100000
+        },
+        buyExchange: 'Test Exchange',
+        sellExchange: 'Test Exchange',
+        isSingleExchange: true
+      }
     ],
     lastUpdate: Date.now(),
     error: null,
