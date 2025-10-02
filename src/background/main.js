@@ -21,11 +21,14 @@ async function updateData() {
 
   try {
     // Fetch de datos en paralelo
+    log('📡 Consultando APIs...');
     const [oficial, usdt, usdtUsd] = await Promise.all([
       fetchDolaritoOficial(),
       fetchCriptoyaUSDT(),
       fetchCriptoyaUSDTtoUSD()
     ]);
+
+    log(`📊 Datos obtenidos - Oficial: ${!!oficial}, USDT: ${!!usdt}, USDT/USD: ${!!usdtUsd}`);
 
     if (!oficial || !usdt) {
       log('❌ Error obteniendo datos básicos');
@@ -33,6 +36,7 @@ async function updateData() {
     }
 
     // Calcular rutas optimizadas
+    log('🧮 Calculando rutas optimizadas...');
     const optimizedRoutes = await calculateOptimizedRoutes(oficial, usdt, usdtUsd);
 
     // Crear objeto de respuesta
@@ -120,11 +124,29 @@ function calculateMarketHealth(arbitrages) {
 }
 
 // Función para obtener datos actuales
-function getCurrentData() {
+async function getCurrentData() {
+  // Si no hay datos, intentar actualizar
   if (!currentData) {
+    log('📊 No hay datos en cache, intentando actualizar...');
+    try {
+      const freshData = await updateData();
+      if (freshData) {
+        return {
+          ...freshData,
+          marketHealth: calculateMarketHealth(freshData.optimizedRoutes),
+          arbitrages: freshData.optimizedRoutes || []
+        };
+      }
+    } catch (error) {
+      log('❌ Error al actualizar datos:', error);
+    }
+
+    // Si aún no hay datos, devolver mensaje de espera
     return {
-      error: 'No hay datos disponibles. Espera a la próxima actualización.',
-      usingCache: false
+      error: 'Inicializando datos... Espera unos segundos e intenta de nuevo.',
+      usingCache: false,
+      optimizedRoutes: [],
+      arbitrages: []
     };
   }
 
@@ -158,13 +180,16 @@ async function initialize() {
 }
 
 // Event listeners para mensajes del popup/options
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   if (request.action === 'getArbitrages') {
-    sendResponse(getCurrentData());
+    const data = await getCurrentData();
+    sendResponse(data);
   } else if (request.action === 'getBanks') {
-    getBanksData().then(data => sendResponse(data));
+    const data = await getBanksData();
+    sendResponse(data);
   } else if (request.action === 'refresh') {
-    updateData().then(data => sendResponse(data));
+    const data = await updateData();
+    sendResponse(data);
   }
 
   // Mantener el canal abierto para respuestas asíncronas
