@@ -2,6 +2,8 @@
 // MAIN BACKGROUND MODULE - ArbitrageAR
 // ============================================
 
+console.log('🔧 [BACKGROUND] main.js se está cargando...');
+
 import { log } from './config.js';
 import {
   fetchDolaritoOficial,
@@ -171,12 +173,19 @@ async function initialize() {
   console.log('🚀 [BACKGROUND] Inicializando background script...');
 
   try {
+    console.log('📦 [BACKGROUND] Verificando imports...');
+    // Verificar que las funciones importadas existen
+    console.log('✅ [BACKGROUND] log function:', typeof log);
+    console.log('✅ [BACKGROUND] fetchDolaritoOficial function:', typeof fetchDolaritoOficial);
+    console.log('✅ [BACKGROUND] calculateOptimizedRoutes function:', typeof calculateOptimizedRoutes);
+
     // Primera actualización de datos
     console.log('📡 [BACKGROUND] Intentando primera actualización de datos...');
     await updateData();
     console.log('✅ [BACKGROUND] Primera actualización completada');
   } catch (error) {
     console.error('❌ [BACKGROUND] Error en inicialización:', error);
+    console.error('❌ [BACKGROUND] Stack trace:', error.stack);
   }
 
   // Configurar actualización periódica cada 2 minutos
