@@ -94,24 +94,33 @@ Extensión moderna para navegadores Chromium (Chrome, Brave, Edge) que monitorea
 
 ## 📊 Cómo Funciona el Arbitraje
 
-### Flujo Completo:
+### Flujo Completo (CON COMISIONES REALES):
 ```
 1. Compras USD Oficial en banco → $1,050 ARS/USD
 2. Depositas USD en exchange (Ej: Binance)
-3. Compras USDT con esos USD (relación 1:1 aprox)
-4. Vendes USDT por ARS → $1,150 ARS/USDT
-5. ✅ Ganancia: $100 por cada USD = 9.52%
+3. Compras USDT con esos USD → Fee: 0.1-1%
+4. Vendes USDT por ARS → $1,150 ARS/USDT → Fee: 0.1-1%
+5. Retiras a tu cuenta → Fee: 0-0.5%
+6. ✅ Ganancia NETA (ya descontadas comisiones)
 ```
 
-### Ejemplo Real con $100,000 ARS:
+### Ejemplo Real con $100,000 ARS (Binance - Comisiones incluidas):
 ```
-Inversión inicial:    $100,000 ARS
-Compras USD:          95.24 USD (a $1,050)
-Conviertes a USDT:    95.24 USDT
-Vendes por ARS:       $109,526 ARS (a $1,150)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Ganancia neta:        $9,526 ARS (9.52%)
+Inversión inicial:      $100,000 ARS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1️⃣ Compras USD oficial:   95.24 USD (a $1,050)
+2️⃣ Fee trading (0.1%):    -0.10 USDT
+3️⃣ USDT después de fee:   95.14 USDT
+4️⃣ Vendes por ARS:        $109,411 ARS (a $1,150)
+5️⃣ Fee venta (0.1%):      -$109 ARS
+6️⃣ Fee retiro (0.5%):     -$547 ARS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Ganancia NETA:         $8,755 ARS (8.76%)
+📊 Comisiones totales:    $2,771 ARS (2.77%)
+💡 Ganancia BRUTA:        $11,526 ARS (11.53%)
 ```
+
+**✨ La extensión calcula automáticamente las comisiones reales de cada exchange**
 
 ## 🔌 APIs Utilizadas
 

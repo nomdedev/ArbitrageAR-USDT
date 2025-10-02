@@ -2,6 +2,37 @@
 
 Todos los cambios notables de este proyecto serán documentados en este archivo.
 
+## [2.1.0] - 2025-10-02
+
+### 💰 Actualización Mayor - Cálculo con Comisiones Reales
+
+#### ✨ Agregado
+- **Cálculo de comisiones por exchange:**
+  - Trading fees al comprar USDT (0.1% - 1.5%)
+  - Trading fees al vender USDT (0.1% - 1.5%)
+  - Withdrawal fees al retirar ARS (0% - 0.5%)
+  - Base de datos con fees reales de 10+ exchanges
+
+- **Visualización mejorada de comisiones:**
+  - Muestra total de comisiones en cada tarjeta
+  - Diferencia entre ganancia bruta y neta
+  - Desglose detallado en la guía paso a paso
+  - Cálculo real con $100,000 ARS de ejemplo
+
+- **Cálculos más precisos:**
+  - Considera fees de trading en ambas operaciones
+  - Incluye costs de retiro bancario
+  - Muestra ganancia neta real (post-fees)
+  - Umbral mínimo ajustado a 1.5% neto
+
+#### 🔧 Mejorado
+- Algoritmo de cálculo de arbitraje más realista
+- Mejor transparencia en costos ocultos
+- Ejemplos actualizados con comisiones incluidas
+- Advertencias más claras sobre fees variables
+
+---
+
 ## [2.0.0] - 2025-10-02
 
 ### 🎉 Nueva Versión Mayor - UI/UX Completamente Renovada

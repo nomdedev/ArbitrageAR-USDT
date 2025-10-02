@@ -2,6 +2,21 @@
 const REQUEST_INTERVAL = 600; // ms (110 req/min max)
 let lastRequestTime = 0;
 
+// Comisiones típicas por exchange (en porcentaje)
+const EXCHANGE_FEES = {
+  'binance': { trading: 0.1, withdrawal: 0.5 },
+  'buenbit': { trading: 0.5, withdrawal: 0 },
+  'ripio': { trading: 1.0, withdrawal: 0 },
+  'letsbit': { trading: 0.9, withdrawal: 0 },
+  'satoshitango': { trading: 1.5, withdrawal: 0 },
+  'belo': { trading: 1.0, withdrawal: 0 },
+  'tiendacrypto': { trading: 0.8, withdrawal: 0 },
+  'cryptomkt': { trading: 0.8, withdrawal: 0 },
+  'bitso': { trading: 0.5, withdrawal: 0 },
+  'lemoncash': { trading: 1.0, withdrawal: 0 },
+  'default': { trading: 1.0, withdrawal: 0.5 } // Valores por defecto
+};
+
 async function fetchWithRateLimit(url) {
   const now = Date.now();
   const delay = REQUEST_INTERVAL - (now - lastRequestTime);
@@ -87,22 +102,58 @@ async function updateData() {
     
     if (usdtBuyPrice === 0 || usdtSellPrice === 0 || officialBuyPrice === 0) return;
 
-    // Lógica de arbitraje: 
-    // 1. Comprar USD oficial a officialSellPrice pesos
-    // 2. Usar esos USD para comprar USDT
-    // 3. Vender USDT por pesos a usdtSellPrice
-    // Ganancia = (usdtSellPrice - officialSellPrice) / officialSellPrice * 100
+    // Obtener comisiones del exchange
+    const exchangeNameLower = exchangeName.toLowerCase();
+    const fees = EXCHANGE_FEES[exchangeNameLower] || EXCHANGE_FEES['default'];
     
-    const profitPercent = ((usdtSellPrice - officialSellPrice) / officialSellPrice) * 100;
+    // Cálculo real de arbitraje con comisiones:
+    // Ejemplo con $100,000 ARS:
+    const initialAmount = 100000; // ARS
     
-    // Umbral mínimo de rentabilidad del 2%
-    if (profitPercent > 2) {
+    // Paso 1: Comprar USD oficial
+    const usdAmount = initialAmount / officialSellPrice;
+    
+    // Paso 2: Convertir USD a USDT (considerando que en algunos exchanges hay spread USD/USDT)
+    // En la mayoría de exchanges argentinos: depósito USD → compra directa USDT/ARS
+    // Asumimos conversión 1:1 pero con fee de trading
+    const usdtAfterBuyFee = usdAmount * (1 - fees.trading / 100);
+    
+    // Paso 3: Vender USDT por ARS
+    const arsFromUsdtSale = usdtAfterBuyFee * usdtSellPrice;
+    const arsAfterSellFee = arsFromUsdtSale * (1 - fees.trading / 100);
+    
+    // Paso 4: Considerar fee de retiro (si aplica)
+    const finalAmount = arsAfterSellFee * (1 - fees.withdrawal / 100);
+    
+    // Ganancia neta
+    const netProfit = finalAmount - initialAmount;
+    const netProfitPercent = (netProfit / initialAmount) * 100;
+    
+    // Ganancia bruta (sin comisiones, para comparación)
+    const grossProfitPercent = ((usdtSellPrice - officialSellPrice) / officialSellPrice) * 100;
+    
+    // Umbral mínimo de rentabilidad NETA del 1.5%
+    if (netProfitPercent > 1.5) {
       arbitrages.push({
         broker: exchangeName,
         officialPrice: officialSellPrice,
         buyPrice: usdtBuyPrice,
         sellPrice: usdtSellPrice,
-        profitPercent: profitPercent
+        profitPercent: netProfitPercent, // Ganancia NETA
+        grossProfitPercent: grossProfitPercent, // Ganancia bruta
+        fees: {
+          trading: fees.trading,
+          withdrawal: fees.withdrawal,
+          total: fees.trading * 2 + fees.withdrawal // Trading x2 (compra y venta) + retiro
+        },
+        calculation: {
+          initial: initialAmount,
+          usdPurchased: usdAmount,
+          usdtAfterFees: usdtAfterBuyFee,
+          arsFromSale: arsFromUsdtSale,
+          finalAmount: finalAmount,
+          netProfit: netProfit
+        }
       });
     }
   });

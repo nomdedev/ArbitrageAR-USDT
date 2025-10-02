@@ -87,6 +87,9 @@ function displayArbitrages(arbitrages, official) {
     const profitClass = arb.profitPercent > 5 ? 'high-profit' : '';
     const profitBadgeClass = arb.profitPercent > 5 ? 'high' : '';
     
+    // Verificar si hay diferencia entre ganancia bruta y neta
+    const hasFees = arb.fees && arb.fees.total > 0;
+    
     html += `
       <div class="arbitrage-card ${profitClass}" data-index="${index}">
         <div class="card-header">
@@ -106,6 +109,16 @@ function displayArbitrages(arbitrages, official) {
             <span class="price-label">💸 USDT Venta</span>
             <span class="price-value highlight">$${formatNumber(arb.sellPrice)}</span>
           </div>
+          ${hasFees ? `
+          <div class="price-row fees-row">
+            <span class="price-label">📊 Comisiones</span>
+            <span class="price-value fee-value">${formatNumber(arb.fees.total)}%</span>
+          </div>
+          <div class="price-row">
+            <span class="price-label">✅ Ganancia Neta</span>
+            <span class="price-value net-profit">+${formatNumber(arb.profitPercent)}%</span>
+          </div>
+          ` : ''}
         </div>
       </div>
     `;
@@ -143,11 +156,14 @@ function selectArbitrage(index) {
 function displayStepByStepGuide(arb) {
   const container = document.getElementById('selected-arbitrage-guide');
   
-  const estimatedInvestment = 100000; // $100,000 ARS como ejemplo
-  const usdAmount = estimatedInvestment / arb.officialPrice;
-  const usdtAmount = usdAmount; // 1:1 asumiendo conversión directa
-  const finalAmount = usdtAmount * arb.sellPrice;
-  const profit = finalAmount - estimatedInvestment;
+  // Usar cálculos reales del backend si están disponibles
+  const calc = arb.calculation || {};
+  const estimatedInvestment = calc.initial || 100000;
+  const usdAmount = calc.usdPurchased || (estimatedInvestment / arb.officialPrice);
+  const usdtAfterFees = calc.usdtAfterFees || usdAmount;
+  const arsFromSale = calc.arsFromSale || (usdtAfterFees * arb.sellPrice);
+  const finalAmount = calc.finalAmount || arsFromSale;
+  const profit = calc.netProfit || (finalAmount - estimatedInvestment);
   
   const html = `
     <div class="step-container">
@@ -185,8 +201,9 @@ function displayStepByStepGuide(arb) {
           <p>Deposita tus dólares en ${arb.broker} y compra USDT.</p>
           <div class="step-detail">
             <strong>Exchange:</strong> ${arb.broker}<br>
-            <strong>Par:</strong> USD/USDT<br>
+            <strong>Par:</strong> USD/USDT o USDT/ARS<br>
             <strong>Precio referencia:</strong> $${formatNumber(arb.buyPrice)} ARS por USDT<br>
+            ${arb.fees ? `<strong>Comisión trading:</strong> ${formatNumber(arb.fees.trading)}%<br>` : ''}
             <strong>Importante:</strong> ❌ NO usar P2P, usar el exchange oficial
           </div>
         </div>
@@ -201,6 +218,7 @@ function displayStepByStepGuide(arb) {
           <p>Vende tus USDT en ${arb.broker} por pesos argentinos (ARS).</p>
           <div class="step-detail">
             <strong>Precio de venta:</strong> $${formatNumber(arb.sellPrice)} ARS por USDT<br>
+            ${arb.fees ? `<strong>Comisión venta:</strong> ${formatNumber(arb.fees.trading)}%<br>` : ''}
             <strong>Método:</strong> Venta directa en el exchange<br>
             <strong>Retiro:</strong> Transferencia bancaria a tu cuenta
           </div>
@@ -217,7 +235,8 @@ function displayStepByStepGuide(arb) {
           <div class="step-detail">
             <strong>Método:</strong> Transferencia bancaria<br>
             <strong>Tiempo:</strong> 24-48 horas hábiles<br>
-            <strong>Comisiones:</strong> Verificar con ${arb.broker}
+            ${arb.fees && arb.fees.withdrawal > 0 ? `<strong>Comisión retiro:</strong> ${formatNumber(arb.fees.withdrawal)}%<br>` : ''}
+            <strong>Total comisiones:</strong> ${arb.fees ? formatNumber(arb.fees.total) : '~2-3'}%
           </div>
         </div>
       </div>
@@ -225,33 +244,50 @@ function displayStepByStepGuide(arb) {
       <div class="calculation-box">
         <h4>💰 Ejemplo con $${formatNumber(estimatedInvestment)} ARS</h4>
         <div class="calculation-line">
-          <span>Inversión inicial:</span>
+          <span>1️⃣ Inversión inicial:</span>
           <span>$${formatNumber(estimatedInvestment)} ARS</span>
         </div>
         <div class="calculation-line">
-          <span>Compras USD:</span>
+          <span>2️⃣ Compras USD oficial:</span>
           <span>$${formatNumber(usdAmount)} USD</span>
         </div>
         <div class="calculation-line">
-          <span>Conviertes a USDT:</span>
-          <span>${formatNumber(usdtAmount)} USDT</span>
+          <span>3️⃣ Conviertes a USDT ${arb.fees ? `(fee ${arb.fees.trading}%)` : ''}:</span>
+          <span>${formatNumber(usdtAfterFees)} USDT</span>
         </div>
         <div class="calculation-line">
-          <span>Vendes por ARS:</span>
+          <span>4️⃣ Vendes USDT por ARS:</span>
+          <span>$${formatNumber(arsFromSale)} ARS</span>
+        </div>
+        ${arb.fees ? `
+        <div class="calculation-line fees-line">
+          <span>📊 Total comisiones (${formatNumber(arb.fees.total)}%):</span>
+          <span>-$${formatNumber(arsFromSale - finalAmount)} ARS</span>
+        </div>
+        ` : ''}
+        <div class="calculation-line">
+          <span>5️⃣ Retiras a tu cuenta:</span>
           <span>$${formatNumber(finalAmount)} ARS</span>
         </div>
-        <div class="calculation-line">
-          <span>Ganancia neta:</span>
-          <span>$${formatNumber(profit)} ARS (${formatNumber(arb.profitPercent)}%)</span>
+        <div class="calculation-line final-line">
+          <span>✅ Ganancia neta:</span>
+          <span class="profit-highlight">$${formatNumber(profit)} ARS (+${formatNumber(arb.profitPercent)}%)</span>
         </div>
+        ${arb.grossProfitPercent ? `
+        <div class="calculation-note">
+          <small>💡 Ganancia bruta sin comisiones: ${formatNumber(arb.grossProfitPercent)}%</small>
+        </div>
+        ` : ''}
       </div>
       
       <div class="warning" style="margin-top: 15px;">
         ⚠️ <strong>Consideraciones importantes:</strong><br>
-        • Verifica comisiones del exchange antes de operar<br>
-        • Los precios fluctúan constantemente<br>
-        • Respeta el límite de USD 200 mensuales<br>
-        • Considera tiempos de transferencia bancaria
+        • <strong>Comisiones incluidas:</strong> El cálculo ya considera fees de trading y retiro<br>
+        • Las comisiones varían según el exchange (${arb.fees ? formatNumber(arb.fees.total) : '~2-3'}% total)<br>
+        • Los precios fluctúan constantemente - verifica antes de operar<br>
+        • Respeta el límite de USD 200 mensuales por persona<br>
+        • Considera tiempos de transferencia bancaria (24-48hs)<br>
+        • Algunos exchanges cobran fees adicionales por depósito USD
       </div>
     </div>
   `;

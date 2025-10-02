@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ArbitrageAR Oficial a USDT Broker",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Extensión Brave para arbitraje Dólar Oficial -> USDT Broker usando Dolarito y CriptoYA APIs",
   "permissions": [
     "storage",
