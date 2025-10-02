@@ -13,6 +13,8 @@ import {
 import { calculateOptimizedRoutes } from './routeCalculator.js';
 import { checkAndNotify } from './notifications.js';
 
+console.log('✅ [BACKGROUND] Todos los imports completados exitosamente');
+
 // Estado global del background
 let currentData = null;
 let lastUpdate = null;
