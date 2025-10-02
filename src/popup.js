@@ -41,16 +41,27 @@ function displayMarketHealth(health) {
 // Navegación entre tabs
 function setupTabNavigation() {
   const tabs = document.querySelectorAll('.tab');
+  console.log(`📑 Configurando ${tabs.length} pestañas de navegación`);
+  
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
+      const tabId = tab.dataset.tab;
+      console.log(`🔄 Cambiando a pestaña: ${tabId}`);
+      
       // Remover active de todos
       tabs.forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
       
       // Activar el seleccionado
       tab.classList.add('active');
-      const tabId = tab.dataset.tab;
-      document.getElementById(`tab-${tabId}`).classList.add('active');
+      const targetContent = document.getElementById(`tab-${tabId}`);
+      
+      if (targetContent) {
+        targetContent.classList.add('active');
+        console.log(`✅ Pestaña ${tabId} activada correctamente`);
+      } else {
+        console.error(`❌ No se encontró el contenido para tab-${tabId}`);
+      }
       
       // NUEVO v5.0: Si se abre el simulador, aplicar monto default
       if (tabId === 'simulator' && userSettings?.defaultSimAmount) {
@@ -333,10 +344,12 @@ function displayOptimizedRoutes(routes, official) {
 // NUEVA FUNCIÓN v5.0.5: Mostrar guía de una ruta optimizada
 function showRouteGuide(index) {
   if (!currentData?.optimizedRoutes?.[index]) {
+    console.warn('No hay ruta disponible para el índice:', index);
     return;
   }
   
   const route = currentData.optimizedRoutes[index];
+  console.log('📖 Mostrando guía para ruta:', route.buyExchange, '→', route.sellExchange);
   
   // Convertir ruta a formato de arbitraje para la guía
   const arbitrage = {
@@ -358,7 +371,13 @@ function showRouteGuide(index) {
   displayStepByStepGuide(arbitrage);
   
   // Cambiar a la pestaña de guía
-  document.querySelector('[data-tab="guide"]').click();
+  const guideTab = document.querySelector('[data-tab="guide"]');
+  if (guideTab) {
+    console.log('✅ Cambiando a pestaña de guía');
+    guideTab.click();
+  } else {
+    console.error('❌ No se encontró el botón de la pestaña guía');
+  }
 }
 
 // Seleccionar un arbitraje y mostrar guía
