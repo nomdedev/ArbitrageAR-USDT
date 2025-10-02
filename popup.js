@@ -306,67 +306,7 @@ function displayOptimizedRoutes(routes, official) {
             <span class="investment-info">sobre $${formatNumber(route.calculation.initial)} ARS</span>
           </div>
           <div class="route-action">
-            <span class="click-to-expand">👆 Click para ver detalles</span>
-          </div>
-        </div>
-        
-        <div class="route-details" id="route-details-${index}" style="display: none;">
-          <div class="route-step">
-            <span class="step-number">1️⃣</span>
-            <div class="step-info">
-              <span class="step-label">Comprar USD Oficial</span>
-              <span class="step-value">$${formatNumber(route.officialPrice)} ARS</span>
-            </div>
-          </div>
-          
-          <div class="route-arrow">⬇️</div>
-          
-          <div class="route-step">
-            <span class="step-number">2️⃣</span>
-            <div class="step-info">
-              <span class="step-label">USD → USDT en <strong>${route.buyExchange}</strong></span>
-              <span class="step-value">${formatNumber(route.usdToUsdtRate)} USD/USDT</span>
-            </div>
-          </div>
-          
-          <div class="route-arrow">${route.isSingleExchange ? '⬇️ Sin transfer' : `🔁 Transfer ${formatNumber(route.transferFeeUSD)} USD`}</div>
-          
-          <div class="route-step">
-            <span class="step-number">3️⃣</span>
-            <div class="step-info">
-              <span class="step-label">USDT → ARS en <strong>${route.sellExchange}</strong></span>
-              <span class="step-value highlight">$${formatNumber(route.usdtArsBid)} ARS</span>
-            </div>
-          </div>
-          
-          <div class="route-summary">
-            <div class="summary-row">
-              <span>💰 Inversión inicial:</span>
-              <span>$${formatNumber(route.calculation.initial)} ARS</span>
-            </div>
-            <div class="summary-row">
-              <span>📊 Fee transferencia:</span>
-              <span class="fee-value">~$${formatNumber(route.transferFeeUSD)} USD (TRC20)</span>
-            </div>
-            <div class="summary-row">
-              <span>💵 Resultado final:</span>
-              <span class="${isNegative ? 'loss' : 'profit'}">$${formatNumber(route.calculation.finalAmount)} ARS</span>
-            </div>
-            <div class="summary-row highlight-row">
-              <span><strong>${isNegative ? 'Pérdida' : 'Ganancia'} neta:</strong></span>
-              <span class="${isNegative ? 'loss' : 'profit'}"><strong>${profitSymbol}$${formatNumber(Math.abs(route.calculation.netProfit))} ARS (${profitSymbol}${formatNumber(route.profitPercent)}%)</strong></span>
-            </div>
-          </div>
-          
-          <div class="route-warning">
-            <span>⏱️</span>
-            <span><small>Tiempo estimado: 2-4 horas (confirmaciones blockchain)</small></span>
-          </div>
-          
-          <div class="route-action-button">
-            <button class="guide-button" data-route-index="${index}">
-              📖 Ver guía paso a paso completa
-            </button>
+            <span class="click-to-expand">👆 Click para ver guía paso a paso</span>
           </div>
         </div>
       </div>
@@ -375,50 +315,19 @@ function displayOptimizedRoutes(routes, official) {
   
   container.innerHTML = html;
   
-  // Agregar event listeners a las tarjetas (sin onclick inline)
+  // Agregar event listeners a las tarjetas - Click va directo a la guía
   document.querySelectorAll('.route-card').forEach(card => {
     card.addEventListener('click', function(e) {
-      // Evitar expandir si se hizo click en el botón de guía
-      if (e.target.classList.contains('guide-button') || e.target.closest('.guide-button')) {
-        return;
-      }
       const index = parseInt(this.dataset.index);
-      expandRoute(index);
-    });
-  });
-  
-  // Agregar event listeners a los botones de guía
-  document.querySelectorAll('.guide-button').forEach(button => {
-    button.addEventListener('click', function(e) {
-      e.stopPropagation(); // Evitar que se expanda/contraiga la ruta
-      const index = parseInt(this.dataset.routeIndex);
+      
+      // Remover selección previa
+      document.querySelectorAll('.route-card').forEach(c => c.classList.remove('selected'));
+      this.classList.add('selected');
+      
+      // Mostrar guía paso a paso
       showRouteGuide(index);
     });
   });
-}
-
-// NUEVA FUNCIÓN v5.0.3: Expandir/contraer detalles de ruta
-function expandRoute(index) {
-  const detailsDiv = document.getElementById(`route-details-${index}`);
-  const allDetails = document.querySelectorAll('.route-details');
-  
-  // Contraer todas las demás rutas
-  allDetails.forEach((div, i) => {
-    if (i !== index) {
-      div.style.display = 'none';
-      const card = div.closest('.route-card');
-      if (card) card.classList.remove('expanded');
-    }
-  });
-  
-  // Toggle la ruta actual
-  if (detailsDiv.style.display === 'none') {
-    detailsDiv.style.display = 'block';
-    detailsDiv.closest('.route-card').classList.add('expanded');
-  } else {
-    detailsDiv.style.display = 'none';
-    detailsDiv.closest('.route-card').classList.remove('expanded');
-  }
 }
 
 // NUEVA FUNCIÓN v5.0.5: Mostrar guía de una ruta optimizada
