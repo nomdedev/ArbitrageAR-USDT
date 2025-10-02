@@ -362,6 +362,12 @@ function displayOptimizedRoutes(routes, official) {
             <span>⏱️</span>
             <span><small>Tiempo estimado: 2-4 horas (confirmaciones blockchain)</small></span>
           </div>
+          
+          <div class="route-action-button">
+            <button class="guide-button" data-route-index="${index}">
+              📖 Ver guía paso a paso completa
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -371,9 +377,22 @@ function displayOptimizedRoutes(routes, official) {
   
   // Agregar event listeners a las tarjetas (sin onclick inline)
   document.querySelectorAll('.route-card').forEach(card => {
-    card.addEventListener('click', function() {
+    card.addEventListener('click', function(e) {
+      // Evitar expandir si se hizo click en el botón de guía
+      if (e.target.classList.contains('guide-button') || e.target.closest('.guide-button')) {
+        return;
+      }
       const index = parseInt(this.dataset.index);
       expandRoute(index);
+    });
+  });
+  
+  // Agregar event listeners a los botones de guía
+  document.querySelectorAll('.guide-button').forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.stopPropagation(); // Evitar que se expanda/contraiga la ruta
+      const index = parseInt(this.dataset.routeIndex);
+      showRouteGuide(index);
     });
   });
 }
@@ -400,6 +419,37 @@ function expandRoute(index) {
     detailsDiv.style.display = 'none';
     detailsDiv.closest('.route-card').classList.remove('expanded');
   }
+}
+
+// NUEVA FUNCIÓN v5.0.5: Mostrar guía de una ruta optimizada
+function showRouteGuide(index) {
+  if (!currentData?.optimizedRoutes?.[index]) {
+    return;
+  }
+  
+  const route = currentData.optimizedRoutes[index];
+  
+  // Convertir ruta a formato de arbitraje para la guía
+  const arbitrage = {
+    broker: route.isSingleExchange ? route.buyExchange : `${route.buyExchange} → ${route.sellExchange}`,
+    buyExchange: route.buyExchange,
+    sellExchange: route.sellExchange,
+    isSingleExchange: route.isSingleExchange,
+    profitPercent: route.profitPercent,
+    officialPrice: route.officialPrice,
+    usdToUsdtRate: route.usdToUsdtRate,
+    usdtArsBid: route.usdtArsBid,
+    sellPrice: route.usdtArsBid,
+    transferFeeUSD: route.transferFeeUSD,
+    calculation: route.calculation,
+    fees: route.fees
+  };
+  
+  selectedArbitrage = arbitrage;
+  displayStepByStepGuide(arbitrage);
+  
+  // Cambiar a la pestaña de guía
+  document.querySelector('[data-tab="guide"]').click();
 }
 
 // Seleccionar un arbitraje y mostrar guía
