@@ -2,7 +2,7 @@
 // MAIN BACKGROUND MODULE - ArbitrageAR
 // ============================================
 
-console.log('🔧 [BACKGROUND] main.js se está cargando...');
+console.log('🔧 [BACKGROUND] main.js se está cargando en:', new Date().toISOString());
 
 import { log } from './config.js';
 import {
@@ -13,7 +13,8 @@ import {
 import { calculateOptimizedRoutes } from './routeCalculator.js';
 import { checkAndNotify } from './notifications.js';
 
-console.log('✅ [BACKGROUND] Todos los imports completados exitosamente');
+console.log('✅ [BACKGROUND] Todos los imports completados exitosamente en:', new Date().toISOString());
+console.log('🚀 [BACKGROUND] Iniciando inicialización del service worker...');
 
 // Estado global del background
 let currentData = null;
@@ -172,19 +173,19 @@ async function getBanksData() {
 
 // Inicialización del background script
 async function initialize() {
-  console.log('🚀 [BACKGROUND] Inicializando background script...');
+  log('🚀 [BACKGROUND] Inicializando background script en:', new Date().toISOString());
 
   try {
-    console.log('📦 [BACKGROUND] Verificando imports...');
+    log('📦 [BACKGROUND] Verificando imports...');
     // Verificar que las funciones importadas existen
-    console.log('✅ [BACKGROUND] log function:', typeof log);
-    console.log('✅ [BACKGROUND] fetchDolaritoOficial function:', typeof fetchDolaritoOficial);
-    console.log('✅ [BACKGROUND] calculateOptimizedRoutes function:', typeof calculateOptimizedRoutes);
+    log('✅ [BACKGROUND] log function:', typeof log);
+    log('✅ [BACKGROUND] fetchDolaritoOficial function:', typeof fetchDolaritoOficial);
+    log('✅ [BACKGROUND] calculateOptimizedRoutes function:', typeof calculateOptimizedRoutes);
 
     // Primera actualización de datos
-    console.log('📡 [BACKGROUND] Intentando primera actualización de datos...');
+    log('📡 [BACKGROUND] Intentando primera actualización de datos...');
     await updateData();
-    console.log('✅ [BACKGROUND] Primera actualización completada');
+    log('✅ [BACKGROUND] Primera actualización completada');
   } catch (error) {
     console.error('❌ [BACKGROUND] Error en inicialización:', error);
     console.error('❌ [BACKGROUND] Stack trace:', error.stack);
@@ -199,24 +200,38 @@ async function initialize() {
     }
   }, 2 * 60 * 1000);
 
-  console.log('✅ [BACKGROUND] Background script inicializado completamente');
+  log('✅ [BACKGROUND] Background script inicializado completamente');
 }
 
 // Event listeners para mensajes del popup/options
-chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.log('📨 [BACKGROUND] Mensaje recibido:', request.action);
 
   if (request.action === 'getArbitrages') {
-    console.log('🔍 [BACKGROUND] Procesando solicitud de arbitrajes...');
-    const data = await getCurrentData();
-    console.log('📤 [BACKGROUND] Enviando respuesta con', data?.optimizedRoutes?.length || 0, 'rutas');
-    sendResponse(data);
+    // Manejar de forma asíncrona pero responder inmediatamente
+    getCurrentData().then(data => {
+      console.log('📤 [BACKGROUND] Enviando respuesta con', data?.optimizedRoutes?.length || 0, 'rutas');
+      sendResponse(data);
+    }).catch(error => {
+      console.error('❌ [BACKGROUND] Error en getArbitrages:', error);
+      sendResponse({ error: 'Error interno del service worker', optimizedRoutes: [] });
+    });
   } else if (request.action === 'getBanks') {
-    const data = await getBanksData();
-    sendResponse(data);
+    // Manejar de forma asíncrona pero responder inmediatamente
+    getBanksData().then(data => {
+      sendResponse(data);
+    }).catch(error => {
+      console.error('❌ [BACKGROUND] Error en getBanks:', error);
+      sendResponse({ banks: [] });
+    });
   } else if (request.action === 'refresh') {
-    const data = await updateData();
-    sendResponse(data);
+    // Manejar de forma asíncrona pero responder inmediatamente
+    updateData().then(data => {
+      sendResponse(data);
+    }).catch(error => {
+      console.error('❌ [BACKGROUND] Error en refresh:', error);
+      sendResponse({ error: 'Error al actualizar datos', optimizedRoutes: [] });
+    });
   }
 
   // Mantener el canal abierto para respuestas asíncronas

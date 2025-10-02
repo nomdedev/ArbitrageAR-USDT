@@ -211,27 +211,18 @@ async function fetchAndDisplay() {
   const settings = await chrome.storage.local.get('notificationSettings');
   userSettings = settings.notificationSettings || {};
   
-  chrome.runtime.sendMessage({ action: 'getArbitrages' }, data => {
-    loading.style.display = 'none';
-    
-    console.log('📥 Popup recibió datos:', {
-      hasData: !!data,
-      optimizedRoutes: data?.optimizedRoutes?.length || 0,
-      arbitrages: data?.arbitrages?.length || 0,
-      marketHealth: data?.marketHealth?.status,
-      error: data?.error,
-      userSettings: userSettings
-    });
-    
-    // DEBUG: Mostrar estructura completa de las primeras rutas
-    if (data?.optimizedRoutes?.length > 0) {
-      console.log('🔍 Primera ruta de ejemplo:', JSON.stringify(data.optimizedRoutes[0], null, 2));
-    }
-    
-    if (!data) {
-      container.innerHTML = '<p class="error">❌ No se pudo comunicar con el servicio de fondo.</p>';
-      return;
-    }
+  try {
+    console.log('📤 Enviando mensaje getArbitrages al background...');
+    chrome.runtime.sendMessage({ action: 'getArbitrages' }, data => {
+      console.log('📥 Callback ejecutado, data:', data ? 'recibida' : 'undefined');
+      
+      loading.style.display = 'none';
+      
+      if (!data) {
+        console.error('❌ CRÍTICO: data es falsy');
+        container.innerHTML = '<p class="error">❌ No se pudo comunicar con el servicio de fondo.</p>';
+        return;
+      }
     
     currentData = data;
     updateLastUpdateTimestamp(data.lastUpdate);
@@ -274,7 +265,12 @@ async function fetchAndDisplay() {
     
     // Poblar selector del simulador (con todas las rutas)
     populateSimulatorRoutes(data.optimizedRoutes);
-  });
+    });
+  } catch (error) {
+    console.error('❌ Error en fetchAndDisplay:', error);
+    loading.style.display = 'none';
+    container.innerHTML = '<p class="error">❌ Error interno: ' + sanitizeHTML(error.message) + '</p>';
+  }
 }
 
 // NUEVA FUNCIÓN v5.0: Aplicar preferencias del usuario

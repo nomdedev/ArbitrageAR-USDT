@@ -3,7 +3,7 @@
 // ============================================
 
 // Sistema de logging unificado
-const DEBUG_MODE = true; // ⚠️ Temporalmente activado para desarrollo
+const DEBUG_MODE = false; // ⚠️ Cambiado a false para producción - mejora rendimiento
 
 function log(...args) {
   if (DEBUG_MODE) {
