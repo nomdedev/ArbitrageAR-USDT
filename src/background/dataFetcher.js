@@ -4,7 +4,7 @@
 
 import { REQUEST_INTERVAL, log } from './config.js';
 
-// Estado local para rate limiting
+// Estado local para rate limiting (específico de este módulo)
 let lastRequestTime = 0;
 
 // Función de rate limiting para requests HTTP
@@ -73,7 +73,16 @@ async function fetchCriptoyaUSDTtoUSD() {
   const data = await fetchWithRateLimit('https://criptoya.com/api/usdt/usd/1');
 
   if (data && typeof data === 'object') {
-    log('✅ USD/USDT rates obtenidos');
+    // Log de ejemplo de estructura para verificar
+    const sampleExchange = Object.keys(data)[0];
+    if (sampleExchange && data[sampleExchange]) {
+      log(`✅ USD/USDT rates obtenidos. Ejemplo ${sampleExchange}:`, {
+        ask: data[sampleExchange].ask,
+        totalAsk: data[sampleExchange].totalAsk,
+        bid: data[sampleExchange].bid,
+        totalBid: data[sampleExchange].totalBid
+      });
+    }
     return data;
   }
 

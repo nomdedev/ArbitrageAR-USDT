@@ -47,13 +47,32 @@ function validateInputData(oficial, usdt, usdtUsd) {
 }
 
 // Función auxiliar para obtener exchanges válidos
-function getValidExchanges(usdt) {
+function getValidExchanges(usdt, usdtUsd) {
   const excludedKeys = ['time', 'timestamp', 'fecha', 'date', 'p2p', 'total'];
 
   const buyExchanges = Object.keys(usdt).filter(key => {
-    return typeof usdt[key] === 'object' &&
-           usdt[key] !== null &&
-           !excludedKeys.includes(key.toLowerCase());
+    // Validar que tenga datos en USDT/ARS
+    if (typeof usdt[key] !== 'object' || usdt[key] === null) {
+      return false;
+    }
+    
+    if (excludedKeys.includes(key.toLowerCase())) {
+      return false;
+    }
+
+    // NUEVO: Validar que tenga datos válidos en USD/USDT
+    if (usdtUsd?.[key]) {
+      const askPrice = parseFloat(usdtUsd[key].totalAsk || usdtUsd[key].ask);
+      if (!askPrice || askPrice <= 0 || askPrice === 1) {
+        log(`⚠️ ${key} tiene USD/USDT inválido: ${askPrice}, excluyendo...`);
+        return false;
+      }
+    } else {
+      log(`⚠️ ${key} no tiene datos USD/USDT, excluyendo...`);
+      return false;
+    }
+
+    return true;
   });
 
   return {
@@ -87,9 +106,17 @@ function calculateRoute(buyExchange, sellExchange, oficial, usdt, usdtUsd, userF
     const usdPurchased = initialAfterBankFee / officialSellPrice;
 
     // Paso 3: Obtener ratio USD/USDT para el exchange comprador
+    // CORREGIDO: Usar 'totalAsk' o 'ask' (precio de COMPRA de USDT en USD)
+    // CriptoYA muestra: totalAsk = cuántos USD necesito para comprar 1 USDT
     let usdToUsdtRate = 1;
-    if (usdtUsd[buyExchange]?.usd) {
-      usdToUsdtRate = parseFloat(usdtUsd[buyExchange].usd);
+    if (usdtUsd[buyExchange]) {
+      const askPrice = parseFloat(usdtUsd[buyExchange].totalAsk || usdtUsd[buyExchange].ask);
+      if (askPrice && askPrice > 0) {
+        usdToUsdtRate = askPrice;
+        log(`💱 ${buyExchange} USD/USDT compra: ${usdToUsdtRate}`);
+      } else {
+        log(`⚠️ ${buyExchange} no tiene precio USD/USDT válido, usando 1:1`);
+      }
     }
 
     // Paso 4: Comprar USDT
@@ -181,8 +208,8 @@ async function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
     'default': 1 + userFees.extraTransferFee     // Por defecto
   };
 
-  // Obtener exchanges válidos
-  const { buyExchanges, sellExchanges } = getValidExchanges(usdt);
+  // Obtener exchanges válidos (filtrar los que no tienen datos USD/USDT válidos)
+  const { buyExchanges, sellExchanges } = getValidExchanges(usdt, usdtUsd);
 
   if (buyExchanges.length === 0 || sellExchanges.length === 0) {
     log('⚠️ No hay exchanges válidos disponibles');
