@@ -239,19 +239,8 @@ async function updateData() {
     error: null // Limpiar errores previos
   });
   
-  // Notificar si hay oportunidades muy buenas (>5%)
-  if (top5.length > 0 && top5[0].profitPercent > 5) {
-    sendNotification(top5[0]);
-  }
-}
-
-function sendNotification(arbitrage) {
-  chrome.notifications.create(`arb_${Date.now()}`, {
-    type: 'basic',
-    iconUrl: 'icons/icon48.png',
-    title: `Oportunidad Arbitraje en ${arbitrage.broker}`,
-    message: `Ganancia estimada: ${arbitrage.profitPercent.toFixed(2)}%`
-  });
+  // Verificar si debe enviar notificaciones
+  await checkAndNotify(top5);
 }
 
 // Actualización periódica
@@ -347,6 +336,192 @@ async function updateBanksData() {
   });
 }
 
+// ============================================
+// SISTEMA DE NOTIFICACIONES
+// ============================================
+
+let lastNotificationTime = 0;
+let notifiedArbitrages = new Set(); // Para evitar notificar el mismo arbitraje repetidamente
+
+async function shouldSendNotification(settings, arbitrage) {
+  // 1. Verificar si las notificaciones están habilitadas
+  if (!settings.notificationsEnabled) {
+    return false;
+  }
+  
+  // 2. Verificar horario silencioso
+  if (settings.quietHoursEnabled) {
+    const now = new Date();
+    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    const start = settings.quietStart;
+    const end = settings.quietEnd;
+    
+    // Si el horario atraviesa medianoche (ej: 22:00 - 08:00)
+    if (start > end) {
+      if (currentTime >= start || currentTime <= end) {
+        return false; // Está en horario silencioso
+      }
+    } else {
+      if (currentTime >= start && currentTime <= end) {
+        return false; // Está en horario silencioso
+      }
+    }
+  }
+  
+  // 3. Verificar frecuencia de notificaciones
+  const now = Date.now();
+  const frequencies = {
+    'always': 0,
+    '5min': 5 * 60 * 1000,
+    '15min': 15 * 60 * 1000,
+    '30min': 30 * 60 * 1000,
+    '1hour': 60 * 60 * 1000,
+    'once': Infinity
+  };
+  
+  const minInterval = frequencies[settings.notificationFrequency] || frequencies['15min'];
+  if (now - lastNotificationTime < minInterval) {
+    return false;
+  }
+  
+  // 4. Verificar umbral según tipo de alerta
+  const thresholds = {
+    'all': 1.5,
+    'moderate': 5,
+    'high': 10,
+    'extreme': 15,
+    'custom': settings.customThreshold || 5
+  };
+  
+  const threshold = thresholds[settings.alertType] || 1.5;
+  if (arbitrage.profitPercent < threshold) {
+    return false;
+  }
+  
+  // 5. Verificar si es un exchange preferido (si hay filtros)
+  if (settings.preferredExchanges && settings.preferredExchanges.length > 0) {
+    const exchangeName = arbitrage.broker.toLowerCase();
+    const isPreferred = settings.preferredExchanges.some(pref => 
+      exchangeName.includes(pref.toLowerCase())
+    );
+    if (!isPreferred) {
+      return false;
+    }
+  }
+  
+  // 6. Verificar si ya notificamos este arbitraje recientemente
+  const arbKey = `${arbitrage.broker}_${arbitrage.profitPercent.toFixed(2)}`;
+  if (notifiedArbitrages.has(arbKey)) {
+    return false;
+  }
+  
+  return true;
+}
+
+async function sendNotification(arbitrage, settings) {
+  try {
+    const notificationId = `arbitrage_${Date.now()}`;
+    
+    // Determinar el ícono según la ganancia
+    const iconLevel = arbitrage.profitPercent >= 15 ? 'extreme' : 
+                      arbitrage.profitPercent >= 10 ? 'high' : 
+                      arbitrage.profitPercent >= 5 ? 'moderate' : 'normal';
+    
+    const icons = {
+      extreme: '🚀',
+      high: '💎',
+      moderate: '💰',
+      normal: '📊'
+    };
+    
+    const icon = icons[iconLevel];
+    
+    await chrome.notifications.create(notificationId, {
+      type: 'basic',
+      iconUrl: 'icons/icon128.png',
+      title: `${icon} Oportunidad de Arbitraje: ${arbitrage.broker}`,
+      message: `Ganancia: ${arbitrage.profitPercent.toFixed(2)}% neto\nUSD→USDT: ${arbitrage.usdToUsdtRate}\nUSDT: $${arbitrage.usdtArsBid.toFixed(2)} ARS`,
+      priority: arbitrage.profitPercent >= 10 ? 2 : 1,
+      requireInteraction: arbitrage.profitPercent >= 15,
+      buttons: [
+        { title: '👀 Ver Detalles' },
+        { title: '⚙️ Configuración' }
+      ]
+    });
+    
+    // Actualizar tiempo de última notificación
+    lastNotificationTime = Date.now();
+    
+    // Agregar a notificados (limpiar después de 1 hora)
+    const arbKey = `${arbitrage.broker}_${arbitrage.profitPercent.toFixed(2)}`;
+    notifiedArbitrages.add(arbKey);
+    setTimeout(() => {
+      notifiedArbitrages.delete(arbKey);
+    }, 60 * 60 * 1000); // 1 hora
+    
+    // Reproducir sonido si está habilitado
+    if (settings.soundEnabled) {
+      // Chrome no permite reproducir audio desde background, 
+      // pero podemos usar la API de notificaciones que tiene sonido por defecto
+      console.log('🔔 Notificación con sonido enviada');
+    }
+    
+  } catch (error) {
+    console.error('Error enviando notificación:', error);
+  }
+}
+
+// Manejar clicks en notificaciones
+chrome.notifications.onButtonClicked.addListener((notificationId, buttonIndex) => {
+  if (buttonIndex === 0) {
+    // Ver detalles - abrir popup
+    chrome.action.openPopup();
+  } else if (buttonIndex === 1) {
+    // Configuración - abrir página de opciones
+    chrome.runtime.openOptionsPage();
+  }
+  chrome.notifications.clear(notificationId);
+});
+
+chrome.notifications.onClicked.addListener((notificationId) => {
+  // Click en la notificación - abrir popup
+  chrome.action.openPopup();
+  chrome.notifications.clear(notificationId);
+});
+
+// Verificar y enviar notificaciones después de actualizar datos
+async function checkAndNotify(arbitrages) {
+  try {
+    const result = await chrome.storage.local.get('notificationSettings');
+    const settings = result.notificationSettings || {
+      notificationsEnabled: true,
+      alertType: 'all',
+      customThreshold: 5,
+      notificationFrequency: '15min',
+      soundEnabled: true,
+      preferredExchanges: [],
+      quietHoursEnabled: false,
+      quietStart: '22:00',
+      quietEnd: '08:00'
+    };
+    
+    if (!arbitrages || arbitrages.length === 0) {
+      return;
+    }
+    
+    // Tomar la mejor oportunidad
+    const bestArbitrage = arbitrages[0];
+    
+    // Verificar si debe notificar
+    if (await shouldSendNotification(settings, bestArbitrage)) {
+      await sendNotification(bestArbitrage, settings);
+    }
+    
+  } catch (error) {
+    console.error('Error en checkAndNotify:', error);
+  }
+}
+
 // Solicitud desde popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'getArbitrages') {
@@ -373,6 +548,29 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     updateData();
     updateBanksData();
     sendResponse({ success: true });
+    return true;
+  }
+  
+  if (message.action === 'settingsUpdated') {
+    console.log('✅ Configuración de notificaciones actualizada');
+    sendResponse({ success: true });
+    return true;
+  }
+  
+  if (message.action === 'sendTestNotification') {
+    // Enviar notificación de prueba
+    const testArbitrage = {
+      broker: 'Buenbit (PRUEBA)',
+      profitPercent: 38.5,
+      usdToUsdtRate: 1.049,
+      usdtArsBid: 1529.66
+    };
+    sendNotification(testArbitrage, message.settings)
+      .then(() => sendResponse({ success: true }))
+      .catch(error => {
+        console.error('Error enviando notificación de prueba:', error);
+        sendResponse({ success: false, error: error.message });
+      });
     return true;
   }
 });

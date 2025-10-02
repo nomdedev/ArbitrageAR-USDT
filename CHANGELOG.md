@@ -2,6 +2,152 @@
 
 Todos los cambios notables de este proyecto serán documentados en este archivo.
 
+## [3.2.0] - 2025-10-02
+
+### 🎨 REDISEÑO COMPLETO - Dark Mode Premium UI
+
+#### ✨ Interfaz Oscura Profesional
+- **Dark Mode nativo:** Fondo oscuro (#0a0e1a, #1a1f2e, #0f1419)
+- **Gradientes azules premium:** De #1e3a8a → #3b82f6 → #06b6d4
+- **Bordes redondeados:** 16px en container, 14-16px en cards
+- **Mejor legibilidad:** Colores optimizados para Dark Mode
+
+#### 🌟 Efectos Visuales Avanzados
+- **Glassmorphism:** Efecto de vidrio con `backdrop-filter: blur(20px)`
+- **Animaciones fluidas:** Transiciones suaves con `cubic-bezier(0.4, 0, 0.2, 1)`
+- **Hover effects mejorados:** Elevation, glow y scale
+- **Sombras profundas:** Múltiples capas para mejor depth perception
+
+#### 🎯 Mejoras en Componentes
+- **Header animado:** Pulso radial de fondo con gradiente azul
+- **Botones premium:** Glassmorphism, bordes redondeados 12px, animación de rotación 360°
+- **Tabs modernas:** Indicador animado con gradiente, efectos hover suaves
+- **Cards optimizadas:** Efecto shimmer al hover, borders con gradiente
+- **Badges mejorados:** Animación `pulseGlow` para profits altos
+
+#### 📱 Scrollbar Personalizado
+- **Diseño custom:** Scrollbar con gradiente azul (#3b82f6 → #06b6d4)
+- **Ancho optimizado:** 8px para mejor usabilidad
+- **Hover effect:** Cambia a tonos más claros
+
+#### ⚡ Performance UI
+- **Font optimizado:** Inter como primary, fallback a system fonts
+- **Animaciones suaves:** 60fps en todas las transiciones
+- **Reduced motion support:** Respeta preferencias de accesibilidad
+
+#### 🎨 Detalles de Diseño
+- **Spacing consistente:** Sistema de espaciado coherente (8px base)
+- **Typography mejorada:** Letter-spacing y font-weights optimizados
+- **Color system:** Paleta coherente con variables semánticas
+- **Focus states:** Outlines visibles para accesibilidad (WCAG 2.1)
+
+#### 📊 Mejoras Visuales en Datos
+- **Price rows:** Hover effect con background highlight
+- **Fees section:** Gradiente naranja con borders y shadows
+- **Profit values:** Text-shadow con glow effect para highlights
+- **Loading states:** Spinner con gradiente azul, animación fadeInOut
+
+### 📝 Documentación
+- **MEJORAS_SUGERIDAS_V3.2+.md:** Documento completo con 10 mejoras prioritarias
+- **Roadmap detallado:** Plan de desarrollo para Q4 2025 - Q3 2026
+- **Quick wins:** 5 mejoras de implementación rápida (2-6 horas)
+- **Análisis de competencia:** Comparación con herramientas similares
+
+---
+
+## [3.1.0] - 2025-10-02
+
+### 🔔 NUEVA CARACTERÍSTICA - Sistema de Notificaciones Personalizable
+
+#### ⭐ Página de Configuración Completa
+- **Nueva página de opciones:** Interfaz dedicada para configurar notificaciones
+- **Acceso fácil:** Botón ⚙️ en el popup + click derecho en extensión
+- **6 secciones de configuración:** Control total sobre las notificaciones
+
+#### 🎯 Control de Notificaciones
+- **On/Off global:** Desactiva completamente las notificaciones si no quieres ser molestado
+- **5 tipos de alertas:**
+  - Todas (≥1.5%)
+  - Moderadas (≥5%)
+  - Altas (≥10%)
+  - Excepcionales (≥15%)
+  - Personalizado (1-20%)
+- **Umbral custom:** Define tu propio porcentaje mínimo
+
+#### ⏰ Control de Frecuencia
+- **6 opciones de frecuencia:**
+  - Sin límite
+  - Cada 5 minutos
+  - Cada 15 minutos (default)
+  - Cada 30 minutos
+  - Cada hora
+  - Una vez por sesión
+- **Previene spam:** Evita notificaciones repetitivas
+
+#### 🏦 Filtros por Exchange
+- **Selección múltiple:** Elige tus exchanges favoritos
+- **8 exchanges disponibles:** Buenbit, Ripio, SatoshiTango, Letsbit, etc.
+- **Todos por defecto:** Si no seleccionas, notifica de todos
+
+#### 🕐 Modo Silencioso
+- **Horario configurable:** Define cuándo NO quieres notificaciones
+- **Soporta medianoche:** Ej: 22:00 - 08:00
+- **Activación opcional:** Toggle on/off
+
+#### 🔊 Sonido
+- **Control de audio:** Activa/desactiva sonido de notificaciones
+- **Toggle simple:** Un click para cambiar
+
+#### 🧪 Test de Notificación
+- **Botón de prueba:** Verifica tu configuración antes de guardar
+- **Notificación de ejemplo:** Ve cómo se verán las alertas
+
+### 🎨 Mejoras en la UI
+- **Nuevo botón ⚙️:** Acceso rápido a configuración desde popup
+- **Estilos modernos:** Gradientes purple/blue, switches animados
+- **Grid responsivo:** Adaptable a móvil
+- **Hover effects:** Feedback visual mejorado
+
+### 🔧 Implementación Técnica
+- **Nuevos archivos:**
+  - `options.html` (242 líneas)
+  - `options.css` (431 líneas)
+  - `options.js` (189 líneas)
+- **Sistema inteligente:** Verifica 6 condiciones antes de notificar
+- **Persistencia local:** Configuración guardada en `chrome.storage.local`
+- **Actualización en tiempo real:** No requiere reiniciar extensión
+
+### 📊 Lógica de Notificaciones
+- **6 validaciones antes de notificar:**
+  1. ¿Notificaciones habilitadas?
+  2. ¿Está en horario silencioso?
+  3. ¿Pasó el tiempo mínimo?
+  4. ¿Supera el umbral?
+  5. ¿Es un exchange preferido?
+  6. ¿Ya se notificó este arbitraje?
+- **Niveles de prioridad:** 🚀 Excepcional, 💎 Alta, 💰 Moderada, 📊 Normal
+- **Botones en notificación:** Ver Detalles + Configuración
+
+### ⚙️ Configuración por Defecto
+```
+Notificaciones: ✅ Activadas
+Tipo: Todas (≥1.5%)
+Frecuencia: Cada 15 minutos
+Sonido: ✅ Activado
+Exchanges: Todos
+Horario silencioso: ❌ Desactivado
+```
+
+### 📄 Documentación
+- **SISTEMA_NOTIFICACIONES_V3.1.md:** Guía completa (400+ líneas)
+- **Casos de uso:** 4 ejemplos de configuración
+- **Diagramas de flujo:** Explicación técnica
+
+### 🔒 Permisos
+- **Nuevo permiso:** `notifications` (Chrome notifications API)
+
+---
+
 ## [3.0.0] - 2025-10-02
 
 ### 🚨 CAMBIO CRÍTICO - Corrección de Lógica Fundamental

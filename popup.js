@@ -38,6 +38,11 @@ function setupRefreshButton() {
     fetchAndDisplay();
     loadBanksData();
   });
+  
+  // Botón de configuración
+  document.getElementById('settings').addEventListener('click', () => {
+    chrome.runtime.openOptionsPage();
+  });
 }
 
 // Obtener y mostrar datos de arbitraje

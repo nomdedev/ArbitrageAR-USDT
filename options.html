@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuración - ArbitrageAR</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="options-container">
+    <header class="options-header">
+      <h1>⚙️ Configuración de Alertas</h1>
+      <p>Personaliza cómo y cuándo quieres recibir notificaciones de oportunidades de arbitraje</p>
+    </header>
+
+    <main class="options-content">
+      <!-- SECCIÓN 1: Activar/Desactivar Notificaciones -->
+      <section class="settings-section">
+        <h2>🔔 Notificaciones</h2>
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="notifications-enabled" class="setting-label">Activar notificaciones</label>
+            <p class="setting-description">Recibe alertas cuando aparezcan oportunidades rentables</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="notifications-enabled" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 2: Tipos de Alertas -->
+      <section class="settings-section" id="alert-types-section">
+        <h2>📊 Tipos de Alertas</h2>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <label>
+              <input type="radio" name="alert-type" value="all" checked>
+              <span class="radio-label">Todas las oportunidades (≥1.5%)</span>
+            </label>
+            <p class="setting-description">Te notificaremos de cualquier arbitraje rentable</p>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label>
+              <input type="radio" name="alert-type" value="moderate">
+              <span class="radio-label">Oportunidades moderadas (≥5%)</span>
+            </label>
+            <p class="setting-description">Solo ganancias superiores al 5% neto</p>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label>
+              <input type="radio" name="alert-type" value="high">
+              <span class="radio-label">Oportunidades altas (≥10%)</span>
+            </label>
+            <p class="setting-description">Solo las mejores oportunidades</p>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label>
+              <input type="radio" name="alert-type" value="extreme">
+              <span class="radio-label">Oportunidades excepcionales (≥15%)</span>
+            </label>
+            <p class="setting-description">Solo arbitrajes extraordinarios</p>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label>
+              <input type="radio" name="alert-type" value="custom">
+              <span class="radio-label">Personalizado</span>
+            </label>
+            <div class="custom-threshold">
+              <label for="custom-threshold">Umbral mínimo: <span id="threshold-value">5</span>%</label>
+              <input type="range" id="custom-threshold" min="1" max="20" step="0.5" value="5" disabled>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 3: Frecuencia de Notificaciones -->
+      <section class="settings-section" id="frequency-section">
+        <h2>⏰ Frecuencia de Notificaciones</h2>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="notification-frequency" class="setting-label">Límite de notificaciones</label>
+            <select id="notification-frequency">
+              <option value="always">Sin límite (siempre notificar)</option>
+              <option value="5min">Máximo cada 5 minutos</option>
+              <option value="15min" selected>Máximo cada 15 minutos</option>
+              <option value="30min">Máximo cada 30 minutos</option>
+              <option value="1hour">Máximo cada 1 hora</option>
+              <option value="once">Solo una vez por sesión</option>
+            </select>
+            <p class="setting-description">Evita notificaciones repetitivas</p>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="sound-enabled" class="setting-label">Sonido de notificación</label>
+            <label class="switch">
+              <input type="checkbox" id="sound-enabled" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 4: Exchanges Favoritos -->
+      <section class="settings-section">
+        <h2>🏦 Exchanges Preferidos</h2>
+        <div class="setting-info">
+          <p class="setting-description">Solo recibir alertas de exchanges específicos (deja vacío para todos)</p>
+        </div>
+        
+        <div class="exchanges-grid">
+          <label class="exchange-checkbox">
+            <input type="checkbox" name="exchange" value="buenbit">
+            <span>Buenbit</span>
+          </label>
+          <label class="exchange-checkbox">
+            <input type="checkbox" name="exchange" value="ripio">
+            <span>Ripio</span>
+          </label>
+          <label class="exchange-checkbox">
+            <input type="checkbox" name="exchange" value="satoshitango">
+            <span>SatoshiTango</span>
+          </label>
+          <label class="exchange-checkbox">
+            <input type="checkbox" name="exchange" value="letsbit">
+            <span>Letsbit</span>
+          </label>
+          <label class="exchange-checkbox">
+            <input type="checkbox" name="exchange" value="decrypto">
+            <span>Decrypto</span>
+          </label>
+          <label class="exchange-checkbox">
+            <input type="checkbox" name="exchange" value="fiwind">
+            <span>Fiwind</span>
+          </label>
+          <label class="exchange-checkbox">
+            <input type="checkbox" name="exchange" value="belo">
+            <span>Belo</span>
+          </label>
+          <label class="exchange-checkbox">
+            <input type="checkbox" name="exchange" value="tiendacrypto">
+            <span>TiendaCrypto</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 5: Horarios -->
+      <section class="settings-section">
+        <h2>🕐 Horario de Notificaciones</h2>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="quiet-hours-enabled" class="setting-label">Activar modo silencioso</label>
+            <p class="setting-description">No molestar durante ciertas horas</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="quiet-hours-enabled">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="quiet-hours-config" id="quiet-hours-config" style="display: none;">
+          <div class="time-inputs">
+            <div>
+              <label for="quiet-start">Desde:</label>
+              <input type="time" id="quiet-start" value="22:00">
+            </div>
+            <div>
+              <label for="quiet-end">Hasta:</label>
+              <input type="time" id="quiet-end" value="08:00">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 6: Test de Notificación -->
+      <section class="settings-section">
+        <h2>🧪 Prueba</h2>
+        <button id="test-notification" class="test-button">
+          🔔 Enviar notificación de prueba
+        </button>
+      </section>
+    </main>
+
+    <footer class="options-footer">
+      <button id="save-settings" class="save-button">💾 Guardar Configuración</button>
+      <button id="reset-settings" class="reset-button">🔄 Restaurar Valores por Defecto</button>
+      <div id="save-status" class="save-status"></div>
+    </footer>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
