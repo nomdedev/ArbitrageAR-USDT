@@ -166,5 +166,7 @@ class ScrapingService {
 }
 
 // Exportar clase
-// Exportar clase
-export default ScrapingService;
+// Exportar clase (compatible con service workers)
+if (typeof self !== 'undefined') {
+  self.ScrapingService = ScrapingService;
+}

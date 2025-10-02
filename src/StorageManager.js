@@ -54,6 +54,8 @@ class StorageManager {
   }
 }
 
-// Exportar instancia singleton
+// Exportar instancia singleton (compatible con service workers)
 const storageManager = new StorageManager();
-export default storageManager;
+if (typeof self !== 'undefined') {
+  self.storageManager = storageManager;
+}

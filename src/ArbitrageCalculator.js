@@ -223,5 +223,7 @@ class ArbitrageCalculator {
 }
 
 // Exportar clase
-// Exportar clase
-export default ArbitrageCalculator;
+// Exportar clase (compatible con service workers)
+if (typeof self !== 'undefined') {
+  self.ArbitrageCalculator = ArbitrageCalculator;
+}

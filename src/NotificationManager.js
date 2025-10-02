@@ -101,5 +101,7 @@ class NotificationManager {
 }
 
 // Exportar clase
-// Exportar clase
-export default NotificationManager;
+// Exportar clase (compatible con service workers)
+if (typeof self !== 'undefined') {
+  self.NotificationManager = NotificationManager;
+}

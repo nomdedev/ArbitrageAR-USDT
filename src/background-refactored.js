@@ -3,69 +3,34 @@
 // Coordinador principal que usa servicios separados (SOLID)
 // ============================================
 
-// Importar servicios
-// import { DataService } from './DataService.js';
-// import { StorageManager } from './StorageManager.js';
-// import { ArbitrageCalculator } from './ArbitrageCalculator.js';
-// import { NotificationManager } from './NotificationManager.js';
-// import { ScrapingService } from './ScrapingService.js';
-
-// Para Chrome Extension, usamos archivos separados pero importamos aquí
-// Como estamos en un service worker, creamos las instancias directamente
+// Importar servicios usando importScripts (requerido para service workers)
+try {
+  importScripts(
+    'DataService.js',
+    'StorageManager.js',
+    'ArbitrageCalculator.js',
+    'NotificationManager.js',
+    'ScrapingService.js'
+  );
+  console.log('✅ Todos los servicios importados correctamente');
+} catch (error) {
+  console.error('❌ Error al importar servicios:', error);
+}
 
 // Inicializar servicios
-const dataService = typeof DataService !== 'undefined' ? new DataService() : {
-  fetchDolarOficial: async () => {
-    const res = await fetch('https://dolarapi.com/v1/dolares/oficial');
-    return res.ok ? await res.json() : null;
-  },
-  fetchUSDTData: async () => {
-    const res = await fetch('https://criptoya.com/api/usdt/ars/1');
-    return res.ok ? await res.json() : null;
-  },
-  fetchUSDTUsdData: async () => {
-    const res = await fetch('https://criptoya.com/api/usdt/usd/1');
-    return res.ok ? await res.json() : null;
-  }
-};
+// Los servicios DataService y StorageManager ya están disponibles como singletons
+// Crear instancias de servicios que requieren inyección de dependencias
+const arbitrageCalculator = new ArbitrageCalculator(storageManager);
+const notificationManager = new NotificationManager(storageManager);
+const scrapingService = new ScrapingService(dataService);
 
-const storageManager = typeof StorageManager !== 'undefined' ? new StorageManager() : {
-  getSettings: async () => await chrome.storage.local.get('notificationSettings').then(r => r.notificationSettings || {}),
-  saveSettings: async (settings) => await chrome.storage.local.set({ notificationSettings: settings }),
-  getArbitrages: async () => await chrome.storage.local.get('currentData').then(r => r.currentData || {}),
-  saveArbitrages: async (data) => await chrome.storage.local.set({ currentData: data }),
-  getBanks: async () => await chrome.storage.local.get('banks').then(r => r.banks || []),
-  saveBanks: async (banks, lastUpdate) => {
-    await chrome.storage.local.set({ banks, banksLastUpdate: lastUpdate });
-  }
-};
-
-const arbitrageCalculator = typeof ArbitrageCalculator !== 'undefined'
-  ? new ArbitrageCalculator(storageManager)
-  : {
-    calculateRoutes: async (official, usdt, usdtUsd) => {
-      // Lógica simplificada - en producción usaríamos la clase completa
-      console.log('Calculando rutas con datos:', { official, usdt, usdtUsd });
-      return [];
-    }
-  };
-
-const notificationManager = typeof NotificationManager !== 'undefined'
-  ? new NotificationManager(storageManager)
-  : {
-    sendNotification: async (arbitrage) => {
-      console.log('Enviando notificación:', arbitrage);
-    }
-  };
-
-const scrapingService = typeof ScrapingService !== 'undefined'
-  ? new ScrapingService(dataService)
-  : {
-    scrapeBanksData: async () => {
-      console.log('Scraping bancos...');
-      return { banks: [], lastUpdate: Date.now() };
-    }
-  };
+console.log('✅ Servicios inicializados:', {
+  dataService: !!dataService,
+  storageManager: !!storageManager,
+  arbitrageCalculator: !!arbitrageCalculator,
+  notificationManager: !!notificationManager,
+  scrapingService: !!scrapingService
+});
 
 // ============================================
 // FUNCIONES PRINCIPALES - Usando servicios

@@ -64,6 +64,8 @@ class DataService {
   }
 }
 
-// Exportar instancia singleton
+// Exportar instancia singleton (compatible con service workers)
 const dataService = new DataService();
-export default dataService;
+if (typeof self !== 'undefined') {
+  self.dataService = dataService;
+}
