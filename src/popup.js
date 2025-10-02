@@ -327,18 +327,28 @@ function displayOptimizedRoutes(routes, official) {
   container.innerHTML = html;
   
   // Agregar event listeners a las tarjetas - Click va directo a la guía
-  document.querySelectorAll('.route-card').forEach(card => {
+  const routeCards = document.querySelectorAll('.route-card');
+  console.log(`🎯 Agregando event listeners a ${routeCards.length} tarjetas de ruta`);
+  
+  routeCards.forEach((card, idx) => {
     card.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
       const index = parseInt(this.dataset.index);
+      console.log(`🖱️ Click en tarjeta ${idx}, index: ${index}`);
       
       // Remover selección previa
       document.querySelectorAll('.route-card').forEach(c => c.classList.remove('selected'));
       this.classList.add('selected');
+      console.log(`✅ Tarjeta ${index} marcada como seleccionada`);
       
       // Mostrar guía paso a paso
       showRouteGuide(index);
     });
   });
+  
+  console.log(`✅ Event listeners agregados a ${routeCards.length} tarjetas`);
 }
 
 // NUEVA FUNCIÓN v5.0.5: Mostrar guía de una ruta optimizada
@@ -392,7 +402,15 @@ function selectArbitrage(index) {
 
 // Mostrar guía paso a paso
 function displayStepByStepGuide(arb) {
+  console.log('📝 Generando guía paso a paso para:', arb);
+  
   const container = document.getElementById('selected-arbitrage-guide');
+  if (!container) {
+    console.error('❌ No se encontró el contenedor selected-arbitrage-guide');
+    return;
+  }
+  
+  console.log('✅ Contenedor de guía encontrado');
   
   // Usar cálculos reales del backend si están disponibles
   const calc = arb.calculation || {};
