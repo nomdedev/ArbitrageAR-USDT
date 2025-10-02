@@ -445,10 +445,14 @@ input[type="time"]:focus {
 
 .input-group {
   margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
 }
 
 .input-group input[type="number"] {
-  width: 100%;
+  flex: 1;
   padding: 10px 14px;
   border: 2px solid #e0e7ff;
   border-radius: 8px;
@@ -467,6 +471,16 @@ input[type="time"]:focus {
 
 .input-group input[type="number"]:hover {
   border-color: #a5b4fc;
+}
+
+/* Sufijo de unidad (%, USD, etc.) */
+.input-suffix {
+  font-size: 0.95em;
+  font-weight: 600;
+  color: #667eea;
+  padding: 0 4px;
+  min-width: 40px;
+  text-align: left;
 }
 
 /* Ocultar spinners en número */

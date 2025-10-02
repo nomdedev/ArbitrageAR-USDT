@@ -164,7 +164,66 @@
         </div>
       </section>
 
-      <!-- SECCIÓN 5: Exchanges Favoritos -->
+      <!-- SECCIÓN 5: Fees Personalizados -->
+      <section class="settings-section">
+        <h2>💸 Fees Personalizados</h2>
+        <div class="setting-info">
+          <p class="setting-description">Ajusta los fees según tu experiencia real con cada exchange. Estos valores se sumarán a los cálculos de arbitraje.</p>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="extra-trading-fee" class="setting-label">Fee de trading adicional (%)</label>
+            <p class="setting-description">Comisión extra al comprar/vender crypto (ej: 0.5%)</p>
+          </div>
+          <div class="input-group">
+            <input type="number" id="extra-trading-fee" min="0" max="10" step="0.1" value="0" placeholder="0">
+            <span class="input-suffix">%</span>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="extra-withdrawal-fee" class="setting-label">Fee de retiro adicional (%)</label>
+            <p class="setting-description">Comisión extra al retirar ARS del exchange (ej: 0.5%)</p>
+          </div>
+          <div class="input-group">
+            <input type="number" id="extra-withdrawal-fee" min="0" max="10" step="0.1" value="0" placeholder="0">
+            <span class="input-suffix">%</span>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="extra-transfer-fee" class="setting-label">Fee de transferencia adicional (USD)</label>
+            <p class="setting-description">Costo extra al transferir USDT entre exchanges (ej: $0.50)</p>
+          </div>
+          <div class="input-group">
+            <input type="number" id="extra-transfer-fee" min="0" max="50" step="0.1" value="0" placeholder="0">
+            <span class="input-suffix">USD</span>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="bank-commission-fee" class="setting-label">Comisión bancaria (%)</label>
+            <p class="setting-description">Comisión del banco al comprar USD oficial (ej: 0.3%)</p>
+          </div>
+          <div class="input-group">
+            <input type="number" id="bank-commission-fee" min="0" max="10" step="0.1" value="0" placeholder="0">
+            <span class="input-suffix">%</span>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label class="setting-label">⚠️ Nota importante</label>
+            <p class="setting-description" style="color: #fbbf24;">Estos fees SE SUMAN a los fees predeterminados de cada exchange. Úsalos solo si tu exchange cobra fees adicionales no contemplados en los cálculos base.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 6: Exchanges Favoritos -->
       <section class="settings-section">
         <h2>🏦 Exchanges Preferidos</h2>
         <div class="setting-info">

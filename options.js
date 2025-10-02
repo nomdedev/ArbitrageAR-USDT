@@ -17,7 +17,12 @@ const DEFAULT_SETTINGS = {
   showNegativeRoutes: true,
   preferSingleExchange: false,
   defaultSimAmount: 100000,
-  maxRoutesDisplay: 20
+  maxRoutesDisplay: 20,
+  // NUEVO v5.0.4: Fees personalizados
+  extraTradingFee: 0,
+  extraWithdrawalFee: 0,
+  extraTransferFee: 0,
+  bankCommissionFee: 0
 };
 
 // Cargar configuración al iniciar
@@ -71,6 +76,12 @@ async function loadSettings() {
     document.getElementById('prefer-single-exchange').checked = settings.preferSingleExchange ?? false;
     document.getElementById('default-sim-amount').value = settings.defaultSimAmount ?? 100000;
     document.getElementById('max-routes-display').value = settings.maxRoutesDisplay ?? 20;
+    
+    // NUEVO v5.0.4: Fees personalizados
+    document.getElementById('extra-trading-fee').value = settings.extraTradingFee ?? 0;
+    document.getElementById('extra-withdrawal-fee').value = settings.extraWithdrawalFee ?? 0;
+    document.getElementById('extra-transfer-fee').value = settings.extraTransferFee ?? 0;
+    document.getElementById('bank-commission-fee').value = settings.bankCommissionFee ?? 0;
     
     // Actualizar UI según estado de notificaciones
     updateUIState();
@@ -166,7 +177,12 @@ async function saveSettings() {
       showNegativeRoutes: document.getElementById('show-negative-routes').checked,
       preferSingleExchange: document.getElementById('prefer-single-exchange').checked,
       defaultSimAmount: parseInt(document.getElementById('default-sim-amount').value),
-      maxRoutesDisplay: parseInt(document.getElementById('max-routes-display').value)
+      maxRoutesDisplay: parseInt(document.getElementById('max-routes-display').value),
+      // NUEVO v5.0.4: Fees personalizados
+      extraTradingFee: parseFloat(document.getElementById('extra-trading-fee').value) || 0,
+      extraWithdrawalFee: parseFloat(document.getElementById('extra-withdrawal-fee').value) || 0,
+      extraTransferFee: parseFloat(document.getElementById('extra-transfer-fee').value) || 0,
+      bankCommissionFee: parseFloat(document.getElementById('bank-commission-fee').value) || 0
     };
     
     // Guardar en storage

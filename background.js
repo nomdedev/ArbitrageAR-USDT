@@ -309,8 +309,8 @@ async function updateData() {
   // Calcular salud del mercado
   const marketHealth = calculateMarketHealth(top20);
 
-  // NUEVO: Calcular rutas multi-exchange optimizadas
-  const optimizedRoutes = calculateOptimizedRoutes(oficial, usdt, usdtUsd);
+  // NUEVO: Calcular rutas multi-exchange optimizadas (async para cargar fees personalizados)
+  const optimizedRoutes = await calculateOptimizedRoutes(oficial, usdt, usdtUsd);
 
   await chrome.storage.local.set({ 
     official: oficial, 
@@ -386,12 +386,31 @@ function calculateMarketHealth(arbitrages) {
 }
 
 // NUEVO v5.0.0: Calcular TODAS las rutas (single + multi-exchange)
-function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
+async function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
   if (DEBUG_MODE) console.log('🔀 Iniciando calculateOptimizedRoutes...');
   
   if (!oficial || !usdt || !usdtUsd) {
     if (DEBUG_MODE) console.warn('⚠️ Datos faltantes en calculateOptimizedRoutes');
     return [];
+  }
+
+  // NUEVO v5.0.4: Cargar fees personalizados del usuario
+  let userFees = { extraTradingFee: 0, extraWithdrawalFee: 0, extraTransferFee: 0, bankCommissionFee: 0 };
+  try {
+    const stored = await chrome.storage.local.get('notificationSettings');
+    if (stored.notificationSettings) {
+      userFees = {
+        extraTradingFee: stored.notificationSettings.extraTradingFee || 0,
+        extraWithdrawalFee: stored.notificationSettings.extraWithdrawalFee || 0,
+        extraTransferFee: stored.notificationSettings.extraTransferFee || 0,
+        bankCommissionFee: stored.notificationSettings.bankCommissionFee || 0
+      };
+      if (DEBUG_MODE && (userFees.extraTradingFee > 0 || userFees.extraWithdrawalFee > 0 || userFees.extraTransferFee > 0 || userFees.bankCommissionFee > 0)) {
+        console.log('💸 Fees personalizados activos:', userFees);
+      }
+    }
+  } catch (error) {
+    console.warn('⚠️ Error cargando fees personalizados:', error);
   }
 
   const officialSellPrice = parseFloat(oficial.venta) || 0;
@@ -406,12 +425,12 @@ function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
   
   if (DEBUG_MODE) console.log(`   Precio oficial: $${officialSellPrice} ARS`);
   
-  // Fees de transferencia entre exchanges (en USD)
+  // Fees de transferencia entre exchanges (en USD) + fee personalizado
   const TRANSFER_FEES = {
-    'TRC20': 1,      // USDT Tron - más barato
-    'ERC20': 15,     // USDT Ethereum - caro
-    'BEP20': 0.8,    // USDT BSC - barato
-    'default': 1     // Por defecto
+    'TRC20': 1 + userFees.extraTransferFee,      // USDT Tron - más barato
+    'ERC20': 15 + userFees.extraTransferFee,     // USDT Ethereum - caro
+    'BEP20': 0.8 + userFees.extraTransferFee,    // USDT BSC - barato
+    'default': 1 + userFees.extraTransferFee     // Por defecto
   };
 
   const routes = [];
@@ -454,8 +473,10 @@ function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
         return;
       }
 
-      // PASO 1: Comprar USD oficial (sin fees, ya incluido en el precio oficial)
-      const usdPurchased = initialAmount / officialSellPrice;
+      // PASO 1: Comprar USD oficial + comisión bancaria personalizada
+      const bankFeeMultiplier = 1 - (userFees.bankCommissionFee / 100);
+      const initialAfterBankFee = initialAmount * bankFeeMultiplier;
+      const usdPurchased = initialAfterBankFee / officialSellPrice;
 
       // PASO 2: Comprar USDT en buyExchange con USD
       const usdToUsdtRate = parseFloat(buyUsdRate.totalAsk) || parseFloat(buyUsdRate.ask) || 1.05;
@@ -469,9 +490,10 @@ function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
       // Calcular USDT obtenidos (USD ÷ rate)
       const usdtPurchased = usdPurchased / usdToUsdtRate;
       
-      // Aplicar fee de compra (solo una vez)
+      // Aplicar fee de compra (exchange + personalizado)
       const buyFees = EXCHANGE_FEES[buyExchange.toLowerCase()] || EXCHANGE_FEES['default'];
-      const usdtAfterBuyFee = usdtPurchased * (1 - buyFees.trading / 100);
+      const totalBuyFee = buyFees.trading + userFees.extraTradingFee;
+      const usdtAfterBuyFee = usdtPurchased * (1 - totalBuyFee / 100);
 
       // PASO 3: Transferir USDT (o $0 si es mismo exchange)
       const transferFeeUSD = isSingleExchange ? 0 : TRANSFER_FEES['TRC20'];
@@ -490,26 +512,33 @@ function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
       // Vender USDT directo (USDT × precio_ARS)
       const arsFromSale = usdtAfterTransfer * usdtArsBid;
       
-      // Aplicar fees de venta y retiro
+      // Aplicar fees de venta (exchange + personalizado)
       const sellFees = EXCHANGE_FEES[sellExchange.toLowerCase()] || EXCHANGE_FEES['default'];
-      const arsAfterSellFee = arsFromSale * (1 - sellFees.trading / 100);
-      const finalAmount = arsAfterSellFee * (1 - sellFees.withdrawal / 100);
+      const totalSellFee = sellFees.trading + userFees.extraTradingFee;
+      const arsAfterSellFee = arsFromSale * (1 - totalSellFee / 100);
+      
+      // Aplicar fee de retiro (exchange + personalizado)
+      const totalWithdrawalFee = sellFees.withdrawal + userFees.extraWithdrawalFee;
+      const finalAmount = arsAfterSellFee * (1 - totalWithdrawalFee / 100);
 
       // Calcular ganancia neta
       const netProfit = finalAmount - initialAmount;
       const netProfitPercent = (netProfit / initialAmount) * 100;
 
-      // DEBUG: Log de ejemplo para verificar cálculo
+      // DEBUG: Log de ejemplo para verificar cálculo (incluyendo fees personalizados)
       if (DEBUG_MODE && routes.length === 0) {
         console.log('📊 EJEMPLO DE CÁLCULO:');
-        console.log(`   1. Inversión: $${initialAmount.toLocaleString()} ARS`);
-        console.log(`   2. Comprar USD: ${initialAmount} / ${officialSellPrice} = ${usdPurchased.toFixed(2)} USD`);
-        console.log(`   3. Comprar USDT: ${usdPurchased.toFixed(2)} / ${usdToUsdtRate} = ${usdtPurchased.toFixed(2)} USDT`);
-        console.log(`   4. Fee compra (${buyFees.trading}%): ${usdtAfterBuyFee.toFixed(2)} USDT`);
-        console.log(`   5. Fee transfer: -${transferFeeUSDT.toFixed(2)} USDT = ${usdtAfterTransfer.toFixed(2)} USDT`);
-        console.log(`   6. Vender USDT: ${usdtAfterTransfer.toFixed(2)} × ${usdtArsBid} = $${arsFromSale.toFixed(2)} ARS`);
-        console.log(`   7. Fee venta (${sellFees.trading}%): $${arsAfterSellFee.toFixed(2)} ARS`);
-        console.log(`   8. Fee retiro (${sellFees.withdrawal}%): $${finalAmount.toFixed(2)} ARS`);
+        console.log(`   0. Inversión inicial: $${initialAmount.toLocaleString()} ARS`);
+        if (userFees.bankCommissionFee > 0) {
+          console.log(`      Fee bancario (${userFees.bankCommissionFee}%): $${initialAfterBankFee.toFixed(2)} ARS`);
+        }
+        console.log(`   1. Comprar USD: ${initialAfterBankFee.toFixed(2)} / ${officialSellPrice} = ${usdPurchased.toFixed(2)} USD`);
+        console.log(`   2. Comprar USDT: ${usdPurchased.toFixed(2)} / ${usdToUsdtRate} = ${usdtPurchased.toFixed(2)} USDT`);
+        console.log(`   3. Fee compra (${totalBuyFee.toFixed(1)}% = ${buyFees.trading}% + ${userFees.extraTradingFee}%): ${usdtAfterBuyFee.toFixed(2)} USDT`);
+        console.log(`   4. Fee transfer ($${transferFeeUSD.toFixed(2)} USD): -${transferFeeUSDT.toFixed(2)} USDT = ${usdtAfterTransfer.toFixed(2)} USDT`);
+        console.log(`   5. Vender USDT: ${usdtAfterTransfer.toFixed(2)} × ${usdtArsBid} = $${arsFromSale.toFixed(2)} ARS`);
+        console.log(`   6. Fee venta (${totalSellFee.toFixed(1)}% = ${sellFees.trading}% + ${userFees.extraTradingFee}%): $${arsAfterSellFee.toFixed(2)} ARS`);
+        console.log(`   7. Fee retiro (${totalWithdrawalFee.toFixed(1)}% = ${sellFees.withdrawal}% + ${userFees.extraWithdrawalFee}%): $${finalAmount.toFixed(2)} ARS`);
         console.log(`   ✅ GANANCIA: $${netProfit.toFixed(2)} ARS (${netProfitPercent.toFixed(2)}%)`);
       }
 
