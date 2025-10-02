@@ -67,11 +67,24 @@ async function fetchCriptoyaUSDT() {
   return null;
 }
 
+async function fetchCriptoyaUSDTtoUSD() {
+  // Endpoint CriptoYA para conversión USD/USDT por exchange
+  // ¡CRÍTICO! Este ratio NO es 1:1, sino ~1.049 (cuesta más USD comprar USDT)
+  const data = await fetchWithRateLimit('https://criptoya.com/api/usdt/usd/1');
+  // Validar que la respuesta sea un objeto válido
+  if (data && typeof data === 'object') {
+    return data;
+  }
+  console.error('Estructura de datos inválida de CriptoYA USD/USDT:', data);
+  return null;
+}
+
 async function updateData() {
   const oficial = await fetchDolaritoOficial();
   const usdt = await fetchCriptoyaUSDT();
+  const usdtUsd = await fetchCriptoyaUSDTtoUSD(); // ¡CRÍTICO! Obtener ratio USD/USDT
 
-  if (!oficial || !usdt) {
+  if (!oficial || !usdt || !usdtUsd) {
     console.error('Error fetching data');
     // Guardar estado de error
     await chrome.storage.local.set({ 
