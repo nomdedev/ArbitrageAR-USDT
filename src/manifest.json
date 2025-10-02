@@ -8,7 +8,7 @@
     "alarms",
     "notifications"
   ],
-  "options_page": "src/options.html",
+  "options_page": "options.html",
   "host_permissions": [
     "https://*.dolarapi.com/*",
     "https://*.criptoya.com/*",

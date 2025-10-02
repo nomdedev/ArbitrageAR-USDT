@@ -1,6 +1,113 @@
-# ArbitrageAR Oficial a USDT Broker v2.0 🚀
+# ArbitrageAR - Extensión Chrome para Arbitraje Dólar Oficial → USDT 🚀
 
-Extensión moderna para navegadores Chromium (Chrome, Brave, Edge) que monitorea oportunidades de arbitraje entre el Dólar Oficial y USDT en brokers argentinos, con **UI/UX mejorada** y **guía paso a paso interactiva**.
+Extensión moderna para navegadores Chromium que monitorea oportunidades de arbitraje entre el Dólar Oficial argentino y USDT en brokers locales.
+
+## 📁 Estructura del Proyecto
+
+```
+ArbitrageAR-USDT/
+├── src/                    # Código fuente principal
+│   ├── background-refactored.js    # Service worker principal (SOLID)
+│   ├── background.js               # Service worker original
+│   ├── DataService.js              # Servicio de APIs externas
+│   ├── StorageManager.js           # Gestión de almacenamiento Chrome
+│   ├── ArbitrageCalculator.js      # Lógica de cálculos de arbitraje
+│   ├── NotificationManager.js      # Sistema de notificaciones
+│   ├── ScrapingService.js          # Web scraping de bancos
+│   ├── popup.html/js/css           # Interfaz del popup
+│   └── options.html/js/css         # Página de configuración
+├── docs/                   # Documentación completa
+├── tests/                  # Archivos de testing
+├── scripts/                # Scripts de automatización
+├── icons/                  # Iconos de la extensión
+├── manifest.json           # Configuración de la extensión
+└── README.md              # Este archivo
+```
+
+## 🏗️ Arquitectura SOLID
+
+La extensión sigue los principios SOLID con una arquitectura modular:
+
+- **DataService**: Gestión de llamadas a APIs externas (DolarAPI, CriptoYA)
+- **StorageManager**: Abstracción del almacenamiento Chrome
+- **ArbitrageCalculator**: Lógica pura de cálculos de arbitraje
+- **NotificationManager**: Sistema de notificaciones inteligentes
+- **ScrapingService**: Web scraping de datos bancarios
+
+## 🚀 Instalación
+
+1. Clona el repositorio:
+```bash
+git clone https://github.com/nomdedev/ArbitrageAR-USDT.git
+cd ArbitrageAR-USDT
+```
+
+2. Carga la extensión en Chrome:
+   - Ve a `chrome://extensions/`
+   - Activa "Modo desarrollador"
+   - Haz clic en "Cargar descomprimida"
+   - Selecciona la carpeta del proyecto
+
+## 🧪 Testing
+
+Ejecuta los tests para verificar que todo funciona correctamente:
+
+```bash
+cd tests
+node --experimental-modules test-refactored-services.js
+```
+
+## 📚 Documentación
+
+Toda la documentación detallada se encuentra en la carpeta `docs/`:
+- Guías de instalación y uso
+- Reportes de testing
+- Análisis de mejoras
+- Changelog completo
+
+## 🔧 Desarrollo
+
+### Requisitos
+- Node.js (para testing)
+- Chrome/Brave/Edge (para testing de extensión)
+
+### Comandos útiles
+```bash
+# Ejecutar tests
+cd tests && node --experimental-modules test-refactored-services.js
+
+# Ver documentación
+ls docs/
+```
+
+## 📈 Características
+
+- ✅ Monitoreo automático de oportunidades de arbitraje
+- ✅ Notificaciones inteligentes con filtros de horario
+- ✅ Interfaz moderna y responsive
+- ✅ Cálculos precisos considerando todas las comisiones
+- ✅ Integración con múltiples APIs y bancos
+- ✅ Arquitectura modular y mantenible
+
+## 🤝 Contribuir
+
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
+
+## 👨‍💻 Autor
+
+**nomdedev** - [GitHub](https://github.com/nomdedev)
+
+---
+
+⭐ Si te gusta el proyecto, ¡dale una estrella!
 
 ## ✨ Características Principales (v2.0)
 
