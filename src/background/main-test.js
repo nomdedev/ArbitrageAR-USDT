@@ -8,13 +8,13 @@ console.log('🔧 [BACKGROUND-TEST] main.js se está cargando...');
 import { log } from './config.js';
 console.log('✅ [BACKGROUND-TEST] config.js importado exitosamente');
 
-// Paso 2: Probar dataFetcher.js (comentado)
-// import {
-//   fetchDolaritoOficial,
-//   fetchCriptoyaUSDT,
-//   fetchCriptoyaUSDTtoUSD
-// } from './dataFetcher.js';
-// console.log('✅ [BACKGROUND-TEST] dataFetcher.js importado exitosamente');
+// Paso 2: Probar dataFetcher.js
+import {
+  fetchDolaritoOficial,
+  fetchCriptoyaUSDT,
+  fetchCriptoyaUSDTtoUSD
+} from './dataFetcher.js';
+console.log('✅ [BACKGROUND-TEST] dataFetcher.js importado exitosamente');
 
 // Paso 3: Probar routeCalculator.js (comentado)
 // import { calculateOptimizedRoutes } from './routeCalculator.js';
