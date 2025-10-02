@@ -193,7 +193,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 // Inicialización
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('🎯 ArbitrageAR Extension instalada');
+  console.log('🎯 arbitrarARS Extension instalada');
 
   // Configurar alarmas
   chrome.alarms.create('update', { periodInMinutes: 2 });
@@ -205,7 +205,7 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.runtime.onStartup.addListener(() => {
-  console.log('🚀 ArbitrageAR Extension iniciada');
+  console.log('🚀 arbitrarARS Extension iniciada');
   updateData();
   updateBanksData();
 });
