@@ -128,22 +128,21 @@ async function updateData() {
     
     // Validar que existan los precios en ambas APIs
     if (!exchange || typeof exchange !== 'object') return;
-    if (!exchangeUsdRate || typeof exchangeUsdRate !== 'object') {
-      skippedExchanges.push(exchangeName);
-      // DEBUG: Log por qué se omite
-      if (exchange && typeof exchange === 'object') {
-        console.log(`⚠️ ${exchangeName}: No hay USD/USDT rate`);
-      }
-      return;
+    
+    // Si no hay USD/USDT rate para este exchange, usar ratio por defecto de 1.05
+    // Esto permite calcular arbitrajes incluso sin datos específicos de USD/USDT
+    const DEFAULT_USD_USDT_RATE = 1.05;
+    let usdToUsdtRate = DEFAULT_USD_USDT_RATE;
+    
+    if (exchangeUsdRate && typeof exchangeUsdRate === 'object') {
+      usdToUsdtRate = parseFloat(exchangeUsdRate.totalAsk) || parseFloat(exchangeUsdRate.ask) || DEFAULT_USD_USDT_RATE;
+    } else {
+      console.log(`⚠️ ${exchangeName}: Usando USD/USDT rate por defecto (${DEFAULT_USD_USDT_RATE})`);
     }
     
     // Precios USDT/ARS
     const usdtArsAsk = parseFloat(exchange.totalAsk) || parseFloat(exchange.ask) || 0; // Comprar USDT con ARS
     const usdtArsBid = parseFloat(exchange.totalBid) || parseFloat(exchange.bid) || 0; // Vender USDT por ARS
-    
-    // Precios USD/USDT (¡CRÍTICO para el arbitraje!)
-    const usdToUsdtRate = parseFloat(exchangeUsdRate.totalAsk) || parseFloat(exchangeUsdRate.ask) || 0; // Cuántos USD necesito para comprar 1 USDT
-    const usdtToUsdRate = parseFloat(exchangeUsdRate.totalBid) || parseFloat(exchangeUsdRate.bid) || 0; // Cuántos USD recibo si vendo 1 USDT
     
     // DEBUG: Log exchanges que pasan validación inicial
     console.log(`✅ ${exchangeName}: USDT/ARS=${usdtArsBid}, USD/USDT=${usdToUsdtRate}`);
