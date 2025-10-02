@@ -88,8 +88,24 @@ async function updateData() {
   const officialBuyPrice = parseFloat(oficial.compra) || 0; // Precio de compra del dólar oficial
   const officialSellPrice = parseFloat(oficial.venta) || 0; // Precio de venta del dólar oficial
   
+  // Validar que el precio oficial sea válido
+  if (officialSellPrice <= 0 || officialBuyPrice <= 0) {
+    console.error('Precio oficial inválido:', oficial);
+    await chrome.storage.local.set({ 
+      error: 'Precio oficial inválido o no disponible',
+      lastUpdate: Date.now() 
+    });
+    return;
+  }
+  
   // CriptoYA devuelve un objeto con brokers como keys
-  const exchanges = Object.keys(usdt).filter(key => typeof usdt[key] === 'object' && usdt[key] !== null);
+  // Filtrar solo exchanges válidos y excluir claves no deseadas
+  const excludedKeys = ['time', 'timestamp', 'fecha', 'date', 'p2p', 'total'];
+  const exchanges = Object.keys(usdt).filter(key => {
+    return typeof usdt[key] === 'object' && 
+           usdt[key] !== null && 
+           !excludedKeys.includes(key.toLowerCase());
+  });
 
   exchanges.forEach(exchangeName => {
     const exchange = usdt[exchangeName];
@@ -100,11 +116,25 @@ async function updateData() {
     const usdtBuyPrice = parseFloat(exchange.totalAsk) || parseFloat(exchange.ask) || 0; // Precio para comprar USDT en pesos
     const usdtSellPrice = parseFloat(exchange.totalBid) || parseFloat(exchange.bid) || 0; // Precio para vender USDT en pesos
     
-    if (usdtBuyPrice === 0 || usdtSellPrice === 0 || officialBuyPrice === 0) return;
+    // Validaciones más estrictas
+    if (usdtBuyPrice <= 0 || usdtSellPrice <= 0) return;
+    if (officialSellPrice <= 0) return; // Doble verificación
+    
+    // Filtrar si el spread es muy alto (posible P2P o datos inválidos)
+    const spread = ((usdtBuyPrice - usdtSellPrice) / usdtSellPrice) * 100;
+    if (Math.abs(spread) > 10) { // Spread mayor a 10% es sospechoso
+      console.warn(`Exchange ${exchangeName} tiene spread muy alto (${spread.toFixed(2)}%), posible P2P`);
+      return;
+    }
 
     // Obtener comisiones del exchange
     const exchangeNameLower = exchangeName.toLowerCase();
     const fees = EXCHANGE_FEES[exchangeNameLower] || EXCHANGE_FEES['default'];
+    
+    // Advertir si se usa fee por defecto
+    if (!EXCHANGE_FEES[exchangeNameLower]) {
+      console.info(`Exchange ${exchangeName} no encontrado en DB de fees, usando valores por defecto`);
+    }
     
     // Cálculo real de arbitraje con comisiones:
     // Ejemplo con $100,000 ARS:
@@ -132,8 +162,14 @@ async function updateData() {
     // Ganancia bruta (sin comisiones, para comparación)
     const grossProfitPercent = ((usdtSellPrice - officialSellPrice) / officialSellPrice) * 100;
     
-    // Umbral mínimo de rentabilidad NETA del 1.5%
-    if (netProfitPercent > 1.5) {
+    // Validar que los números sean finitos y razonables
+    if (!isFinite(netProfitPercent) || !isFinite(grossProfitPercent)) {
+      console.error(`Cálculo inválido para ${exchangeName}`);
+      return;
+    }
+    
+    // Umbral mínimo de rentabilidad NETA del 1.5% (inclusivo)
+    if (netProfitPercent >= 1.5) {
       arbitrages.push({
         broker: exchangeName,
         officialPrice: officialSellPrice,

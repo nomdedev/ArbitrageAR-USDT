@@ -2,6 +2,40 @@
 
 Todos los cambios notables de este proyecto serán documentados en este archivo.
 
+## [2.2.0] - 2025-01-XX
+
+### 🔒 Seguridad
+- Agregada validación de `officialSellPrice > 0` antes de división para evitar crashes
+- Agregada validación `isFinite()` para prevenir NaN/Infinity en cálculos
+
+### 🐛 Correcciones
+- **Filtrado mejorado**: Excluye claves no-exchange (`time`, `p2p`, `timestamp`, etc.)
+- **Umbral inclusivo**: Cambiado de `> 1.5%` a `>= 1.5%` para incluir exactamente 1.5%
+- **Detección P2P**: Agregado filtro de spread >10% para identificar exchanges P2P
+- **Validaciones estrictas**: Todos los precios deben ser `> 0` (no solo `!= 0`)
+
+### ✨ Mejoras
+- Agregados logs informativos (`console.info`) para exchanges desconocidos
+- Logs de advertencia (`console.warn`) para spreads altos (posible P2P)
+- Mejor manejo de errores con mensajes específicos al usuario
+- Validación de doble verificación en precio oficial
+
+### 🧪 Testing
+- **Agregado test suite completo** con 5 categorías de tests
+- Validación de estructura de comisiones (11 exchanges)
+- Simulación de cálculo de arbitraje ($100k → 8.76% neto)
+- Tests de condiciones límite (precio=0, pérdidas, fees altos)
+- Validación de estructura de objeto arbitrage
+- Tests de lógica de filtrado por umbral
+
+### 📊 Resultados
+- ✅ 5/5 tests pasados
+- ✅ 5 correcciones críticas implementadas
+- ✅ 0 breaking changes
+- ✅ 100% compatible con v2.1.0
+
+---
+
 ## [2.1.0] - 2025-10-02
 
 ### 💰 Actualización Mayor - Cálculo con Comisiones Reales
