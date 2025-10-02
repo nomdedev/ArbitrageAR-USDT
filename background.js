@@ -214,8 +214,9 @@ async function updateData() {
       return;
     }
     
-    // Umbral mínimo de rentabilidad NETA del 1.5% (inclusivo)
-    if (netProfitPercent >= 1.5) {
+    // Mostrar TODOS los arbitrajes (incluso <1%) en el popup
+    // Solo notificaremos los que superen 1% en la función showNotification
+    if (netProfitPercent >= 0.1) {
       arbitrages.push({
         broker: exchangeName,
         officialPrice: officialSellPrice,
@@ -250,12 +251,12 @@ async function updateData() {
   console.log(`✅ ${arbitrages.length} oportunidades de arbitraje encontradas`);
 
   arbitrages.sort((a, b) => b.profitPercent - a.profitPercent);
-  const top5 = arbitrages.slice(0, 5);
+  const top20 = arbitrages.slice(0, 20); // Guardar hasta 20 oportunidades
 
   await chrome.storage.local.set({ 
     official: oficial, 
     usdt: usdt, 
-    arbitrages: top5, 
+    arbitrages: top20, 
     lastUpdate: Date.now(),
     error: null // Limpiar errores previos
   });
@@ -406,16 +407,22 @@ async function shouldSendNotification(settings, arbitrage) {
     return false;
   }
   
-  // 4. Verificar umbral según tipo de alerta
+  // 4. Verificar umbral mínimo de 1% para notificaciones (mostrar todos en popup)
+  // Solo notificamos arbitrajes > 1%, pero en el popup se ven todos
+  if (arbitrage.profitPercent < 1.0) {
+    return false; // No notificar arbitrajes menores a 1%
+  }
+  
+  // 5. Verificar umbral según tipo de alerta configurado
   const thresholds = {
-    'all': 1.5,
+    'all': 1.0, // Notificar desde 1%
     'moderate': 5,
     'high': 10,
     'extreme': 15,
     'custom': settings.customThreshold || 5
   };
   
-  const threshold = thresholds[settings.alertType] || 1.5;
+  const threshold = thresholds[settings.alertType] || 1.0;
   if (arbitrage.profitPercent < threshold) {
     return false;
   }

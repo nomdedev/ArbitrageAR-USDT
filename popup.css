@@ -276,6 +276,20 @@ main::-webkit-scrollbar-thumb {
   animation: pulseGlow 2s ease-in-out infinite;
 }
 
+/* Tag para arbitrajes < 1% (solo visibles, no notificados) */
+.low-profit-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 4px 8px;
+  font-size: 0.7em;
+  font-weight: 600;
+  background: rgba(100, 116, 139, 0.3);
+  color: #cbd5e1;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  vertical-align: middle;
+}
+
 @keyframes pulseGlow {
   0%, 100% {
     box-shadow: 0 4px 16px rgba(245, 158, 11, 0.5);

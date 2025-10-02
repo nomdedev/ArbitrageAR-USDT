@@ -92,6 +92,9 @@ function displayArbitrages(arbitrages, official) {
     const profitClass = arb.profitPercent > 5 ? 'high-profit' : '';
     const profitBadgeClass = arb.profitPercent > 5 ? 'high' : '';
     
+    // Indicador para arbitrajes menores a 1% (visibles pero no notificados)
+    const lowProfitIndicator = arb.profitPercent < 1 ? '<span class="low-profit-tag">👁️ Solo vista</span>' : '';
+    
     // Verificar si hay diferencia entre ganancia bruta y neta
     const hasFees = arb.fees && arb.fees.total > 0;
     
@@ -99,7 +102,7 @@ function displayArbitrages(arbitrages, official) {
       <div class="arbitrage-card ${profitClass}" data-index="${index}">
         <div class="card-header">
           <h3>🏦 ${arb.broker}</h3>
-          <div class="profit-badge ${profitBadgeClass}">+${formatNumber(arb.profitPercent)}%</div>
+          <div class="profit-badge ${profitBadgeClass}">+${formatNumber(arb.profitPercent)}% ${lowProfitIndicator}</div>
         </div>
         <div class="card-body">
           <div class="price-row">
