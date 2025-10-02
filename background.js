@@ -86,12 +86,23 @@ async function updateData() {
   const usdt = await fetchCriptoyaUSDT();
   const usdtUsd = await fetchCriptoyaUSDTtoUSD(); // ¡CRÍTICO! Obtener ratio USD/USDT
 
+  // 🔴 FIX CRÍTICO: Cache si APIs fallan
   if (!oficial || !usdt || !usdtUsd) {
     console.error('Error fetching data');
-    // Guardar estado de error
+    const cached = await chrome.storage.local.get(['optimizedRoutes', 'lastUpdate']);
+    if (cached.optimizedRoutes && cached.optimizedRoutes.length > 0) {
+      if (DEBUG_MODE) console.warn('⚠️ APIs caídas, usando datos en cache');
+      await chrome.storage.local.set({ 
+        error: '⚠️ Datos desactualizados (APIs no disponibles)',
+        lastUpdate: cached.lastUpdate || Date.now(),
+        usingCache: true
+      });
+      return; // Mantener datos anteriores
+    }
     await chrome.storage.local.set({ 
       error: 'No se pudieron obtener los datos de las APIs',
-      lastUpdate: Date.now() 
+      lastUpdate: Date.now(),
+      usingCache: false
     });
     return;
   }
@@ -345,13 +356,19 @@ function calculateMarketHealth(arbitrages) {
   };
 }
 
-// NUEVO: Calcular rutas optimizadas multi-exchange
+// NUEVO v5.0.0: Calcular TODAS las rutas (single + multi-exchange)
 function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
   if (!oficial || !usdt || !usdtUsd) return [];
 
   const officialSellPrice = parseFloat(oficial.venta) || 0;
   const initialAmount = 100000; // $100,000 ARS base
   const excludedKeys = ['time', 'timestamp', 'fecha', 'date', 'p2p', 'total'];
+  
+  // 🔴 FIX CRÍTICO: Validar precio oficial
+  if (!officialSellPrice || officialSellPrice <= 0) {
+    if (DEBUG_MODE) console.warn('⚠️ Precio oficial inválido');
+    return [];
+  }
   
   // Fees de transferencia entre exchanges (en USD)
   const TRANSFER_FEES = {
@@ -371,6 +388,12 @@ function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
   });
 
   const sellExchanges = [...buyExchanges];
+  
+  // 🔴 FIX CRÍTICO: Validar que hay exchanges
+  if (buyExchanges.length === 0 || sellExchanges.length === 0) {
+    if (DEBUG_MODE) console.warn('⚠️ No hay exchanges disponibles');
+    return [];
+  }
 
   // Para cada combinación de exchange de compra y venta
   buyExchanges.forEach(buyExchange => {
@@ -380,24 +403,38 @@ function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
     if (!buyData || !buyUsdRate) return;
 
     sellExchanges.forEach(sellExchange => {
-      // Skip si es el mismo exchange (eso es single-exchange)
-      if (buyExchange === sellExchange) return;
-
       const sellData = usdt[sellExchange];
       if (!sellData) return;
+      
+      // ✅ CAMBIO: Permitir rutas single-exchange (mismo broker)
+      const isSingleExchange = (buyExchange === sellExchange);
+      
+      // 🔴 FIX CRÍTICO: Validar precios razonables (100-10000 ARS)
+      const sellBid = parseFloat(sellData.totalBid) || parseFloat(sellData.bid) || 0;
+      if (sellBid < 100 || sellBid > 10000) {
+        if (DEBUG_MODE) console.warn(`⚠️ Precio inválido en ${sellExchange}: ${sellBid}`);
+        return;
+      }
 
       // PASO 1: Comprar USD oficial
       const usdPurchased = initialAmount / officialSellPrice;
 
       // PASO 2: Comprar USDT en buyExchange
       const usdToUsdtRate = parseFloat(buyUsdRate.totalAsk) || parseFloat(buyUsdRate.ask) || 1.05;
+      
+      // 🔴 FIX CRÍTICO: Validar división por cero
+      if (!usdToUsdtRate || usdToUsdtRate <= 0) {
+        if (DEBUG_MODE) console.warn(`⚠️ USD/USDT rate inválido para ${buyExchange}: ${usdToUsdtRate}`);
+        return;
+      }
+      
       const buyFees = EXCHANGE_FEES[buyExchange] || EXCHANGE_FEES['default'];
       
       const usdtPurchased = usdPurchased / usdToUsdtRate;
       const usdtAfterBuyFee = usdtPurchased * (1 - buyFees.trading / 100);
 
-      // PASO 3: Transferir USDT de buyExchange a sellExchange
-      const transferFeeUSD = TRANSFER_FEES['TRC20']; // Asumimos TRC20 (más barato)
+      // PASO 3: Transferir USDT (o $0 si es mismo exchange)
+      const transferFeeUSD = isSingleExchange ? 0 : TRANSFER_FEES['TRC20'];
       const transferFeeUSDT = transferFeeUSD / usdToUsdtRate; // Convertir a USDT
       const usdtAfterTransfer = usdtAfterBuyFee - transferFeeUSDT;
 
@@ -420,14 +457,16 @@ function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
       // Solo guardar si es >= -5% para análisis
       if (netProfitPercent >= -5) {
         routes.push({
-          buyExchange: buyExchange,
-          sellExchange: sellExchange,
+          buyExchange: buyExchange.replace(/[<>\"']/g, ''), // 🔒 Sanitizar XSS
+          sellExchange: sellExchange.replace(/[<>\"']/g, ''),
           profitPercent: netProfitPercent,
           officialPrice: officialSellPrice,
           usdToUsdtRate: usdToUsdtRate,
           usdtArsBid: usdtArsBid,
           transferFeeUSD: transferFeeUSD,
           transferFeeUSDT: transferFeeUSDT,
+          isSingleExchange: isSingleExchange, // ✅ Flag para UI
+          network: isSingleExchange ? 'N/A' : 'TRC20',
           calculation: {
             initial: initialAmount,
             usdPurchased: usdPurchased,
@@ -450,9 +489,9 @@ function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
     });
   });
 
-  // Ordenar por ganancia y devolver top 10
+  // Ordenar por ganancia y devolver top 20 (incluye single + multi-exchange)
   routes.sort((a, b) => b.profitPercent - a.profitPercent);
-  return routes.slice(0, 10);
+  return routes.slice(0, 20);
 }
 
 // Actualización periódica

@@ -28,31 +28,48 @@
   <div id="marketHealth" class="market-health"></div>
 
   <div class="tabs">
-    <button class="tab active" data-tab="opportunities">🎯 Single Exchange</button>
-    <button class="tab" data-tab="optimized">🔀 Rutas Optimizadas</button>
+    <button class="tab active" data-tab="routes">🎯 Rutas</button>
+    <button class="tab" data-tab="simulator">� Simulador</button>
     <button class="tab" data-tab="guide">📚 Guía</button>
     <button class="tab" data-tab="banks">🏦 Bancos</button>
   </div>
 
   <main>
-    <!-- TAB: Oportunidades de Arbitraje (Single Exchange) -->
-    <section id="tab-opportunities" class="tab-content active">
-      <div class="info-banner">
-        <strong>Modo Simple:</strong> Todo en una misma plataforma
-      </div>
+    <!-- TAB: Todas las Rutas (Single + Multi-Exchange) -->
+    <section id="tab-routes" class="tab-content active">
       <div id="loading" class="loading">
         <div class="spinner"></div>
-        <p>Cargando oportunidades...</p>
-      </div>
-      <div id="arbitrages"></div>
-    </section>
-
-    <!-- TAB: Rutas Optimizadas (Multi-Exchange) -->
-    <section id="tab-optimized" class="tab-content">
-      <div class="info-banner success">
-        <strong>Modo Optimizado:</strong> Maximiza ganancia usando múltiples exchanges
+        <p>Calculando rutas optimizadas...</p>
       </div>
       <div id="optimized-routes"></div>
+    </section>
+
+    <!-- TAB: Simulador con Monto Personalizado -->
+    <section id="tab-simulator" class="tab-content">
+      <div class="simulator-container">
+        <div class="simulator-header">
+          <h3>💰 Simular con Monto Personalizado</h3>
+          <p>Calcula la ganancia exacta con tu inversión</p>
+        </div>
+        
+        <div class="simulator-input">
+          <label for="sim-amount">Monto a invertir (ARS):</label>
+          <input type="number" id="sim-amount" value="100000" min="1000" max="10000000" step="1000">
+        </div>
+
+        <div class="simulator-route-selector">
+          <label for="sim-route">Selecciona una ruta:</label>
+          <select id="sim-route">
+            <option value="">-- Carga primero las rutas --</option>
+          </select>
+        </div>
+
+        <button id="sim-calculate" class="btn-simulate">Calcular Ganancia</button>
+
+        <div id="sim-results" class="simulator-results" style="display: none;">
+          <!-- Resultados dinámicos aquí -->
+        </div>
+      </div>
     </section>
 
     <!-- TAB: Guía Paso a Paso -->

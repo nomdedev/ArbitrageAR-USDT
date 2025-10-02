@@ -69,7 +69,7 @@ function setupRefreshButton() {
 
 // Obtener y mostrar datos de arbitraje
 function fetchAndDisplay() {
-  const container = document.getElementById('arbitrages');
+  const container = document.getElementById('optimized-routes');
   const loading = document.getElementById('loading');
   
   loading.style.display = 'block';
@@ -90,24 +90,29 @@ function fetchAndDisplay() {
     displayMarketHealth(data.marketHealth);
     
     if (data.error) {
-      container.innerHTML = `<p class="error">❌ Error: ${data.error}</p>`;
+      const errorClass = data.usingCache ? 'warning' : 'error';
+      container.innerHTML = `<p class="${errorClass}">❌ ${data.error}</p>`;
+      if (data.usingCache) {
+        displayOptimizedRoutes(data.optimizedRoutes || []);
+      }
       return;
     }
     
-    if (!data.arbitrages || !Array.isArray(data.arbitrages)) {
-      container.innerHTML = '<p class="warning">⏳ No hay datos de arbitraje disponibles. Espera un momento...</p>';
+    if (!data.optimizedRoutes || !Array.isArray(data.optimizedRoutes)) {
+      container.innerHTML = '<p class="warning">⏳ No hay rutas disponibles. Espera un momento...</p>';
       return;
     }
     
-    if (data.arbitrages.length === 0) {
-      container.innerHTML = '<p class="info">📊 No se encontraron oportunidades de arbitraje rentables en este momento.</p>';
+    if (data.optimizedRoutes.length === 0) {
+      container.innerHTML = '<p class="info">📊 No se encontraron rutas rentables en este momento.</p>';
       return;
     }
     
-    displayArbitrages(data.arbitrages, data.official);
-    
-    // NUEVO: Mostrar rutas optimizadas
+    // Mostrar rutas optimizadas (incluye single + multi-exchange)
     displayOptimizedRoutes(data.optimizedRoutes, data.official);
+    
+    // Poblar selector del simulador
+    populateSimulatorRoutes(data.optimizedRoutes);
   });
 }
 
@@ -184,12 +189,12 @@ function displayArbitrages(arbitrages, official) {
   });
 }
 
-// NUEVO: Mostrar rutas optimizadas multi-exchange
+// NUEVO v5.0.0: Mostrar rutas (single + multi-exchange)
 function displayOptimizedRoutes(routes, official) {
   const container = document.getElementById('optimized-routes');
   
   if (!routes || routes.length === 0) {
-    container.innerHTML = '<p class="info">📊 No hay rutas optimizadas disponibles en este momento.</p>';
+    container.innerHTML = '<p class="info">📊 No hay rutas disponibles en este momento.</p>';
     return;
   }
 
@@ -204,11 +209,22 @@ function displayOptimizedRoutes(routes, official) {
     const negativeIndicator = isNegative ? '<span class="negative-tag">⚠️ Pérdida</span>' : '';
     const profitSymbol = isNegative ? '' : '+';
     
+    // Badge especial para single-exchange
+    const singleExchangeBadge = route.isSingleExchange 
+      ? '<span class="single-exchange-badge">🎯 Mismo Broker</span>' 
+      : '';
+    
+    // Determinar texto del transfer
+    const transferText = route.isSingleExchange 
+      ? '⬇️ Sin transfer' 
+      : `🔁 Transfer ${formatNumber(route.transferFeeUSD)} USD`;
+    
     html += `
-      <div class="route-card ${profitClass}" data-index="${index}">
+      <div class="route-card ${profitClass}" data-index="${index}" data-route='${JSON.stringify(route)}'>
         <div class="route-header">
           <div class="route-title">
-            <h3>🔀 Ruta ${index + 1}</h3>
+            <h3>${route.isSingleExchange ? '🎯' : '🔀'} Ruta ${index + 1}</h3>
+            ${singleExchangeBadge}
             <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${formatNumber(route.profitPercent)}% ${negativeIndicator}</div>
           </div>
         </div>
@@ -232,7 +248,7 @@ function displayOptimizedRoutes(routes, official) {
             </div>
           </div>
           
-          <div class="route-arrow">🔁 Transfer ${formatNumber(route.transferFeeUSD)} USD</div>
+          <div class="route-arrow">${transferText}</div>
           
           <div class="route-step">
             <span class="step-number">3️⃣</span>
@@ -480,4 +496,129 @@ function updateLastUpdateTimestamp(timestamp) {
     const timeStr = date.toLocaleTimeString('es-AR');
     container.textContent = `⏰ Última actualización: ${timeStr}`;
   }
+}
+
+// NUEVO v5.0.0: Simulador con monto personalizado
+function populateSimulatorRoutes(routes) {
+  const select = document.getElementById('sim-route');
+  if (!routes || routes.length === 0) {
+    select.innerHTML = '<option value="">-- No hay rutas disponibles --</option>';
+    return;
+  }
+  
+  let options = '<option value="">-- Selecciona una ruta --</option>';
+  routes.forEach((route, index) => {
+    const badge = route.isSingleExchange ? '🎯' : '🔀';
+    const profitSymbol = route.profitPercent >= 0 ? '+' : '';
+    options += `<option value="${index}">${badge} Ruta ${index + 1}: ${profitSymbol}${route.profitPercent.toFixed(2)}% (${route.buyExchange} → ${route.sellExchange})</option>`;
+  });
+  
+  select.innerHTML = options;
+  
+  // Setup event listeners
+  document.getElementById('sim-calculate').addEventListener('click', calculateSimulation);
+}
+
+function calculateSimulation() {
+  const amountInput = document.getElementById('sim-amount');
+  const routeSelect = document.getElementById('sim-route');
+  const resultsDiv = document.getElementById('sim-results');
+  
+  const amount = parseFloat(amountInput.value);
+  const routeIndex = parseInt(routeSelect.value);
+  
+  if (!amount || amount < 1000) {
+    alert('⚠️ Ingresa un monto válido (mínimo $1,000 ARS)');
+    return;
+  }
+  
+  if (isNaN(routeIndex) || !currentData || !currentData.optimizedRoutes[routeIndex]) {
+    alert('⚠️ Selecciona una ruta válida');
+    return;
+  }
+  
+  const route = currentData.optimizedRoutes[routeIndex];
+  
+  // Calcular paso a paso
+  const step1_usd = amount / route.officialPrice;
+  const step2_usdt = step1_usd / route.usdToUsdtRate;
+  
+  // Aplicar fees de compra
+  const buyFees = 0.01; // 1% promedio
+  const step2_usdtAfterFee = step2_usdt * (1 - buyFees);
+  
+  // Transfer fee
+  const transferFeeUSDT = route.transferFeeUSD / route.usdToUsdtRate;
+  const step3_usdtAfterTransfer = step2_usdtAfterFee - transferFeeUSDT;
+  
+  // Vender USDT
+  const step4_ars = step3_usdtAfterTransfer * route.usdtArsBid;
+  
+  // Apply sell fees
+  const sellFees = 0.01; // 1% promedio
+  const finalAmount = step4_ars * (1 - sellFees);
+  
+  // Calcular ganancia
+  const profit = finalAmount - amount;
+  const profitPercent = (profit / amount) * 100;
+  
+  // Mostrar resultados
+  const isNegative = profit < 0;
+  const profitClass = isNegative ? 'negative' : 'positive';
+  const profitEmoji = isNegative ? '📉' : '📈';
+  
+  resultsDiv.style.display = 'block';
+  resultsDiv.innerHTML = `
+    <div class="sim-result-card ${profitClass}">
+      <h3>${profitEmoji} Resultado de Simulación</h3>
+      
+      <div class="sim-breakdown">
+        <div class="sim-row">
+          <span>1️⃣ Inversión inicial:</span>
+          <strong>$${formatNumber(amount)} ARS</strong>
+        </div>
+        <div class="sim-row">
+          <span>2️⃣ USD comprados (oficial):</span>
+          <strong>${formatNumber(step1_usd)} USD</strong>
+        </div>
+        <div class="sim-row">
+          <span>3️⃣ USDT comprados en ${route.buyExchange}:</span>
+          <strong>${formatNumber(step2_usdt)} USDT</strong>
+        </div>
+        <div class="sim-row">
+          <span>4️⃣ Después de fees de compra:</span>
+          <strong>${formatNumber(step2_usdtAfterFee)} USDT</strong>
+        </div>
+        ${!route.isSingleExchange ? `
+        <div class="sim-row warning">
+          <span>⚠️ Fee de transferencia:</span>
+          <strong>-${formatNumber(transferFeeUSDT)} USDT</strong>
+        </div>
+        <div class="sim-row">
+          <span>5️⃣ USDT después de transfer:</span>
+          <strong>${formatNumber(step3_usdtAfterTransfer)} USDT</strong>
+        </div>
+        ` : ''}
+        <div class="sim-row">
+          <span>6️⃣ ARS de venta en ${route.sellExchange}:</span>
+          <strong>$${formatNumber(step4_ars)} ARS</strong>
+        </div>
+        <div class="sim-row">
+          <span>7️⃣ Después de fees de venta:</span>
+          <strong>$${formatNumber(finalAmount)} ARS</strong>
+        </div>
+      </div>
+      
+      <div class="sim-final">
+        <div class="sim-profit ${profitClass}">
+          <span>Ganancia/Pérdida:</span>
+          <strong>${profit >= 0 ? '+' : ''}$${formatNumber(profit)} ARS (${profitPercent.toFixed(2)}%)</strong>
+        </div>
+      </div>
+      
+      <div class="sim-note">
+        <small>⚠️ Los fees reales pueden variar según el exchange. Esta es una estimación aproximada.</small>
+      </div>
+    </div>
+  `;
 }
