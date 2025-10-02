@@ -1,0 +1,60 @@
+# Ignored files and directories
+
+# Extension-specific
+*.crx
+*.pem
+*.zip
+
+# Node modules (if using npm in future)
+node_modules/
+package-lock.json
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS files
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Build directories (if adding build process)
+dist/
+build/
+.cache/
+
+# Temporary files
+*.tmp
+*.temp
+.temp/
+tmp/
+
+# User-specific storage data
+storage/
+*.db
+*.sqlite
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Archives
+*.tar
+*.tar.gz
+*.rar
+*.7z
