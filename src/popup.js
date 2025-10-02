@@ -590,395 +590,148 @@ function calculateGuideValues(arb) {
 
 // Generar HTML del header de la guía
 function generateGuideHeader(broker, profitPercent) {
+  const isProfitable = profitPercent >= 0;
   return `
-    <div class="arbitrage-summary-enhanced">
-      <div class="broker-badge">
-        <div class="broker-icon">🏦</div>
-        <div class="broker-info">
-          <h3>${sanitizeHTML(broker)}</h3>
-          <span class="broker-tag">Ruta seleccionada</span>
-        </div>
+    <div class="guide-header-simple">
+      <div class="guide-title">
+        <h3>📋 Cómo hacer el arbitraje en <span class="broker-name">${sanitizeHTML(broker)}</span></h3>
       </div>
-      <div class="profit-display-enhanced">
-        <div class="profit-percentage">+${formatNumber(profitPercent)}%</div>
-        <div class="profit-label">Ganancia neta</div>
+      <div class="profit-badge ${isProfitable ? 'profit-positive' : 'profit-negative'}">
+        <span class="profit-icon">${isProfitable ? '📈' : '📉'}</span>
+        <span class="profit-text">
+          ${isProfitable ? 'Ganancia' : 'Pérdida'}: 
+          <strong>${isProfitable ? '+' : ''}${formatNumber(profitPercent)}%</strong>
+        </span>
       </div>
     </div>
   `;
 }
 
-// Generar HTML de la barra de progreso
-function generateProgressBar() {
-  return `
-    <div class="progress-bar-container">
-      <div class="progress-step active" data-step="1">
-        <div class="progress-dot"></div>
-        <span>Compra USD</span>
-      </div>
-      <div class="progress-line"></div>
-      <div class="progress-step" data-step="2">
-        <div class="progress-dot"></div>
-        <span>USD → USDT</span>
-      </div>
-      <div class="progress-line"></div>
-      <div class="progress-step" data-step="3">
-        <div class="progress-dot"></div>
-        <span>USDT → ARS</span>
-      </div>
-      <div class="progress-line"></div>
-      <div class="progress-step" data-step="4">
-        <div class="progress-dot"></div>
-        <span>Retiro</span>
-      </div>
-    </div>
-  `;
-}
-
-// Generar HTML de los pasos de la guía
+// Generar HTML de los pasos de la guía (SIMPLIFICADO)
 function generateGuideSteps(values) {
-  const { estimatedInvestment, officialPrice, usdToUsdtRate, usdtArsBid, fees, broker } = values;
+  const { estimatedInvestment, officialPrice, usdAmount, usdToUsdtRate, usdtAfterFees, usdtArsBid, arsFromSale, finalAmount, profit, profitPercent, fees, broker } = values;
 
   return `
-    <div class="steps-timeline">
-      <div class="step-item" data-step="1">
-        <div class="step-timeline-connector"></div>
-        <div class="step-icon-wrapper">
-          <div class="step-icon">💵</div>
-          <div class="step-number-badge">1</div>
-        </div>
-        <div class="step-content-card">
-          <div class="step-header-enhanced">
-            <h4>Comprar Dólares Oficiales</h4>
-            <div class="step-status">Paso inicial</div>
+    <div class="steps-simple">
+      <!-- Paso 1: Comprar USD -->
+      <div class="step-simple" data-step="1">
+        <div class="step-number">1</div>
+        <div class="step-simple-content">
+          <h4>💵 Comprar Dólares Oficiales</h4>
+          <p class="step-simple-text">Ve a tu banco y compra USD al precio oficial</p>
+          <div class="step-simple-calc">
+            <span class="calc-label">Precio:</span>
+            <span class="calc-value">$${formatNumber(officialPrice)}/USD</span>
+            <span class="calc-arrow">→</span>
+            <span class="calc-result">Obtienes ${formatNumber(usdAmount)} USD</span>
           </div>
-          <p class="step-description">Compra dólares al tipo de cambio oficial en tu banco habilitado.</p>
-          <div class="step-details-grid">
-            <div class="detail-item">
-              <span class="detail-icon">💰</span>
-              <div class="detail-content">
-                <span class="detail-label">Precio oficial</span>
-                <span class="detail-value highlight">$${formatNumber(officialPrice)}</span>
-              </div>
-            </div>
-            <div class="detail-item">
-              <span class="detail-icon">🏦</span>
-              <div class="detail-content">
-                <span class="detail-label">Dónde comprar</span>
-                <span class="detail-value">Bancos autorizados</span>
-              </div>
-            </div>
-            <div class="detail-item">
-              <span class="detail-icon">📊</span>
-              <div class="detail-content">
-                <span class="detail-label">Límite mensual</span>
-                <span class="detail-value">USD 200</span>
-              </div>
-            </div>
-            <div class="detail-item">
-              <span class="detail-icon">📋</span>
-              <div class="detail-content">
-                <span class="detail-label">Requisitos</span>
-                <span class="detail-value">CBU + CUIT/CUIL</span>
-              </div>
-            </div>
-          </div>
-          <div class="step-action">
-            <a href="#" data-action="show-banks" class="action-link">
-              <span>Ver bancos disponibles</span>
-              <span class="arrow">→</span>
-            </a>
-          </div>
-        </div>
-        <a href="#" class="platform-link" data-action="show-banks">
-          🏦 Ver bancos disponibles
-        </a>
-      </div>
-
-      <div class="step-item" data-step="2">
-        <div class="step-timeline-connector"></div>
-        <div class="step-icon-wrapper">
-          <div class="step-icon">🔄</div>
-          <div class="step-number-badge">2</div>
-        </div>
-        <div class="step-content-card">
-          <div class="step-header-enhanced">
-            <h4>Depositar USD y Comprar USDT</h4>
-            <div class="step-status">En ${sanitizeHTML(broker)}</div>
-          </div>
-          <p class="step-description">Deposita tus USD en ${sanitizeHTML(broker)} y cómpralos por USDT.</p>
-          <div class="step-details-grid">
-            <div class="detail-item">
-              <span class="detail-icon">🏢</span>
-              <div class="detail-content">
-                <span class="detail-label">Exchange</span>
-                <span class="detail-value">${sanitizeHTML(broker)}</span>
-              </div>
-            </div>
-            <div class="detail-item">
-              <span class="detail-icon">⚖️</span>
-              <div class="detail-content">
-                <span class="detail-label">Ratio conversión</span>
-                <span class="detail-value">${formatNumber(usdToUsdtRate)} USD/USDT</span>
-              </div>
-            </div>
-            <div class="detail-item">
-              <span class="detail-icon">💵</span>
-              <div class="detail-content">
-                <span class="detail-label">Precio USDT</span>
-                <span class="detail-value highlight">$${formatNumber(usdtArsBid)}</span>
-              </div>
-            </div>
-            ${fees.trading > 0 ? `
-            <div class="detail-item">
-              <span class="detail-icon">💳</span>
-              <div class="detail-content">
-                <span class="detail-label">Comisión trading</span>
-                <span class="detail-value fee">${formatNumber(fees.trading)}%</span>
-              </div>
-            </div>
-            ` : ''}
-          </div>
-          <div class="step-warning">
-            <span class="warning-icon">⚠️</span>
-            <span>El exchange cobra ~${formatNumber((usdToUsdtRate - 1) * 100)}% para convertir USD a USDT</span>
+          <div class="step-simple-note">
+            💡 Límite mensual: USD 200 por persona
           </div>
         </div>
       </div>
 
-      <div class="step-item" data-step="3">
-        <div class="step-timeline-connector"></div>
-        <div class="step-icon-wrapper">
-          <div class="step-icon">💸</div>
-          <div class="step-number-badge">3</div>
-        </div>
-        <div class="step-content-card">
-          <div class="step-header-enhanced">
-            <h4>Vender USDT por Pesos</h4>
-            <div class="step-status step-status-success">Ganancia aquí</div>
+      <!-- Paso 2: USD → USDT -->
+      <div class="step-simple" data-step="2">
+        <div class="step-number">2</div>
+        <div class="step-simple-content">
+          <h4>🔄 Convertir USD a USDT</h4>
+          <p class="step-simple-text">Deposita tus USD en <strong>${sanitizeHTML(broker)}</strong> y cómpralos por USDT</p>
+          <div class="step-simple-calc">
+            <span class="calc-label">Tasa:</span>
+            <span class="calc-value">${formatNumber(usdToUsdtRate)} USD = 1 USDT</span>
+            <span class="calc-arrow">→</span>
+            <span class="calc-result">${formatNumber(usdtAfterFees)} USDT</span>
           </div>
-          <p class="step-description">Vende tus USDT en ${sanitizeHTML(broker)} por pesos argentinos (ARS).</p>
-          <div class="step-details-grid">
-            <div class="detail-item">
-              <span class="detail-icon">🎯</span>
-              <div class="detail-content">
-                <span class="detail-label">Precio de venta</span>
-                <span class="detail-value highlight">$${formatNumber(usdtArsBid)}</span>
-              </div>
-            </div>
-            ${fees.trading > 0 ? `
-            <div class="detail-item">
-              <span class="detail-icon">💳</span>
-              <div class="detail-content">
-                <span class="detail-label">Comisión venta</span>
-                <span class="detail-value fee">${formatNumber(fees.trading)}%</span>
-              </div>
-            </div>
-            ` : ''}
-            <div class="detail-item">
-              <span class="detail-icon">🔒</span>
-              <div class="detail-content">
-                <span class="detail-label">Método</span>
-                <span class="detail-value">Venta directa (NO P2P)</span>
-              </div>
-            </div>
-            <div class="detail-item">
-              <span class="detail-icon">🏦</span>
-              <div class="detail-content">
-                <span class="detail-label">Retiro</span>
-                <span class="detail-value">Transferencia bancaria</span>
-              </div>
-            </div>
+          ${usdToUsdtRate > 1.01 ? `
+          <div class="step-simple-warning">
+            ⚠️ El exchange cobra ${formatNumber((usdToUsdtRate - 1) * 100)}% para esta conversión
+          </div>
+          ` : ''}
+        </div>
+      </div>
+
+      <!-- Paso 3: USDT → ARS -->
+      <div class="step-simple" data-step="3">
+        <div class="step-number">3</div>
+        <div class="step-simple-content">
+          <h4>💸 Vender USDT por Pesos</h4>
+          <p class="step-simple-text">Vende tus USDT en <strong>${sanitizeHTML(broker)}</strong> y recibe pesos</p>
+          <div class="step-simple-calc highlight-profit">
+            <span class="calc-label">Precio:</span>
+            <span class="calc-value big">$${formatNumber(usdtArsBid)}/USDT</span>
+            <span class="calc-arrow">→</span>
+            <span class="calc-result big">$${formatNumber(arsFromSale)}</span>
+          </div>
+          <div class="step-simple-success">
+            ✅ Aquí está la ganancia: diferencia entre dólar oficial y USDT
           </div>
         </div>
       </div>
 
-      <div class="step-item" data-step="4">
-        <div class="step-timeline-connector last"></div>
-        <div class="step-icon-wrapper">
-          <div class="step-icon">✅</div>
-          <div class="step-number-badge">4</div>
+      <!-- Paso 4: Retirar -->
+      <div class="step-simple" data-step="4">
+        <div class="step-number">4</div>
+        <div class="step-simple-content">
+          <h4>🏦 Retirar a tu Banco</h4>
+          <p class="step-simple-text">Transfiere los pesos a tu cuenta bancaria</p>
+          <div class="step-simple-calc final">
+            <span class="calc-label">Después de comisiones:</span>
+            <span class="calc-result final-amount">$${formatNumber(finalAmount)}</span>
+          </div>
+          <div class="profit-summary ${profit >= 0 ? 'positive' : 'negative'}">
+            <div class="profit-main">
+              <span class="profit-icon">${profit >= 0 ? '📈' : '📉'}</span>
+              <span class="profit-amount">${profit >= 0 ? '+' : ''}$${formatNumber(profit)}</span>
+              <span class="profit-percent">(${profit >= 0 ? '+' : ''}${formatNumber(profitPercent)}%)</span>
+            </div>
+            <div class="profit-subtitle">
+              ${profit >= 0 ? 'Ganancia neta' : 'Pérdida neta'}
+            </div>
+          </div>
         </div>
-        <div class="step-content-card">
-          <div class="step-header-enhanced">
-            <h4>Retirar Ganancias</h4>
-            <div class="step-status step-status-final">Paso final</div>
-          </div>
-          <p class="step-description">Retira tus pesos a tu cuenta bancaria.</p>
-          <div class="step-details-grid">
-            <div class="detail-item">
-              <span class="detail-icon">🏦</span>
-              <div class="detail-content">
-                <span class="detail-label">Método</span>
-                <span class="detail-value">Transferencia bancaria</span>
-              </div>
-            </div>
-            <div class="detail-item">
-              <span class="detail-icon">⏱️</span>
-              <div class="detail-content">
-                <span class="detail-label">Tiempo estimado</span>
-                <span class="detail-value">24-48 horas hábiles</span>
-              </div>
-            </div>
-            ${fees.withdrawal > 0 ? `
-            <div class="detail-item">
-              <span class="detail-icon">💳</span>
-              <div class="detail-content">
-                <span class="detail-label">Comisión retiro</span>
-                <span class="detail-value fee">${formatNumber(fees.withdrawal)}%</span>
-              </div>
-            </div>
-            ` : ''}
-            <div class="detail-item">
-              <span class="detail-icon">📊</span>
-              <div class="detail-content">
-                <span class="detail-label">Total comisiones</span>
-                <span class="detail-value fee-total">${fees.total > 0 ? formatNumber(fees.total) : '~2-3'}%</span>
-              </div>
-            </div>
-          </div>
+      </div>
+    </div>
+
+    <!-- Resumen Rápido -->
+    <div class="quick-summary">
+      <h4>📊 Resumen Rápido</h4>
+      <div class="summary-flow">
+        <div class="summary-item">
+          <span class="summary-label">Inversión</span>
+          <span class="summary-value">$${formatNumber(estimatedInvestment)}</span>
+        </div>
+        <span class="summary-arrow">→</span>
+        <div class="summary-item">
+          <span class="summary-label">USD Oficial</span>
+          <span class="summary-value">${formatNumber(usdAmount)} USD</span>
+        </div>
+        <span class="summary-arrow">→</span>
+        <div class="summary-item">
+          <span class="summary-label">USDT</span>
+          <span class="summary-value">${formatNumber(usdtAfterFees)} USDT</span>
+        </div>
+        <span class="summary-arrow">→</span>
+        <div class="summary-item highlight">
+          <span class="summary-label">Resultado</span>
+          <span class="summary-value big">$${formatNumber(finalAmount)}</span>
         </div>
       </div>
     </div>
   `;
 }
 
+/* FUNCIONES ANTIGUAS COMENTADAS - Calculadora y Consideraciones detalladas
 // Generar HTML de la calculadora
 function generateCalculatorHTML(values) {
-  const { estimatedInvestment, usdAmount, usdToUsdtRate, usdtAfterFees, arsFromSale, finalAmount, profit, profitPercent, fees } = values;
-
-  return `
-    <div class="calculation-box-enhanced">
-      <div class="calculation-header">
-        <span class="calculation-icon">💰</span>
-        <h4>Simulación con $${formatNumber(estimatedInvestment)} ARS</h4>
-      </div>
-
-      <div class="calculation-flow">
-        <div class="calc-step">
-          <div class="calc-step-number">1</div>
-          <div class="calc-step-content">
-            <span class="calc-label">Inversión inicial</span>
-            <span class="calc-value initial">$${formatNumber(estimatedInvestment)} ARS</span>
-          </div>
-        </div>
-
-        <div class="calc-arrow">↓</div>
-
-        <div class="calc-step">
-          <div class="calc-step-number">2</div>
-          <div class="calc-step-content">
-            <span class="calc-label">Compras USD oficial</span>
-            <span class="calc-value">$${formatNumber(usdAmount)} USD</span>
-          </div>
-        </div>
-
-        <div class="calc-arrow">↓</div>
-
-        <div class="calc-step">
-          <div class="calc-step-number">3</div>
-          <div class="calc-step-content">
-            <span class="calc-label">Compras USDT (${formatNumber(usdToUsdtRate)} USD/USDT)</span>
-            <span class="calc-value">${formatNumber(usdtAfterFees)} USDT</span>
-            ${fees.trading > 0 ? `<span class="calc-fee">Después fee: ${formatNumber(usdtAfterFees)} USDT</span>` : ''}
-          </div>
-        </div>
-
-        <div class="calc-arrow">↓</div>
-
-        <div class="calc-step">
-          <div class="calc-step-number">4</div>
-          <div class="calc-step-content">
-            <span class="calc-label">Vendes USDT por ARS</span>
-            <span class="calc-value">$${formatNumber(arsFromSale)} ARS</span>
-          </div>
-        </div>
-
-        ${fees.total > 0 ? `
-        <div class="calc-fees-summary">
-          <span class="fees-icon">📊</span>
-          <span class="fees-text">Total comisiones (${formatNumber(fees.total)}%)</span>
-          <span class="fees-value">-$${formatNumber(arsFromSale - finalAmount)} ARS</span>
-        </div>
-        ` : ''}
-
-        <div class="calc-arrow final">↓</div>
-
-        <div class="calc-step final">
-          <div class="calc-step-number">5</div>
-          <div class="calc-step-content">
-            <span class="calc-label">Retiras a tu cuenta</span>
-            <span class="calc-value final">$${formatNumber(finalAmount)} ARS</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="calculation-result">
-        <div class="result-icon">✅</div>
-        <div class="result-content">
-          <span class="result-label">Ganancia neta</span>
-          <span class="result-value">$${formatNumber(profit)} ARS</span>
-          <span class="result-percentage">+${formatNumber(profitPercent)}%</span>
-        </div>
-      </div>
-    </div>
-  `;
+  // ... código comentado ...
 }
 
 // Generar HTML de consideraciones importantes
 function generateConsiderationsHTML(fees) {
-  return `
-    <div class="important-considerations">
-      <div class="considerations-header">
-        <span class="considerations-icon">⚠️</span>
-        <h4>Consideraciones importantes</h4>
-      </div>
-      <div class="considerations-list">
-        <div class="consideration-item">
-          <span class="item-icon">💳</span>
-          <div class="item-content">
-            <strong>Comisiones incluidas:</strong>
-            <span>El cálculo ya considera fees de trading y retiro</span>
-          </div>
-        </div>
-        <div class="consideration-item">
-          <span class="item-icon">📊</span>
-          <div class="item-content">
-            <strong>Comisiones variables:</strong>
-            <span>Según el exchange (${fees.total > 0 ? formatNumber(fees.total) : '~2-3'}% total)</span>
-          </div>
-        </div>
-        <div class="consideration-item">
-          <span class="item-icon">📈</span>
-          <div class="item-content">
-            <strong>Precios fluctuantes:</strong>
-            <span>Verifica antes de operar - los valores cambian constantemente</span>
-          </div>
-        </div>
-        <div class="consideration-item">
-          <span class="item-icon">💰</span>
-          <div class="item-content">
-            <strong>Límite mensual:</strong>
-            <span>USD 200 por persona según BCRA</span>
-          </div>
-        </div>
-        <div class="consideration-item">
-          <span class="item-icon">⏱️</span>
-          <div class="item-content">
-            <strong>Tiempos de espera:</strong>
-            <span>Transferencias bancarias: 24-48 horas hábiles</span>
-          </div>
-        </div>
-        <div class="consideration-item">
-          <span class="item-icon">⚡</span>
-          <div class="item-content">
-            <strong>Fees adicionales:</strong>
-            <span>Algunos exchanges cobran por depósito USD</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
+  // ... código comentado ...
 }
+*/
 
 // Configurar animaciones y event listeners para la guía
 function setupGuideAnimations(container) {
@@ -1031,14 +784,11 @@ function displayStepByStepGuide(arb) {
   const values = calculateGuideValues(arb);
   log('📊 Valores calculados para la guía:', values);
 
-  // Generar HTML completo usando funciones auxiliares
+  // Generar HTML completo usando funciones auxiliares (SIMPLIFICADO)
   const html = `
-    <div class="step-container">
+    <div class="guide-container-simple">
       ${generateGuideHeader(values.broker, values.profitPercent)}
-      ${generateProgressBar()}
       ${generateGuideSteps(values)}
-      ${generateCalculatorHTML(values)}
-      ${generateConsiderationsHTML(values.fees)}
     </div>
   `;
 

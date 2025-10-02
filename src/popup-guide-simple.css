@@ -1,0 +1,350 @@
+/* ==========================================
+   GUÍA PASO A PASO SIMPLIFICADA
+   ========================================== */
+
+/* Contenedor principal */
+.guide-container-simple {
+  padding: 20px;
+  max-width: 100%;
+}
+
+/* Header simplificado */
+.guide-header-simple {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  border-radius: 12px;
+  color: white;
+}
+
+.guide-title h3 {
+  font-size: 18px;
+  margin: 0;
+  font-weight: 600;
+}
+
+.broker-name {
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+.profit-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.profit-badge.profit-positive {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.profit-badge.profit-negative {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.profit-icon {
+  font-size: 20px;
+}
+
+.profit-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.profit-text strong {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* Pasos simplificados */
+.steps-simple {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.step-simple {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+  border-radius: 12px;
+  border-left: 4px solid #3b82f6;
+  transition: all 0.3s ease;
+}
+
+.step-simple:hover {
+  transform: translateX(5px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+}
+
+.step-number {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 50%;
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.step-simple-content {
+  flex: 1;
+}
+
+.step-simple-content h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #e1e8ed;
+}
+
+.step-simple-text {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+/* Cálculo inline */
+.step-simple-calc {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 8px;
+  margin: 8px 0;
+  flex-wrap: wrap;
+}
+
+.step-simple-calc.highlight-profit {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.step-simple-calc.final {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.1));
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.calc-label {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.calc-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #3b82f6;
+}
+
+.calc-value.big {
+  font-size: 16px;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.calc-arrow {
+  font-size: 16px;
+  color: #64748b;
+}
+
+.calc-result {
+  font-size: 14px;
+  font-weight: 700;
+  color: #e1e8ed;
+}
+
+.calc-result.big {
+  font-size: 16px;
+  color: #10b981;
+}
+
+.final-amount {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  color: #fbbf24 !important;
+}
+
+/* Notas y alertas */
+.step-simple-note {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: rgba(251, 191, 36, 0.1);
+  border-left: 3px solid #fbbf24;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #fbbf24;
+}
+
+.step-simple-warning {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: rgba(239, 68, 68, 0.1);
+  border-left: 3px solid #ef4444;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #ef4444;
+}
+
+.step-simple-success {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: rgba(16, 185, 129, 0.1);
+  border-left: 3px solid #10b981;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #10b981;
+}
+
+/* Resumen de ganancia */
+.profit-summary {
+  margin-top: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.profit-summary.positive {
+  border: 2px solid rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
+}
+
+.profit-summary.negative {
+  border: 2px solid rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2);
+}
+
+.profit-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.profit-main .profit-icon {
+  font-size: 28px;
+}
+
+.profit-amount {
+  font-size: 24px;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.profit-summary.negative .profit-amount {
+  color: #ef4444;
+}
+
+.profit-percent {
+  font-size: 18px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.profit-subtitle {
+  font-size: 12px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Resumen rápido al final */
+.quick-summary {
+  margin-top: 30px;
+  padding: 20px;
+  background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+  border-radius: 12px;
+  border: 2px solid rgba(59, 130, 246, 0.2);
+}
+
+.quick-summary h4 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #e1e8ed;
+  text-align: center;
+}
+
+.summary-flow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.summary-item {
+  flex: 1;
+  min-width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 8px;
+}
+
+.summary-item.highlight {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.15));
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.summary-label {
+  font-size: 10px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e1e8ed;
+}
+
+.summary-value.big {
+  font-size: 16px;
+  color: #fbbf24;
+}
+
+.summary-arrow {
+  font-size: 20px;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 400px) {
+  .guide-header-simple {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .summary-flow {
+    flex-direction: column;
+  }
+
+  .summary-arrow {
+    transform: rotate(90deg);
+  }
+}
