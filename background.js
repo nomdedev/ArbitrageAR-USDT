@@ -130,6 +130,10 @@ async function updateData() {
     if (!exchange || typeof exchange !== 'object') return;
     if (!exchangeUsdRate || typeof exchangeUsdRate !== 'object') {
       skippedExchanges.push(exchangeName);
+      // DEBUG: Log por qué se omite
+      if (exchange && typeof exchange === 'object') {
+        console.log(`⚠️ ${exchangeName}: No hay USD/USDT rate`);
+      }
       return;
     }
     
@@ -141,8 +145,14 @@ async function updateData() {
     const usdToUsdtRate = parseFloat(exchangeUsdRate.totalAsk) || parseFloat(exchangeUsdRate.ask) || 0; // Cuántos USD necesito para comprar 1 USDT
     const usdtToUsdRate = parseFloat(exchangeUsdRate.totalBid) || parseFloat(exchangeUsdRate.bid) || 0; // Cuántos USD recibo si vendo 1 USDT
     
+    // DEBUG: Log exchanges que pasan validación inicial
+    console.log(`✅ ${exchangeName}: USDT/ARS=${usdtArsBid}, USD/USDT=${usdToUsdtRate}`);
+    
     // Validaciones estrictas
-    if (usdtArsBid <= 0 || usdToUsdtRate <= 0) return;
+    if (usdtArsBid <= 0 || usdToUsdtRate <= 0) {
+      console.log(`❌ ${exchangeName}: Precios inválidos (USDT/ARS=${usdtArsBid}, USD/USDT=${usdToUsdtRate})`);
+      return;
+    }
     if (officialSellPrice <= 0) return;
     
     // Filtrar spreads muy altos en ARS (posible P2P)
