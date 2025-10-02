@@ -553,6 +553,16 @@ function createSafeElement(tag, content, className = '') {
   return element;
 }
 
+// Función para sanitizar HTML (previene XSS)
+function sanitizeHTML(text) {
+  if (typeof text !== 'string') {
+    return '';
+  }
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
 // Función para actualizar innerHTML de manera segura
 function setSafeHTML(element, html) {
   if (typeof html !== 'string') {
