@@ -296,19 +296,19 @@ async function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
 
       if (route.profitPercent <= -10) {
         lowProfitRoutes++;
-        if (totalCalculated <= 5) log(`📉 [DEBUG] Rentabilidad muy baja: ${buyExchange} → ${sellExchange} (${route.profitPercent.toFixed(2)}%), excluyendo`);
+        if (totalCalculated <= 5) log(`📉 [DEBUG] Rentabilidad muy baja: ${buyExchange} → ${sellExchange} (${route.profitPercent.toFixed(4)}%), excluyendo`);
         continue;
       }
 
       routes.push(route);
-      if (routes.length <= 3) log(`✅ [DEBUG] Ruta rentable: ${buyExchange} → ${sellExchange} (${route.profitPercent.toFixed(2)}%)`);
+      log(`✅ [DEBUG] Ruta rentable: ${buyExchange} → ${sellExchange} (${route.profitPercent.toFixed(4)}%)`);
     }
   }
 
   log(`📊 [DEBUG] Análisis de rutas:`);
   log(`   - Total calculadas: ${totalCalculated}`);
   log(`   - Rutas nulas: ${nullRoutes}`);
-  log(`   - Rentabilidad muy baja (≤-50%): ${lowProfitRoutes}`);
+  log(`   - Rentabilidad muy baja (≤-10%): ${lowProfitRoutes}`);
   log(`   - Rutas rentables: ${routes.length}`);
 
   // Ordenar por rentabilidad

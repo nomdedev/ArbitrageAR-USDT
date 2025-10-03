@@ -299,11 +299,13 @@ async function fetchAndDisplay(retryCount = 0) {
     
     // NUEVO: Guardar todas las rutas en cache global para filtrado P2P
     allRoutes = data.optimizedRoutes || [];
+    console.log('🔍 [POPUP] allRoutes guardadas:', allRoutes.length, 'rutas');
     
     // NUEVO: Actualizar contadores de filtros
     updateFilterCounts();
     
     // NUEVO: Aplicar filtro P2P activo (esto internamente llama a displayOptimizedRoutes)
+    console.log('🔍 [POPUP] Llamando applyP2PFilter()...');
     applyP2PFilter();
     
     // Poblar selector del simulador (con todas las rutas)
@@ -318,21 +320,24 @@ async function fetchAndDisplay(retryCount = 0) {
 
 // NUEVA FUNCIÓN v5.0: Aplicar preferencias del usuario
 function applyUserPreferences(routes) {
-  console.log('🔍 applyUserPreferences() llamado con', routes?.length, 'rutas');
+  console.log('🔍 [POPUP] applyUserPreferences() llamado con', routes?.length, 'rutas');
+  console.log('🔍 [POPUP] userSettings completo:', JSON.stringify(userSettings, null, 2));
   if (!Array.isArray(routes) || routes.length === 0) {
-    console.log('🔍 applyUserPreferences: rutas vacías o no array, retornando vacío');
+    console.log('🔍 [POPUP] applyUserPreferences: rutas vacías o no array, retornando vacío');
     return routes;
   }
   
   let filtered = [...routes]; // Copia para no mutar original
-  console.log('🔍 applyUserPreferences: copia inicial tiene', filtered.length, 'rutas');
+  console.log('🔍 [POPUP] applyUserPreferences: copia inicial tiene', filtered.length, 'rutas');
   
   // 1. Filtrar rutas negativas si el usuario no quiere verlas
-  console.log('🔍 userSettings.showNegativeRoutes:', userSettings?.showNegativeRoutes);
+  console.log('🔍 [POPUP] userSettings.showNegativeRoutes:', userSettings?.showNegativeRoutes, 'tipo:', typeof userSettings?.showNegativeRoutes);
   if (userSettings.showNegativeRoutes === false) {
     const beforeCount = filtered.length;
     filtered = filtered.filter(r => r.profitPercent >= 0);
-    console.log(`🔧 Filtradas ${beforeCount - filtered.length} rutas negativas, quedan ${filtered.length}`);
+    console.log(`🔧 [POPUP] Filtradas ${beforeCount - filtered.length} rutas negativas, quedan ${filtered.length}`);
+  } else {
+    console.log('🔍 [POPUP] No se filtran rutas negativas (showNegativeRoutes no es false)');
   }
   
   // 2. Ordenar priorizando rutas single-exchange si el usuario lo prefiere
@@ -345,18 +350,18 @@ function applyUserPreferences(routes) {
       // Luego por rentabilidad
       return b.profitPercent - a.profitPercent;
     });
-    console.log('🔧 Rutas ordenadas priorizando mismo broker');
+    console.log('🔧 [POPUP] Rutas ordenadas priorizando mismo broker');
   }
   
   // 3. Limitar cantidad de rutas mostradas
   const maxDisplay = userSettings.maxRoutesDisplay || 20;
-  console.log('🔍 maxDisplay:', maxDisplay, 'rutas actuales:', filtered.length);
+  console.log('🔍 [POPUP] maxDisplay:', maxDisplay, 'rutas actuales:', filtered.length);
   if (filtered.length > maxDisplay) {
     filtered = filtered.slice(0, maxDisplay);
-    console.log(`🔧 Limitadas a ${maxDisplay} rutas`);
+    console.log(`🔧 [POPUP] Limitadas a ${maxDisplay} rutas`);
   }
   
-  console.log('🔍 applyUserPreferences retornando', filtered.length, 'rutas');
+  console.log('🔍 [POPUP] applyUserPreferences retornando', filtered.length, 'rutas');
   return filtered;
 }
 
@@ -435,17 +440,17 @@ function displayArbitrages(arbitrages, official) {
 
 // NUEVO v5.0.0: Mostrar rutas (single + multi-exchange) - Vista compacta
 function displayOptimizedRoutes(routes, official) {
-  console.log('🔍 displayOptimizedRoutes() llamado con', routes?.length, 'rutas');
+  console.log('🔍 [POPUP] displayOptimizedRoutes() llamado con', routes?.length, 'rutas');
   const container = document.getElementById('optimized-routes');
-  console.log('🔍 container encontrado:', !!container);
+  console.log('🔍 [POPUP] container encontrado:', !!container);
   
   if (!routes || routes.length === 0) {
-    console.log('🔍 No hay rutas para mostrar, mostrando mensaje vacío');
+    console.log('🔍 [POPUP] No hay rutas para mostrar, mostrando mensaje vacío');
     container.innerHTML = '<p class="info">📊 No hay rutas disponibles en este momento.</p>';
     return;
   }
 
-  console.log('🔍 Generando HTML para', routes.length, 'rutas');
+  console.log('🔍 [POPUP] Generando HTML para', routes.length, 'rutas');
   let html = '';
   
   routes.forEach((route, index) => {
@@ -522,6 +527,8 @@ function displayOptimizedRoutes(routes, official) {
       showRouteGuide(index);
     });
   });
+  
+  console.log('✅ [POPUP] displayOptimizedRoutes() completado - HTML generado y aplicado');
 }
 
 // NUEVA FUNCIÓN v5.0.5: Mostrar guía de una ruta optimizada
