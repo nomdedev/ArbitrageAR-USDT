@@ -6,7 +6,7 @@ let currentFilter = 'no-p2p'; // CORREGIDO v5.0.12: Volver a 'no-p2p' pero con d
 let allRoutes = []; // NUEVO: Cache de todas las rutas sin filtrar
 
 // Modo debug para reducir logs excesivos
-const DEBUG_MODE = false;
+const DEBUG_MODE = true;
 
 console.log('🚀 Popup.js cargado correctamente');
 
