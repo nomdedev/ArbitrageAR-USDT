@@ -323,16 +323,47 @@ async function fetchAndDisplay(retryCount = 0) {
   
   try {
     console.log('📤 Solicitando datos al background...');
+    
+    // Mantener vivo el service worker
+    chrome.runtime.getBackgroundPage(() => {
+      console.log('🔄 Service worker mantenido vivo');
+    });
+    
+    // Timeout para detectar si el callback nunca se ejecuta
+    let responseReceived = false;
+    const timeoutId = setTimeout(() => {
+      if (!responseReceived) {
+        console.error('⏰ TIMEOUT: El callback del background nunca se ejecutó (10 segundos)');
+        loading.style.display = 'none';
+        container.innerHTML = '<p class="error">⏰ Timeout: El background no respondió en 10 segundos.</p>';
+      }
+    }, 10000);
+    
     chrome.runtime.sendMessage({ action: 'getArbitrages' }, data => {
-      console.log('📥 Datos recibidos del background:', data);
+      responseReceived = true;
+      clearTimeout(timeoutId);
+      
+      console.log('📥 Callback ejecutado - Datos recibidos del background:', data);
+      
+      if (chrome.runtime.lastError) {
+        console.error('❌ Error en chrome.runtime:', chrome.runtime.lastError);
+        loading.style.display = 'none';
+        container.innerHTML = '<p class="error">❌ Error de comunicación con el background.</p>';
+        return;
+      }
+      
+      console.log('📥 Procesando respuesta del background...');
       
       loading.style.display = 'none';
       
       if (!data) {
+        console.error('❌ No se recibió data del background');
         handleNoData(container);
         return;
       }
 
+      console.log('📥 Data válida recibida, procesando...');
+      
       // Si está inicializando y aún no hay rutas, hacer retry automático
       if (data.error?.includes('Inicializando') && retryCount < maxRetries) {
         handleInitializationError(container, data, retryCount, maxRetries);
