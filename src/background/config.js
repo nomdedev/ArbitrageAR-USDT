@@ -24,7 +24,7 @@ const CACHE_CONFIG = {
   showCacheWhileUpdating: true,
   
   // Forzar actualización al abrir popup (false = usar cache si está disponible)
-  forceRefreshOnPopupOpen: false, // ⚠️ Temporalmente true para debug
+  forceRefreshOnPopupOpen: true, // ⚠️ TEMPORALMENTE TRUE PARA DEBUG
   
   // Intervalo de actualización automática en background (en minutos)
   autoUpdateInterval: 2

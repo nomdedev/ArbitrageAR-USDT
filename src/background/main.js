@@ -156,10 +156,16 @@ async function getCurrentData() {
     const isCacheValid = cacheAge < CACHE_CONFIG.maxCacheAge;
     
     if (isCacheValid && !CACHE_CONFIG.forceRefreshOnPopupOpen) {
-      console.log(`📊 Usando datos cacheados (${cacheAge.toFixed(1)} min antiguos)`);
+      console.log(`📊 [DEBUG] Usando datos cacheados (${cacheAge.toFixed(1)} min antiguos)`);
+      console.log('📊 [DEBUG] Cache data:', {
+        hasCurrentData: !!currentData,
+        routesInCache: currentData?.optimizedRoutes?.length || 0
+      });
       
       // Calcular salud del mercado
+      console.log('🔧 [DEBUG] Calculando marketHealth para cache...');
       const marketHealth = calculateMarketHealth(currentData.optimizedRoutes);
+      console.log('🔧 [DEBUG] marketHealth calculado:', marketHealth?.status);
       
       const result = {
         ...currentData,
@@ -171,9 +177,11 @@ async function getCurrentData() {
       console.log('🔍 [DEBUG] getCurrentData() RETORNA (cache):', {
         routesCount: result.optimizedRoutes?.length || 0,
         arbitragesCount: result.arbitrages?.length || 0,
-        hasError: !!result.error
+        hasError: !!result.error,
+        hasMarketHealth: !!result.marketHealth
       });
       
+      console.log('📤 [DEBUG] Retornando result de cache...');
       return result;
     }
   }
