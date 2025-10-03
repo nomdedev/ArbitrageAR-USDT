@@ -282,37 +282,64 @@ async function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
   let totalCalculated = 0;
   let nullRoutes = 0;
   let lowProfitRoutes = 0;
+  const maxCalculations = 1000; // Límite para evitar cuelgues
+  const startTime = Date.now();
 
-  log(`🔄 [DEBUG] Iniciando cálculo de rutas: ${buyExchanges.length} x ${sellExchanges.length} = ${buyExchanges.length * sellExchanges.length} combinaciones`);
+  console.log(`🔄 [DEBUG] Iniciando cálculo de rutas: ${buyExchanges.length} x ${sellExchanges.length} = ${buyExchanges.length * sellExchanges.length} combinaciones (máx ${maxCalculations})`);
 
   // Calcular todas las combinaciones posibles
   for (const buyExchange of buyExchanges) {
     for (const sellExchange of sellExchanges) {
       totalCalculated++;
-      const route = calculateRoute(buyExchange, sellExchange, oficial, usdt, usdtUsd, userFees, transferFees);
 
-      if (!route) {
+      // Verificar límite de cálculos
+      if (totalCalculated > maxCalculations) {
+        console.log(`⚠️ [DEBUG] Límite de cálculos alcanzado (${maxCalculations}), deteniendo...`);
+        break;
+      }
+
+      // Verificar tiempo límite (30 segundos máximo)
+      if (Date.now() - startTime > 30000) {
+        console.log(`⏰ [DEBUG] Tiempo límite alcanzado (30s), deteniendo cálculo...`);
+        break;
+      }
+
+      try {
+        const route = calculateRoute(buyExchange, sellExchange, oficial, usdt, usdtUsd, userFees, transferFees);
+
+        if (!route) {
+          nullRoutes++;
+          if (totalCalculated <= 5) console.log(`❌ [DEBUG] Ruta nula: ${buyExchange} → ${sellExchange}`);
+          continue;
+        }
+
+        if (route.profitPercent <= -10) {
+          lowProfitRoutes++;
+          if (totalCalculated <= 5) console.log(`📉 [DEBUG] Rentabilidad muy baja: ${buyExchange} → ${sellExchange} (${route.profitPercent.toFixed(4)}%), excluyendo`);
+          continue;
+        }
+
+        routes.push(route);
+        if (totalCalculated <= 10) console.log(`✅ [DEBUG] Ruta rentable: ${buyExchange} → ${sellExchange} (${route.profitPercent.toFixed(4)}%)`);
+
+      } catch (error) {
+        console.error(`❌ [DEBUG] Error calculando ruta ${buyExchange} → ${sellExchange}:`, error);
         nullRoutes++;
-        if (totalCalculated <= 5) log(`❌ [DEBUG] Ruta nula: ${buyExchange} → ${sellExchange}`);
-        continue;
       }
+    }
 
-      if (route.profitPercent <= -10) {
-        lowProfitRoutes++;
-        if (totalCalculated <= 5) log(`📉 [DEBUG] Rentabilidad muy baja: ${buyExchange} → ${sellExchange} (${route.profitPercent.toFixed(4)}%), excluyendo`);
-        continue;
-      }
-
-      routes.push(route);
-      log(`✅ [DEBUG] Ruta rentable: ${buyExchange} → ${sellExchange} (${route.profitPercent.toFixed(4)}%)`);
+    // Si ya alcanzamos el límite, salir del bucle externo también
+    if (totalCalculated > maxCalculations || Date.now() - startTime > 30000) {
+      break;
     }
   }
 
-  log(`📊 [DEBUG] Análisis de rutas:`);
-  log(`   - Total calculadas: ${totalCalculated}`);
-  log(`   - Rutas nulas: ${nullRoutes}`);
-  log(`   - Rentabilidad muy baja (≤-10%): ${lowProfitRoutes}`);
-  log(`   - Rutas rentables: ${routes.length}`);
+  const calcTime = Date.now() - startTime;
+  console.log(`📊 [DEBUG] Análisis de rutas completado en ${calcTime}ms:`);
+  console.log(`   - Total calculadas: ${totalCalculated}`);
+  console.log(`   - Rutas nulas: ${nullRoutes}`);
+  console.log(`   - Rentabilidad muy baja (≤-10%): ${lowProfitRoutes}`);
+  console.log(`   - Rutas rentables: ${routes.length}`);
 
   // Ordenar por rentabilidad
   routes.sort((a, b) => b.profitPercent - a.profitPercent);
@@ -320,7 +347,7 @@ async function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
   // Limitar a las mejores 50 rutas para evitar sobrecarga
   const limitedRoutes = routes.slice(0, 50);
 
-  console.log(`✅ ${limitedRoutes.length} rutas calculadas`);
+  console.log(`✅ [DEBUG] calculateOptimizedRoutes FINALIZADO - ${limitedRoutes.length} rutas retornadas`);
 
   if (limitedRoutes.length > 0) {
     console.log(`🏆 Mejor ruta: ${limitedRoutes[0].buyExchange} → ${limitedRoutes[0].sellExchange} (${limitedRoutes[0].profitPercent.toFixed(2)}%)`);

@@ -22,27 +22,30 @@ let lastUpdate = null;
 
 // Función principal de actualización de datos
 async function updateData() {
-  log('🔄 Iniciando actualización de datos...');
+  console.log('🔄 [DEBUG] updateData() INICIO en', new Date().toISOString());
 
   try {
     // Fetch de datos en paralelo
-    log('📡 Consultando APIs...');
+    console.log('📡 [DEBUG] Consultando APIs...');
     const [oficial, usdt, usdtUsd] = await Promise.all([
       fetchDolaritoOficial(),
       fetchCriptoyaUSDT(),
       fetchCriptoyaUSDTtoUSD()
     ]);
 
-    log(`📊 Datos obtenidos - Oficial: ${!!oficial}, USDT: ${!!usdt}, USDT/USD: ${!!usdtUsd}`);
+    console.log(`📊 [DEBUG] Datos obtenidos - Oficial: ${!!oficial}, USDT: ${!!usdt}, USDT/USD: ${!!usdtUsd}`);
 
     if (!oficial || !usdt) {
-      log('❌ Error obteniendo datos básicos');
+      console.log('❌ [DEBUG] Error obteniendo datos básicos');
       return null;
     }
 
     // Calcular rutas optimizadas
-    console.log('🧮 Calculando rutas optimizadas...');
+    console.log('🧮 [DEBUG] Iniciando calculateOptimizedRoutes...');
+    const startTime = Date.now();
     const optimizedRoutes = await calculateOptimizedRoutes(oficial, usdt, usdtUsd);
+    const calcTime = Date.now() - startTime;
+    console.log(`✅ [DEBUG] calculateOptimizedRoutes completado en ${calcTime}ms - ${optimizedRoutes.length} rutas`);
 
     // Crear objeto de respuesta
     const data = {
@@ -58,7 +61,7 @@ async function updateData() {
     currentData = data;
     lastUpdate = data.lastUpdate;
 
-    log(`✅ Datos actualizados: ${optimizedRoutes.length} rutas calculadas`);
+    console.log(`✅ [DEBUG] updateData() COMPLETADO - ${optimizedRoutes.length} rutas calculadas`);
 
     // Verificar y enviar notificaciones
     if (optimizedRoutes.length > 0) {
@@ -68,7 +71,8 @@ async function updateData() {
     return data;
 
   } catch (error) {
-    log('❌ Error en updateData:', error);
+    console.error('❌ [DEBUG] Error en updateData:', error);
+    console.error('❌ [DEBUG] Stack trace:', error.stack);
     return {
       error: error.message,
       usingCache: true,
@@ -130,6 +134,7 @@ function calculateMarketHealth(arbitrages) {
 
 // Función para obtener datos actuales
 async function getCurrentData() {
+  console.log('🔍 [DEBUG] getCurrentData() INICIO');
   const now = Date.now();
   
   // Si tenemos datos cacheados y son recientes, usarlos
@@ -184,6 +189,7 @@ async function getCurrentData() {
   }
 
   // Si no hay nada, devolver mensaje de espera
+  console.log('🔍 [DEBUG] getCurrentData() FIN - retornando mensaje de inicialización');
   return {
     error: 'Inicializando datos... Espera unos segundos e intenta de nuevo.',
     usingCache: false,
@@ -232,17 +238,29 @@ async function initialize() {
 
 // Event listeners para mensajes del popup/options
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log('📨 [BACKGROUND] Mensaje recibido:', request.action);
+  console.log('📨 [BACKGROUND] Mensaje recibido:', request.action, 'en', new Date().toISOString());
 
   if (request.action === 'getArbitrages') {
+    console.log('🔄 [BACKGROUND] Iniciando getCurrentData() para getArbitrages...');
+
     // Manejar de forma asíncrona pero responder inmediatamente
     getCurrentData().then(data => {
-      console.log('📤 [BACKGROUND] Enviando respuesta con', data?.optimizedRoutes?.length || 0, 'rutas');
+      console.log('📤 [BACKGROUND] getCurrentData() completado, enviando respuesta con', data?.optimizedRoutes?.length || 0, 'rutas');
+      console.log('📤 [BACKGROUND] Respuesta completa:', {
+        hasError: !!data?.error,
+        routesCount: data?.optimizedRoutes?.length || 0,
+        usingCache: data?.usingCache,
+        timestamp: new Date().toISOString()
+      });
       sendResponse(data);
     }).catch(error => {
       console.error('❌ [BACKGROUND] Error en getArbitrages:', error);
+      console.error('❌ [BACKGROUND] Stack trace:', error.stack);
       sendResponse({ error: 'Error interno del service worker', optimizedRoutes: [] });
     });
+
+    // Mantener el canal abierto para respuestas asíncronas
+    return true;
   } else if (request.action === 'getBanks') {
     // Manejar de forma asíncrona pero responder inmediatamente
     getBanksData().then(data => {
