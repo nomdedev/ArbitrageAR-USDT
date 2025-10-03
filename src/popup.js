@@ -140,17 +140,6 @@ function applyP2PFilter() {
 
   // Mostrar rutas filtradas
   if (currentData) {
-    displayOptimizedRoutes(filteredRoutes, currentData.official);
-  } else {
-    console.warn('⚠️ currentData es null, no se puede mostrar rutas');
-  }
-
-  // Actualizar contadores en los botones
-  updateFilterCounts();
-}
-
-  // Mostrar rutas filtradas
-  if (currentData) {
     if (DEBUG_MODE) console.log('🔍 Llamando displayOptimizedRoutes con', filteredRoutes.length, 'rutas');
     displayOptimizedRoutes(filteredRoutes, currentData.official);
   } else {
