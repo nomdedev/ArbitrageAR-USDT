@@ -205,6 +205,9 @@ function calculateRoute(buyExchange, sellExchange, oficial, usdt, usdtUsd, userF
     console.log(`   Ganancia: $${netProfit.toFixed(2)} (${netProfitPercent.toFixed(4)}%)`);
     console.log(`   Mostrar como: ${displayProfitPercent.toFixed(4)}% sobre $${userConfiguredAmount.toLocaleString()}`);
 
+    // Determinar si la ruta requiere P2P trading
+    const requiresP2P = buyExchange.toLowerCase().endsWith('p2p') || sellExchange.toLowerCase().endsWith('p2p');
+
     return {
       buyExchange,
       sellExchange,
@@ -239,7 +242,7 @@ function calculateRoute(buyExchange, sellExchange, oficial, usdt, usdtUsd, userF
 
 // Función principal para calcular rutas optimizadas
 async function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
-  log('🔀 [DEBUG] Iniciando calculateOptimizedRoutes...');
+  console.log('🔀 [DEBUG] Iniciando calculateOptimizedRoutes...');
 
   if (!validateInputData(oficial, usdt, usdtUsd)) {
     log('❌ [DEBUG] Validación de datos falló');
@@ -263,17 +266,17 @@ async function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
 
   // Obtener exchanges válidos (filtrar los que no tienen datos USD/USDT válidos)
   const { buyExchanges, sellExchanges } = getValidExchanges(usdt, usdtUsd);
-  log(`🏦 [DEBUG] Exchanges encontrados - USDT/ARS: ${Object.keys(usdt).length}, USD/USDT: ${Object.keys(usdtUsd || {}).length}`);
-  log(`✅ [DEBUG] Exchanges válidos: ${buyExchanges.length} (${buyExchanges.slice(0, 5).join(', ')}${buyExchanges.length > 5 ? '...' : ''})`);
+  console.log(`🏦 [DEBUG] Exchanges encontrados - USDT/ARS: ${Object.keys(usdt).length}, USD/USDT: ${Object.keys(usdtUsd || {}).length}`);
+  console.log(`✅ [DEBUG] Exchanges válidos: ${buyExchanges.length} (${buyExchanges.slice(0, 5).join(', ')}${buyExchanges.length > 5 ? '...' : ''})`);
 
   if (buyExchanges.length === 0 || sellExchanges.length === 0) {
-    log('❌ [DEBUG] No hay exchanges válidos disponibles');
-    log('📊 Total exchanges en USDT/ARS:', Object.keys(usdt).length);
-    log('📊 Total exchanges en USD/USDT:', Object.keys(usdtUsd || {}).length);
+    console.log('❌ [DEBUG] No hay exchanges válidos disponibles');
+    console.log('📊 Total exchanges en USDT/ARS:', Object.keys(usdt).length);
+    console.log('📊 Total exchanges en USD/USDT:', Object.keys(usdtUsd || {}).length);
     return [];
   }
 
-  log(`🏦 Exchanges válidos: ${buyExchanges.length} (${buyExchanges.join(', ')})`);
+  console.log(`🏦 Exchanges válidos: ${buyExchanges.length} (${buyExchanges.join(', ')})`);
 
   const routes = [];
   let totalCalculated = 0;
@@ -317,10 +320,10 @@ async function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
   // Limitar a las mejores 50 rutas para evitar sobrecarga
   const limitedRoutes = routes.slice(0, 50);
 
-  log(`✅ ${limitedRoutes.length} rutas calculadas`);
+  console.log(`✅ ${limitedRoutes.length} rutas calculadas`);
 
   if (limitedRoutes.length > 0) {
-    log(`🏆 Mejor ruta: ${limitedRoutes[0].buyExchange} → ${limitedRoutes[0].sellExchange} (${limitedRoutes[0].profitPercent.toFixed(2)}%)`);
+    console.log(`🏆 Mejor ruta: ${limitedRoutes[0].buyExchange} → ${limitedRoutes[0].sellExchange} (${limitedRoutes[0].profitPercent.toFixed(2)}%)`);
   }
 
   return limitedRoutes;

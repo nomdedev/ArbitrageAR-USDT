@@ -3,7 +3,7 @@
 // ============================================
 
 // Sistema de logging unificado
-const DEBUG_MODE = false; // ⚠️ Cambiado a false para producción - mejora rendimiento
+const DEBUG_MODE = false; // ⚠️ Temporalmente true para debug
 
 function log(...args) {
   if (DEBUG_MODE) {
@@ -24,7 +24,7 @@ const CACHE_CONFIG = {
   showCacheWhileUpdating: true,
   
   // Forzar actualización al abrir popup (false = usar cache si está disponible)
-  forceRefreshOnPopupOpen: false,
+  forceRefreshOnPopupOpen: false, // ⚠️ Temporalmente true para debug
   
   // Intervalo de actualización automática en background (en minutos)
   autoUpdateInterval: 2

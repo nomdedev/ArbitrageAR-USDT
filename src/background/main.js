@@ -41,7 +41,7 @@ async function updateData() {
     }
 
     // Calcular rutas optimizadas
-    log('🧮 Calculando rutas optimizadas...');
+    console.log('🧮 Calculando rutas optimizadas...');
     const optimizedRoutes = await calculateOptimizedRoutes(oficial, usdt, usdtUsd);
 
     // Crear objeto de respuesta
@@ -138,7 +138,7 @@ async function getCurrentData() {
     const isCacheValid = cacheAge < CACHE_CONFIG.maxCacheAge;
     
     if (isCacheValid && !CACHE_CONFIG.forceRefreshOnPopupOpen) {
-      log(`📊 Usando datos cacheados (${cacheAge.toFixed(1)} min antiguos)`);
+      console.log(`📊 Usando datos cacheados (${cacheAge.toFixed(1)} min antiguos)`);
       
       // Calcular salud del mercado
       const marketHealth = calculateMarketHealth(currentData.optimizedRoutes);
@@ -153,7 +153,7 @@ async function getCurrentData() {
   }
   
   // Si no hay cache válido, intentar actualizar
-  log('📊 No hay cache válido, intentando actualizar...');
+  console.log('📊 No hay cache válido, intentando actualizar...');
   try {
     const freshData = await updateData();
     if (freshData) {

@@ -37,13 +37,15 @@ body {
 header {
   background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);
   color: white;
-  padding: 24px 20px;
+  padding: 16px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
   position: relative;
   overflow: hidden;
+  min-height: 100px;
+  max-height: 150px;
 }
 
 header::before {
@@ -68,30 +70,41 @@ header::before {
 }
 
 .header-content h1 {
-  font-size: 1.75em;
+  font-size: 1.5em;
   font-weight: 800;
   margin: 0;
-  background: linear-gradient(135deg, #fff 0%, #e0f2fe 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: white;
   letter-spacing: -0.5px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 
+               0 0 30px rgba(255, 255, 255, 0.3);
+  filter: brightness(1.2) contrast(1.1);
+}
+
+/* Estilo específico para el emoji logo */
+.logo-icon {
+  display: inline-block;
+  font-style: normal;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.9))
+          drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8))
+          drop-shadow(0 0 15px rgba(251, 191, 36, 0.5))
+          brightness(1.4) contrast(1.3);
+  transform: scale(1.1);
 }
 
 .subtitle {
-  font-size: 0.9em;
-  margin-top: 6px;
+  font-size: 0.85em;
+  margin-top: 4px;
   color: #bae6fd;
   font-weight: 500;
 }
 
 .data-status {
-  margin-top: 8px;
-  font-size: 0.7em;
+  margin-top: 4px;
+  font-size: 0.65em;
   color: rgba(255, 255, 255, 0.6);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -114,7 +127,7 @@ header::before {
 
 .header-buttons {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   z-index: 1;
 }
 
@@ -2186,4 +2199,41 @@ footer {
 
 .route-card.is-direct {
   border-left: 3px solid rgba(34, 197, 94, 0.6);
+}
+
+/* Mensajes de estado */
+p.info {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(99, 102, 241, 0.1) 100%);
+  color: #93c5fd;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 20px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  animation: pulse-info 2s ease-in-out infinite;
+}
+
+@keyframes pulse-info {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+  }
+}
+
+p.error {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.1) 100%);
+  color: #fca5a5;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 20px;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
 }
