@@ -292,10 +292,13 @@ async function initialize() {
 }
 
 // Event listeners para mensajes del popup/options
+console.log('🔧 [BACKGROUND] Registrando chrome.runtime.onMessage listener...');
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log('📨 [BACKGROUND] Mensaje recibido:', request.action, 'en', new Date().toISOString());
+  console.log('📨 [BACKGROUND] Mensaje recibido:', request, 'de sender:', sender);
+  console.log('📨 [BACKGROUND] Action:', request.action, 'en', new Date().toISOString());
 
   if (request.action === 'getArbitrages') {
+    console.log('🔄 [BACKGROUND] Procesando getArbitrages...');
     console.log('🔄 [BACKGROUND] Iniciando getCurrentData() para getArbitrages...');
 
     // Manejar de forma asíncrona pero responder inmediatamente
@@ -355,5 +358,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   return true;
 });
 
+console.log('✅ [BACKGROUND] Listener registrado exitosamente');
+
 // Inicializar cuando se carga el service worker
+console.log('🚀 [BACKGROUND] Llamando initialize()...');
 initialize();

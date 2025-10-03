@@ -322,28 +322,27 @@ async function fetchAndDisplay(retryCount = 0) {
   userSettings = settings.notificationSettings || {};
   
   try {
-    console.log('📤 Solicitando datos al background...');
-    
-    // Mantener vivo el service worker
-    chrome.runtime.getBackgroundPage(() => {
-      console.log('🔄 Service worker mantenido vivo');
-    });
+    console.log('📤 [POPUP] Solicitando datos al background...');
+    console.log('📤 [POPUP] Verificando runtime disponible:', !!chrome.runtime);
+    console.log('� [POPUP] Verificando sendMessage disponible:', !!chrome.runtime?.sendMessage);
     
     // Timeout para detectar si el callback nunca se ejecuta
     let responseReceived = false;
     const timeoutId = setTimeout(() => {
       if (!responseReceived) {
-        console.error('⏰ TIMEOUT: El callback del background nunca se ejecutó (10 segundos)');
+        console.error('⏰ [POPUP] TIMEOUT: El callback del background nunca se ejecutó (10 segundos)');
         loading.style.display = 'none';
         container.innerHTML = '<p class="error">⏰ Timeout: El background no respondió en 10 segundos.</p>';
       }
     }, 10000);
     
+    console.log('📤 [POPUP] Enviando mensaje { action: "getArbitrages" }...');
     chrome.runtime.sendMessage({ action: 'getArbitrages' }, data => {
       responseReceived = true;
       clearTimeout(timeoutId);
       
-      console.log('📥 Callback ejecutado - Datos recibidos del background:', data);
+      console.log('📥 [POPUP] Callback ejecutado - Datos recibidos:', data);
+      console.log('📥 [POPUP] chrome.runtime.lastError:', chrome.runtime.lastError);
       
       if (chrome.runtime.lastError) {
         console.error('❌ Error en chrome.runtime:', chrome.runtime.lastError);
