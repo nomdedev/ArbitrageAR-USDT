@@ -148,12 +148,20 @@ async function getCurrentData() {
       // Calcular salud del mercado
       const marketHealth = calculateMarketHealth(currentData.optimizedRoutes);
       
-      return {
+      const result = {
         ...currentData,
         marketHealth,
         arbitrages: currentData.optimizedRoutes || [],
         usingCache: true
       };
+      
+      console.log('🔍 [DEBUG] getCurrentData() RETORNA (cache):', {
+        routesCount: result.optimizedRoutes?.length || 0,
+        arbitragesCount: result.arbitrages?.length || 0,
+        hasError: !!result.error
+      });
+      
+      return result;
     }
   }
   
@@ -161,14 +169,28 @@ async function getCurrentData() {
   console.log('📊 No hay cache válido, intentando actualizar...');
   try {
     const freshData = await updateData();
+    console.log('🔍 [DEBUG] updateData() retornó:', {
+      hasFreshData: !!freshData,
+      routesCount: freshData?.optimizedRoutes?.length || 0
+    });
+    
     if (freshData) {
-      return {
+      const result = {
         ...freshData,
         marketHealth: calculateMarketHealth(freshData.optimizedRoutes),
         arbitrages: freshData.optimizedRoutes || []
       };
+      
+      console.log('🔍 [DEBUG] getCurrentData() RETORNA (fresh):', {
+        routesCount: result.optimizedRoutes?.length || 0,
+        arbitragesCount: result.arbitrages?.length || 0,
+        hasError: !!result.error
+      });
+      
+      return result;
     }
   } catch (error) {
+    console.error('❌ [DEBUG] Error en updateData():', error);
     log('❌ Error al actualizar datos:', error);
     
     // Si hay cache antiguo disponible, devolverlo con una advertencia
@@ -244,22 +266,39 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log('🔄 [BACKGROUND] Iniciando getCurrentData() para getArbitrages...');
 
     // Manejar de forma asíncrona pero responder inmediatamente
-    getCurrentData().then(data => {
-      console.log('📤 [BACKGROUND] getCurrentData() completado, enviando respuesta con', data?.optimizedRoutes?.length || 0, 'rutas');
-      console.log('📤 [BACKGROUND] Respuesta completa:', {
-        hasError: !!data?.error,
-        routesCount: data?.optimizedRoutes?.length || 0,
-        usingCache: data?.usingCache,
-        timestamp: new Date().toISOString()
+    getCurrentData()
+      .then(data => {
+        console.log('✅ [BACKGROUND] getCurrentData() resuelto exitosamente');
+        console.log('📤 [BACKGROUND] Preparando respuesta con', data?.optimizedRoutes?.length || 0, 'rutas');
+        console.log('📤 [BACKGROUND] Respuesta completa:', {
+          hasError: !!data?.error,
+          routesCount: data?.optimizedRoutes?.length || 0,
+          arbitragesCount: data?.arbitrages?.length || 0,
+          usingCache: data?.usingCache,
+          timestamp: new Date().toISOString()
+        });
+        
+        console.log('📤 [BACKGROUND] Llamando sendResponse()...');
+        try {
+          sendResponse(data);
+          console.log('✅ [BACKGROUND] sendResponse() ejecutado correctamente');
+        } catch (error) {
+          console.error('❌ [BACKGROUND] Error al ejecutar sendResponse():', error);
+        }
+      })
+      .catch(error => {
+        console.error('❌ [BACKGROUND] Error en getCurrentData():', error);
+        console.error('❌ [BACKGROUND] Stack trace:', error.stack);
+        try {
+          sendResponse({ error: 'Error interno del service worker', optimizedRoutes: [], arbitrages: [] });
+          console.log('✅ [BACKGROUND] sendResponse() de error ejecutado');
+        } catch (sendError) {
+          console.error('❌ [BACKGROUND] Error al ejecutar sendResponse() de error:', sendError);
+        }
       });
-      sendResponse(data);
-    }).catch(error => {
-      console.error('❌ [BACKGROUND] Error en getArbitrages:', error);
-      console.error('❌ [BACKGROUND] Stack trace:', error.stack);
-      sendResponse({ error: 'Error interno del service worker', optimizedRoutes: [] });
-    });
 
     // Mantener el canal abierto para respuestas asíncronas
+    console.log('🔄 [BACKGROUND] Retornando true para mantener canal abierto');
     return true;
   } else if (request.action === 'getBanks') {
     // Manejar de forma asíncrona pero responder inmediatamente
