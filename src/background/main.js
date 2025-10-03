@@ -181,29 +181,41 @@ async function getCurrentData() {
   // Si no hay cache válido, intentar actualizar
   console.log('📊 No hay cache válido, intentando actualizar...');
   try {
+    console.log('🔄 [DEBUG] Llamando updateData()...');
     const freshData = await updateData();
     console.log('🔍 [DEBUG] updateData() retornó:', {
       hasFreshData: !!freshData,
-      routesCount: freshData?.optimizedRoutes?.length || 0
+      type: typeof freshData,
+      routesCount: freshData?.optimizedRoutes?.length || 0,
+      keys: freshData ? Object.keys(freshData) : []
     });
     
     if (freshData) {
+      console.log('🔧 [DEBUG] Construyendo resultado con freshData...');
+      
+      const marketHealth = calculateMarketHealth(freshData.optimizedRoutes);
+      console.log('🔧 [DEBUG] marketHealth calculado:', marketHealth?.status);
+      
       const result = {
         ...freshData,
-        marketHealth: calculateMarketHealth(freshData.optimizedRoutes),
+        marketHealth,
         arbitrages: freshData.optimizedRoutes || []
       };
       
       console.log('🔍 [DEBUG] getCurrentData() RETORNA (fresh):', {
         routesCount: result.optimizedRoutes?.length || 0,
         arbitragesCount: result.arbitrages?.length || 0,
-        hasError: !!result.error
+        hasError: !!result.error,
+        hasMarketHealth: !!result.marketHealth
       });
       
       return result;
+    } else {
+      console.log('⚠️ [DEBUG] freshData es null/undefined, continuando al final...');
     }
   } catch (error) {
     console.error('❌ [DEBUG] Error en updateData():', error);
+    console.error('❌ [DEBUG] Stack trace:', error.stack);
     log('❌ Error al actualizar datos:', error);
     
     // Si hay cache antiguo disponible, devolverlo con una advertencia
