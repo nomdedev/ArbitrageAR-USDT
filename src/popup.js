@@ -2,7 +2,7 @@
 let currentData = null;
 let selectedArbitrage = null;
 let userSettings = null; // NUEVO v5.0: Configuración del usuario
-let currentFilter = 'no-p2p'; // NUEVO: Filtro P2P activo ('all', 'p2p', 'no-p2p') - Por defecto Sin P2P
+let currentFilter = 'no-p2p'; // CORREGIDO v5.0.12: Volver a 'no-p2p' pero con debug forzado
 let allRoutes = []; // NUEVO: Cache de todas las rutas sin filtrar
 
 console.log('🚀 Popup.js cargado correctamente');
@@ -73,57 +73,70 @@ function setupFilterButtons() {
   }
 }
 
-// NUEVO: Determinar si una ruta usa P2P
+// CORREGIDO v5.0.7: Determinar si una ruta usa P2P basándose en datos del backend
 function isP2PRoute(route) {
-  if (!route || !route.broker) return false;
-  
-  const brokerName = route.broker.toLowerCase();
-  // Los brokers P2P terminan en "p2p" o contienen "p2p" en el nombre
-  return brokerName.includes('p2p');
+  if (!route) return false;
+
+  // CORREGIDO v5.0.11: Logs detallados para debug
+  const brokerName = route.broker?.toLowerCase() || '';
+  const buyName = route.buyExchange?.toLowerCase() || '';
+  const sellName = route.sellExchange?.toLowerCase() || '';
+
+  // Prioridad 1: Usar el campo requiresP2P calculado en backend
+  if (typeof route.requiresP2P === 'boolean') {
+    console.log(`🔍 ${route.broker}: requiresP2P=${route.requiresP2P} (backend)`);
+    return route.requiresP2P;
+  }
+
+  // Fallback 1: Verificar nombre del broker
+  if (brokerName.includes('p2p')) {
+    console.log(`🔍 ${route.broker}: P2P detectado por nombre del broker`);
+    return true;
+  }
+
+  // Fallback 2: Verificar nombres de exchanges
+  if (buyName.includes('p2p') || sellName.includes('p2p')) {
+    console.log(`🔍 ${route.broker}: P2P detectado por exchanges (${buyName}, ${sellName})`);
+    return true;
+  }
+
+  console.log(`🔍 ${route.broker}: Clasificado como NO-P2P`);
+  return false;
 }
 
-// NUEVO: Aplicar filtro P2P a las rutas
+// CORREGIDO v5.0.12: Forzar mostrar todas las rutas inicialmente para debug
 function applyP2PFilter() {
+  console.log('🔍 applyP2PFilter() llamado');
+  console.log('🔍 allRoutes:', allRoutes);
+  console.log('🔍 allRoutes.length:', allRoutes?.length);
+
   if (!allRoutes || allRoutes.length === 0) {
     console.warn('⚠️ No hay rutas disponibles para filtrar');
     return;
   }
-  
-  // Contar rutas P2P vs no-P2P sin logs individuales
-  const p2pCount = allRoutes.filter(route => isP2PRoute(route)).length;
-  const nonP2pCount = allRoutes.length - p2pCount;
-  
-  let filteredRoutes = [];
-  
-  switch(currentFilter) {
-    case 'all':
-      filteredRoutes = [...allRoutes];
-      break;
-      
-    case 'p2p':
-      filteredRoutes = allRoutes.filter(route => isP2PRoute(route));
-      break;
-      
-    case 'no-p2p':
-      filteredRoutes = allRoutes.filter(route => !isP2PRoute(route));
-      break;
-      
-    default:
-      filteredRoutes = [...allRoutes];
-  }
-  
-  console.log(`✅ Rutas filtradas: ${filteredRoutes.length}/${allRoutes.length}`);
-  
-  // Actualizar contadores en los botones
-  updateFilterCounts();
-  
+
+  // CORREGIDO v5.0.12: Forzar mostrar todas las rutas inicialmente
+  console.log(`📊 Total rutas disponibles: ${allRoutes.length}`);
+
+  // Mostrar TODAS las rutas inicialmente, sin filtrar
+  let filteredRoutes = [...allRoutes];
+  console.log('🔍 Después de copiar allRoutes, filteredRoutes.length:', filteredRoutes.length);
+
+  // Aplicar filtros adicionales del usuario (negativas, max rutas, etc.)
+  filteredRoutes = applyUserPreferences(filteredRoutes);
+  console.log('🔍 Después de applyUserPreferences, filteredRoutes.length:', filteredRoutes.length);
+
   // Mostrar rutas filtradas
   if (currentData) {
+    console.log('🔍 Llamando displayOptimizedRoutes con', filteredRoutes.length, 'rutas');
     displayOptimizedRoutes(filteredRoutes, currentData.official);
+  } else {
+    console.warn('⚠️ currentData es null, no se puede mostrar rutas');
   }
-}
 
-// NUEVO: Actualizar contadores de rutas en filtros
+  // Actualizar contadores en los botones
+  updateFilterCounts();
+}// NUEVO: Actualizar contadores de rutas en filtros
 function updateFilterCounts() {
   const allCount = allRoutes.length;
   const p2pCount = allRoutes.filter(route => isP2PRoute(route)).length;
@@ -187,12 +200,13 @@ function setupRefreshButton() {
   });
 }
 
-// Obtener y mostrar datos de arbitraje
-async function fetchAndDisplay() {
-  console.log('🔄 Cargando datos de arbitraje...');
+// Obtener y mostrar datos de arbitraje (con retry automático)
+async function fetchAndDisplay(retryCount = 0) {
+  console.log(`🔄 Cargando datos de arbitraje... (intento ${retryCount + 1})`);
   
   const container = document.getElementById('optimized-routes');
   const loading = document.getElementById('loading');
+  const maxRetries = 3;
   
   loading.style.display = 'block';
   container.innerHTML = '';
@@ -204,13 +218,30 @@ async function fetchAndDisplay() {
   try {
     console.log('📤 Solicitando datos al background...');
     chrome.runtime.sendMessage({ action: 'getArbitrages' }, data => {
-      console.log('📥 Datos recibidos del background');
+      console.log('📥 Datos recibidos del background:', data);
       
       loading.style.display = 'none';
       
       if (!data) {
         console.error('❌ Error: No se recibió respuesta del background');
         container.innerHTML = '<p class="error">❌ No se pudo comunicar con el servicio de fondo.</p>';
+        return;
+      }
+
+      // Si está inicializando y aún no hay rutas, hacer retry automático
+      if (data.error && data.error.includes('Inicializando') && retryCount < maxRetries) {
+        console.log(`⏳ Background inicializando, reintentando en 2 segundos... (${retryCount + 1}/${maxRetries})`);
+        container.innerHTML = `<p class="info">⏳ ${sanitizeHTML(data.error)} (reintentando automáticamente...)</p>`;
+        setTimeout(() => {
+          fetchAndDisplay(retryCount + 1);
+        }, 2000);
+        return;
+      }
+
+      // Si alcanzamos el límite de reintentos
+      if (data.error && retryCount >= maxRetries) {
+        console.error(`❌ Máximo de reintentos alcanzado (${maxRetries})`);
+        container.innerHTML = `<p class="error">❌ ${sanitizeHTML(data.error)}<br><br>⚠️ Intenta actualizar manualmente en unos segundos.</p>`;
         return;
       }
     
@@ -227,12 +258,12 @@ async function fetchAndDisplay() {
         cacheIndicator.style.display = 'block';
         cacheIndicator.textContent = data.error ? `⚠️ ${data.error}` : '📱 Datos cacheados';
         
-        // Si hay error en cache, intentar actualizar automáticamente
-        if (data.error) {
+        // Si hay error en cache, intentar actualizar automáticamente (solo 1 vez)
+        if (data.error && retryCount === 0) {
           setTimeout(() => {
             console.log('🔄 Intentando actualizar datos automáticamente...');
-            fetchAndDisplay();
-          }, 2000); // Esperar 2 segundos antes de intentar actualizar
+            fetchAndDisplay(1);
+          }, 2000);
         }
       }
     } else {
@@ -287,16 +318,21 @@ async function fetchAndDisplay() {
 
 // NUEVA FUNCIÓN v5.0: Aplicar preferencias del usuario
 function applyUserPreferences(routes) {
+  console.log('🔍 applyUserPreferences() llamado con', routes?.length, 'rutas');
   if (!Array.isArray(routes) || routes.length === 0) {
+    console.log('🔍 applyUserPreferences: rutas vacías o no array, retornando vacío');
     return routes;
   }
   
   let filtered = [...routes]; // Copia para no mutar original
+  console.log('🔍 applyUserPreferences: copia inicial tiene', filtered.length, 'rutas');
   
   // 1. Filtrar rutas negativas si el usuario no quiere verlas
+  console.log('🔍 userSettings.showNegativeRoutes:', userSettings?.showNegativeRoutes);
   if (userSettings.showNegativeRoutes === false) {
+    const beforeCount = filtered.length;
     filtered = filtered.filter(r => r.profitPercent >= 0);
-    console.log(`🔧 Filtradas ${routes.length - filtered.length} rutas negativas`);
+    console.log(`🔧 Filtradas ${beforeCount - filtered.length} rutas negativas, quedan ${filtered.length}`);
   }
   
   // 2. Ordenar priorizando rutas single-exchange si el usuario lo prefiere
@@ -314,11 +350,13 @@ function applyUserPreferences(routes) {
   
   // 3. Limitar cantidad de rutas mostradas
   const maxDisplay = userSettings.maxRoutesDisplay || 20;
+  console.log('🔍 maxDisplay:', maxDisplay, 'rutas actuales:', filtered.length);
   if (filtered.length > maxDisplay) {
     filtered = filtered.slice(0, maxDisplay);
     console.log(`🔧 Limitadas a ${maxDisplay} rutas`);
   }
   
+  console.log('🔍 applyUserPreferences retornando', filtered.length, 'rutas');
   return filtered;
 }
 
@@ -397,13 +435,17 @@ function displayArbitrages(arbitrages, official) {
 
 // NUEVO v5.0.0: Mostrar rutas (single + multi-exchange) - Vista compacta
 function displayOptimizedRoutes(routes, official) {
+  console.log('🔍 displayOptimizedRoutes() llamado con', routes?.length, 'rutas');
   const container = document.getElementById('optimized-routes');
+  console.log('🔍 container encontrado:', !!container);
   
   if (!routes || routes.length === 0) {
+    console.log('🔍 No hay rutas para mostrar, mostrando mensaje vacío');
     container.innerHTML = '<p class="info">📊 No hay rutas disponibles en este momento.</p>';
     return;
   }
 
+  console.log('🔍 Generando HTML para', routes.length, 'rutas');
   let html = '';
   
   routes.forEach((route, index) => {
