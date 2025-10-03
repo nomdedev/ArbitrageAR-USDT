@@ -65,8 +65,21 @@ async function updateData() {
 
     // Verificar y enviar notificaciones
     if (optimizedRoutes.length > 0) {
-      await checkAndNotify(optimizedRoutes);
+      console.log('🔔 [DEBUG] Iniciando checkAndNotify...');
+      try {
+        await checkAndNotify(optimizedRoutes);
+        console.log('✅ [DEBUG] checkAndNotify completado');
+      } catch (notifyError) {
+        console.error('❌ [DEBUG] Error en checkAndNotify (no crítico):', notifyError);
+      }
     }
+
+    console.log('📤 [DEBUG] updateData() a punto de retornar data:', {
+      hasData: !!data,
+      routesCount: data.optimizedRoutes?.length || 0,
+      hasOficial: !!data.oficial,
+      hasUsdt: !!data.usdt
+    });
 
     return data;
 
