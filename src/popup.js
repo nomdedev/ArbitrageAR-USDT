@@ -106,27 +106,48 @@ function isP2PRoute(route) {
   return false;
 }
 
-// CORREGIDO v5.0.12: Forzar mostrar todas las rutas inicialmente para debug
+// CORREGIDO v5.0.12: Aplicar filtro P2P según selección del usuario
 function applyP2PFilter() {
-  if (DEBUG_MODE) console.log('🔍 applyP2PFilter() llamado');
-  if (DEBUG_MODE) console.log('🔍 allRoutes:', allRoutes);
-  if (DEBUG_MODE) console.log('🔍 allRoutes.length:', allRoutes?.length);
+  if (DEBUG_MODE) console.log('🔍 applyP2PFilter() llamado con filtro:', currentFilter);
+  if (DEBUG_MODE) console.log('🔍 allRoutes:', allRoutes?.length);
 
   if (!allRoutes || allRoutes.length === 0) {
     console.warn('⚠️ No hay rutas disponibles para filtrar');
     return;
   }
 
-  // CORREGIDO v5.0.12: Forzar mostrar todas las rutas inicialmente
-  if (DEBUG_MODE) console.log(`📊 Total rutas disponibles: ${allRoutes.length}`);
+  // Aplicar filtro P2P según selección
+  let filteredRoutes;
+  switch (currentFilter) {
+    case 'p2p':
+      filteredRoutes = allRoutes.filter(route => isP2PRoute(route));
+      if (DEBUG_MODE) console.log(`� Filtro P2P: ${filteredRoutes.length} rutas P2P de ${allRoutes.length}`);
+      break;
+    case 'no-p2p':
+      filteredRoutes = allRoutes.filter(route => !isP2PRoute(route));
+      if (DEBUG_MODE) console.log(`🔍 Filtro No-P2P: ${filteredRoutes.length} rutas directas de ${allRoutes.length}`);
+      break;
+    case 'all':
+    default:
+      filteredRoutes = [...allRoutes];
+      if (DEBUG_MODE) console.log(`🔍 Filtro Todas: ${filteredRoutes.length} rutas totales`);
+      break;
+  }
 
-  // Mostrar TODAS las rutas inicialmente, sin filtrar
-  let filteredRoutes = [...allRoutes];
-  if (DEBUG_MODE) console.log('🔍 Después de copiar allRoutes, filteredRoutes.length:', filteredRoutes.length);
-
-  // Aplicar filtros adicionales del usuario (negativas, max rutas, etc.)
+  // Aplicar filtros adicionales del usuario (negativas, max rutas, exchanges preferidos, etc.)
   filteredRoutes = applyUserPreferences(filteredRoutes);
-  if (DEBUG_MODE) console.log('🔍 Después de applyUserPreferences, filteredRoutes.length:', filteredRoutes.length);
+  if (DEBUG_MODE) console.log('🔍 Después de applyUserPreferences:', filteredRoutes.length, 'rutas');
+
+  // Mostrar rutas filtradas
+  if (currentData) {
+    displayOptimizedRoutes(filteredRoutes, currentData.official);
+  } else {
+    console.warn('⚠️ currentData es null, no se puede mostrar rutas');
+  }
+
+  // Actualizar contadores en los botones
+  updateFilterCounts();
+}
 
   // Mostrar rutas filtradas
   if (currentData) {
@@ -138,7 +159,9 @@ function applyP2PFilter() {
 
   // Actualizar contadores en los botones
   updateFilterCounts();
-}// NUEVO: Actualizar contadores de rutas en filtros
+}
+
+// NUEVO: Actualizar contadores de rutas en filtros
 function updateFilterCounts() {
   const allCount = allRoutes.length;
   const p2pCount = allRoutes.filter(route => isP2PRoute(route)).length;
@@ -347,7 +370,10 @@ function applyUserPreferences(routes) {
   // 1. Filtrar rutas negativas si el usuario no quiere verlas (default: mostrar)
   filtered = applyNegativeFilter(filtered, userSettings?.showNegativeRoutes);
   
-  // 2. Ordenar priorizando rutas single-exchange si el usuario lo prefiere
+  // 2. Filtrar por exchanges preferidos del usuario
+  filtered = applyPreferredExchangesFilter(filtered, userSettings?.preferredExchanges);
+  
+  // 3. Ordenar priorizando rutas single-exchange si el usuario lo prefiere
   filtered = applySorting(filtered, userSettings.preferSingleExchange);
   
   // 3. Limitar cantidad de rutas mostradas
@@ -368,6 +394,23 @@ function applyNegativeFilter(routes, showNegative) {
   }
   if (DEBUG_MODE) console.log('🔍 [POPUP] No se filtran rutas negativas');
   return routes;
+}
+
+function applyPreferredExchangesFilter(routes, preferredExchanges) {
+  if (!preferredExchanges || !Array.isArray(preferredExchanges) || preferredExchanges.length === 0) {
+    if (DEBUG_MODE) console.log('🔍 [POPUP] No hay exchanges preferidos configurados');
+    return routes;
+  }
+  
+  const beforeCount = routes.length;
+  const filtered = routes.filter(route => {
+    // Una ruta pasa el filtro si al menos uno de sus exchanges está en la lista preferida
+    return preferredExchanges.includes(route.buyExchange) || 
+           (route.sellExchange && preferredExchanges.includes(route.sellExchange));
+  });
+  
+  if (DEBUG_MODE) console.log(`🔧 [POPUP] Exchanges preferidos (${preferredExchanges.join(', ')}): ${beforeCount} → ${filtered.length} rutas`);
+  return filtered;
 }
 
 function applySorting(routes, preferSingleExchange) {
