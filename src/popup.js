@@ -1449,12 +1449,22 @@ async function checkForUpdates() {
 function showUpdateBanner(updateInfo) {
   const banner = document.getElementById('update-banner');
   const messageEl = document.getElementById('update-message');
+  const newVersionEl = document.getElementById('new-version');
   
   if (!banner || !messageEl) return;
   
-  // Actualizar mensaje
+  // Obtener versión actual del manifest
+  const currentVersion = chrome.runtime.getManifest().version;
+  
+  // Actualizar mensaje del commit
   const message = updateInfo.message || 'Nueva versión disponible';
-  messageEl.textContent = message.substring(0, 60) + (message.length > 60 ? '...' : '');
+  messageEl.textContent = message.substring(0, 80) + (message.length > 80 ? '...' : '');
+  
+  // Mostrar versión nueva (primeros 7 caracteres del SHA)
+  if (newVersionEl && updateInfo.version) {
+    const shortSha = updateInfo.version.substring(0, 7);
+    newVersionEl.textContent = `commit ${shortSha}`;
+  }
   
   // Mostrar banner
   banner.style.display = 'flex';

@@ -17,6 +17,7 @@
       <div id="dataStatus" class="data-status"></div>
     </div>
     <div class="header-buttons">
+      <span id="version-indicator" class="version-indicator" title="Versión instalada">v5.0.20</span>
       <button id="settings" class="btn-settings" title="Configurar notificaciones">
         <span>⚙️</span>
       </button>
@@ -31,8 +32,13 @@
     <div class="update-content">
       <span class="update-icon">✨</span>
       <div class="update-text">
-        <strong>Actualización disponible</strong>
-        <p id="update-message">Nueva versión con mejoras</p>
+        <strong>Nueva actualización disponible</strong>
+        <p class="update-version-info">
+          <span class="current-version">v5.0.20</span>
+          <span class="version-arrow">→</span>
+          <span class="new-version" id="new-version">Nueva versión</span>
+        </p>
+        <p id="update-message" class="update-commit-msg">Nueva versión con mejoras</p>
       </div>
     </div>
     <div class="update-actions">
