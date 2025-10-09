@@ -1328,6 +1328,15 @@ main::-webkit-scrollbar-thumb {
   font-weight: 700;
 }
 
+/* NUEVO v5.0.22: Precio alternativo de CriptoYa */
+.bank-price-alt {
+  color: #94a3b8;
+  font-size: 0.75em;
+  margin-top: 4px;
+  font-style: italic;
+  opacity: 0.8;
+}
+
 /* NUEVO: Controles de bancos */
 .banks-controls {
   display: flex;

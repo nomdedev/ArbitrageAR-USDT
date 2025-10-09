@@ -1101,7 +1101,7 @@ function loadBanksData() {
   loadBankRates();
 }
 
-// Mostrar lista de bancos desde dolarito.ar
+// Mostrar lista de bancos desde dolarito.ar + criptoya
 function displayBanks(bankRates) {
   const container = document.getElementById('banks-list');
   
@@ -1109,7 +1109,7 @@ function displayBanks(bankRates) {
     container.innerHTML = `
       <div class="select-prompt">
         <p>📊 No hay datos de bancos disponibles</p>
-        <p style="margin-top: 8px; font-size: 0.85em;">Presiona el botón "Actualizar" para cargar las cotizaciones desde dolarito.ar</p>
+        <p style="margin-top: 8px; font-size: 0.85em;">Presiona el botón "Actualizar" para cargar las cotizaciones desde dolarito.ar y CriptoYa</p>
       </div>
     `;
     return;
@@ -1123,6 +1123,10 @@ function displayBanks(bankRates) {
     const spread = rates.venta - rates.compra;
     const spreadPercent = ((spread / rates.compra) * 100).toFixed(2);
     
+    // Determinar fuente(s)
+    let sourceText = rates.source === 'dolarito' ? 'dolarito.ar' : 'CriptoYa';
+    let hasCriptoya = rates.criptoya ? true : false;
+    
     html += `
       <div class="bank-card">
         <div class="bank-header">
@@ -1134,13 +1138,15 @@ function displayBanks(bankRates) {
           <div class="bank-price">
             <div class="bank-price-label">Compra</div>
             <div class="bank-price-value">$${formatNumber(rates.compra)}</div>
+            ${hasCriptoya ? `<div class="bank-price-alt">CriptoYa: $${formatNumber(rates.criptoya.compra)}</div>` : ''}
           </div>
           <div class="bank-price">
             <div class="bank-price-label">Venta</div>
             <div class="bank-price-value">$${formatNumber(rates.venta)}</div>
+            ${hasCriptoya ? `<div class="bank-price-alt">CriptoYa: $${formatNumber(rates.criptoya.venta)}</div>` : ''}
           </div>
         </div>
-        <div class="bank-source">Fuente: dolarito.ar</div>
+        <div class="bank-source">Fuente: ${sourceText}${hasCriptoya ? ' + CriptoYa' : ''}</div>
       </div>
     `;
   });
@@ -1164,6 +1170,11 @@ function getBankDisplayName(bankCode) {
     'supervielle': 'Banco Supervielle',
     'patagonia': 'Banco Patagonia',
     'comafi': 'Banco Comafi',
+    'icbc': 'ICBC',
+    'bind': 'Bind',
+    'bancor': 'Bancor',
+    'chaco': 'Banco Chaco',
+    'pampa': 'Banco Pampa',
     'promedio': 'Promedio Bancos'
   };
   

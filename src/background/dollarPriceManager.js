@@ -108,7 +108,7 @@ class DollarPriceManager {
     }
   }
 
-  // Obtener tasas bancarias desde dolarito.ar (con cache)
+  // Obtener tasas bancarias desde dolarito.ar + criptoya (con cache)
   async getBankRates() {
     const now = Date.now();
     
@@ -119,10 +119,10 @@ class DollarPriceManager {
     }
 
     try {
-      // Usar dataService para obtener precios con timeout de 5 segundos
-      const fetchPromise = this.dataService.fetchDolaritoBankRates();
+      // NUEVO v5.0.22: Usar método combinado (dolarito + criptoya)
+      const fetchPromise = this.dataService.fetchCombinedBankRates();
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout fetchDolaritoBankRates (5s)')), 5000)
+        setTimeout(() => reject(new Error('Timeout fetchCombinedBankRates (10s)')), 10000)
       );
       
       const bankRates = await Promise.race([fetchPromise, timeoutPromise]);

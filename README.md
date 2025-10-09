@@ -60,6 +60,8 @@ node --experimental-modules test-refactored-services.js
 ## 📚 Documentación
 
 Toda la documentación detallada se encuentra en la carpeta `docs/`:
+- **[Índice de Documentación](docs/DOCS_INDEX.md)** - Guía completa de toda la documentación disponible
+- **[Resumen de Hotfixes](docs/HOTFIX_SUMMARY.md)** - Historial de correcciones v5.x
 - Guías de instalación y uso
 - Reportes de testing
 - Análisis de mejoras

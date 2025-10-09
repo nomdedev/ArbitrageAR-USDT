@@ -132,11 +132,121 @@ class DataService {
         }
       }
 
-      console.log(`💰 Precios bancarios obtenidos: ${Object.keys(bankRates).length} bancos`);
+      console.log(`💰 Precios bancarios obtenidos (dolarito): ${Object.keys(bankRates).length} bancos`);
       return bankRates;
 
     } catch (error) {
       console.error('Error obteniendo precios bancarios de Dolarito:', error);
+      return null;
+    }
+  }
+
+  // NUEVO v5.0.22: Obtener precios de dólar por banco desde CriptoYa
+  async fetchCriptoYaBankRates() {
+    try {
+      const data = await this.fetchWithRateLimit('https://criptoya.com/api/bancostodos');
+      
+      if (!data || typeof data !== 'object') {
+        console.warn('⚠️ No se pudo obtener datos de CriptoYa bancos');
+        return null;
+      }
+
+      const bankRates = {};
+      
+      // La API retorna un objeto con bancos como claves
+      for (const [bankCode, rates] of Object.entries(data)) {
+        const compra = parseFloat(rates.ask);
+        const venta = parseFloat(rates.bid);
+
+        if (!isNaN(compra) && !isNaN(venta) && compra > 0 && venta > 0) {
+          bankRates[bankCode] = {
+            name: this.normalizeBankName(bankCode),
+            compra: compra,
+            venta: venta,
+            spread: venta - compra,
+            timestamp: new Date().toISOString(),
+            source: 'criptoya'
+          };
+        }
+      }
+
+      console.log(`💰 Precios bancarios obtenidos (criptoya): ${Object.keys(bankRates).length} bancos`);
+      return bankRates;
+
+    } catch (error) {
+      console.error('Error obteniendo precios bancarios de CriptoYa:', error);
+      return null;
+    }
+  }
+
+  // NUEVO v5.0.22: Normalizar nombres de bancos de CriptoYa
+  normalizeBankName(code) {
+    const bankNames = {
+      'nacion': 'Banco Nación',
+      'bbva': 'BBVA',
+      'piano': 'Banco Piano',
+      'hipotecario': 'Banco Hipotecario',
+      'galicia': 'Banco Galicia',
+      'santander': 'Banco Santander',
+      'ciudad': 'Banco Ciudad',
+      'supervielle': 'Banco Supervielle',
+      'patagonia': 'Banco Patagonia',
+      'comafi': 'Banco Comafi',
+      'icbc': 'ICBC',
+      'bind': 'Bind',
+      'bancor': 'Bancor',
+      'chaco': 'Banco Chaco',
+      'pampa': 'Banco Pampa'
+    };
+    
+    return bankNames[code] || code.charAt(0).toUpperCase() + code.slice(1);
+  }
+
+  // NUEVO v5.0.22: Combinar datos de ambas fuentes (dolarito + criptoya)
+  async fetchCombinedBankRates() {
+    try {
+      const [dolarito, criptoya] = await Promise.all([
+        this.fetchDolaritoBankRates(),
+        this.fetchCriptoYaBankRates()
+      ]);
+
+      const combined = {};
+
+      // Añadir datos de dolarito
+      if (dolarito) {
+        Object.entries(dolarito).forEach(([key, data]) => {
+          combined[key] = { ...data };
+        });
+      }
+
+      // Añadir/combinar datos de criptoya
+      if (criptoya) {
+        Object.entries(criptoya).forEach(([key, data]) => {
+          if (combined[key]) {
+            // Si ya existe, agregar datos de criptoya como fuente alternativa
+            combined[key].criptoya = {
+              compra: data.compra,
+              venta: data.venta
+            };
+          } else {
+            // Si no existe, añadir directamente
+            combined[key] = { ...data };
+          }
+        });
+      }
+
+      console.log(`💰 Precios bancarios combinados: ${Object.keys(combined).length} bancos`);
+      return combined;
+
+    } catch (error) {
+      console.error('Error combinando precios bancarios:', error);
+      // Fallback: intentar cada fuente por separado
+      const dolarito = await this.fetchDolaritoBankRates();
+      if (dolarito) return dolarito;
+      
+      const criptoya = await this.fetchCriptoYaBankRates();
+      if (criptoya) return criptoya;
+      
       return null;
     }
   }
