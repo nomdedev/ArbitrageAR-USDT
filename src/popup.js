@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupTabNavigation();
   setupRefreshButton();
   setupFilterButtons(); // NUEVO: Configurar filtros P2P
+  setupDollarPriceControls(); // NUEVO: Configurar controles del precio del dólar
   fetchAndDisplay();
   loadBanksData();
 });
@@ -27,6 +28,43 @@ function formatNumber(num) {
     return '0.00';
   }
   return num.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// NUEVO: Formateo específico para ratios USD/USDT con 3 decimales
+function formatUsdUsdtRatio(num) {
+  if (num === undefined || num === null || isNaN(num)) {
+    console.warn('formatUsdUsdtRatio recibió valor inválido:', num);
+    return '1.000';
+  }
+  return num.toLocaleString('es-AR', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+}
+
+// NUEVO: Formateo específico para porcentajes de comisión con mayor precisión
+function formatCommissionPercent(num) {
+  if (num === undefined || num === null || isNaN(num)) {
+    return '0.00';
+  }
+  return num.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 3 });
+}
+
+// NUEVO: Obtener texto para mostrar la fuente del precio del dólar
+function getDollarSourceDisplay(official) {
+  if (!official || !official.source) return 'N/A';
+  
+  switch (official.source) {
+    case 'manual':
+      return '👤 Manual';
+    case 'dolarito_bank':
+      return `🏦 ${official.bank}`;
+    case 'dolarito_average':
+      return `📊 Promedio (${official.banksCount || 0} bancos)`;
+    case 'dolarapi_fallback':
+      return '🔄 DolarAPI (fallback)';
+    case 'hardcoded_fallback':
+      return '⚠️ Fallback fijo';
+    default:
+      return official.source;
+  }
 }
 
 // Mostrar indicador de salud del mercado
@@ -257,6 +295,11 @@ function handleSuccessfulData(data, container) {
   currentData = data;
   updateLastUpdateTimestamp(data.lastUpdate);
   displayMarketHealth(data.marketHealth);
+  
+  // NUEVO: Mostrar información del precio del dólar
+  if (data.oficial) {
+    displayDollarInfo(data.oficial);
+  }
 
   if (data.error && !data.usingCache) {
     const errorClass = data.usingCache ? 'warning' : 'error';
@@ -319,26 +362,55 @@ async function fetchAndDisplay(retryCount = 0) {
     let responseReceived = false;
     const timeoutId = setTimeout(() => {
       if (!responseReceived) {
-        console.error('⏰ [POPUP] TIMEOUT: El callback del background nunca se ejecutó (10 segundos)');
+        console.error('⏰ [POPUP] TIMEOUT: El callback del background nunca se ejecutó (15 segundos)');
         loading.style.display = 'none';
-        container.innerHTML = '<p class="error">⏰ Timeout: El background no respondió en 10 segundos.</p>';
+        container.innerHTML = `
+          <div class="error-container">
+            <h3>⏰ Timeout de Conexión</h3>
+            <p>El background no respondió en 15 segundos.</p>
+            <button onclick="location.reload()" class="retry-btn">🔄 Reintentar</button>
+            <details style="margin-top: 10px;">
+              <summary>Información de Debug</summary>
+              <p><small>Runtime disponible: ${!!chrome.runtime}</small></p>
+              <p><small>SendMessage disponible: ${!!chrome.runtime?.sendMessage}</small></p>
+              <p><small>Timestamp: ${new Date().toISOString()}</small></p>
+            </details>
+          </div>
+        `;
       }
-    }, 10000);
+    }, 15000); // Aumentado a 15 segundos
     
     console.log('📤 [POPUP] Enviando mensaje { action: "getArbitrages" }...');
-    chrome.runtime.sendMessage({ action: 'getArbitrages' }, data => {
-      responseReceived = true;
+    
+    // Verificar que chrome.runtime está disponible antes de enviar
+    if (!chrome.runtime) {
+      console.error('❌ [POPUP] chrome.runtime no está disponible');
+      loading.style.display = 'none';
+      container.innerHTML = '<p class="error">❌ Chrome Runtime no disponible. Recarga la extensión.</p>';
       clearTimeout(timeoutId);
-      
-      console.log('📥 [POPUP] Callback ejecutado - Datos recibidos:', data);
-      console.log('📥 [POPUP] chrome.runtime.lastError:', chrome.runtime.lastError);
-      
-      if (chrome.runtime.lastError) {
-        console.error('❌ Error en chrome.runtime:', chrome.runtime.lastError);
-        loading.style.display = 'none';
-        container.innerHTML = '<p class="error">❌ Error de comunicación con el background.</p>';
-        return;
-      }
+      return;
+    }
+    
+    try {
+      chrome.runtime.sendMessage({ action: 'getArbitrages' }, data => {
+        responseReceived = true;
+        clearTimeout(timeoutId);
+        
+        console.log('📥 [POPUP] Callback ejecutado - Datos recibidos:', data);
+        console.log('📥 [POPUP] chrome.runtime.lastError:', chrome.runtime.lastError);
+        
+        if (chrome.runtime.lastError) {
+          console.error('❌ Error en chrome.runtime:', chrome.runtime.lastError);
+          loading.style.display = 'none';
+          container.innerHTML = `
+            <div class="error-container">
+              <h3>❌ Error de Comunicación</h3>
+              <p>Error: ${chrome.runtime.lastError.message}</p>
+              <button onclick="location.reload()" class="retry-btn">🔄 Reintentar</button>
+            </div>
+          `;
+          return;
+        }
       
       console.log('📥 Procesando respuesta del background...');
       
@@ -347,6 +419,43 @@ async function fetchAndDisplay(retryCount = 0) {
       if (!data) {
         console.error('❌ No se recibió data del background');
         handleNoData(container);
+        return;
+      }
+
+      // NUEVO: Manejar errores específicos del background
+      if (data.timeout) {
+        container.innerHTML = `
+          <div class="error-container">
+            <h3>⏰ Timeout del Background</h3>
+            <p>El procesamiento tomó demasiado tiempo.</p>
+            <button onclick="location.reload()" class="retry-btn">🔄 Reintentar</button>
+            <p><small>Si el problema persiste, recarga la extensión.</small></p>
+          </div>
+        `;
+        return;
+      }
+
+      if (data.isTimeout) {
+        container.innerHTML = `
+          <div class="error-container">
+            <h3>⏰ Timeout de APIs</h3>
+            <p>Las APIs externas no responden.</p>
+            <button onclick="location.reload()" class="retry-btn">🔄 Reintentar</button>
+            <p><small>Verifica tu conexión a internet.</small></p>
+          </div>
+        `;
+        return;
+      }
+
+      if (data.backgroundUnhealthy) {
+        container.innerHTML = `
+          <div class="error-container">
+            <h3>🏥 Background No Saludable</h3>
+            <p>Las APIs externas no están disponibles.</p>
+            <button onclick="location.reload()" class="retry-btn">🔄 Reintentar</button>
+            <p><small>Esto puede ser temporal. Intenta de nuevo en unos minutos.</small></p>
+          </div>
+        `;
         return;
       }
 
@@ -366,7 +475,20 @@ async function fetchAndDisplay(retryCount = 0) {
     
       handleCacheIndicator(data, retryCount);
       handleSuccessfulData(data, container);
-    });
+      });
+    } catch (error) {
+      console.error('❌ Error enviando mensaje al background:', error);
+      responseReceived = true;
+      clearTimeout(timeoutId);
+      loading.style.display = 'none';
+      container.innerHTML = `
+        <div class="error-container">
+          <h3>❌ Error de Envío</h3>
+          <p>No se pudo comunicar con el background: ${error.message}</p>
+          <button onclick="location.reload()" class="retry-btn">🔄 Reintentar</button>
+        </div>
+      `;
+    }
   } catch (error) {
     console.error('❌ Error en fetchAndDisplay:', error);
     loading.style.display = 'none';
@@ -484,9 +606,15 @@ function displayArbitrages(arbitrages, official) {
             <span class="price-label">💵 Dólar Oficial</span>
             <span class="price-value">$${formatNumber(arb.officialPrice)}</span>
           </div>
+          ${official?.source ? `
+          <div class="price-row source-row">
+            <span class="price-label">📍 Fuente</span>
+            <span class="price-value source-value">${getDollarSourceDisplay(official)}</span>
+          </div>
+          ` : ''}
           <div class="price-row">
             <span class="price-label">� USD → USDT</span>
-            <span class="price-value">${formatNumber(arb.usdToUsdtRate)} USD/USDT</span>
+            <span class="price-value">${formatUsdUsdtRatio(arb.usdToUsdtRate)} USD/USDT</span>
           </div>
           <div class="price-row">
             <span class="price-label">💸 USDT → ARS</span>
@@ -785,7 +913,7 @@ function generateGuideSteps(values) {
             <span class="calc-result">Obtienes ${formatNumber(usdAmount)} USD</span>
           </div>
           <div class="step-simple-note">
-            💡 Límite mensual: USD 200 por persona
+            💡 Verifica los límites actuales con tu banco
           </div>
         </div>
       </div>
@@ -798,13 +926,13 @@ function generateGuideSteps(values) {
           <p class="step-simple-text">Deposita tus USD en <strong>${sanitizeHTML(broker)}</strong> y cómpralos por USDT</p>
           <div class="step-simple-calc">
             <span class="calc-label">Tasa:</span>
-            <span class="calc-value">${formatNumber(usdToUsdtRate)} USD = 1 USDT</span>
+            <span class="calc-value">${formatUsdUsdtRatio(usdToUsdtRate)} USD = 1 USDT</span>
             <span class="calc-arrow">→</span>
             <span class="calc-result">${formatNumber(usdtAfterFees)} USDT</span>
           </div>
-          ${usdToUsdtRate > 1.01 ? `
+          ${usdToUsdtRate > 1.005 ? `
           <div class="step-simple-warning">
-            ⚠️ El exchange cobra ${formatNumber((usdToUsdtRate - 1) * 100)}% para esta conversión
+            ⚠️ El exchange cobra ${formatCommissionPercent((usdToUsdtRate - 1) * 100)}% para esta conversión
           </div>
           ` : ''}
         </div>
@@ -962,60 +1090,134 @@ function displayStepByStepGuide(arb) {
 
 // Cargar datos de bancos
 function loadBanksData() {
-  const container = document.getElementById('banks-list');
+  // Configurar event listener para el botón de refresh
+  const refreshBtn = document.getElementById('refresh-banks');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', loadBankRates);
+  }
   
-  chrome.runtime.sendMessage({ action: 'getBanks' }, data => {
-    if (!data?.banks || data.banks.length === 0) {
-      container.innerHTML = '<p class="info">📋 Información de bancos no disponible en este momento.</p>';
-      return;
-    }
-    
-    displayBanks(data.banks);
-  });
+  // Cargar datos iniciales automáticamente cuando se abre la pestaña
+  loadBankRates();
 }
 
-// Mostrar lista de bancos
-function displayBanks(banks) {
+// Mostrar lista de bancos desde dolarito.ar
+function displayBanks(bankRates) {
   const container = document.getElementById('banks-list');
-  let html = '';
   
-  banks.forEach(bank => {
-    // Usar logo si está disponible, sino usar emoji
-    const logoHtml = bank.logo ? 
-      `<img src="${bank.logo}" alt="${bank.name}" class="bank-logo" onerror="this.style.display='none'">` : 
-      '🏦';
-    
-    // Mostrar spread si está disponible
-    const spreadHtml = bank.spread ? 
-      `<div class="bank-spread">Spread: $${bank.spread}</div>` : '';
-    
-    // Mostrar fuente si está disponible
-    const sourceHtml = bank.source ? 
-      `<div class="bank-source">Fuente: ${bank.source}</div>` : '';
+  if (!bankRates || Object.keys(bankRates).length === 0) {
+    container.innerHTML = `
+      <div class="select-prompt">
+        <p>📊 No hay datos de bancos disponibles</p>
+        <p style="margin-top: 8px; font-size: 0.85em;">Presiona el botón "Actualizar" para cargar las cotizaciones desde dolarito.ar</p>
+      </div>
+    `;
+    return;
+  }
+  
+  let html = '';
+  const banks = Object.entries(bankRates);
+  
+  banks.forEach(([bankCode, rates]) => {
+    const bankName = getBankDisplayName(bankCode);
+    const spread = rates.venta - rates.compra;
+    const spreadPercent = ((spread / rates.compra) * 100).toFixed(2);
     
     html += `
       <div class="bank-card">
         <div class="bank-header">
-          <div class="bank-logo-container">${logoHtml}</div>
-          <div class="bank-name">${bank.name}</div>
-          ${spreadHtml}
+          <div class="bank-logo-container">🏦</div>
+          <div class="bank-name">${bankName}</div>
+          <div class="bank-spread">Spread: $${formatNumber(spread)} (${spreadPercent}%)</div>
         </div>
         <div class="bank-prices">
           <div class="bank-price">
             <div class="bank-price-label">Compra</div>
-            <div class="bank-price-value">$${formatNumber(bank.compra)}</div>
+            <div class="bank-price-value">$${formatNumber(rates.compra)}</div>
           </div>
           <div class="bank-price">
             <div class="bank-price-label">Venta</div>
-            <div class="bank-price-value">$${formatNumber(bank.venta)}</div>
+            <div class="bank-price-value">$${formatNumber(rates.venta)}</div>
           </div>
         </div>
-        ${sourceHtml}
+        <div class="bank-source">Fuente: dolarito.ar</div>
       </div>
     `;
   });
   
   container.innerHTML = html;
+  
+  // Actualizar timestamp
+  updateBanksTimestamp();
+}
+
+// Obtener nombre legible del banco
+function getBankDisplayName(bankCode) {
+  const bankNames = {
+    'nacion': 'Banco Nación',
+    'bbva': 'BBVA',
+    'piano': 'Banco Piano',
+    'hipotecario': 'Banco Hipotecario',
+    'galicia': 'Banco Galicia',
+    'santander': 'Banco Santander',
+    'ciudad': 'Banco Ciudad',
+    'supervielle': 'Banco Supervielle',
+    'patagonia': 'Banco Patagonia',
+    'comafi': 'Banco Comafi',
+    'promedio': 'Promedio Bancos'
+  };
+  
+  return bankNames[bankCode] || bankCode.charAt(0).toUpperCase() + bankCode.slice(1);
+}
+
+// Actualizar timestamp de bancos
+function updateBanksTimestamp() {
+  const timestampEl = document.getElementById('banks-last-update');
+  if (timestampEl) {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('es-AR');
+    timestampEl.textContent = `Actualizado: ${timeStr}`;
+  }
+}
+
+// NUEVO: Cargar datos de bancos desde dolarito.ar
+async function loadBankRates() {
+  const refreshBtn = document.getElementById('refresh-banks');
+  const timestampEl = document.getElementById('banks-last-update');
+  
+  try {
+    // Deshabilitar botón durante la carga
+    if (refreshBtn) {
+      refreshBtn.disabled = true;
+      refreshBtn.textContent = '⏳ Cargando...';
+    }
+    
+    // Solicitar datos al background
+    const response = await new Promise((resolve) => {
+      chrome.runtime.sendMessage({ action: 'getBankRates' }, resolve);
+    });
+    
+    if (response && response.bankRates) {
+      displayBanks(response.bankRates);
+    } else {
+      throw new Error('No se pudieron obtener datos de bancos');
+    }
+    
+  } catch (error) {
+    console.error('Error cargando datos de bancos:', error);
+    const container = document.getElementById('banks-list');
+    container.innerHTML = `
+      <div class="select-prompt">
+        <p>❌ Error al cargar datos de bancos</p>
+        <p style="margin-top: 8px; font-size: 0.85em;">Intenta nuevamente en unos momentos</p>
+      </div>
+    `;
+  } finally {
+    // Re-habilitar botón
+    if (refreshBtn) {
+      refreshBtn.disabled = false;
+      refreshBtn.textContent = '🔄 Actualizar';
+    }
+  }
 }
 
 // Actualizar timestamp
@@ -1151,4 +1353,75 @@ function calculateSimulation() {
       </div>
     </div>
   `;
+}
+
+// NUEVO: Configurar controles del precio del dólar
+function setupDollarPriceControls() {
+  const recalculateBtn = document.getElementById('recalculate-with-custom');
+  const configureBtn = document.getElementById('configure-dollar');
+
+  if (recalculateBtn) {
+    recalculateBtn.addEventListener('click', showRecalculateDialog);
+  }
+
+  if (configureBtn) {
+    configureBtn.addEventListener('click', openDollarConfiguration);
+  }
+}
+
+// Mostrar información del precio del dólar
+function displayDollarInfo(officialData) {
+  const dollarInfo = document.getElementById('dollar-info');
+  const dollarPrice = document.getElementById('dollar-current-price');
+  const dollarSource = document.getElementById('dollar-source-text');
+
+  if (!dollarInfo || !officialData) {
+    if (dollarInfo) dollarInfo.style.display = 'none';
+    return;
+  }
+
+  // Actualizar valores - mostrar precio de VENTA (lo que pagamos por comprar USD)
+  dollarPrice.textContent = `$${formatNumber(officialData.venta)}`;
+  dollarSource.textContent = `Fuente: ${getDollarSourceDisplay(officialData)}`;
+
+  // Mostrar la información
+  dollarInfo.style.display = 'block';
+}
+
+// Mostrar diálogo para recalcular con precio personalizado
+async function showRecalculateDialog() {
+  const customPrice = prompt(
+    '💵 Ingresa el precio del dólar para recalcular:\n\n' +
+    'Este será usado temporalmente para esta sesión.\n' +
+    'Para cambiar permanentemente, usa el botón de configuración.',
+    '950'
+  );
+
+  if (customPrice && !isNaN(customPrice) && parseFloat(customPrice) > 0) {
+    const price = parseFloat(customPrice);
+    console.log(`🔄 Recalculando con precio personalizado: $${price}`);
+    
+    // Enviar precio personalizado al background para recálculo temporal
+    chrome.runtime.sendMessage({
+      action: 'recalculateWithCustomPrice',
+      customPrice: price
+    }, (data) => {
+      if (chrome.runtime.lastError) {
+        console.error('Error recalculando:', chrome.runtime.lastError);
+        return;
+      }
+      
+      if (data && data.optimizedRoutes) {
+        console.log('✅ Recálculo completado con precio personalizado');
+        currentData = data;
+        displayDataFromBackground(data);
+        displayDollarInfo(data.oficial);
+      }
+    });
+  }
+}
+
+// Abrir configuración del precio del dólar
+function openDollarConfiguration() {
+  chrome.tabs.create({ url: chrome.runtime.getURL('src/options.html') });
 }

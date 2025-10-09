@@ -32,6 +32,27 @@
   <!-- Indicador de Cache -->
   <div id="cache-indicator" class="cache-indicator" style="display: none;"></div>
 
+  <!-- Información del Precio del Dólar -->
+  <div id="dollar-info" class="dollar-info" style="display: none;">
+    <div class="dollar-info-content">
+      <div class="dollar-price">
+        <span class="dollar-icon">💵</span>
+        <div class="dollar-details">
+          <span class="dollar-value" id="dollar-current-price">$950.00</span>
+          <span class="dollar-source" id="dollar-source-text">Fuente: Manual</span>
+        </div>
+      </div>
+      <div class="dollar-actions">
+        <button id="recalculate-with-custom" class="btn-recalculate" title="Recalcular con precio personalizado">
+          🔄 Recalcular
+        </button>
+        <button id="configure-dollar" class="btn-configure" title="Configurar precio del dólar">
+          ⚙️
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div class="tabs">
     <button class="tab active" data-tab="routes">🎯 Rutas</button>
     <button class="tab" data-tab="simulator">� Simulador</button>
@@ -132,13 +153,17 @@
     <!-- TAB: Bancos -->
     <section id="tab-banks" class="tab-content">
       <div class="banks-intro">
-        <h2>🏦 Dónde comprar dólares oficiales</h2>
-        <p>Los siguientes bancos ofrecen compra de dólar oficial:</p>
+        <h2>🏦 Cotizaciones Dólar Oficial por Banco</h2>
+        <p>Información actualizada desde <strong>dolarito.ar</strong></p>
+        <div class="banks-controls">
+          <button id="refresh-banks" class="btn-refresh">🔄 Actualizar</button>
+          <span id="banks-last-update" class="banks-timestamp"></span>
+        </div>
       </div>
       <div id="banks-list">
         <div class="loading">
           <div class="spinner"></div>
-          <p>Cargando información de bancos...</p>
+          <p>Cargando cotizaciones bancarias...</p>
         </div>
       </div>
     </section>

@@ -12,6 +12,7 @@ import {
 } from './dataFetcher.js';
 import { calculateOptimizedRoutes } from './routeCalculator.js';
 import { checkAndNotify } from './notifications.js';
+import { dollarPriceManager } from './dollarPriceManager.js';
 
 console.log('✅ [BACKGROUND] Todos los imports completados exitosamente en:', new Date().toISOString());
 console.log('🚀 [BACKGROUND] Iniciando inicialización del service worker...');
@@ -19,21 +20,137 @@ console.log('🚀 [BACKGROUND] Iniciando inicialización del service worker...')
 // Estado global del background
 let currentData = null;
 let lastUpdate = null;
+let backgroundHealthy = true;
+let lastHealthCheck = 0;
+
+// NUEVO: Health check del background
+async function performHealthCheck() {
+  console.log('🏥 [HEALTH] Iniciando health check...');
+  const now = Date.now();
+  
+  // Solo hacer health check cada 5 minutos
+  if (now - lastHealthCheck < 5 * 60 * 1000) {
+    return backgroundHealthy;
+  }
+  
+  try {
+    // Test básico: verificar que las APIs responden
+    const testPromises = [
+      fetch('https://dolarapi.com/v1/dolares/oficial').then(r => r.ok),
+      fetch('https://criptoya.com/api/usdt/ars/1').then(r => r.ok)
+    ];
+    
+    const results = await Promise.allSettled(testPromises);
+    const healthyApis = results.filter(r => r.status === 'fulfilled' && r.value).length;
+    
+    backgroundHealthy = healthyApis >= 1; // Al menos 1 API funcionando
+    lastHealthCheck = now;
+    
+    console.log(`🏥 [HEALTH] Health check completado: ${healthyApis}/2 APIs funcionando`);
+    return backgroundHealthy;
+    
+  } catch (error) {
+    console.error('🏥 [HEALTH] Error en health check:', error);
+    backgroundHealthy = false;
+    lastHealthCheck = now;
+    return backgroundHealthy;
+  }
+}
+
+// NUEVO: Función para recalcular con precio personalizado del dólar
+async function recalculateWithCustomDollarPrice(customPrice) {
+  console.log(`🔄 [DEBUG] recalculateWithCustomDollarPrice() INICIO con precio $${customPrice}`);
+
+  try {
+    // Obtener datos actuales de USDT (sin refrescar el dólar)
+    console.log('📡 [DEBUG] Consultando APIs para recálculo...');
+    const [usdt, usdtUsd] = await Promise.all([
+      fetchCriptoyaUSDT(),
+      fetchCriptoyaUSDTtoUSD()
+    ]);
+
+    // Crear objeto oficial con precio personalizado
+    const oficial = {
+      compra: customPrice,
+      venta: customPrice * 1.02, // Spread estimado del 2%
+      source: 'manual_temp',
+      bank: 'Temporal',
+      timestamp: new Date().toISOString()
+    };
+
+    console.log(`📊 [DEBUG] Datos preparados - Custom: $${customPrice}, USDT: ${!!usdt}, USDT/USD: ${!!usdtUsd}`);
+
+    if (!usdt) {
+      console.log('❌ [DEBUG] Error obteniendo datos de USDT para recálculo');
+      return null;
+    }
+
+    // Calcular rutas optimizadas con precio personalizado
+    console.log('🧮 [DEBUG] Iniciando calculateOptimizedRoutes con precio personalizado...');
+    const startTime = Date.now();
+    const optimizedRoutes = await calculateOptimizedRoutes(oficial, usdt, usdtUsd);
+    const calcTime = Date.now() - startTime;
+    console.log(`✅ [DEBUG] calculateOptimizedRoutes completado en ${calcTime}ms - ${optimizedRoutes.length} rutas`);
+
+    // Crear objeto de respuesta
+    const data = {
+      oficial,
+      usdt,
+      usdtUsd,
+      optimizedRoutes,
+      lastUpdate: Date.now(),
+      error: null,
+      usingCache: false,
+      isTemporaryRecalc: true
+    };
+
+    console.log(`✅ [DEBUG] recalculateWithCustomDollarPrice() COMPLETADO - ${optimizedRoutes.length} rutas calculadas`);
+    return data;
+
+  } catch (error) {
+    console.error('❌ [DEBUG] Error en recalculateWithCustomDollarPrice:', error);
+    return {
+      error: error.message,
+      isTemporaryRecalc: true,
+      lastUpdate: Date.now()
+    };
+  }
+}
 
 // Función principal de actualización de datos
 async function updateData() {
   console.log('🔄 [DEBUG] updateData() INICIO en', new Date().toISOString());
 
   try {
-    // Fetch de datos en paralelo
+    // Fetch de datos en paralelo, usando el nuevo sistema para el precio del dólar
     console.log('📡 [DEBUG] Consultando APIs...');
+    
+    // Agregar timeout de 8 segundos para getDollarPrice (puede ser lento por scraping)
+    const getDollarPriceWithTimeout = Promise.race([
+      dollarPriceManager.getDollarPrice(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout obteniendo precio del dólar (8s)')), 8000)
+      )
+    ]);
+    
     const [oficial, usdt, usdtUsd] = await Promise.all([
-      fetchDolaritoOficial(),
+      getDollarPriceWithTimeout.catch(async (error) => {
+        console.error('❌ [DOLLAR] Error/timeout obteniendo precio:', error);
+        // Fallback rápido con precio fijo
+        return {
+          compra: 950,
+          venta: 1000,
+          source: 'fallback_timeout',
+          bank: 'Fallback',
+          timestamp: new Date().toISOString()
+        };
+      }),
       fetchCriptoyaUSDT(),
       fetchCriptoyaUSDTtoUSD()
     ]);
 
     console.log(`📊 [DEBUG] Datos obtenidos - Oficial: ${!!oficial}, USDT: ${!!usdt}, USDT/USD: ${!!usdtUsd}`);
+    console.log(`💵 [DEBUG] Precio dólar: $${oficial?.compra} (${oficial?.source}) - ${oficial?.bank}`);
 
     if (!oficial || !usdt) {
       console.log('❌ [DEBUG] Error obteniendo datos básicos');
@@ -63,15 +180,13 @@ async function updateData() {
 
     console.log(`✅ [DEBUG] updateData() COMPLETADO - ${optimizedRoutes.length} rutas calculadas`);
 
-    // Verificar y enviar notificaciones
+    // Verificar y enviar notificaciones (NO BLOQUEAR - ejecutar en background)
     if (optimizedRoutes.length > 0) {
-      console.log('🔔 [DEBUG] Iniciando checkAndNotify...');
-      try {
-        await checkAndNotify(optimizedRoutes);
-        console.log('✅ [DEBUG] checkAndNotify completado');
-      } catch (notifyError) {
-        console.error('❌ [DEBUG] Error en checkAndNotify (no crítico):', notifyError);
-      }
+      console.log('🔔 [DEBUG] Iniciando checkAndNotify en background...');
+      // NO usar await - dejar que corra asíncrono para no bloquear
+      checkAndNotify(optimizedRoutes)
+        .then(() => console.log('✅ [DEBUG] checkAndNotify completado'))
+        .catch(notifyError => console.error('❌ [DEBUG] Error en checkAndNotify (no crítico):', notifyError));
     }
 
     console.log('📤 [DEBUG] updateData() a punto de retornar data:', {
@@ -145,10 +260,37 @@ function calculateMarketHealth(arbitrages) {
   return { status, message, color, icon };
 }
 
-// Función para obtener datos actuales
+// Función para obtener datos actuales con timeout
 async function getCurrentData() {
   console.log('🔍 [DEBUG] getCurrentData() INICIO');
+
+  // Promise con timeout de 12 segundos para evitar que el popup haga timeout
+  return Promise.race([
+    getCurrentDataInternal(),
+    new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Timeout interno del background (12s)')), 12000)
+    )
+  ]);
+}
+
+// Función interna para obtener datos
+async function getCurrentDataInternal() {
+  console.log('🔍 [DEBUG] getCurrentDataInternal() INICIO');
   const now = Date.now();
+  
+  // Verificar salud del background
+  const isHealthy = await performHealthCheck();
+  if (!isHealthy) {
+    console.warn('⚠️ [HEALTH] Background no está saludable, usando datos cached si están disponibles');
+    if (currentData) {
+      return {
+        ...currentData,
+        error: 'APIs externas no disponibles. Usando datos en cache.',
+        usingCache: true,
+        unhealthy: true
+      };
+    }
+  }
   
   // Si tenemos datos cacheados y son recientes, usarlos
   if (currentData && lastUpdate) {
@@ -301,9 +443,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log('🔄 [BACKGROUND] Procesando getArbitrages...');
     console.log('🔄 [BACKGROUND] Iniciando getCurrentData() para getArbitrages...');
 
+    // Añadir timeout de seguridad para garantizar respuesta
+    const safetyTimeout = setTimeout(() => {
+      console.error('🚨 [BACKGROUND] Safety timeout - forzando respuesta');
+      try {
+        sendResponse({ 
+          error: 'Background timeout interno. Reinicia la extensión.',
+          optimizedRoutes: [], 
+          arbitrages: [],
+          timeout: true
+        });
+      } catch (e) {
+        console.error('❌ [BACKGROUND] Error en safety timeout:', e);
+      }
+    }, 10000);
+    
     // Manejar de forma asíncrona pero responder inmediatamente
     getCurrentData()
       .then(data => {
+        clearTimeout(safetyTimeout);
         console.log('✅ [BACKGROUND] getCurrentData() resuelto exitosamente');
         console.log('📤 [BACKGROUND] Preparando respuesta con', data?.optimizedRoutes?.length || 0, 'rutas');
         console.log('📤 [BACKGROUND] Respuesta completa:', {
@@ -323,10 +481,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
       })
       .catch(error => {
+        clearTimeout(safetyTimeout);
         console.error('❌ [BACKGROUND] Error en getCurrentData():', error);
         console.error('❌ [BACKGROUND] Stack trace:', error.stack);
         try {
-          sendResponse({ error: 'Error interno del service worker', optimizedRoutes: [], arbitrages: [] });
+          const errorResponse = {
+            error: error.message || 'Error interno del service worker',
+            optimizedRoutes: [], 
+            arbitrages: [],
+            isTimeout: error.message?.includes('Timeout'),
+            backgroundUnhealthy: !backgroundHealthy
+          };
+          sendResponse(errorResponse);
           console.log('✅ [BACKGROUND] sendResponse() de error ejecutado');
         } catch (sendError) {
           console.error('❌ [BACKGROUND] Error al ejecutar sendResponse() de error:', sendError);
@@ -344,6 +510,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       console.error('❌ [BACKGROUND] Error en getBanks:', error);
       sendResponse({ banks: [] });
     });
+  } else if (request.action === 'getBankRates') {
+    // NUEVO: Obtener cotizaciones bancarias desde dolarito.ar
+    console.log('📡 [BACKGROUND] Solicitando cotizaciones bancarias...');
+    dollarPriceManager.getBankRates().then(bankRates => {
+      console.log('✅ [BACKGROUND] Cotizaciones bancarias obtenidas:', Object.keys(bankRates || {}).length, 'bancos');
+      sendResponse({ bankRates: bankRates || {} });
+    }).catch(error => {
+      console.error('❌ [BACKGROUND] Error obteniendo cotizaciones bancarias:', error);
+      sendResponse({ bankRates: {}, error: error.message });
+    });
   } else if (request.action === 'refresh') {
     // Manejar de forma asíncrona pero responder inmediatamente
     updateData().then(data => {
@@ -352,6 +528,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       console.error('❌ [BACKGROUND] Error en refresh:', error);
       sendResponse({ error: 'Error al actualizar datos', optimizedRoutes: [] });
     });
+  } else if (request.action === 'recalculateWithCustomPrice') {
+    // NUEVO: Recalcular con precio personalizado del dólar
+    const customPrice = request.customPrice;
+    console.log(`🔄 [BACKGROUND] Recalculando con precio personalizado: $${customPrice}`);
+    
+    recalculateWithCustomDollarPrice(customPrice).then(data => {
+      sendResponse(data);
+    }).catch(error => {
+      console.error('❌ [BACKGROUND] Error en recálculo personalizado:', error);
+      sendResponse({ error: 'Error al recalcular con precio personalizado', optimizedRoutes: [] });
+    });
   }
 
   // Mantener el canal abierto para respuestas asíncronas
@@ -359,6 +546,43 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 console.log('✅ [BACKGROUND] Listener registrado exitosamente');
+
+// NUEVO: Listener para cambios en configuración
+chrome.storage.onChanged.addListener((changes, namespace) => {
+  console.log('🔧 [STORAGE] Cambios detectados en storage:', changes);
+  
+  if (namespace === 'local' && changes.notificationSettings) {
+    const newSettings = changes.notificationSettings.newValue;
+    const oldSettings = changes.notificationSettings.oldValue;
+    
+    // Verificar si cambió la configuración del precio del dólar
+    if (newSettings?.dollarPriceSource !== oldSettings?.dollarPriceSource ||
+        newSettings?.manualDollarPrice !== oldSettings?.manualDollarPrice ||
+        newSettings?.preferredBank !== oldSettings?.preferredBank) {
+      
+      console.log('💵 [STORAGE] Configuración del dólar cambió, refrescando datos...');
+      console.log('💵 [STORAGE] Fuente:', oldSettings?.dollarPriceSource, '→', newSettings?.dollarPriceSource);
+      console.log('💵 [STORAGE] Precio manual:', oldSettings?.manualDollarPrice, '→', newSettings?.manualDollarPrice);
+      
+      // Invalidar cache y actualizar datos
+      currentData = null;
+      lastUpdate = null;
+      
+      // CRÍTICO: También invalidar cache del dollarPriceManager
+      dollarPriceManager.invalidateCache();
+      
+      updateData().then(freshData => {
+        if (freshData) {
+          console.log('✅ [STORAGE] Datos refrescados por cambio de configuración');
+        }
+      }).catch(error => {
+        console.error('❌ [STORAGE] Error refrescando datos por cambio de configuración:', error);
+      });
+    }
+  }
+});
+
+console.log('✅ [BACKGROUND] Storage listener registrado exitosamente');
 
 // Inicializar cuando se carga el service worker
 console.log('🚀 [BACKGROUND] Llamando initialize()...');

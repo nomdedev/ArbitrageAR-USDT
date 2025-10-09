@@ -223,7 +223,75 @@
         </div>
       </section>
 
-      <!-- SECCIÓN 6: Exchanges Favoritos -->
+      <!-- SECCIÓN 6: Configuración del Precio del Dólar -->
+      <section class="settings-section">
+        <h2>💵 Configuración del Precio del Dólar</h2>
+        <div class="setting-info">
+          <p class="setting-description">Los precios del dólar oficial varían entre bancos. Configura cómo quieres obtener este precio para cálculos más precisos.</p>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label>
+              <input type="radio" name="dollar-price-source" value="auto" checked>
+              <span class="radio-label">Automático desde Dolarito.ar</span>
+            </label>
+            <p class="setting-description">Obtener precios actualizados automáticamente de diferentes bancos</p>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label>
+              <input type="radio" name="dollar-price-source" value="manual">
+              <span class="radio-label">Precio manual</span>
+            </label>
+            <p class="setting-description">Usar un precio fijo que tú configures</p>
+          </div>
+        </div>
+
+        <div class="setting-item" id="manual-price-section" style="display: none;">
+          <div class="setting-info">
+            <label for="manual-dollar-price" class="setting-label">Precio del dólar (ARS)</label>
+            <p class="setting-description">Precio al que compraste/comprarás USD oficial en tu banco</p>
+          </div>
+          <div class="input-group">
+            <input type="number" id="manual-dollar-price" min="100" max="2000" step="0.01" value="950" placeholder="950">
+            <span class="input-suffix">ARS</span>
+          </div>
+        </div>
+
+        <div class="setting-item" id="bank-selection-section">
+          <div class="setting-info">
+            <label for="preferred-bank" class="setting-label">Banco preferido</label>
+            <p class="setting-description">Selecciona el banco donde normalmente compras USD oficial</p>
+          </div>
+          <div class="input-group">
+            <select id="preferred-bank">
+              <option value="promedio">Promedio de todos los bancos</option>
+              <option value="Banco Nación">Banco Nación</option>
+              <option value="Banco Provincia">Banco Provincia</option>
+              <option value="BBVA Banco Francés">BBVA Banco Francés</option>
+              <option value="Banco Galicia">Banco Galicia</option>
+              <option value="Banco Santander Río">Banco Santander Río</option>
+              <option value="Banco Macro">Banco Macro</option>
+              <option value="ICBC">ICBC</option>
+              <option value="Banco Ciudad">Banco Ciudad</option>
+              <option value="Banco Patagonia">Banco Patagonia</option>
+              <option value="Banco Supervielle">Banco Supervielle</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label class="setting-label">💡 Recomendación</label>
+            <p class="setting-description">Para mayor precisión, usa el precio manual con el valor exacto al que compraste USD, o selecciona tu banco específico en modo automático.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 7: Exchanges Favoritos -->
       <section class="settings-section">
         <h2>🏦 Exchanges Preferidos</h2>
         <div class="setting-info">
@@ -311,7 +379,7 @@
         </div>
       </section>
 
-      <!-- SECCIÓN 6: Test de Notificación -->
+      <!-- SECCIÓN 8: Test de Notificación -->
       <section class="settings-section">
         <h2>🧪 Prueba</h2>
         <button id="test-notification" class="test-button">

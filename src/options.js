@@ -22,7 +22,11 @@ const DEFAULT_SETTINGS = {
   extraTradingFee: 0,
   extraWithdrawalFee: 0,
   extraTransferFee: 0,
-  bankCommissionFee: 0
+  bankCommissionFee: 0,
+  // NUEVO: Configuración de precio del dólar
+  dollarPriceSource: 'auto', // 'auto' o 'manual'
+  manualDollarPrice: 950,
+  preferredBank: 'promedio'
 };
 
 // Cargar configuración al iniciar
@@ -83,6 +87,17 @@ async function loadSettings() {
     document.getElementById('extra-transfer-fee').value = settings.extraTransferFee ?? 0;
     document.getElementById('bank-commission-fee').value = settings.bankCommissionFee ?? 0;
     
+    // NUEVO: Configuración de precio del dólar
+    const dollarSourceRadio = document.querySelector(`input[name="dollar-price-source"][value="${settings.dollarPriceSource ?? 'auto'}"]`);
+    if (dollarSourceRadio) {
+      dollarSourceRadio.checked = true;
+    }
+    document.getElementById('manual-dollar-price').value = settings.manualDollarPrice ?? 950;
+    document.getElementById('preferred-bank').value = settings.preferredBank ?? 'promedio';
+    
+    // Mostrar/ocultar sección de precio manual
+    updateDollarPriceUI();
+    
     // Actualizar UI según estado de notificaciones
     updateUIState();
     
@@ -121,6 +136,11 @@ function setupEventListeners() {
   
   // Test de notificación
   document.getElementById('test-notification').addEventListener('click', sendTestNotification);
+  
+  // NUEVO: Configuración de precio del dólar
+  document.querySelectorAll('input[name="dollar-price-source"]').forEach(radio => {
+    radio.addEventListener('change', updateDollarPriceUI);
+  });
   
   // Guardar configuración
   document.getElementById('save-settings').addEventListener('click', saveSettings);
@@ -182,7 +202,11 @@ async function saveSettings() {
       extraTradingFee: parseFloat(document.getElementById('extra-trading-fee').value) || 0,
       extraWithdrawalFee: parseFloat(document.getElementById('extra-withdrawal-fee').value) || 0,
       extraTransferFee: parseFloat(document.getElementById('extra-transfer-fee').value) || 0,
-      bankCommissionFee: parseFloat(document.getElementById('bank-commission-fee').value) || 0
+      bankCommissionFee: parseFloat(document.getElementById('bank-commission-fee').value) || 0,
+      // NUEVO: Configuración de precio del dólar
+      dollarPriceSource: document.querySelector('input[name="dollar-price-source"]:checked')?.value || 'auto',
+      manualDollarPrice: parseFloat(document.getElementById('manual-dollar-price').value) || 950,
+      preferredBank: document.getElementById('preferred-bank').value || 'promedio'
     };
     
     // Guardar en storage
@@ -277,4 +301,19 @@ function getThresholdFromAlertType(alertType, customValue) {
     'custom': customValue
   };
   return thresholds[alertType] || 1.5;
+}
+
+// NUEVO: Actualizar UI de configuración de precio del dólar
+function updateDollarPriceUI() {
+  const manualPriceSection = document.getElementById('manual-price-section');
+  const bankSelectionSection = document.getElementById('bank-selection-section');
+  const selectedSource = document.querySelector('input[name="dollar-price-source"]:checked')?.value;
+  
+  if (selectedSource === 'manual') {
+    manualPriceSection.style.display = 'block';
+    bankSelectionSection.style.display = 'none';
+  } else {
+    manualPriceSection.style.display = 'none';
+    bankSelectionSection.style.display = 'block';
+  }
 }

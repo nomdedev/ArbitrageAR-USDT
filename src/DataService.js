@@ -92,6 +92,54 @@ class DataService {
     console.error('Estructura inválida de CriptoYA USD:', data);
     return null;
   }
+
+  // NUEVO: Obtener precios de dólar por banco desde dolarito.ar
+  async fetchDolaritoBankRates() {
+    try {
+      const html = await this.fetchHTML('https://www.dolarito.ar/cotizacion/bancos');
+      
+      if (!html) {
+        console.warn('⚠️ No se pudo obtener HTML de Dolarito para precios bancarios');
+        return null;
+      }
+
+      // Buscar el JSON embebido con los datos de bancos
+      const jsonMatch = html.match(/"bankQuotations":\s*({[^}]*"quotations":\s*\[[^\]]*\][^}]*})/);
+      if (!jsonMatch) {
+        console.warn('No se encontró el JSON de precios bancarios en Dolarito');
+        return null;
+      }
+
+      const bankData = JSON.parse(`{${jsonMatch[1]}}`);
+      const quotations = bankData.quotations || [];
+
+      const bankRates = {};
+      
+      for (const quote of quotations) {
+        const bankName = quote.name?.trim();
+        const buyPrice = parseFloat(quote.buy);
+        const sellPrice = parseFloat(quote.sell);
+
+        if (bankName && !isNaN(buyPrice) && !isNaN(sellPrice) && buyPrice > 0 && sellPrice > 0) {
+          bankRates[bankName] = {
+            name: bankName,
+            compra: buyPrice,
+            venta: sellPrice,
+            spread: sellPrice - buyPrice,
+            timestamp: new Date().toISOString(),
+            source: 'dolarito'
+          };
+        }
+      }
+
+      console.log(`💰 Precios bancarios obtenidos: ${Object.keys(bankRates).length} bancos`);
+      return bankRates;
+
+    } catch (error) {
+      console.error('Error obteniendo precios bancarios de Dolarito:', error);
+      return null;
+    }
+  }
 }
 
 // Exportar instancia singleton (compatible con service workers)
@@ -99,3 +147,6 @@ const dataService = new DataService();
 if (typeof self !== 'undefined') {
   self.dataService = dataService;
 }
+
+// Exportar también la clase para poder crear nuevas instancias
+export { DataService };

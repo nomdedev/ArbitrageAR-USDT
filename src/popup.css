@@ -210,6 +210,93 @@ header::before {
   }
 }
 
+/* INFORMACIÓN DEL PRECIO DEL DÓLAR */
+.dollar-info {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(245, 158, 11, 0.12) 100%);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  padding: 12px 16px;
+  margin: 0;
+  animation: slideDown 0.3s ease;
+}
+
+.dollar-info-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dollar-price {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.dollar-icon {
+  font-size: 1.3em;
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.6));
+}
+
+.dollar-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dollar-value {
+  font-size: 1.1em;
+  font-weight: 700;
+  color: #fbbf24;
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+}
+
+.dollar-source {
+  font-size: 0.8em;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.dollar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-recalculate,
+.btn-configure {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.btn-recalculate {
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  box-shadow: 0 2px 4px rgba(6, 182, 212, 0.3);
+}
+
+.btn-recalculate:hover {
+  background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(6, 182, 212, 0.4);
+}
+
+.btn-configure {
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  box-shadow: 0 2px 4px rgba(100, 116, 139, 0.3);
+}
+
+.btn-configure:hover {
+  background: linear-gradient(135deg, #475569 0%, #334155 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(100, 116, 139, 0.4);
+}
+
 /* TABS */
 .tabs {
   display: flex;
@@ -775,6 +862,21 @@ main::-webkit-scrollbar-thumb {
   font-size: 1.08em;
 }
 
+/* Estilo específico para la fila de fuente del precio del dólar */
+.source-row {
+  background: rgba(100, 116, 139, 0.1);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin: 8px -8px;
+  border: 1px solid rgba(100, 116, 139, 0.2);
+}
+
+.source-value {
+  color: #cbd5e1;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
 /* LOADING & MESSAGES */
 .loading,
 .error-message,
@@ -814,6 +916,67 @@ main::-webkit-scrollbar-thumb {
   border-radius: 12px;
   padding: 20px;
   border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* NUEVO: Contenedor de error mejorado */
+.error-container {
+  text-align: center;
+  padding: 30px 20px;
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  margin: 20px;
+}
+
+.error-container h3 {
+  margin: 0 0 15px 0;
+  color: #ef4444;
+  font-size: 1.2em;
+}
+
+.error-container p {
+  margin: 10px 0;
+  color: #fca5a5;
+  line-height: 1.5;
+}
+
+.retry-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: all 0.2s ease;
+}
+
+.retry-btn:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+.error-container details {
+  text-align: left;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  border-radius: 6px;
+  margin-top: 15px;
+}
+
+.error-container summary {
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.error-container details p {
+  font-size: 0.9em;
+  margin: 5px 0;
+  color: #d1d5db;
 }
 
 /* INFO SECTIONS */
@@ -1009,6 +1172,52 @@ main::-webkit-scrollbar-thumb {
   color: #e1e8ed;
   font-size: 1.2em;
   font-weight: 700;
+}
+
+/* NUEVO: Controles de bancos */
+.banks-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.btn-refresh {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.9em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.btn-refresh:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+.btn-refresh:active {
+  transform: translateY(0);
+}
+
+.btn-refresh:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.banks-timestamp {
+  color: #94a3b8;
+  font-size: 0.85em;
+  font-style: italic;
 }
 
 /* FOOTER */
