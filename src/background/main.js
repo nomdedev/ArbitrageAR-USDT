@@ -13,6 +13,7 @@ import {
 import { calculateOptimizedRoutes } from './routeCalculator.js';
 import { checkAndNotify } from './notifications.js';
 import { dollarPriceManager } from './dollarPriceManager.js';
+import { updateChecker } from './updateChecker.js';
 
 console.log('✅ [BACKGROUND] Todos los imports completados exitosamente en:', new Date().toISOString());
 console.log('🚀 [BACKGROUND] Iniciando inicialización del service worker...');
@@ -582,7 +583,19 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
   }
 });
 
+
 console.log('✅ [BACKGROUND] Storage listener registrado exitosamente');
+
+// Inicializar cuando se carga el service worker
+console.log('🚀 [BACKGROUND] Llamando initialize()...');
+initialize();
+
+// Inicializar checker de actualizaciones
+console.log('🔄 [BACKGROUND] Inicializando update checker...');
+updateChecker.initialize().catch(error => {
+  console.error('❌ [BACKGROUND] Error inicializando update checker:', error);
+});
+
 
 // Inicializar cuando se carga el service worker
 console.log('🚀 [BACKGROUND] Llamando initialize()...');

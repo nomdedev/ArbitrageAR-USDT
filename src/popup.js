@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupRefreshButton();
   setupFilterButtons(); // NUEVO: Configurar filtros P2P
   setupDollarPriceControls(); // NUEVO: Configurar controles del precio del dólar
+  checkForUpdates(); // NUEVO: Verificar actualizaciones disponibles
   fetchAndDisplay();
   loadBanksData();
 });
@@ -1424,4 +1425,83 @@ async function showRecalculateDialog() {
 // Abrir configuración del precio del dólar
 function openDollarConfiguration() {
   chrome.tabs.create({ url: chrome.runtime.getURL('src/options.html') });
+}
+
+// ==========================================
+// SISTEMA DE NOTIFICACIÓN DE ACTUALIZACIONES
+// ==========================================
+
+// Verificar si hay actualizaciones disponibles
+async function checkForUpdates() {
+  try {
+    const result = await chrome.storage.local.get('updateAvailable');
+    const updateInfo = result.updateAvailable;
+    
+    if (updateInfo && updateInfo.available) {
+      showUpdateBanner(updateInfo);
+    }
+  } catch (error) {
+    console.error('Error verificando actualizaciones:', error);
+  }
+}
+
+// Mostrar banner de actualización
+function showUpdateBanner(updateInfo) {
+  const banner = document.getElementById('update-banner');
+  const messageEl = document.getElementById('update-message');
+  
+  if (!banner || !messageEl) return;
+  
+  // Actualizar mensaje
+  const message = updateInfo.message || 'Nueva versión disponible';
+  messageEl.textContent = message.substring(0, 60) + (message.length > 60 ? '...' : '');
+  
+  // Mostrar banner
+  banner.style.display = 'flex';
+  
+  // Configurar botones
+  setupUpdateBannerButtons(updateInfo);
+}
+
+// Configurar botones del banner de actualización
+function setupUpdateBannerButtons(updateInfo) {
+  const viewBtn = document.getElementById('view-update');
+  const dismissBtn = document.getElementById('dismiss-update');
+  
+  if (viewBtn) {
+    viewBtn.onclick = () => {
+      // Abrir URL del commit en GitHub
+      if (updateInfo.url) {
+        chrome.tabs.create({ url: updateInfo.url });
+      }
+    };
+  }
+  
+  if (dismissBtn) {
+    dismissBtn.onclick = async () => {
+      // Ocultar banner
+      const banner = document.getElementById('update-banner');
+      if (banner) {
+        banner.style.display = 'none';
+      }
+      
+      // Marcar como visto en storage
+      try {
+        await chrome.storage.local.set({
+          updateInfo: {
+            dismissedVersion: updateInfo.version,
+            lastCommitSha: updateInfo.version,
+            dismissedAt: Date.now()
+          },
+          updateAvailable: {
+            available: false
+          }
+        });
+        
+        console.log('✅ Actualización marcada como vista');
+      } catch (error) {
+        console.error('Error descartando actualización:', error);
+      }
+    };
+  }
 }
