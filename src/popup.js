@@ -1301,6 +1301,223 @@ function populateSimulatorRoutes(routes) {
   
   // Setup event listeners
   document.getElementById('sim-calculate').addEventListener('click', calculateSimulation);
+  
+  // NUEVO: Configuración avanzada
+  setupAdvancedSimulator();
+}
+
+function setupAdvancedSimulator() {
+  const toggleBtn = document.getElementById('toggle-advanced');
+  const advancedConfig = document.getElementById('advanced-config');
+  const loadDefaultsBtn = document.getElementById('sim-load-defaults');
+  const calculateMatrixBtn = document.getElementById('btn-calculate-matrix');
+  const resetConfigBtn = document.getElementById('btn-reset-config');
+  
+  // Toggle configuración avanzada
+  toggleBtn.addEventListener('click', () => {
+    const isVisible = advancedConfig.style.display !== 'none';
+    advancedConfig.style.display = isVisible ? 'none' : 'block';
+    toggleBtn.textContent = isVisible ? '⚙️ Configuración Avanzada' : '🔽 Configuración Avanzada';
+  });
+  
+  // Cargar valores por defecto
+  loadDefaultsBtn.addEventListener('click', loadDefaultSimulatorValues);
+  
+  // Calcular matriz
+  calculateMatrixBtn.addEventListener('click', calculateProfitMatrix);
+  
+  // Reset configuración
+  resetConfigBtn.addEventListener('click', resetSimulatorConfig);
+}
+
+function loadDefaultSimulatorValues() {
+  // Cargar valores desde la configuración del usuario y rutas actuales
+  const routeSelect = document.getElementById('sim-route');
+  const routeIndex = parseInt(routeSelect.value);
+  
+  if (isNaN(routeIndex) || !currentData?.optimizedRoutes?.[routeIndex]) {
+    alert('⚠️ Selecciona una ruta primero');
+    return;
+  }
+  
+  const route = currentData.optimizedRoutes[routeIndex];
+  
+  // Precios del dólar (usar valores actuales del sistema)
+  document.getElementById('sim-usd-buy-price').value = route.officialPrice?.toFixed(2) || '950.00';
+  document.getElementById('sim-usd-sell-price').value = (route.officialPrice * 1.02)?.toFixed(2) || '970.00';
+  
+  // Fees desde configuración
+  const buyFee = (userSettings?.extraTradingFee || 0) + 1.0; // 1% base + extra
+  const sellFee = (userSettings?.extraTradingFee || 0) + 1.0;
+  const transferFee = route.transferFeeUSD || 0;
+  const bankCommission = userSettings?.bankCommissionFee || 0;
+  
+  document.getElementById('sim-buy-fee').value = buyFee.toFixed(2);
+  document.getElementById('sim-sell-fee').value = sellFee.toFixed(2);
+  document.getElementById('sim-transfer-fee-usd').value = transferFee.toFixed(2);
+  document.getElementById('sim-bank-commission').value = bankCommission.toFixed(2);
+  
+  alert('✅ Valores por defecto cargados desde la configuración actual');
+}
+
+function calculateProfitMatrix() {
+  const routeSelect = document.getElementById('sim-route');
+  const amountInput = document.getElementById('sim-amount');
+  const resultsDiv = document.getElementById('sim-results');
+  
+  const routeIndex = parseInt(routeSelect.value);
+  const amount = parseFloat(amountInput.value);
+  
+  if (!amount || amount < 1000) {
+    alert('⚠️ Ingresa un monto válido (mínimo $1,000 ARS)');
+    return;
+  }
+  
+  if (isNaN(routeIndex) || !currentData?.optimizedRoutes?.[routeIndex]) {
+    alert('⚠️ Selecciona una ruta válida');
+    return;
+  }
+  
+  const route = currentData.optimizedRoutes[routeIndex];
+  
+  // Obtener parámetros de la matriz
+  const minPercent = parseFloat(document.getElementById('matrix-min-percent').value) || 0;
+  const maxPercent = parseFloat(document.getElementById('matrix-max-percent').value) || 2;
+  const stepPercent = parseFloat(document.getElementById('matrix-step-percent').value) || 0.5;
+  
+  // Obtener parámetros configurables
+  const usdBuyPrice = parseFloat(document.getElementById('sim-usd-buy-price').value) || route.officialPrice || 950;
+  const usdSellPrice = parseFloat(document.getElementById('sim-usd-sell-price').value) || (route.officialPrice * 1.02) || 970;
+  const buyFeePercent = parseFloat(document.getElementById('sim-buy-fee').value) || 1.0;
+  const sellFeePercent = parseFloat(document.getElementById('sim-sell-fee').value) || 1.0;
+  const transferFeeUSD = parseFloat(document.getElementById('sim-transfer-fee-usd').value) || route.transferFeeUSD || 0;
+  const bankCommissionPercent = parseFloat(document.getElementById('sim-bank-commission').value) || 0;
+  
+  // Calcular matriz
+  const matrixResults = [];
+  for (let targetPercent = minPercent; targetPercent <= maxPercent; targetPercent += stepPercent) {
+    const result = calculateRequiredPricesForTargetProfit(
+      amount, route, targetPercent, 
+      usdBuyPrice, usdSellPrice, buyFeePercent, sellFeePercent, 
+      transferFeeUSD, bankCommissionPercent
+    );
+    matrixResults.push({
+      targetPercent: targetPercent,
+      ...result
+    });
+  }
+  
+  // Mostrar resultados de matriz
+  displayProfitMatrix(matrixResults, route, amount);
+}
+
+function calculateRequiredPricesForTargetProfit(
+  amount, route, targetPercent, 
+  usdBuyPrice, usdSellPrice, buyFeePercent, sellFeePercent, 
+  transferFeeUSD, bankCommissionPercent
+) {
+  // Esta función calcula qué precios se necesitan para lograr un porcentaje de ganancia específico
+  // Es una simplificación - en la práctica necesitaríamos resolver ecuaciones más complejas
+  
+  const targetProfit = amount * (targetPercent / 100);
+  const targetFinalAmount = amount + targetProfit;
+  
+  // Calcular hacia atrás desde el resultado deseado
+  const sellFeeDecimal = sellFeePercent / 100;
+  const arsBeforeSellFee = targetFinalAmount / (1 - sellFeeDecimal);
+  
+  // Calcular USDT necesarios antes de transferencia
+  const usdtArsBid = route.usdtArsBid;
+  let usdtAfterTransfer = arsBeforeSellFee / usdtArsBid;
+  
+  // Agregar fee de transferencia
+  const transferFeeUSDT = transferFeeUSD / route.usdToUsdtRate;
+  const usdtAfterBuyFee = usdtAfterTransfer + transferFeeUSDT;
+  
+  // Agregar fee de compra
+  const buyFeeDecimal = buyFeePercent / 100;
+  const usdtBeforeBuyFee = usdtAfterBuyFee / (1 - buyFeeDecimal);
+  
+  // Calcular USD necesarios
+  const usdNeeded = usdtBeforeBuyFee * route.usdToUsdtRate;
+  
+  // Calcular precio USD requerido (considerando comisión bancaria)
+  const bankCommissionARS = amount * (bankCommissionPercent / 100);
+  const amountAfterBankCommission = amount - bankCommissionARS;
+  const requiredUSDBuyPrice = amountAfterBankCommission / usdNeeded;
+  
+  // Para el precio de venta, es más complejo ya que depende del spread
+  // Simplificación: asumir que el precio de venta es un porcentaje sobre el de compra
+  const estimatedUSDSellPrice = requiredUSDBuyPrice * 1.02; // 2% spread típico
+  
+  return {
+    requiredUSDBuyPrice: requiredUSDBuyPrice,
+    estimatedUSDSellPrice: estimatedUSDSellPrice,
+    usdNeeded: usdNeeded,
+    usdtBeforeBuyFee: usdtBeforeBuyFee,
+    usdtAfterBuyFee: usdtAfterBuyFee,
+    usdtAfterTransfer: usdtAfterTransfer,
+    arsBeforeSellFee: arsBeforeSellFee,
+    targetFinalAmount: targetFinalAmount
+  };
+}
+
+function displayProfitMatrix(matrixResults, route, amount) {
+  const resultsDiv = document.getElementById('sim-results');
+  
+  let matrixHTML = `
+    <div class="matrix-result-card">
+      <h3>📊 Matriz de Rendimientos Requeridos</h3>
+      <p class="matrix-description">
+        Para lograr diferentes porcentajes de ganancia con $${formatNumber(amount)} ARS iniciales<br>
+        en la ruta ${route.buyExchange} → ${route.sellExchange}
+      </p>
+      
+      <div class="matrix-table-container">
+        <table class="profit-matrix-table">
+          <thead>
+            <tr>
+              <th>Rendimiento<br>Objetivo</th>
+              <th>Precio USD<br>Compra Requerido</th>
+              <th>Precio USD<br>Venta Estimado</th>
+              <th>USD<br>Necesarios</th>
+              <th>USDT<br>Compra</th>
+              <th>ARS<br>Final</th>
+            </tr>
+          </thead>
+          <tbody>
+  `;
+  
+  matrixResults.forEach(result => {
+    const profitClass = result.targetPercent >= 0 ? 'positive' : 'negative';
+    matrixHTML += `
+      <tr class="${profitClass}">
+        <td class="target-percent">${result.targetPercent.toFixed(1)}%</td>
+        <td>$${formatNumber(result.requiredUSDBuyPrice)}</td>
+        <td>$${formatNumber(result.estimatedUSDSellPrice)}</td>
+        <td>${formatNumber(result.usdNeeded)}</td>
+        <td>${formatNumber(result.usdtBeforeBuyFee)}</td>
+        <td>$${formatNumber(result.targetFinalAmount)}</td>
+      </tr>
+    `;
+  });
+  
+  matrixHTML += `
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="matrix-note">
+        <small>
+          📈 <strong>Interpretación:</strong> Para lograr X% de ganancia, necesitas comprar USD a un precio igual o menor al mostrado.<br>
+          💡 <strong>Consejo:</strong> Los valores son estimaciones basadas en los parámetros configurados arriba.
+        </small>
+      </div>
+    </div>
+  `;
+  
+  resultsDiv.style.display = 'block';
+  resultsDiv.innerHTML = matrixHTML;
 }
 
 function calculateSimulation() {
@@ -1321,26 +1538,37 @@ function calculateSimulation() {
     return;
   }
   
-  const route = currentData.optimizedRoutes?.[routeIndex];
+  const route = currentData.optimizedRoutes[routeIndex];
   
-  // Calcular paso a paso
-  const step1_usd = amount / route.officialPrice;
+  // Obtener parámetros configurables (o valores por defecto)
+  const usdBuyPrice = parseFloat(document.getElementById('sim-usd-buy-price').value) || route.officialPrice || 950;
+  const usdSellPrice = parseFloat(document.getElementById('sim-usd-sell-price').value) || (route.officialPrice * 1.02) || 970;
+  const buyFeePercent = parseFloat(document.getElementById('sim-buy-fee').value) || 1.0;
+  const sellFeePercent = parseFloat(document.getElementById('sim-sell-fee').value) || 1.0;
+  const transferFeeUSD = parseFloat(document.getElementById('sim-transfer-fee-usd').value) || route.transferFeeUSD || 0;
+  const bankCommissionPercent = parseFloat(document.getElementById('sim-bank-commission').value) || 0;
+  
+  // Calcular paso a paso con parámetros configurables
+  const bankCommissionARS = amount * (bankCommissionPercent / 100);
+  const amountAfterBankCommission = amount - bankCommissionARS;
+  
+  const step1_usd = amountAfterBankCommission / usdBuyPrice;
   const step2_usdt = step1_usd / route.usdToUsdtRate;
   
   // Aplicar fees de compra
-  const buyFees = 0.01; // 1% promedio
-  const step2_usdtAfterFee = step2_usdt * (1 - buyFees);
+  const buyFeeDecimal = buyFeePercent / 100;
+  const step2_usdtAfterFee = step2_usdt * (1 - buyFeeDecimal);
   
   // Transfer fee
-  const transferFeeUSDT = route.transferFeeUSD / route.usdToUsdtRate;
+  const transferFeeUSDT = transferFeeUSD / route.usdToUsdtRate;
   const step3_usdtAfterTransfer = step2_usdtAfterFee - transferFeeUSDT;
   
   // Vender USDT
   const step4_ars = step3_usdtAfterTransfer * route.usdtArsBid;
   
   // Apply sell fees
-  const sellFees = 0.01; // 1% promedio
-  const finalAmount = step4_ars * (1 - sellFees);
+  const sellFeeDecimal = sellFeePercent / 100;
+  const finalAmount = step4_ars * (1 - sellFeeDecimal);
   
   // Calcular ganancia
   const profit = finalAmount - amount;
@@ -1356,11 +1584,33 @@ function calculateSimulation() {
     <div class="sim-result-card ${profitClass}">
       <h3>${profitEmoji} Resultado de Simulación</h3>
       
+      <div class="sim-params-used">
+        <h4>⚙️ Parámetros usados:</h4>
+        <div class="params-grid">
+          <div class="param-item"><span>USD Compra:</span> $${formatNumber(usdBuyPrice)}</div>
+          <div class="param-item"><span>USD Venta:</span> $${formatNumber(usdSellPrice)}</div>
+          <div class="param-item"><span>Fee Compra:</span> ${buyFeePercent}%</div>
+          <div class="param-item"><span>Fee Venta:</span> ${sellFeePercent}%</div>
+          <div class="param-item"><span>Fee Transfer:</span> $${formatNumber(transferFeeUSD)} USD</div>
+          <div class="param-item"><span>Comisión Banco:</span> ${bankCommissionPercent}%</div>
+        </div>
+      </div>
+      
       <div class="sim-breakdown">
         <div class="sim-row">
           <span>1️⃣ Inversión inicial:</span>
           <strong>$${formatNumber(amount)} ARS</strong>
         </div>
+        ${bankCommissionPercent > 0 ? `
+        <div class="sim-row warning">
+          <span>🏦 Comisión bancaria:</span>
+          <strong>-$${formatNumber(bankCommissionARS)} ARS</strong>
+        </div>
+        <div class="sim-row">
+          <span>1️⃣ Después de comisión:</span>
+          <strong>$${formatNumber(amountAfterBankCommission)} ARS</strong>
+        </div>
+        ` : ''}
         <div class="sim-row">
           <span>2️⃣ USD comprados (oficial):</span>
           <strong>${formatNumber(step1_usd)} USD</strong>
@@ -1370,7 +1620,7 @@ function calculateSimulation() {
           <strong>${formatNumber(step2_usdt)} USDT</strong>
         </div>
         <div class="sim-row">
-          <span>4️⃣ Después de fees de compra:</span>
+          <span>4️⃣ Después de fees de compra (${buyFeePercent}%):</span>
           <strong>${formatNumber(step2_usdtAfterFee)} USDT</strong>
         </div>
         ${!route.isSingleExchange ? `
@@ -1384,11 +1634,11 @@ function calculateSimulation() {
         </div>
         ` : ''}
         <div class="sim-row">
-          <span>6️⃣ ARS de venta en ${route.sellExchange}:</span>
+          <span>${route.isSingleExchange ? '5️⃣' : '6️⃣'} ARS de venta en ${route.sellExchange}:</span>
           <strong>$${formatNumber(step4_ars)} ARS</strong>
         </div>
         <div class="sim-row">
-          <span>7️⃣ Después de fees de venta:</span>
+          <span>${route.isSingleExchange ? '6️⃣' : '7️⃣'} Después de fees de venta (${sellFeePercent}%):</span>
           <strong>$${formatNumber(finalAmount)} ARS</strong>
         </div>
       </div>
@@ -1401,7 +1651,7 @@ function calculateSimulation() {
       </div>
       
       <div class="sim-note">
-        <small>⚠️ Los fees reales pueden variar según el exchange. Esta es una estimación aproximada.</small>
+        <small>⚠️ Los fees reales pueden variar según el exchange. Esta es una estimación con parámetros configurables.</small>
       </div>
     </div>
   `;

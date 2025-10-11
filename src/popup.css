@@ -1587,29 +1587,36 @@ footer {
 
 .simulator-input,
 .simulator-route-selector {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
-.simulator-input label,
+.simulator-route-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .simulator-route-selector label {
   display: block;
   color: #e2e8f0;
   font-weight: 600;
-  margin-bottom: 8px;
-  font-size: 0.95em;
+  margin-bottom: 0;
+  font-size: 0.9em;
+  white-space: nowrap;
+  min-width: fit-content;
 }
 
-.simulator-input input,
 .simulator-route-selector select {
-  width: 100%;
-  padding: 12px 16px;
+  flex: 1;
+  padding: 8px 12px;
   background: rgba(15, 23, 42, 0.6);
   border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: 12px;
+  border-radius: 8px;
   color: #e2e8f0;
-  font-size: 1em;
+  font-size: 0.9em;
   font-family: 'Segoe UI', sans-serif;
   transition: all 0.3s ease;
+  max-width: 300px;
 }
 
 .simulator-input input:focus,
@@ -1619,8 +1626,130 @@ footer {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
-.btn-simulate {
+.simulator-advanced-toggle {
+  margin-bottom: 16px;
+}
+
+.btn-toggle-advanced {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #3b82f6;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-toggle-advanced:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.advanced-config {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  animation: slideDown 0.3s ease;
+}
+
+.config-section {
+  margin-bottom: 20px;
+}
+
+.config-section h4 {
+  color: #e2e8f0;
+  font-size: 1em;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.config-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.config-input {
+  flex: 1;
+  min-width: 140px;
+}
+
+.config-input label {
+  display: block;
+  color: #cbd5e1;
+  font-size: 0.85em;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.config-input input {
   width: 100%;
+  padding: 8px 12px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-size: 0.9em;
+  transition: all 0.3s ease;
+}
+
+.config-input input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.config-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.btn-calculate-matrix {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-calculate-matrix:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-reset-config {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-reset-config:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.simulator-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.btn-simulate {
+  flex: 1;
   padding: 14px;
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
@@ -1640,6 +1769,135 @@ footer {
 
 .btn-simulate:active {
   transform: translateY(0);
+}
+
+.btn-load-defaults {
+  background: rgba(156, 163, 175, 0.1);
+  border: 1px solid rgba(156, 163, 175, 0.3);
+  color: #9ca3af;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-load-defaults:hover {
+  background: rgba(156, 163, 175, 0.2);
+  border-color: rgba(156, 163, 175, 0.5);
+}
+
+.sim-params-used {
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.sim-params-used h4 {
+  color: #e2e8f0;
+  font-size: 0.9em;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.params-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.param-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8em;
+  color: #cbd5e1;
+}
+
+.param-item span:first-child {
+  font-weight: 500;
+}
+
+/* Matriz de resultados */
+.matrix-result-card {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.15) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  animation: slideDown 0.4s ease;
+}
+
+.matrix-result-card h3 {
+  color: #e2e8f0;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.matrix-description {
+  color: #cbd5e1;
+  font-size: 0.9em;
+  text-align: center;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+.matrix-table-container {
+  overflow-x: auto;
+  margin-bottom: 16px;
+}
+
+.profit-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.profit-matrix-table th,
+.profit-matrix-table td {
+  padding: 8px 12px;
+  text-align: center;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  font-size: 0.85em;
+}
+
+.profit-matrix-table th {
+  background: rgba(59, 130, 246, 0.1);
+  color: #e2e8f0;
+  font-weight: 600;
+  font-size: 0.8em;
+}
+
+.profit-matrix-table tbody tr:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.profit-matrix-table .target-percent {
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+.profit-matrix-table .positive {
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.profit-matrix-table .negative {
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.matrix-note {
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 6px;
+  padding: 12px;
+  text-align: center;
+}
+
+.matrix-note small {
+  color: #d1d5db;
+  line-height: 1.4;
 }
 
 .simulator-results {
