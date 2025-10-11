@@ -1102,7 +1102,7 @@ function loadBanksData() {
 }
 
 // Mostrar lista de bancos desde dolarito.ar + criptoya
-function displayBanks(bankRates) {
+async function displayBanks(bankRates) {
   const container = document.getElementById('banks-list');
   
   if (!bankRates || Object.keys(bankRates).length === 0) {
@@ -1115,8 +1115,44 @@ function displayBanks(bankRates) {
     return;
   }
   
+  // Obtener configuración de usuario
+  const showBestOnly = userSettings?.showBestBankPrice ?? false;
+  const selectedBanks = userSettings?.selectedBanks ?? [];
+  
+  let banks = Object.entries(bankRates);
+  
+  // Filtrar bancos seleccionados si hay selección específica
+  if (selectedBanks.length > 0) {
+    banks = banks.filter(([bankCode]) => selectedBanks.includes(bankCode));
+  }
+  
+  // Ordenar por precio de compra más bajo
+  banks.sort((a, b) => a[1].compra - b[1].compra);
+  
+  // Si solo mostrar mejor precio, mostrar solo el primero
+  if (showBestOnly && banks.length > 0) {
+    const [bestBankCode, bestRates] = banks[0];
+    const bestBankName = getBankDisplayName(bestBankCode);
+    
+    container.innerHTML = `
+      <div class="best-bank-highlight">
+        <div class="best-bank-header">
+          <div class="best-bank-icon">🏆</div>
+          <div class="best-bank-title">Mejor Precio de Compra</div>
+        </div>
+        <div class="best-bank-content">
+          <div class="best-bank-name">${bestBankName}</div>
+          <div class="best-bank-price">$${formatNumber(bestRates.compra)}</div>
+          <div class="best-bank-source">Fuente: ${bestRates.source === 'dolarito' ? 'dolarito.ar' : 'CriptoYa'}</div>
+        </div>
+      </div>
+    `;
+    updateBanksTimestamp();
+    return;
+  }
+  
+  // Mostrar todos los bancos (modo normal compacto)
   let html = '';
-  const banks = Object.entries(bankRates);
   
   banks.forEach(([bankCode, rates]) => {
     const bankName = getBankDisplayName(bankCode);
@@ -1128,25 +1164,24 @@ function displayBanks(bankRates) {
     let hasCriptoya = rates.criptoya ? true : false;
     
     html += `
-      <div class="bank-card">
-        <div class="bank-header">
-          <div class="bank-logo-container">🏦</div>
+      <div class="bank-card compact">
+        <div class="bank-header-compact">
           <div class="bank-name">${bankName}</div>
-          <div class="bank-spread">Spread: $${formatNumber(spread)} (${spreadPercent}%)</div>
+          <div class="bank-source-compact">${sourceText}${hasCriptoya ? '+C' : ''}</div>
         </div>
-        <div class="bank-prices">
-          <div class="bank-price">
-            <div class="bank-price-label">Compra</div>
-            <div class="bank-price-value">$${formatNumber(rates.compra)}</div>
-            ${hasCriptoya ? `<div class="bank-price-alt">CriptoYa: $${formatNumber(rates.criptoya.compra)}</div>` : ''}
+        <div class="bank-prices-compact">
+          <div class="bank-price-compact">
+            <span class="price-label">Compra:</span>
+            <span class="price-value">$${formatNumber(rates.compra)}</span>
+            ${hasCriptoya ? `<span class="price-alt">(C:$${formatNumber(rates.criptoya.compra)})</span>` : ''}
           </div>
-          <div class="bank-price">
-            <div class="bank-price-label">Venta</div>
-            <div class="bank-price-value">$${formatNumber(rates.venta)}</div>
-            ${hasCriptoya ? `<div class="bank-price-alt">CriptoYa: $${formatNumber(rates.criptoya.venta)}</div>` : ''}
+          <div class="bank-price-compact">
+            <span class="price-label">Venta:</span>
+            <span class="price-value">$${formatNumber(rates.venta)}</span>
+            ${hasCriptoya ? `<span class="price-alt">(C:$${formatNumber(rates.criptoya.venta)})</span>` : ''}
           </div>
+          <div class="bank-spread-compact">Spread: ${spreadPercent}%</div>
         </div>
-        <div class="bank-source">Fuente: ${sourceText}${hasCriptoya ? ' + CriptoYa' : ''}</div>
       </div>
     `;
   });
@@ -1203,9 +1238,14 @@ async function loadBankRates() {
       refreshBtn.textContent = '⏳ Cargando...';
     }
     
-    // Solicitar datos al background
+    // Solicitar datos al background con configuración de usuario
     const response = await new Promise((resolve) => {
-      chrome.runtime.sendMessage({ action: 'getBankRates' }, resolve);
+      chrome.runtime.sendMessage({ 
+        action: 'getBankRates',
+        userSettings: {
+          selectedBanks: userSettings?.selectedBanks || []
+        }
+      }, resolve);
     });
     
     if (response && response.bankRates) {

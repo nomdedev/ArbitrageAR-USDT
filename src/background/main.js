@@ -514,7 +514,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.action === 'getBankRates') {
     // NUEVO: Obtener cotizaciones bancarias desde dolarito.ar
     console.log('📡 [BACKGROUND] Solicitando cotizaciones bancarias...');
-    dollarPriceManager.getBankRates().then(bankRates => {
+    const userSettings = request.userSettings || {};
+    dollarPriceManager.getBankRates(userSettings).then(bankRates => {
       console.log('✅ [BACKGROUND] Cotizaciones bancarias obtenidas:', Object.keys(bankRates || {}).length, 'bancos');
       sendResponse({ bankRates: bankRates || {} });
     }).catch(error => {

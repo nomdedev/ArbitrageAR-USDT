@@ -26,7 +26,10 @@ const DEFAULT_SETTINGS = {
   // NUEVO: Configuración de precio del dólar
   dollarPriceSource: 'auto', // 'auto' o 'manual'
   manualDollarPrice: 950,
-  preferredBank: 'promedio'
+  preferredBank: 'promedio',
+  // NUEVO v5.0.23: Configuración de bancos
+  showBestBankPrice: false,
+  selectedBanks: [] // vacío = todos los bancos
 };
 
 // Cargar configuración al iniciar
@@ -94,6 +97,13 @@ async function loadSettings() {
     }
     document.getElementById('manual-dollar-price').value = settings.manualDollarPrice ?? 950;
     document.getElementById('preferred-bank').value = settings.preferredBank ?? 'promedio';
+    
+    // NUEVO v5.0.23: Configuración de bancos
+    document.getElementById('show-best-bank-price').checked = settings.showBestBankPrice ?? false;
+    const selectedBanks = settings.selectedBanks ?? [];
+    document.querySelectorAll('input[name="bank-selection"]').forEach(cb => {
+      cb.checked = selectedBanks.length === 0 || selectedBanks.includes(cb.value);
+    });
     
     // Mostrar/ocultar sección de precio manual
     updateDollarPriceUI();
@@ -206,7 +216,11 @@ async function saveSettings() {
       // NUEVO: Configuración de precio del dólar
       dollarPriceSource: document.querySelector('input[name="dollar-price-source"]:checked')?.value || 'auto',
       manualDollarPrice: parseFloat(document.getElementById('manual-dollar-price').value) || 950,
-      preferredBank: document.getElementById('preferred-bank').value || 'promedio'
+      preferredBank: document.getElementById('preferred-bank').value || 'promedio',
+      // NUEVO v5.0.23: Configuración de bancos
+      showBestBankPrice: document.getElementById('show-best-bank-price').checked,
+      selectedBanks: Array.from(document.querySelectorAll('input[name="bank-selection"]:checked'))
+        .map(cb => cb.value)
     };
     
     // Guardar en storage

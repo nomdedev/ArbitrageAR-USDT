@@ -265,6 +265,44 @@ select:focus {
   color: #667eea;
 }
 
+/* BANKS GRID */
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9em;
+}
+
+.checkbox-item:hover {
+  background: #e9ecef;
+  border-color: #667eea;
+}
+
+.checkbox-item input[type="checkbox"] {
+  margin-right: 8px;
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  accent-color: #667eea;
+}
+
+.checkbox-item input[type="checkbox"]:checked + span {
+  font-weight: 600;
+  color: #667eea;
+}
+
 /* QUIET HOURS */
 .quiet-hours-config {
   margin-top: 15px;

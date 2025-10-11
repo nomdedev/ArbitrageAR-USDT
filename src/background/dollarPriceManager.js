@@ -109,13 +109,26 @@ class DollarPriceManager {
   }
 
   // Obtener tasas bancarias desde dolarito.ar + criptoya (con cache)
-  async getBankRates() {
+  async getBankRates(userSettings = {}) {
     const now = Date.now();
     
     // Usar cache si es válido
     if (this.bankRatesCache && (now - this.cacheTimestamp) < this.CACHE_DURATION) {
       log('💰 Usando cache de tasas bancarias');
-      return this.bankRatesCache;
+      let filteredRates = this.bankRatesCache;
+      
+      // Aplicar filtro de bancos seleccionados
+      if (userSettings.selectedBanks && userSettings.selectedBanks.length > 0) {
+        filteredRates = {};
+        userSettings.selectedBanks.forEach(bankCode => {
+          if (this.bankRatesCache[bankCode]) {
+            filteredRates[bankCode] = this.bankRatesCache[bankCode];
+          }
+        });
+        log(`🔍 Filtrando bancos: ${userSettings.selectedBanks.length} seleccionados, ${Object.keys(filteredRates).length} encontrados`);
+      }
+      
+      return filteredRates;
     }
 
     try {
@@ -131,7 +144,20 @@ class DollarPriceManager {
         this.bankRatesCache = bankRates;
         this.cacheTimestamp = now;
         log(`💰 Cache de tasas bancarias actualizado: ${Object.keys(bankRates).length} bancos`);
-        return bankRates;
+        
+        // Aplicar filtro si hay selección de bancos
+        let filteredRates = bankRates;
+        if (userSettings.selectedBanks && userSettings.selectedBanks.length > 0) {
+          filteredRates = {};
+          userSettings.selectedBanks.forEach(bankCode => {
+            if (bankRates[bankCode]) {
+              filteredRates[bankCode] = bankRates[bankCode];
+            }
+          });
+          log(`🔍 Filtrando bancos: ${userSettings.selectedBanks.length} seleccionados, ${Object.keys(filteredRates).length} encontrados`);
+        }
+        
+        return filteredRates;
       }
     } catch (error) {
       console.error('Error obteniendo tasas bancarias:', error);
@@ -140,7 +166,19 @@ class DollarPriceManager {
     // Si hay cache anterior, usarlo aunque esté vencido
     if (this.bankRatesCache) {
       log('⚠️ Usando cache vencido de tasas bancarias');
-      return this.bankRatesCache;
+      let filteredRates = this.bankRatesCache;
+      
+      // Aplicar filtro de bancos seleccionados incluso con cache vencido
+      if (userSettings.selectedBanks && userSettings.selectedBanks.length > 0) {
+        filteredRates = {};
+        userSettings.selectedBanks.forEach(bankCode => {
+          if (this.bankRatesCache[bankCode]) {
+            filteredRates[bankCode] = this.bankRatesCache[bankCode];
+          }
+        });
+      }
+      
+      return filteredRates;
     }
 
     return null;
