@@ -263,23 +263,36 @@
 
         <div class="setting-item" id="bank-selection-section">
           <div class="setting-info">
-            <label for="preferred-bank" class="setting-label">Banco preferido</label>
-            <p class="setting-description">Selecciona el banco donde normalmente compras USD oficial</p>
+            <label for="preferred-bank" class="setting-label">Método de precio USD oficial</label>
+            <p class="setting-description">Selecciona cómo calcular el precio del dólar oficial</p>
           </div>
           <div class="input-group">
             <select id="preferred-bank">
-              <option value="promedio">Promedio de todos los bancos</option>
-              <option value="Banco Nación">Banco Nación</option>
-              <option value="Banco Provincia">Banco Provincia</option>
-              <option value="BBVA Banco Francés">BBVA Banco Francés</option>
-              <option value="Banco Galicia">Banco Galicia</option>
-              <option value="Banco Santander Río">Banco Santander Río</option>
-              <option value="Banco Macro">Banco Macro</option>
-              <option value="ICBC">ICBC</option>
-              <option value="Banco Ciudad">Banco Ciudad</option>
-              <option value="Banco Patagonia">Banco Patagonia</option>
-              <option value="Banco Supervielle">Banco Supervielle</option>
+              <optgroup label="📊 Métodos Estadísticos (Recomendado)">
+                <option value="consenso">Consenso de mercado (grupo más grande) 🔥⭐</option>
+                <option value="mediana">Mediana de bancos (robusto ante outliers)</option>
+                <option value="promedio_recortado">Promedio recortado (elimina 10% extremos)</option>
+                <option value="menor_valor">Banco con menor precio</option>
+              </optgroup>
+              <optgroup label="🏦 Bancos Específicos">
+                <option value="Banco Nación">Banco Nación</option>
+                <option value="Banco Provincia">Banco Provincia</option>
+                <option value="BBVA Banco Francés">BBVA Banco Francés</option>
+                <option value="Banco Galicia">Banco Galicia</option>
+                <option value="Banco Santander Río">Banco Santander Río</option>
+                <option value="Banco Macro">Banco Macro</option>
+                <option value="ICBC">ICBC</option>
+                <option value="Banco Ciudad">Banco Ciudad</option>
+                <option value="Banco Patagonia">Banco Patagonia</option>
+                <option value="Banco Supervielle">Banco Supervielle</option>
+              </optgroup>
+              <optgroup label="⚠️ Legado (No recomendado)">
+                <option value="promedio">Promedio simple (sensible a outliers)</option>
+              </optgroup>
             </select>
+          </div>
+          <div class="setting-note">
+            <strong>💡 Recomendación:</strong> El <strong>consenso de mercado</strong> 🔥 encuentra automáticamente el grupo más grande de bancos con precios similares, dándote el valor más representativo del mercado real. Ideal cuando hay outliers.
           </div>
         </div>
 
@@ -309,72 +322,97 @@
           </label>
         </div>
 
-        <div class="setting-item">
+        <div class="setting-item-full">
           <div class="setting-info">
             <label class="setting-label">Bancos a consultar</label>
             <p class="setting-description">Selecciona qué bancos quieres que se consulten para obtener precios. Deja vacío para consultar todos.</p>
           </div>
-          <div class="checkbox-grid">
-            <label class="checkbox-item">
-              <input type="checkbox" name="bank-selection" value="nacion">
-              <span>Banco Nación</span>
-            </label>
-            <label class="checkbox-item">
-              <input type="checkbox" name="bank-selection" value="bbva">
-              <span>BBVA</span>
-            </label>
-            <label class="checkbox-item">
-              <input type="checkbox" name="bank-selection" value="galicia">
-              <span>Banco Galicia</span>
-            </label>
-            <label class="checkbox-item">
-              <input type="checkbox" name="bank-selection" value="santander">
-              <span>Banco Santander</span>
-            </label>
-            <label class="checkbox-item">
-              <input type="checkbox" name="bank-selection" value="ciudad">
-              <span>Banco Ciudad</span>
-            </label>
-            <label class="checkbox-item">
-              <input type="checkbox" name="bank-selection" value="supervielle">
-              <span>Banco Supervielle</span>
-            </label>
-            <label class="checkbox-item">
-              <input type="checkbox" name="bank-selection" value="patagonia">
-              <span>Banco Patagonia</span>
-            </label>
-            <label class="checkbox-item">
-              <input type="checkbox" name="bank-selection" value="comafi">
-              <span>Banco Comafi</span>
-            </label>
-            <label class="checkbox-item">
-              <input type="checkbox" name="bank-selection" value="icbc">
-              <span>ICBC</span>
-            </label>
-            <label class="checkbox-item">
-              <input type="checkbox" name="bank-selection" value="hipotecario">
-              <span>Banco Hipotecario</span>
-            </label>
-            <label class="checkbox-item">
-              <input type="checkbox" name="bank-selection" value="piano">
-              <span>Banco Piano</span>
-            </label>
-            <label class="checkbox-item">
-              <input type="checkbox" name="bank-selection" value="bind">
-              <span>Bind</span>
-            </label>
-            <label class="checkbox-item">
-              <input type="checkbox" name="bank-selection" value="bancor">
-              <span>Bancor</span>
-            </label>
-            <label class="checkbox-item">
-              <input type="checkbox" name="bank-selection" value="chaco">
-              <span>Banco Chaco</span>
-            </label>
-            <label class="checkbox-item">
-              <input type="checkbox" name="bank-selection" value="pampa">
-              <span>Banco Pampa</span>
-            </label>
+          
+          <div class="banks-selection-header">
+            <button type="button" class="selection-btn" id="select-all-banks">✅ Seleccionar todos</button>
+            <button type="button" class="selection-btn" id="deselect-all-banks">❌ Deseleccionar todos</button>
+            <span class="banks-counter" id="banks-counter">0 bancos seleccionados</span>
+          </div>
+
+          <div class="checkbox-grid banks-grid">
+            <!-- Bancos Principales -->
+            <div class="bank-category">
+              <h4 class="category-title">🏦 Principales</h4>
+              <label class="checkbox-item bank-item">
+                <input type="checkbox" name="bank-selection" value="nacion">
+                <span>Banco Nación</span>
+              </label>
+              <label class="checkbox-item bank-item">
+                <input type="checkbox" name="bank-selection" value="galicia">
+                <span>Banco Galicia</span>
+              </label>
+              <label class="checkbox-item bank-item">
+                <input type="checkbox" name="bank-selection" value="santander">
+                <span>Santander Río</span>
+              </label>
+              <label class="checkbox-item bank-item">
+                <input type="checkbox" name="bank-selection" value="bbva">
+                <span>BBVA Francés</span>
+              </label>
+              <label class="checkbox-item bank-item">
+                <input type="checkbox" name="bank-selection" value="icbc">
+                <span>ICBC</span>
+              </label>
+            </div>
+
+            <!-- Bancos Regionales -->
+            <div class="bank-category">
+              <h4 class="category-title">🌎 Regionales</h4>
+              <label class="checkbox-item bank-item">
+                <input type="checkbox" name="bank-selection" value="ciudad">
+                <span>Banco Ciudad</span>
+              </label>
+              <label class="checkbox-item bank-item">
+                <input type="checkbox" name="bank-selection" value="provincia">
+                <span>Banco Provincia</span>
+              </label>
+              <label class="checkbox-item bank-item">
+                <input type="checkbox" name="bank-selection" value="chaco">
+                <span>Nuevo Chaco</span>
+              </label>
+              <label class="checkbox-item bank-item">
+                <input type="checkbox" name="bank-selection" value="pampa">
+                <span>Banco Pampa</span>
+              </label>
+              <label class="checkbox-item bank-item">
+                <input type="checkbox" name="bank-selection" value="bancor">
+                <span>Bancor</span>
+              </label>
+            </div>
+
+            <!-- Otros Bancos -->
+            <div class="bank-category">
+              <h4 class="category-title">💼 Otros</h4>
+              <label class="checkbox-item bank-item">
+                <input type="checkbox" name="bank-selection" value="supervielle">
+                <span>Supervielle</span>
+              </label>
+              <label class="checkbox-item bank-item">
+                <input type="checkbox" name="bank-selection" value="patagonia">
+                <span>Patagonia</span>
+              </label>
+              <label class="checkbox-item bank-item">
+                <input type="checkbox" name="bank-selection" value="hipotecario">
+                <span>Hipotecario</span>
+              </label>
+              <label class="checkbox-item bank-item">
+                <input type="checkbox" name="bank-selection" value="comafi">
+                <span>Comafi</span>
+              </label>
+              <label class="checkbox-item bank-item">
+                <input type="checkbox" name="bank-selection" value="piano">
+                <span>Piano</span>
+              </label>
+              <label class="checkbox-item bank-item">
+                <input type="checkbox" name="bank-selection" value="bind">
+                <span>Bind</span>
+              </label>
+            </div>
           </div>
         </div>
       </section>

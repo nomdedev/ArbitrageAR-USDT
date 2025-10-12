@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Diagnóstico Precio $1411</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #2c3e50;
+      border-bottom: 3px solid #3498db;
+      padding-bottom: 10px;
+    }
+    h2 {
+      color: #34495e;
+      margin-top: 30px;
+      background: #ecf0f1;
+      padding: 10px;
+      border-left: 4px solid #3498db;
+    }
+    .info-box {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .warning {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      color: #856404;
+    }
+    .error {
+      background: #f8d7da;
+      border-left: 4px solid #dc3545;
+      color: #721c24;
+    }
+    .success {
+      background: #d4edda;
+      border-left: 4px solid #28a745;
+      color: #155724;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      background: white;
+    }
+    th {
+      background: #3498db;
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+    tr:hover {
+      background: #f8f9fa;
+    }
+    .price {
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      color: #27ae60;
+    }
+    .highlight {
+      background: #fff3cd;
+      font-weight: bold;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+    button {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    button:hover {
+      background: #2980b9;
+    }
+    #resultado {
+      margin-top: 20px;
+    }
+    .step {
+      background: white;
+      margin: 10px 0;
+      padding: 15px;
+      border-left: 3px solid #3498db;
+    }
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Diagnóstico: ¿De dónde sale $1411?</h1>
+
+  <div class="info-box warning">
+    <h3>⚠️ Problema Reportado</h3>
+    <p>El precio del dólar oficial muestra <strong>$1411</strong> pero ninguno de los bancos seleccionados tiene ese valor exacto.</p>
+    <p>Este diagnóstico te mostrará <strong>exactamente</strong> cómo se calcula ese precio.</p>
+  </div>
+
+  <div class="info-box">
+    <h3>📋 Instrucciones</h3>
+    <ol>
+      <li>Abrí la <strong>consola de desarrollador</strong> (F12) → pestaña <strong>Console</strong></li>
+      <li>Hacé clic en el botón <strong>"Ejecutar Diagnóstico"</strong></li>
+      <li>El script analizará tu configuración y te mostrará el cálculo paso a paso</li>
+    </ol>
+  </div>
+
+  <button onclick="ejecutarDiagnostico()">▶️ Ejecutar Diagnóstico</button>
+  <button onclick="location.reload()">🔄 Reiniciar</button>
+
+  <div id="resultado"></div>
+
+  <script>
+    async function ejecutarDiagnostico() {
+      const output = document.getElementById('resultado');
+      output.innerHTML = '<div class="info-box"><p>⏳ Ejecutando diagnóstico...</p></div>';
+
+      try {
+        // 1. Cargar configuración del usuario
+        const result = await chrome.storage.local.get('notificationSettings');
+        const settings = result.notificationSettings || {};
+
+        let html = '';
+
+        // PASO 1: Mostrar configuración
+        html += `<h2>1️⃣ Tu Configuración Actual</h2>`;
+        html += `<div class="info-box">`;
+        html += `<p><strong>Método de cálculo:</strong> <code>${settings.preferredBank || 'promedio'}</code></p>`;
+        html += `<p><strong>Fuente de precio:</strong> <code>${settings.dollarPriceSource || 'auto'}</code></p>`;
+        
+        if (settings.selectedBanks && settings.selectedBanks.length > 0) {
+          html += `<p><strong>Bancos seleccionados:</strong> ${settings.selectedBanks.length} bancos</p>`;
+          html += `<ul>`;
+          settings.selectedBanks.forEach(bank => {
+            html += `<li><code>${bank}</code></li>`;
+          });
+          html += `</ul>`;
+        } else {
+          html += `<p class="warning">⚠️ <strong>No hay bancos seleccionados</strong> (se usan todos por defecto)</p>`;
+        }
+        html += `</div>`;
+
+        // PASO 2: Obtener datos de bancos
+        html += `<h2>2️⃣ Precios de Bancos (desde dolarito.ar)</h2>`;
+        
+        const response = await fetch('https://www.dolarito.ar/cotizacion/bancos');
+        const htmlContent = await response.text();
+        const jsonMatch = htmlContent.match(/"bankQuotations":\s*({[^}]*"quotations":\s*\[[^\]]*\][^}]*})/);
+        
+        if (!jsonMatch) {
+          html += `<div class="info-box error">❌ No se pudieron obtener los datos de dolarito.ar</div>`;
+          output.innerHTML = html;
+          return;
+        }
+
+        const bankData = JSON.parse(`{${jsonMatch[1]}}`);
+        const quotations = bankData.quotations || [];
+
+        // Mapeo de nombres a códigos (igual que en DataService.js)
+        const getBankCode = (fullName) => {
+          const bankCodes = {
+            'Banco Nación': 'nacion',
+            'BBVA Banco Francés': 'bbva',
+            'BBVA': 'bbva',
+            'Banco Piano': 'piano',
+            'Banco Hipotecario': 'hipotecario',
+            'Banco Galicia': 'galicia',
+            'Banco Santander Río': 'santander',
+            'Banco Santander': 'santander',
+            'Banco Ciudad': 'ciudad',
+            'Banco Supervielle': 'supervielle',
+            'Banco Patagonia': 'patagonia',
+            'Banco Comafi': 'comafi',
+            'ICBC': 'icbc',
+            'Bind': 'bind',
+            'Bancor': 'bancor',
+            'Nuevo Banco del Chaco': 'chaco',
+            'Banco Chaco': 'chaco',
+            'Banco de la Pampa': 'pampa',
+            'Banco Pampa': 'pampa',
+            'Banco Provincia': 'provincia',
+            'Banco de la Provincia de Buenos Aires': 'provincia',
+            'Banco Columbia': 'columbia',
+            'Banco Macro': 'macro'
+          };
+          return bankCodes[fullName] || fullName.toLowerCase().replace(/[^a-z]/g, '');
+        };
+
+        // Procesar bancos
+        const allBanks = [];
+        quotations.forEach(quote => {
+          const bankName = quote.name?.trim();
+          const buyPrice = parseFloat(quote.buy);
+          const sellPrice = parseFloat(quote.sell);
+
+          if (bankName && !isNaN(buyPrice) && !isNaN(sellPrice) && buyPrice > 0 && sellPrice > 0) {
+            const bankCode = getBankCode(bankName);
+            allBanks.push({
+              code: bankCode,
+              name: bankName,
+              compra: buyPrice,
+              venta: sellPrice,
+              isSelected: !settings.selectedBanks || settings.selectedBanks.length === 0 || settings.selectedBanks.includes(bankCode)
+            });
+          }
+        });
+
+        // Mostrar TODOS los bancos con indicador de selección
+        html += `<div class="info-box">`;
+        html += `<table>`;
+        html += `<thead><tr><th>✓</th><th>Banco</th><th>Código</th><th>Compra</th><th>Venta</th></tr></thead>`;
+        html += `<tbody>`;
+        
+        allBanks.sort((a, b) => a.venta - b.venta).forEach(bank => {
+          const rowClass = bank.isSelected ? '' : 'style="opacity: 0.4; text-decoration: line-through;"';
+          const checkMark = bank.isSelected ? '✅' : '❌';
+          html += `<tr ${rowClass}>`;
+          html += `<td>${checkMark}</td>`;
+          html += `<td>${bank.name}</td>`;
+          html += `<td><code>${bank.code}</code></td>`;
+          html += `<td class="price">$${bank.compra.toFixed(2)}</td>`;
+          html += `<td class="price">$${bank.venta.toFixed(2)}</td>`;
+          html += `</tr>`;
+        });
+        
+        html += `</tbody></table>`;
+        html += `<p><small>ℹ️ Los bancos tachados NO están seleccionados y NO se usan en el cálculo</small></p>`;
+        html += `</div>`;
+
+        // PASO 3: Aplicar filtro
+        const selectedBanks = allBanks.filter(b => b.isSelected);
+        
+        html += `<h2>3️⃣ Bancos Filtrados (${selectedBanks.length} de ${allBanks.length})</h2>`;
+        html += `<div class="info-box ${selectedBanks.length < allBanks.length ? 'success' : 'warning'}">`;
+        
+        if (selectedBanks.length < allBanks.length) {
+          html += `<p>✅ <strong>Filtro aplicado correctamente</strong></p>`;
+        } else {
+          html += `<p>⚠️ <strong>Se están usando TODOS los bancos</strong> porque no hay filtro configurado</p>`;
+        }
+        
+        html += `<table>`;
+        html += `<thead><tr><th>Banco</th><th>Compra</th><th>Venta</th></tr></thead>`;
+        html += `<tbody>`;
+        selectedBanks.forEach(bank => {
+          html += `<tr>`;
+          html += `<td>${bank.name}</td>`;
+          html += `<td class="price">$${bank.compra.toFixed(2)}</td>`;
+          html += `<td class="price">$${bank.venta.toFixed(2)}</td>`;
+          html += `</tr>`;
+        });
+        html += `</tbody></table>`;
+        html += `</div>`;
+
+        // PASO 4: Calcular según método
+        html += `<h2>4️⃣ Cálculo del Precio (Método: ${settings.preferredBank || 'promedio'})</h2>`;
+        
+        const method = settings.preferredBank || 'promedio';
+        
+        if (method === 'mediana') {
+          const compraValues = selectedBanks.map(b => b.compra).sort((a, b) => a - b);
+          const ventaValues = selectedBanks.map(b => b.venta).sort((a, b) => a - b);
+          
+          const getMedian = (arr) => {
+            const mid = Math.floor(arr.length / 2);
+            return arr.length % 2 === 0 ? (arr[mid - 1] + arr[mid]) / 2 : arr[mid];
+          };
+          
+          const medianaCompra = getMedian(compraValues);
+          const medianaVenta = getMedian(ventaValues);
+          
+          html += `<div class="info-box">`;
+          html += `<div class="step">`;
+          html += `<h4>📊 Cálculo de MEDIANA</h4>`;
+          html += `<p><strong>Precios de COMPRA ordenados:</strong></p>`;
+          html += `<p>${compraValues.map((v, i) => {
+            const mid = Math.floor(compraValues.length / 2);
+            const isMedian = compraValues.length % 2 === 0 ? (i === mid - 1 || i === mid) : i === mid;
+            return isMedian ? `<span class="highlight">$${v.toFixed(2)}</span>` : `$${v.toFixed(2)}`;
+          }).join(' , ')}</p>`;
+          html += `<p><strong>Mediana de COMPRA:</strong> <span class="price">$${medianaCompra.toFixed(2)}</span></p>`;
+          html += `</div>`;
+          
+          html += `<div class="step">`;
+          html += `<p><strong>Precios de VENTA ordenados:</strong></p>`;
+          html += `<p>${ventaValues.map((v, i) => {
+            const mid = Math.floor(ventaValues.length / 2);
+            const isMedian = ventaValues.length % 2 === 0 ? (i === mid - 1 || i === mid) : i === mid;
+            return isMedian ? `<span class="highlight">$${v.toFixed(2)}</span>` : `$${v.toFixed(2)}`;
+          }).join(' , ')}</p>`;
+          html += `<p><strong>Mediana de VENTA:</strong> <span class="price" style="font-size: 24px;">$${medianaVenta.toFixed(2)}</span></p>`;
+          html += `</div>`;
+          html += `</div>`;
+          
+          if (Math.abs(medianaVenta - 1411) < 1) {
+            html += `<div class="info-box success">`;
+            html += `<h3>✅ ¡ENCONTRADO!</h3>`;
+            html += `<p>El precio <strong>$1411</strong> es la <strong>MEDIANA de los precios de VENTA</strong> de tus bancos seleccionados.</p>`;
+            html += `<p>Este es el valor correcto según tu configuración.</p>`;
+            html += `</div>`;
+          }
+          
+        } else if (method === 'promedio_recortado') {
+          const compraValues = selectedBanks.map(b => b.compra).sort((a, b) => a - b);
+          const ventaValues = selectedBanks.map(b => b.venta).sort((a, b) => a - b);
+          
+          const trimPercent = 0.10;
+          const trimCount = Math.floor(compraValues.length * trimPercent);
+          
+          const trimmedCompra = compraValues.slice(trimCount, -trimCount || undefined);
+          const trimmedVenta = ventaValues.slice(trimCount, -trimCount || undefined);
+          
+          const avgCompra = trimmedCompra.reduce((sum, val) => sum + val, 0) / trimmedCompra.length;
+          const avgVenta = trimmedVenta.reduce((sum, val) => sum + val, 0) / trimmedVenta.length;
+          
+          html += `<div class="info-box">`;
+          html += `<div class="step">`;
+          html += `<h4>📊 Promedio Recortado (elimina 10% de extremos)</h4>`;
+          html += `<p><strong>Valores de VENTA originales:</strong> ${ventaValues.length}</p>`;
+          html += `<p><strong>Se eliminan:</strong> ${trimCount} valores más bajos + ${trimCount} valores más altos</p>`;
+          html += `<p><strong>Valores usados:</strong> ${trimmedVenta.length}</p>`;
+          html += `<p>${trimmedVenta.map(v => `$${v.toFixed(2)}`).join(' , ')}</p>`;
+          html += `<p><strong>Promedio de VENTA:</strong> <span class="price" style="font-size: 24px;">$${avgVenta.toFixed(2)}</span></p>`;
+          html += `</div>`;
+          html += `</div>`;
+          
+        } else if (method === 'menor_valor') {
+          const cheapest = selectedBanks.reduce((min, bank) => 
+            bank.compra < min.compra ? bank : min
+          );
+          
+          html += `<div class="info-box">`;
+          html += `<div class="step">`;
+          html += `<h4>💰 Banco con Menor Precio</h4>`;
+          html += `<p><strong>Banco:</strong> ${cheapest.name}</p>`;
+          html += `<p><strong>Precio de COMPRA:</strong> <span class="price">$${cheapest.compra.toFixed(2)}</span></p>`;
+          html += `<p><strong>Precio de VENTA:</strong> <span class="price" style="font-size: 24px;">$${cheapest.venta.toFixed(2)}</span></p>`;
+          html += `</div>`;
+          html += `</div>`;
+        }
+
+        // PASO 5: Explicación
+        html += `<h2>5️⃣ Explicación</h2>`;
+        html += `<div class="info-box">`;
+        html += `<h4>¿Por qué no veo $1411 en ningún banco?</h4>`;
+        html += `<p>Porque <strong>$1411 NO es el precio de un banco específico</strong>, es el resultado de un <strong>cálculo matemático</strong>:</p>`;
+        html += `<ul>`;
+        html += `<li><strong>MEDIANA:</strong> Valor del medio cuando ordenas todos los precios</li>`;
+        html += `<li><strong>PROMEDIO RECORTADO:</strong> Promedio eliminando los 10% más extremos</li>`;
+        html += `<li><strong>MENOR VALOR:</strong> El banco más barato</li>`;
+        html += `</ul>`;
+        html += `<p>💡 <strong>Es NORMAL que $1411 no aparezca en ningún banco</strong> - es el cálculo correcto según tu configuración.</p>`;
+        html += `</div>`;
+
+        output.innerHTML = html;
+
+      } catch (error) {
+        output.innerHTML = `<div class="info-box error">
+          <h3>❌ Error</h3>
+          <p>${error.message}</p>
+          <pre>${error.stack}</pre>
+        </div>`;
+        console.error('Error en diagnóstico:', error);
+      }
+    }
+
+    // Auto-ejecutar al cargar la página
+    window.addEventListener('load', () => {
+      document.getElementById('resultado').innerHTML = `
+        <div class="info-box">
+          <p>👆 Hacé clic en <strong>"Ejecutar Diagnóstico"</strong> para comenzar el análisis</p>
+        </div>
+      `;
+    });
+  </script>
+</body>
+</html>

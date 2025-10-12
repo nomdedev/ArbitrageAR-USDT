@@ -7,12 +7,13 @@ const DEFAULT_SETTINGS = {
   notificationsEnabled: true,
   alertType: 'all',
   customThreshold: 5,
-  notificationFrequency: '15min',
   soundEnabled: true,
   preferredExchanges: [],
-  quietHoursEnabled: false,
-  quietStart: '22:00',
-  quietEnd: '08:00',
+  // Validación y seguridad (NUEVO v5.0.28)
+  dataFreshnessWarning: true, // Alertar si datos tienen más de 5 min
+  riskAlertsEnabled: true, // Mostrar semáforo de riesgo
+  requireConfirmHighAmount: true, // Confirmar simulaciones > $500k
+  minProfitWarning: 0.5, // Alertar si ganancia < 0.5%
   // NUEVO v5.0: Preferencias de rutas
   showNegativeRoutes: true,
   preferSingleExchange: false,
@@ -26,7 +27,7 @@ const DEFAULT_SETTINGS = {
   // NUEVO: Configuración de precio del dólar
   dollarPriceSource: 'auto', // 'auto' o 'manual'
   manualDollarPrice: 950,
-  preferredBank: 'promedio',
+  preferredBank: 'mediana', // MEJORADO v5.0.29: Mediana es más robusta que promedio
   // NUEVO v5.0.23: Configuración de bancos
   showBestBankPrice: false,
   selectedBanks: [] // vacío = todos los bancos
@@ -96,7 +97,7 @@ async function loadSettings() {
       dollarSourceRadio.checked = true;
     }
     document.getElementById('manual-dollar-price').value = settings.manualDollarPrice ?? 950;
-    document.getElementById('preferred-bank').value = settings.preferredBank ?? 'promedio';
+    document.getElementById('preferred-bank').value = settings.preferredBank ?? 'mediana';
     
     // NUEVO v5.0.23: Configuración de bancos
     document.getElementById('show-best-bank-price').checked = settings.showBestBankPrice ?? false;
@@ -151,6 +152,24 @@ function setupEventListeners() {
   document.querySelectorAll('input[name="dollar-price-source"]').forEach(radio => {
     radio.addEventListener('change', updateDollarPriceUI);
   });
+  
+  // NUEVO v5.0.31: Selección de bancos
+  document.getElementById('select-all-banks')?.addEventListener('click', () => {
+    document.querySelectorAll('input[name="bank-selection"]').forEach(cb => cb.checked = true);
+    updateBanksCounter();
+  });
+  
+  document.getElementById('deselect-all-banks')?.addEventListener('click', () => {
+    document.querySelectorAll('input[name="bank-selection"]').forEach(cb => cb.checked = false);
+    updateBanksCounter();
+  });
+  
+  document.querySelectorAll('input[name="bank-selection"]').forEach(cb => {
+    cb.addEventListener('change', updateBanksCounter);
+  });
+  
+  // Actualizar contador al inicio
+  updateBanksCounter();
   
   // Guardar configuración
   document.getElementById('save-settings').addEventListener('click', saveSettings);
@@ -216,7 +235,7 @@ async function saveSettings() {
       // NUEVO: Configuración de precio del dólar
       dollarPriceSource: document.querySelector('input[name="dollar-price-source"]:checked')?.value || 'auto',
       manualDollarPrice: parseFloat(document.getElementById('manual-dollar-price').value) || 950,
-      preferredBank: document.getElementById('preferred-bank').value || 'promedio',
+      preferredBank: document.getElementById('preferred-bank').value || 'mediana',
       // NUEVO v5.0.23: Configuración de bancos
       showBestBankPrice: document.getElementById('show-best-bank-price').checked,
       selectedBanks: Array.from(document.querySelectorAll('input[name="bank-selection"]:checked'))
@@ -329,5 +348,25 @@ function updateDollarPriceUI() {
   } else {
     manualPriceSection.style.display = 'none';
     bankSelectionSection.style.display = 'block';
+  }
+}
+
+// NUEVO v5.0.31: Actualizar contador de bancos seleccionados
+function updateBanksCounter() {
+  const selectedCount = document.querySelectorAll('input[name="bank-selection"]:checked').length;
+  const totalCount = document.querySelectorAll('input[name="bank-selection"]').length;
+  const counter = document.getElementById('banks-counter');
+  
+  if (counter) {
+    if (selectedCount === 0) {
+      counter.textContent = 'Todos los bancos (ninguno seleccionado)';
+      counter.style.color = '#94a3b8';
+    } else if (selectedCount === totalCount) {
+      counter.textContent = `Todos seleccionados (${selectedCount})`;
+      counter.style.color = '#22c55e';
+    } else {
+      counter.textContent = `${selectedCount} de ${totalCount} bancos seleccionados`;
+      counter.style.color = '#667eea';
+    }
   }
 }

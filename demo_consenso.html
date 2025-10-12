@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: Método Consenso vs Mediana</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1400px;
+      margin: 40px auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+    }
+    h1 {
+      color: white;
+      text-align: center;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .subtitle {
+      color: rgba(255,255,255,0.9);
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 1.2em;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .method-box {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .method-box h2 {
+      margin-top: 0;
+      color: #667eea;
+      border-bottom: 3px solid #667eea;
+      padding-bottom: 10px;
+    }
+    .consensus-box h2 {
+      color: #10b981;
+      border-color: #10b981;
+    }
+    .example {
+      background: #f8fafc;
+      border-left: 4px solid #667eea;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 5px;
+    }
+    .consensus-box .example {
+      border-color: #10b981;
+    }
+    .banks-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin: 15px 0;
+    }
+    .bank-item {
+      background: white;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #e5e7eb;
+      font-size: 0.9em;
+    }
+    .bank-item.outlier {
+      background: #fee2e2;
+      border-color: #ef4444;
+      opacity: 0.6;
+    }
+    .bank-item.cluster {
+      background: #d1fae5;
+      border-color: #10b981;
+      font-weight: bold;
+    }
+    .result {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      margin: 20px 0;
+      font-size: 1.3em;
+    }
+    .consensus-box .result {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    .price {
+      font-size: 2em;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    .info-box {
+      background: #dbeafe;
+      border-left: 4px solid #3b82f6;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
+    .warning-box {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
+    .success-box {
+      background: #d1fae5;
+      border-left: 4px solid #10b981;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      display: block;
+      margin: 20px auto;
+      transition: all 0.3s;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    button:hover {
+      background: #764ba2;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    }
+    .stats {
+      background: #f1f5f9;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+    }
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .stats-row:last-child {
+      border-bottom: none;
+    }
+    .highlight {
+      background: yellow;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 Método CONSENSO vs MEDIANA</h1>
+  <p class="subtitle">Comparación de métodos de cálculo del precio del dólar oficial</p>
+
+  <div class="info-box">
+    <h3>🔍 Escenario de Ejemplo</h3>
+    <p>Imaginate que tenés estos precios de bancos:</p>
+    <ul>
+      <li><strong>5 bancos</strong> con precios similares entre <strong>$1450 - $1480</strong> (el "consenso del mercado")</li>
+      <li><strong>2 bancos outliers</strong> con precios muy diferentes: $1249 y $1720</li>
+    </ul>
+    <p><strong>Pregunta:</strong> ¿Qué método te da el precio más representativo del mercado real?</p>
+  </div>
+
+  <div class="container">
+    <!-- MEDIANA -->
+    <div class="method-box">
+      <h2>📊 Método MEDIANA (Actual)</h2>
+      
+      <div class="example">
+        <h4>Precios ordenados:</h4>
+        <div class="banks-list">
+          <div class="bank-item outlier">Banco Columbia: $1249</div>
+          <div class="bank-item">Banco Nación: $1450</div>
+          <div class="bank-item">Banco Galicia: $1460</div>
+          <div class="bank-item">BBVA: $1465</div>
+          <div class="bank-item">Santander: $1470</div>
+          <div class="bank-item">Banco Provincia: $1480</div>
+          <div class="bank-item outlier">Banco Premium: $1720</div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stats-row">
+          <span>Total de bancos:</span>
+          <strong>7 bancos</strong>
+        </div>
+        <div class="stats-row">
+          <span>Posición central:</span>
+          <strong>4° banco (medio)</strong>
+        </div>
+        <div class="stats-row">
+          <span>Valor seleccionado:</span>
+          <strong>$1465 (BBVA)</strong>
+        </div>
+      </div>
+
+      <div class="result">
+        <div>Resultado MEDIANA:</div>
+        <div class="price">$1465</div>
+      </div>
+
+      <div class="warning-box">
+        <strong>⚠️ Problema:</strong>
+        <p>La mediana toma el valor del medio sin importar cuántos bancos están cerca de ese valor. No representa el "consenso" del mercado.</p>
+      </div>
+    </div>
+
+    <!-- CONSENSO -->
+    <div class="method-box consensus-box">
+      <h2>🎯 Método CONSENSO (Nuevo) 🔥</h2>
+      
+      <div class="example">
+        <h4>Agrupamiento por similaridad (±2%):</h4>
+        <div class="banks-list">
+          <div class="bank-item outlier">❌ Banco Columbia: $1249</div>
+          <div class="bank-item cluster">✅ Banco Nación: $1450</div>
+          <div class="bank-item cluster">✅ Banco Galicia: $1460</div>
+          <div class="bank-item cluster">✅ BBVA: $1465</div>
+          <div class="bank-item cluster">✅ Santander: $1470</div>
+          <div class="bank-item cluster">✅ Banco Provincia: $1480</div>
+          <div class="bank-item outlier">❌ Banco Premium: $1720</div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stats-row">
+          <span>Total de bancos:</span>
+          <strong>7 bancos</strong>
+        </div>
+        <div class="stats-row">
+          <span>Cluster más grande:</span>
+          <strong class="highlight">5 bancos (71%)</strong>
+        </div>
+        <div class="stats-row">
+          <span>Bancos en cluster:</span>
+          <strong>Nación, Galicia, BBVA, Santander, Provincia</strong>
+        </div>
+        <div class="stats-row">
+          <span>Promedio del cluster:</span>
+          <strong>$1465</strong>
+        </div>
+      </div>
+
+      <div class="result">
+        <div>Resultado CONSENSO:</div>
+        <div class="price">$1465</div>
+        <small>Basado en 5 de 7 bancos (71% consenso)</small>
+      </div>
+
+      <div class="success-box">
+        <strong>✅ Ventaja:</strong>
+        <p>El consenso encuentra automáticamente el grupo más grande de bancos con precios similares e ignora outliers. Te da el precio que realmente representa el mercado.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <h3>🧪 Caso Extremo: Cuando SÍ hay diferencia</h3>
+    <p>Imaginate esta situación:</p>
+    <ul>
+      <li><strong>Grupo A:</strong> 2 bancos en ~$1200</li>
+      <li><strong>Grupo B:</strong> 5 bancos en ~$1450-$1480 👈 El consenso del mercado</li>
+      <li><strong>Grupo C:</strong> 1 banco en $1720</li>
+    </ul>
+    <p><strong>MEDIANA:</strong> Tomaría el valor del medio = probablemente ~$1450</p>
+    <p><strong>CONSENSO:</strong> Encuentra que 5 bancos (62%) están en $1450-$1480, promedia ese grupo = ~$1465</p>
+    <p>💡 El consenso te dice: <em>"5 de 8 bancos están de acuerdo en este rango de precios"</em></p>
+  </div>
+
+  <button onclick="runLiveDemo()">🚀 Ejecutar Demo con Datos Reales</button>
+
+  <div id="live-result"></div>
+
+  <script>
+    async function runLiveDemo() {
+      const resultDiv = document.getElementById('live-result');
+      resultDiv.innerHTML = '<div class="info-box"><p>⏳ Obteniendo datos reales de dolarito.ar...</p></div>';
+
+      try {
+        const response = await fetch('https://www.dolarito.ar/cotizacion/bancos');
+        const html = await response.text();
+        const jsonMatch = html.match(/"bankQuotations":\s*({[^}]*"quotations":\s*\[[^\]]*\][^}]*})/);
+        
+        if (!jsonMatch) {
+          throw new Error('No se pudieron obtener datos');
+        }
+
+        const bankData = JSON.parse(`{${jsonMatch[1]}}`);
+        const quotations = bankData.quotations || [];
+
+        // Procesar bancos
+        const banks = quotations
+          .filter(q => q.name && !isNaN(parseFloat(q.sell)) && parseFloat(q.sell) > 0)
+          .map(q => ({
+            name: q.name.trim(),
+            venta: parseFloat(q.sell)
+          }))
+          .sort((a, b) => a.venta - b.venta);
+
+        // Calcular MEDIANA
+        const ventaValues = banks.map(b => b.venta);
+        const mid = Math.floor(ventaValues.length / 2);
+        const mediana = ventaValues.length % 2 === 0 
+          ? (ventaValues[mid - 1] + ventaValues[mid]) / 2 
+          : ventaValues[mid];
+
+        // Calcular CONSENSO
+        const findConsensusCluster = (banks, tolerance = 0.02) => {
+          let bestCluster = [];
+          
+          for (let i = 0; i < banks.length; i++) {
+            const center = banks[i].venta;
+            const cluster = banks.filter(bank => {
+              const diff = Math.abs(bank.venta - center) / center;
+              return diff <= tolerance;
+            });
+            
+            if (cluster.length > bestCluster.length) {
+              bestCluster = cluster;
+            }
+          }
+          
+          return bestCluster;
+        };
+
+        const cluster = findConsensusCluster(banks);
+        const consenso = cluster.reduce((sum, bank) => sum + bank.venta, 0) / cluster.length;
+
+        // Mostrar resultados
+        let html = '<div class="container">';
+        
+        // MEDIANA
+        html += '<div class="method-box">';
+        html += '<h2>📊 MEDIANA</h2>';
+        html += `<div class="result"><div>Precio calculado:</div><div class="price">$${mediana.toFixed(2)}</div></div>`;
+        html += '<div class="stats">';
+        html += `<div class="stats-row"><span>Bancos usados:</span><strong>${banks.length} bancos</strong></div>`;
+        html += `<div class="stats-row"><span>Rango:</span><strong>$${Math.min(...ventaValues).toFixed(2)} - $${Math.max(...ventaValues).toFixed(2)}</strong></div>`;
+        html += '</div>';
+        html += '<h4>Todos los bancos:</h4><div class="banks-list">';
+        banks.forEach(bank => {
+          html += `<div class="bank-item">${bank.name}: $${bank.venta.toFixed(2)}</div>`;
+        });
+        html += '</div></div>';
+
+        // CONSENSO
+        html += '<div class="method-box consensus-box">';
+        html += '<h2>🎯 CONSENSO</h2>';
+        html += `<div class="result">`;
+        html += `<div>Precio calculado:</div>`;
+        html += `<div class="price">$${consenso.toFixed(2)}</div>`;
+        html += `<small>Basado en ${cluster.length} de ${banks.length} bancos (${Math.round(cluster.length/banks.length*100)}% consenso)</small>`;
+        html += `</div>`;
+        
+        html += '<div class="stats">';
+        html += `<div class="stats-row"><span>Cluster encontrado:</span><strong>${cluster.length} bancos</strong></div>`;
+        const clusterMin = Math.min(...cluster.map(b => b.venta));
+        const clusterMax = Math.max(...cluster.map(b => b.venta));
+        html += `<div class="stats-row"><span>Rango del cluster:</span><strong>$${clusterMin.toFixed(2)} - $${clusterMax.toFixed(2)}</strong></div>`;
+        html += `<div class="stats-row"><span>Varianza:</span><strong>${((clusterMax - clusterMin) / consenso * 100).toFixed(2)}%</strong></div>`;
+        html += '</div>';
+        
+        html += '<h4>Bancos en el cluster:</h4><div class="banks-list">';
+        const clusterNames = cluster.map(b => b.name);
+        banks.forEach(bank => {
+          const isInCluster = clusterNames.includes(bank.name);
+          const className = isInCluster ? 'bank-item cluster' : 'bank-item outlier';
+          const prefix = isInCluster ? '✅ ' : '❌ ';
+          html += `<div class="${className}">${prefix}${bank.name}: $${bank.venta.toFixed(2)}</div>`;
+        });
+        html += '</div></div>';
+
+        html += '</div>';
+
+        // Comparación
+        const diff = Math.abs(consenso - mediana);
+        const diffPercent = (diff / mediana * 100).toFixed(2);
+        
+        if (diffPercent > 1) {
+          html += '<div class="warning-box">';
+          html += `<h3>⚠️ Diferencia Significativa</h3>`;
+          html += `<p>Hay una diferencia de <strong>$${diff.toFixed(2)}</strong> (${diffPercent}%) entre ambos métodos.</p>`;
+          html += `<p>El <strong>CONSENSO</strong> es más representativo porque se basa en el grupo de ${cluster.length} bancos con precios similares.</p>`;
+          html += '</div>';
+        } else {
+          html += '<div class="success-box">';
+          html += `<h3>✅ Resultados Similares</h3>`;
+          html += `<p>Ambos métodos dan resultados muy parecidos (diferencia: $${diff.toFixed(2)} / ${diffPercent}%).</p>`;
+          html += `<p>Esto significa que no hay outliers significativos en los datos actuales.</p>`;
+          html += '</div>';
+        }
+
+        resultDiv.innerHTML = html;
+
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="warning-box">
+          <h3>❌ Error</h3>
+          <p>${error.message}</p>
+        </div>`;
+      }
+    }
+  </script>
+</body>
+</html>

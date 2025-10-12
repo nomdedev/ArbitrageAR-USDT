@@ -17,7 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
   setupRefreshButton();
   setupFilterButtons(); // NUEVO: Configurar filtros P2P
   setupDollarPriceControls(); // NUEVO: Configurar controles del precio del dólar
+  setupAdvancedSimulator(); // NUEVO v5.0.31: Configurar simulador sin rutas
   checkForUpdates(); // NUEVO: Verificar actualizaciones disponibles
+  loadUserSettings(); // NUEVO v5.0.28: Cargar configuración del usuario
   fetchAndDisplay();
   loadBanksData();
 });
@@ -57,8 +59,14 @@ function getDollarSourceDisplay(official) {
       return '👤 Manual';
     case 'dolarito_bank':
       return `🏦 ${official.bank}`;
+    case 'dolarito_median':
+      return `📊 Mediana (${official.banksCount || 0} bancos)`;
+    case 'dolarito_trimmed_average':
+      return `📊 Prom. Recortado (${official.usedBanks || 0}/${official.banksCount || 0} bancos)`;
     case 'dolarito_average':
       return `📊 Promedio (${official.banksCount || 0} bancos)`;
+    case 'dolarito_cheapest':
+      return `💰 ${official.bank} (menor precio)`;
     case 'dolarapi_fallback':
       return '🔄 DolarAPI (fallback)';
     case 'hardcoded_fallback':
@@ -68,7 +76,82 @@ function getDollarSourceDisplay(official) {
   }
 }
 
-// Mostrar indicador de salud del mercado
+// ============================================
+// FUNCIONES DE VALIDACIÓN Y SEGURIDAD v5.0.28
+// ============================================
+
+/**
+ * Cargar configuración del usuario
+ */
+function loadUserSettings() {
+  chrome.storage.local.get([
+    'dataFreshnessWarning',
+    'riskAlertsEnabled',
+    'requireConfirmHighAmount',
+    'minProfitWarning'
+  ], (result) => {
+    userSettings = {
+      dataFreshnessWarning: result.dataFreshnessWarning !== false, // default true
+      riskAlertsEnabled: result.riskAlertsEnabled !== false, // default true
+      requireConfirmHighAmount: result.requireConfirmHighAmount !== false, // default true
+      minProfitWarning: result.minProfitWarning || 0.5
+    };
+    console.log('⚙️ Configuración de seguridad cargada:', userSettings);
+  });
+}
+
+/**
+ * Actualizar indicador de estado de datos con información de frescura
+ */
+function updateDataStatusIndicator(data) {
+  const statusEl = document.getElementById('dataStatus');
+  if (!statusEl || !window.validationService) return;
+
+  // Verificar salud del sistema
+  const health = window.validationService.generateSystemHealthReport(data);
+  
+  // Obtener frescura del precio oficial
+  const freshness = window.validationService.getDataFreshnessLevel(data.officialPrice?.timestamp);
+  
+  // Construir HTML del indicador
+  let html = `<span class="freshness-indicator" style="color: ${freshness.color}">${freshness.icon}</span>`;
+  
+  if (freshness.ageMinutes !== null) {
+    html += ` <span class="age-text">Datos: hace ${freshness.ageMinutes} min</span>`;
+  } else {
+    html += ` <span class="age-text">Datos: Sin timestamp</span>`;
+  }
+  
+  // Mostrar advertencias si hay
+  if (health.warnings.length > 0) {
+    html += ` <span class="health-warning" title="${health.warnings.join(', ')}">⚠️</span>`;
+  }
+  
+  statusEl.innerHTML = html;
+  statusEl.className = `data-status ${freshness.level}`;
+}
+
+/**
+ * Agregar indicador de riesgo a una ruta
+ */
+function addRiskIndicatorToRoute(route, params) {
+  if (!window.validationService) return '';
+  
+  const risk = window.validationService.calculateRouteRiskLevel(
+    route,
+    route.profitPercent,
+    params
+  );
+  
+  return `
+    <div class="risk-indicator risk-${risk.level}" title="Nivel de riesgo: ${risk.level}">
+      ${risk.icon} <span class="risk-text">${risk.level === 'low' ? 'Bajo' : risk.level === 'medium' ? 'Medio' : 'Alto'}</span>
+      ${risk.reasons.length > 0 ? `<div class="risk-reasons">${risk.reasons.join(', ')}</div>` : ''}
+    </div>
+  `;
+}
+
+// Mostrar indicador de salud del mercado (versión compacta)
 function displayMarketHealth(health) {
   const container = document.getElementById('marketHealth');
   
@@ -81,12 +164,10 @@ function displayMarketHealth(health) {
   container.style.backgroundColor = `${health.color}15`; // 15 = opacity
   container.style.borderColor = `${health.color}40`;
   
+  // Versión compacta: solo icono + status en una línea
   container.innerHTML = `
     <span class="market-icon">${health.icon}</span>
-    <div class="market-info">
-      <span class="market-status">Mercado: <strong>${health.status}</strong></span>
-      <span class="market-message">${health.message}</span>
-    </div>
+    <span class="market-status-compact">${health.status}</span>
   `;
 }
 
@@ -297,6 +378,9 @@ function handleSuccessfulData(data, container) {
   updateLastUpdateTimestamp(data.lastUpdate);
   displayMarketHealth(data.marketHealth);
   
+  // NUEVO v5.0.28: Actualizar indicador de estado de datos
+  updateDataStatusIndicator(data);
+  
   // NUEVO: Mostrar información del precio del dólar
   if (data.oficial) {
     displayDollarInfo(data.oficial);
@@ -334,9 +418,6 @@ function handleSuccessfulData(data, container) {
   // Aplicar filtro P2P activo
   console.log('🔍 [POPUP] Llamando applyP2PFilter()...');
   applyP2PFilter();
-
-  // Poblar selector del simulador
-  populateSimulatorRoutes(data.optimizedRoutes);
 }
 
 // Obtener y mostrar datos de arbitraje (con retry automático)
@@ -1210,7 +1291,8 @@ function getBankDisplayName(bankCode) {
     'bancor': 'Bancor',
     'chaco': 'Banco Chaco',
     'pampa': 'Banco Pampa',
-    'promedio': 'Promedio Bancos'
+    'promedio': 'Promedio Bancos',
+    'menor_valor': 'Menor Valor'
   };
   
   return bankNames[bankCode] || bankCode.charAt(0).toUpperCase() + bankCode.slice(1);
@@ -1272,389 +1354,344 @@ async function loadBankRates() {
   }
 }
 
-// Actualizar timestamp
+// Actualizar timestamp con indicador de frescura
 function updateLastUpdateTimestamp(timestamp) {
   const container = document.getElementById('last-update');
-  if (timestamp) {
-    const date = new Date(timestamp);
-    const timeStr = date.toLocaleTimeString('es-AR');
+  if (!timestamp) {
+    container.textContent = '⏰ Sin datos de actualización';
+    return;
+  }
+  
+  const date = new Date(timestamp);
+  const timeStr = date.toLocaleTimeString('es-AR');
+  
+  // NUEVO v5.0.28: Agregar indicador de frescura
+  if (window.validationService) {
+    const freshness = window.validationService.getDataFreshnessLevel(timestamp);
+    container.innerHTML = `
+      <span style="color: ${freshness.color}">${freshness.icon}</span>
+      <span>Última actualización: ${timeStr}</span>
+      ${freshness.ageMinutes !== null ? `<span class="age-info">(hace ${freshness.ageMinutes} min)</span>` : ''}
+    `;
+  } else {
     container.textContent = `⏰ Última actualización: ${timeStr}`;
   }
 }
 
-// NUEVO v5.0.0: Simulador con monto personalizado
-function populateSimulatorRoutes(routes) {
-  const select = document.getElementById('sim-route');
-  if (!routes || routes.length === 0) {
-    select.innerHTML = '<option value="">-- No hay rutas disponibles --</option>';
-    return;
-  }
-  
-  let options = '<option value="">-- Selecciona una ruta --</option>';
-  routes.forEach((route, index) => {
-    const badge = route.isSingleExchange ? '🎯' : '🔀';
-    const profitSymbol = route.profitPercent >= 0 ? '+' : '';
-    options += `<option value="${index}">${badge} Ruta ${index + 1}: ${profitSymbol}${route.profitPercent.toFixed(2)}% (${route.buyExchange} → ${route.sellExchange})</option>`;
-  });
-  
-  select.innerHTML = options;
-  
-  // Setup event listeners
-  document.getElementById('sim-calculate').addEventListener('click', calculateSimulation);
-  
-  // NUEVO: Configuración avanzada
-  setupAdvancedSimulator();
-}
-
+// NUEVO v5.0.31: Configuración del simulador (sin rutas)
 function setupAdvancedSimulator() {
   const toggleBtn = document.getElementById('toggle-advanced');
   const advancedConfig = document.getElementById('advanced-config');
-  const loadDefaultsBtn = document.getElementById('sim-load-defaults');
-  const calculateMatrixBtn = document.getElementById('btn-calculate-matrix');
   const resetConfigBtn = document.getElementById('btn-reset-config');
   
   // Toggle configuración avanzada
   toggleBtn.addEventListener('click', () => {
     const isVisible = advancedConfig.style.display !== 'none';
     advancedConfig.style.display = isVisible ? 'none' : 'block';
-    toggleBtn.textContent = isVisible ? '⚙️ Configuración Avanzada' : '🔽 Configuración Avanzada';
+    toggleBtn.textContent = isVisible ? '⚙️ Parámetros de Cálculo' : '🔽 Parámetros de Cálculo';
   });
   
-  // Cargar valores por defecto
-  loadDefaultsBtn.addEventListener('click', loadDefaultSimulatorValues);
+  // Generar matriz de riesgo
+  const generateRiskMatrixBtn = document.getElementById('generate-risk-matrix');
+  if (generateRiskMatrixBtn) {
+    generateRiskMatrixBtn.addEventListener('click', generateRiskMatrix);
+  }
   
-  // Calcular matriz
-  calculateMatrixBtn.addEventListener('click', calculateProfitMatrix);
+  // Filtros de la matriz
+  const applyFilterBtn = document.getElementById('apply-matrix-filter');
+  const resetFilterBtn = document.getElementById('reset-matrix-filter');
+  if (applyFilterBtn) {
+    applyFilterBtn.addEventListener('click', applyMatrixFilter);
+  }
+  if (resetFilterBtn) {
+    resetFilterBtn.addEventListener('click', resetMatrixFilter);
+  }
   
   // Reset configuración
   resetConfigBtn.addEventListener('click', resetSimulatorConfig);
+  
+  // Cargar valores por defecto al iniciar
+  loadDefaultSimulatorValues();
 }
 
 function loadDefaultSimulatorValues() {
-  // Cargar valores desde la configuración del usuario y rutas actuales
-  const routeSelect = document.getElementById('sim-route');
-  const routeIndex = parseInt(routeSelect.value);
+  // Cargar valores desde la configuración del usuario y datos actuales
+  const officialPrice = currentData?.dollarPrice || 950;
   
-  if (isNaN(routeIndex) || !currentData?.optimizedRoutes?.[routeIndex]) {
-    alert('⚠️ Selecciona una ruta primero');
+  // Verificar que los elementos existan antes de asignar valores
+  const usdBuyInput = document.getElementById('sim-usd-buy-price');
+  const usdSellInput = document.getElementById('sim-usd-sell-price');
+  const buyFeeInput = document.getElementById('sim-buy-fee');
+  const sellFeeInput = document.getElementById('sim-sell-fee');
+  const transferFeeInput = document.getElementById('sim-transfer-fee-usd');
+  const bankCommissionInput = document.getElementById('sim-bank-commission');
+  
+  if (!usdBuyInput || !usdSellInput || !buyFeeInput || !sellFeeInput || !transferFeeInput || !bankCommissionInput) {
+    console.warn('⚠️ No se encontraron todos los inputs del simulador');
     return;
   }
   
-  const route = currentData.optimizedRoutes[routeIndex];
-  
-  // Precios del dólar (usar valores actuales del sistema)
-  document.getElementById('sim-usd-buy-price').value = route.officialPrice?.toFixed(2) || '950.00';
-  document.getElementById('sim-usd-sell-price').value = (route.officialPrice * 1.02)?.toFixed(2) || '970.00';
+  // Precios del dólar
+  usdBuyInput.value = officialPrice.toFixed(2);
+  usdSellInput.value = (officialPrice * 1.02).toFixed(2);
   
   // Fees desde configuración
   const buyFee = (userSettings?.extraTradingFee || 0) + 1.0; // 1% base + extra
   const sellFee = (userSettings?.extraTradingFee || 0) + 1.0;
-  const transferFee = route.transferFeeUSD || 0;
+  const transferFee = userSettings?.transferFeeUSD || 0;
   const bankCommission = userSettings?.bankCommissionFee || 0;
   
-  document.getElementById('sim-buy-fee').value = buyFee.toFixed(2);
-  document.getElementById('sim-sell-fee').value = sellFee.toFixed(2);
-  document.getElementById('sim-transfer-fee-usd').value = transferFee.toFixed(2);
-  document.getElementById('sim-bank-commission').value = bankCommission.toFixed(2);
+  buyFeeInput.value = buyFee.toFixed(2);
+  sellFeeInput.value = sellFee.toFixed(2);
+  transferFeeInput.value = transferFee.toFixed(2);
+  bankCommissionInput.value = bankCommission.toFixed(2);
   
-  alert('✅ Valores por defecto cargados desde la configuración actual');
+  console.log('✅ Valores por defecto cargados en simulador:', {
+    usdPrice: officialPrice,
+    buyFee,
+    sellFee,
+    transferFee,
+    bankCommission
+  });
 }
 
-function calculateProfitMatrix() {
-  const routeSelect = document.getElementById('sim-route');
+function resetSimulatorConfig() {
+  // Verificar que los elementos existan
+  const elements = {
+    usdBuy: document.getElementById('sim-usd-buy-price'),
+    usdSell: document.getElementById('sim-usd-sell-price'),
+    buyFee: document.getElementById('sim-buy-fee'),
+    sellFee: document.getElementById('sim-sell-fee'),
+    transferFee: document.getElementById('sim-transfer-fee-usd'),
+    bankCommission: document.getElementById('sim-bank-commission'),
+    matrixMin: document.getElementById('matrix-min-percent'),
+    matrixMax: document.getElementById('matrix-max-percent'),
+    matrixStep: document.getElementById('matrix-step-percent')
+  };
+  
+  // Verificar que todos existan
+  const missingElements = Object.entries(elements)
+    .filter(([key, el]) => !el)
+    .map(([key]) => key);
+  
+  if (missingElements.length > 0) {
+    console.warn('⚠️ Elementos faltantes en resetSimulatorConfig:', missingElements);
+    return;
+  }
+  
+  // Reset a valores por defecto
+  elements.usdBuy.value = '';
+  elements.usdSell.value = '';
+  elements.buyFee.value = '1.0';
+  elements.sellFee.value = '1.0';
+  elements.transferFee.value = '0';
+  elements.bankCommission.value = '0';
+  elements.matrixMin.value = '0';
+  elements.matrixMax.value = '2';
+  elements.matrixStep.value = '0.5';
+  
+  // Recargar valores desde configuración
+  loadDefaultSimulatorValues();
+  
+  console.log('✅ Configuración del simulador reseteada');
+}
+
+// NUEVO v5.0.31: Generar Matriz de Riesgo mejorada (sin rutas)
+function generateRiskMatrix() {
   const amountInput = document.getElementById('sim-amount');
-  const resultsDiv = document.getElementById('sim-results');
+  const amount = parseFloat(amountInput?.value) || 1000000;
   
-  const routeIndex = parseInt(routeSelect.value);
-  const amount = parseFloat(amountInput.value);
-  
+  // Validar monto
   if (!amount || amount < 1000) {
     alert('⚠️ Ingresa un monto válido (mínimo $1,000 ARS)');
     return;
   }
   
-  if (isNaN(routeIndex) || !currentData?.optimizedRoutes?.[routeIndex]) {
-    alert('⚠️ Selecciona una ruta válida');
+  // Obtener rangos de la matriz
+  const usdMin = parseFloat(document.getElementById('matrix-usd-min')?.value) || 940;
+  const usdMax = parseFloat(document.getElementById('matrix-usd-max')?.value) || 980;
+  const usdtMin = parseFloat(document.getElementById('matrix-usdt-min')?.value) || 1000;
+  const usdtMax = parseFloat(document.getElementById('matrix-usdt-max')?.value) || 1040;
+  
+  // Validaciones de rangos
+  if (usdMin >= usdMax) {
+    alert('⚠️ El USD mínimo debe ser menor que el USD máximo');
     return;
   }
-  
-  const route = currentData.optimizedRoutes[routeIndex];
-  
-  // Obtener parámetros de la matriz
-  const minPercent = parseFloat(document.getElementById('matrix-min-percent').value) || 0;
-  const maxPercent = parseFloat(document.getElementById('matrix-max-percent').value) || 2;
-  const stepPercent = parseFloat(document.getElementById('matrix-step-percent').value) || 0.5;
+  if (usdtMin >= usdtMax) {
+    alert('⚠️ El USDT mínimo debe ser menor que el USDT máximo');
+    return;
+  }
   
   // Obtener parámetros configurables
-  const usdBuyPrice = parseFloat(document.getElementById('sim-usd-buy-price').value) || route.officialPrice || 950;
-  const usdSellPrice = parseFloat(document.getElementById('sim-usd-sell-price').value) || (route.officialPrice * 1.02) || 970;
-  const buyFeePercent = parseFloat(document.getElementById('sim-buy-fee').value) || 1.0;
-  const sellFeePercent = parseFloat(document.getElementById('sim-sell-fee').value) || 1.0;
-  const transferFeeUSD = parseFloat(document.getElementById('sim-transfer-fee-usd').value) || route.transferFeeUSD || 0;
-  const bankCommissionPercent = parseFloat(document.getElementById('sim-bank-commission').value) || 0;
+  const buyFeePercent = parseFloat(document.getElementById('sim-buy-fee')?.value) || 1.0;
+  const sellFeePercent = parseFloat(document.getElementById('sim-sell-fee')?.value) || 1.0;
+  const transferFeeUSD = parseFloat(document.getElementById('sim-transfer-fee-usd')?.value) || 0;
+  const bankCommissionPercent = parseFloat(document.getElementById('sim-bank-commission')?.value) || 0;
   
-  // Calcular matriz
-  const matrixResults = [];
-  for (let targetPercent = minPercent; targetPercent <= maxPercent; targetPercent += stepPercent) {
-    const result = calculateRequiredPricesForTargetProfit(
-      amount, route, targetPercent, 
-      usdBuyPrice, usdSellPrice, buyFeePercent, sellFeePercent, 
-      transferFeeUSD, bankCommissionPercent
-    );
-    matrixResults.push({
-      targetPercent: targetPercent,
-      ...result
-    });
+  // Validaciones de parámetros
+  if (buyFeePercent < 0 || buyFeePercent > 10) {
+    alert('⚠️ El fee de compra debe estar entre 0% y 10%');
+    return;
+  }
+  if (sellFeePercent < 0 || sellFeePercent > 10) {
+    alert('⚠️ El fee de venta debe estar entre 0% y 10%');
+    return;
   }
   
-  // Mostrar resultados de matriz
-  displayProfitMatrix(matrixResults, route, amount);
-}
-
-function calculateRequiredPricesForTargetProfit(
-  amount, route, targetPercent, 
-  usdBuyPrice, usdSellPrice, buyFeePercent, sellFeePercent, 
-  transferFeeUSD, bankCommissionPercent
-) {
-  // Esta función calcula qué precios se necesitan para lograr un porcentaje de ganancia específico
-  // Es una simplificación - en la práctica necesitaríamos resolver ecuaciones más complejas
-  
-  const targetProfit = amount * (targetPercent / 100);
-  const targetFinalAmount = amount + targetProfit;
-  
-  // Calcular hacia atrás desde el resultado deseado
-  const sellFeeDecimal = sellFeePercent / 100;
-  const arsBeforeSellFee = targetFinalAmount / (1 - sellFeeDecimal);
-  
-  // Calcular USDT necesarios antes de transferencia
-  const usdtArsBid = route.usdtArsBid;
-  let usdtAfterTransfer = arsBeforeSellFee / usdtArsBid;
-  
-  // Agregar fee de transferencia
-  const transferFeeUSDT = transferFeeUSD / route.usdToUsdtRate;
-  const usdtAfterBuyFee = usdtAfterTransfer + transferFeeUSDT;
-  
-  // Agregar fee de compra
-  const buyFeeDecimal = buyFeePercent / 100;
-  const usdtBeforeBuyFee = usdtAfterBuyFee / (1 - buyFeeDecimal);
-  
-  // Calcular USD necesarios
-  const usdNeeded = usdtBeforeBuyFee * route.usdToUsdtRate;
-  
-  // Calcular precio USD requerido (considerando comisión bancaria)
-  const bankCommissionARS = amount * (bankCommissionPercent / 100);
-  const amountAfterBankCommission = amount - bankCommissionARS;
-  const requiredUSDBuyPrice = amountAfterBankCommission / usdNeeded;
-  
-  // Para el precio de venta, es más complejo ya que depende del spread
-  // Simplificación: asumir que el precio de venta es un porcentaje sobre el de compra
-  const estimatedUSDSellPrice = requiredUSDBuyPrice * 1.02; // 2% spread típico
-  
-  return {
-    requiredUSDBuyPrice: requiredUSDBuyPrice,
-    estimatedUSDSellPrice: estimatedUSDSellPrice,
-    usdNeeded: usdNeeded,
-    usdtBeforeBuyFee: usdtBeforeBuyFee,
-    usdtAfterBuyFee: usdtAfterBuyFee,
-    usdtAfterTransfer: usdtAfterTransfer,
-    arsBeforeSellFee: arsBeforeSellFee,
-    targetFinalAmount: targetFinalAmount
-  };
-}
-
-function displayProfitMatrix(matrixResults, route, amount) {
-  const resultsDiv = document.getElementById('sim-results');
-  
-  let matrixHTML = `
-    <div class="matrix-result-card">
-      <h3>📊 Matriz de Rendimientos Requeridos</h3>
-      <p class="matrix-description">
-        Para lograr diferentes porcentajes de ganancia con $${formatNumber(amount)} ARS iniciales<br>
-        en la ruta ${route.buyExchange} → ${route.sellExchange}
-      </p>
-      
-      <div class="matrix-table-container">
-        <table class="profit-matrix-table">
-          <thead>
-            <tr>
-              <th>Rendimiento<br>Objetivo</th>
-              <th>Precio USD<br>Compra Requerido</th>
-              <th>Precio USD<br>Venta Estimado</th>
-              <th>USD<br>Necesarios</th>
-              <th>USDT<br>Compra</th>
-              <th>ARS<br>Final</th>
-            </tr>
-          </thead>
-          <tbody>
-  `;
-  
-  matrixResults.forEach(result => {
-    const profitClass = result.targetPercent >= 0 ? 'positive' : 'negative';
-    matrixHTML += `
-      <tr class="${profitClass}">
-        <td class="target-percent">${result.targetPercent.toFixed(1)}%</td>
-        <td>$${formatNumber(result.requiredUSDBuyPrice)}</td>
-        <td>$${formatNumber(result.estimatedUSDSellPrice)}</td>
-        <td>${formatNumber(result.usdNeeded)}</td>
-        <td>${formatNumber(result.usdtBeforeBuyFee)}</td>
-        <td>$${formatNumber(result.targetFinalAmount)}</td>
-      </tr>
-    `;
+  console.log('📊 Generando matriz con parámetros:', {
+    amount,
+    usdRange: [usdMin, usdMax],
+    usdtRange: [usdtMin, usdtMax],
+    fees: { buy: buyFeePercent, sell: sellFeePercent, transfer: transferFeeUSD, bank: bankCommissionPercent }
   });
   
-  matrixHTML += `
-          </tbody>
-        </table>
-      </div>
-      
-      <div class="matrix-note">
-        <small>
-          📈 <strong>Interpretación:</strong> Para lograr X% de ganancia, necesitas comprar USD a un precio igual o menor al mostrado.<br>
-          💡 <strong>Consejo:</strong> Los valores son estimaciones basadas en los parámetros configurados arriba.
-        </small>
-      </div>
-    </div>
-  `;
+  // Tasa USD a USDT (normalmente 1:1, pero puede variar ligeramente)
+  const usdToUsdtRate = 1.0;
   
-  resultsDiv.style.display = 'block';
-  resultsDiv.innerHTML = matrixHTML;
+  // Generar valores para la matriz (5x5)
+  const usdPrices = [];
+  const usdtPrices = [];
+  const matrixSize = 5;
+  
+  for (let i = 0; i < matrixSize; i++) {
+    usdPrices.push(usdMin + (usdMax - usdMin) * i / (matrixSize - 1));
+    usdtPrices.push(usdtMin + (usdtMax - usdtMin) * i / (matrixSize - 1));
+  }
+  
+  // Crear tabla HTML
+  let tableHTML = '<thead><tr><th>USD Compra \\ USDT Venta</th>';
+  usdtPrices.forEach(price => {
+    tableHTML += `<th>$${price.toFixed(0)}</th>`;
+  });
+  tableHTML += '</tr></thead><tbody>';
+  
+  // Calcular rentabilidad para cada combinación
+  usdPrices.forEach(usdPrice => {
+    tableHTML += `<tr><td><strong>$${usdPrice.toFixed(0)}</strong></td>`;
+    
+    usdtPrices.forEach(usdtPrice => {
+      // Calcular ganancia con estos precios
+      const bankCommissionARS = amount * (bankCommissionPercent / 100);
+      const amountAfterBankCommission = amount - bankCommissionARS;
+      
+      // Paso 1: Comprar USD
+      const step1_usd = amountAfterBankCommission / usdPrice;
+      
+      // Paso 2: Comprar USDT con USD
+      const step2_usdt = step1_usd / usdToUsdtRate;
+      
+      // Paso 3: Aplicar fee de compra
+      const buyFeeDecimal = buyFeePercent / 100;
+      const step2_usdtAfterFee = step2_usdt * (1 - buyFeeDecimal);
+      
+      // Paso 4: Fee de transferencia (si aplica)
+      const transferFeeUSDT = transferFeeUSD / usdToUsdtRate;
+      const step3_usdtAfterTransfer = step2_usdtAfterFee - transferFeeUSDT;
+      
+      // Paso 5: Vender USDT por ARS
+      const step4_ars = step3_usdtAfterTransfer * usdtPrice;
+      
+      // Paso 6: Aplicar fee de venta
+      const sellFeeDecimal = sellFeePercent / 100;
+      const finalAmount = step4_ars * (1 - sellFeeDecimal);
+      
+      // Calcular ganancia
+      const profit = finalAmount - amount;
+      const profitPercent = (profit / amount) * 100;
+      
+      // Determinar clase CSS según rentabilidad
+      let cellClass = 'matrix-cell-negative';
+      if (profitPercent > 1.0) {
+        cellClass = 'matrix-cell-positive';
+      } else if (profitPercent >= 0) {
+        cellClass = 'matrix-cell-neutral';
+      }
+      
+      tableHTML += `<td class="${cellClass}" title="Ganancia: $${formatNumber(profit)} ARS (${profitPercent.toFixed(2)}%)">${profitPercent.toFixed(2)}%</td>`;
+    });
+    
+    tableHTML += '</tr>';
+  });
+  
+  tableHTML += '</tbody>';
+  
+  // Mostrar matriz
+  const matrixTable = document.getElementById('risk-matrix-table');
+  const matrixResult = document.getElementById('risk-matrix-result');
+  
+  if (!matrixTable || !matrixResult) {
+    alert('⚠️ Error: elementos de la matriz no encontrados');
+    return;
+  }
+  
+  matrixTable.innerHTML = tableHTML;
+  matrixResult.style.display = 'block';
+  
+  // Scroll hacia la matriz
+  matrixResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function calculateSimulation() {
-  const amountInput = document.getElementById('sim-amount');
-  const routeSelect = document.getElementById('sim-route');
-  const resultsDiv = document.getElementById('sim-results');
+// NUEVO v5.0.31: Funciones de filtrado de matriz
+function applyMatrixFilter() {
+  const minProfit = parseFloat(document.getElementById('filter-min-profit').value) || -5;
+  const maxProfit = parseFloat(document.getElementById('filter-max-profit').value) || 10;
   
-  const amount = parseFloat(amountInput.value);
-  const routeIndex = parseInt(routeSelect.value);
+  const matrixTable = document.getElementById('risk-matrix-table');
+  if (!matrixTable) return;
   
-  if (!amount || amount < 1000) {
-    alert('⚠️ Ingresa un monto válido (mínimo $1,000 ARS)');
-    return;
+  const cells = matrixTable.querySelectorAll('td');
+  let visibleCount = 0;
+  let totalCells = 0;
+  
+  cells.forEach(cell => {
+    // Skip header cells
+    if (cell.tagName === 'TH' || cell.querySelector('strong')) return;
+    
+    const text = cell.textContent.trim();
+    if (text.endsWith('%')) {
+      totalCells++;
+      const profitValue = parseFloat(text.replace('%', ''));
+      
+      if (profitValue >= minProfit && profitValue <= maxProfit) {
+        cell.style.opacity = '1';
+        cell.style.backgroundColor = '';
+        visibleCount++;
+      } else {
+        cell.style.opacity = '0.2';
+        cell.style.backgroundColor = '#333';
+      }
+    }
+  });
+  
+  // Mostrar contador
+  const filterResults = document.getElementById('filter-results');
+  const filterCount = document.getElementById('filter-count');
+  if (filterResults && filterCount) {
+    filterCount.textContent = visibleCount;
+    filterResults.style.display = 'block';
+  }
+}
+
+function resetMatrixFilter() {
+  const matrixTable = document.getElementById('risk-matrix-table');
+  if (!matrixTable) return;
+  
+  const cells = matrixTable.querySelectorAll('td');
+  cells.forEach(cell => {
+    cell.style.opacity = '1';
+    cell.style.backgroundColor = '';
+  });
+  
+  // Ocultar contador
+  const filterResults = document.getElementById('filter-results');
+  if (filterResults) {
+    filterResults.style.display = 'none';
   }
   
-  if (isNaN(routeIndex) || !currentData?.optimizedRoutes?.[routeIndex]) {
-    alert('⚠️ Selecciona una ruta válida');
-    return;
-  }
-  
-  const route = currentData.optimizedRoutes[routeIndex];
-  
-  // Obtener parámetros configurables (o valores por defecto)
-  const usdBuyPrice = parseFloat(document.getElementById('sim-usd-buy-price').value) || route.officialPrice || 950;
-  const usdSellPrice = parseFloat(document.getElementById('sim-usd-sell-price').value) || (route.officialPrice * 1.02) || 970;
-  const buyFeePercent = parseFloat(document.getElementById('sim-buy-fee').value) || 1.0;
-  const sellFeePercent = parseFloat(document.getElementById('sim-sell-fee').value) || 1.0;
-  const transferFeeUSD = parseFloat(document.getElementById('sim-transfer-fee-usd').value) || route.transferFeeUSD || 0;
-  const bankCommissionPercent = parseFloat(document.getElementById('sim-bank-commission').value) || 0;
-  
-  // Calcular paso a paso con parámetros configurables
-  const bankCommissionARS = amount * (bankCommissionPercent / 100);
-  const amountAfterBankCommission = amount - bankCommissionARS;
-  
-  const step1_usd = amountAfterBankCommission / usdBuyPrice;
-  const step2_usdt = step1_usd / route.usdToUsdtRate;
-  
-  // Aplicar fees de compra
-  const buyFeeDecimal = buyFeePercent / 100;
-  const step2_usdtAfterFee = step2_usdt * (1 - buyFeeDecimal);
-  
-  // Transfer fee
-  const transferFeeUSDT = transferFeeUSD / route.usdToUsdtRate;
-  const step3_usdtAfterTransfer = step2_usdtAfterFee - transferFeeUSDT;
-  
-  // Vender USDT
-  const step4_ars = step3_usdtAfterTransfer * route.usdtArsBid;
-  
-  // Apply sell fees
-  const sellFeeDecimal = sellFeePercent / 100;
-  const finalAmount = step4_ars * (1 - sellFeeDecimal);
-  
-  // Calcular ganancia
-  const profit = finalAmount - amount;
-  const profitPercent = (profit / amount) * 100;
-  
-  // Mostrar resultados
-  const isNegative = profit < 0;
-  const profitClass = isNegative ? 'negative' : 'positive';
-  const profitEmoji = isNegative ? '📉' : '📈';
-  
-  resultsDiv.style.display = 'block';
-  resultsDiv.innerHTML = `
-    <div class="sim-result-card ${profitClass}">
-      <h3>${profitEmoji} Resultado de Simulación</h3>
-      
-      <div class="sim-params-used">
-        <h4>⚙️ Parámetros usados:</h4>
-        <div class="params-grid">
-          <div class="param-item"><span>USD Compra:</span> $${formatNumber(usdBuyPrice)}</div>
-          <div class="param-item"><span>USD Venta:</span> $${formatNumber(usdSellPrice)}</div>
-          <div class="param-item"><span>Fee Compra:</span> ${buyFeePercent}%</div>
-          <div class="param-item"><span>Fee Venta:</span> ${sellFeePercent}%</div>
-          <div class="param-item"><span>Fee Transfer:</span> $${formatNumber(transferFeeUSD)} USD</div>
-          <div class="param-item"><span>Comisión Banco:</span> ${bankCommissionPercent}%</div>
-        </div>
-      </div>
-      
-      <div class="sim-breakdown">
-        <div class="sim-row">
-          <span>1️⃣ Inversión inicial:</span>
-          <strong>$${formatNumber(amount)} ARS</strong>
-        </div>
-        ${bankCommissionPercent > 0 ? `
-        <div class="sim-row warning">
-          <span>🏦 Comisión bancaria:</span>
-          <strong>-$${formatNumber(bankCommissionARS)} ARS</strong>
-        </div>
-        <div class="sim-row">
-          <span>1️⃣ Después de comisión:</span>
-          <strong>$${formatNumber(amountAfterBankCommission)} ARS</strong>
-        </div>
-        ` : ''}
-        <div class="sim-row">
-          <span>2️⃣ USD comprados (oficial):</span>
-          <strong>${formatNumber(step1_usd)} USD</strong>
-        </div>
-        <div class="sim-row">
-          <span>3️⃣ USDT comprados en ${route.buyExchange}:</span>
-          <strong>${formatNumber(step2_usdt)} USDT</strong>
-        </div>
-        <div class="sim-row">
-          <span>4️⃣ Después de fees de compra (${buyFeePercent}%):</span>
-          <strong>${formatNumber(step2_usdtAfterFee)} USDT</strong>
-        </div>
-        ${!route.isSingleExchange ? `
-        <div class="sim-row warning">
-          <span>⚠️ Fee de transferencia:</span>
-          <strong>-${formatNumber(transferFeeUSDT)} USDT</strong>
-        </div>
-        <div class="sim-row">
-          <span>5️⃣ USDT después de transfer:</span>
-          <strong>${formatNumber(step3_usdtAfterTransfer)} USDT</strong>
-        </div>
-        ` : ''}
-        <div class="sim-row">
-          <span>${route.isSingleExchange ? '5️⃣' : '6️⃣'} ARS de venta en ${route.sellExchange}:</span>
-          <strong>$${formatNumber(step4_ars)} ARS</strong>
-        </div>
-        <div class="sim-row">
-          <span>${route.isSingleExchange ? '6️⃣' : '7️⃣'} Después de fees de venta (${sellFeePercent}%):</span>
-          <strong>$${formatNumber(finalAmount)} ARS</strong>
-        </div>
-      </div>
-      
-      <div class="sim-final">
-        <div class="sim-profit ${profitClass}">
-          <span>Ganancia/Pérdida:</span>
-          <strong>${profit >= 0 ? '+' : ''}$${formatNumber(profit)} ARS (${profitPercent.toFixed(2)}%)</strong>
-        </div>
-      </div>
-      
-      <div class="sim-note">
-        <small>⚠️ Los fees reales pueden variar según el exchange. Esta es una estimación con parámetros configurables.</small>
-      </div>
-    </div>
-  `;
+  // Reset valores de filtro
+  document.getElementById('filter-min-profit').value = '-5';
+  document.getElementById('filter-max-profit').value = '10';
 }
 
 // NUEVO: Configurar controles del precio del dólar

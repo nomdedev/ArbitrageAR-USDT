@@ -121,7 +121,10 @@ class DataService {
         const sellPrice = parseFloat(quote.sell);
 
         if (bankName && !isNaN(buyPrice) && !isNaN(sellPrice) && buyPrice > 0 && sellPrice > 0) {
-          bankRates[bankName] = {
+          // NUEVO v5.0.31: Usar código de banco como key para consistencia con selectedBanks
+          const bankCode = this.getBankCode(bankName);
+          
+          bankRates[bankCode] = {
             name: bankName,
             compra: buyPrice,
             venta: sellPrice,
@@ -196,10 +199,43 @@ class DataService {
       'bind': 'Bind',
       'bancor': 'Bancor',
       'chaco': 'Banco Chaco',
-      'pampa': 'Banco Pampa'
+      'pampa': 'Banco Pampa',
+      'provincia': 'Banco Provincia',
+      'columbia': 'Banco Columbia'
     };
     
     return bankNames[code] || code.charAt(0).toUpperCase() + code.slice(1);
+  }
+
+  // NUEVO v5.0.31: Convertir nombre completo de banco a código
+  getBankCode(fullName) {
+    const bankCodes = {
+      'Banco Nación': 'nacion',
+      'BBVA Banco Francés': 'bbva',
+      'BBVA': 'bbva',
+      'Banco Piano': 'piano',
+      'Banco Hipotecario': 'hipotecario',
+      'Banco Galicia': 'galicia',
+      'Banco Santander Río': 'santander',
+      'Banco Santander': 'santander',
+      'Banco Ciudad': 'ciudad',
+      'Banco Supervielle': 'supervielle',
+      'Banco Patagonia': 'patagonia',
+      'Banco Comafi': 'comafi',
+      'ICBC': 'icbc',
+      'Bind': 'bind',
+      'Bancor': 'bancor',
+      'Nuevo Banco del Chaco': 'chaco',
+      'Banco Chaco': 'chaco',
+      'Banco de la Pampa': 'pampa',
+      'Banco Pampa': 'pampa',
+      'Banco Provincia': 'provincia',
+      'Banco de la Provincia de Buenos Aires': 'provincia',
+      'Banco Columbia': 'columbia',
+      'Banco Macro': 'macro'
+    };
+    
+    return bankCodes[fullName] || fullName.toLowerCase().replace(/[^a-z]/g, '');
   }
 
   // NUEVO v5.0.22: Combinar datos de ambas fuentes (dolarito + criptoya)

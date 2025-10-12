@@ -123,12 +123,16 @@ async function updateData() {
   console.log('🔄 [DEBUG] updateData() INICIO en', new Date().toISOString());
 
   try {
+    // IMPORTANTE v5.0.32: Cargar userSettings ANTES para aplicar filtro de bancos
+    const result = await chrome.storage.local.get('notificationSettings');
+    const userSettings = result.notificationSettings || {};
+    
     // Fetch de datos en paralelo, usando el nuevo sistema para el precio del dólar
     console.log('📡 [DEBUG] Consultando APIs...');
     
     // Agregar timeout de 8 segundos para getDollarPrice (puede ser lento por scraping)
     const getDollarPriceWithTimeout = Promise.race([
-      dollarPriceManager.getDollarPrice(),
+      dollarPriceManager.getDollarPrice(userSettings), // ✅ CORREGIDO: pasar userSettings
       new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Timeout obteniendo precio del dólar (8s)')), 8000)
       )

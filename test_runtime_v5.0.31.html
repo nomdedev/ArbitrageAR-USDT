@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧪 Test Runtime v5.0.31 - ArbitrageAR</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: #e2e8f0;
+      padding: 20px;
+      margin: 0;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: rgba(30, 41, 59, 0.8);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    h1 {
+      color: #60a5fa;
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .test-section {
+      background: rgba(15, 23, 42, 0.6);
+      padding: 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+      border-left: 4px solid #3b82f6;
+    }
+    
+    .test-section h2 {
+      margin-top: 0;
+      color: #93c5fd;
+      font-size: 1.2em;
+    }
+    
+    .test-result {
+      padding: 10px 15px;
+      margin: 8px 0;
+      border-radius: 8px;
+      font-family: 'Consolas', monospace;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .test-result.success {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #4ade80;
+    }
+    
+    .test-result.error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+    
+    .test-result.warning {
+      background: rgba(251, 191, 36, 0.15);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      color: #fbbf24;
+    }
+    
+    .summary {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      padding: 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    
+    .summary h2 {
+      margin: 0 0 10px 0;
+      color: white;
+    }
+    
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 15px;
+    }
+    
+    .stat {
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 2em;
+      font-weight: bold;
+      color: white;
+    }
+    
+    .stat-label {
+      font-size: 0.9em;
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .icon {
+      font-size: 1.2em;
+    }
+    
+    #console-output {
+      background: #0f172a;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Consolas', monospace;
+      font-size: 0.9em;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid rgba(71, 85, 105, 0.4);
+    }
+    
+    .console-line {
+      margin: 4px 0;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(71, 85, 105, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><span class="icon">🧪</span> Test Runtime v5.0.31</h1>
+    <p>Tests de ejecución en tiempo real para detectar errores de runtime que los tests estáticos no pueden detectar.</p>
+    
+    <div id="test-results"></div>
+    
+    <div class="summary" id="summary" style="display: none;">
+      <h2>📊 Resumen de Tests</h2>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-number" id="total-tests">0</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number" id="passed-tests" style="color: #4ade80;">0</div>
+          <div class="stat-label">Pasados</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number" id="failed-tests" style="color: #f87171;">0</div>
+          <div class="stat-label">Fallidos</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2>📝 Consola de Errores</h2>
+      <div id="console-output"></div>
+    </div>
+  </div>
+
+  <script>
+    // Capturar errores globales
+    const errors = [];
+    const consoleOutput = [];
+    
+    window.onerror = function(msg, url, line, col, error) {
+      const errorMsg = `ERROR en línea ${line}: ${msg}`;
+      errors.push(errorMsg);
+      addConsoleOutput('error', errorMsg);
+      return false;
+    };
+    
+    // Override console methods
+    const originalConsoleLog = console.log;
+    const originalConsoleError = console.error;
+    const originalConsoleWarn = console.warn;
+    
+    console.log = function(...args) {
+      addConsoleOutput('log', args.join(' '));
+      originalConsoleLog.apply(console, args);
+    };
+    
+    console.error = function(...args) {
+      addConsoleOutput('error', args.join(' '));
+      originalConsoleError.apply(console, args);
+    };
+    
+    console.warn = function(...args) {
+      addConsoleOutput('warning', args.join(' '));
+      originalConsoleWarn.apply(console, args);
+    };
+    
+    function addConsoleOutput(type, message) {
+      const consoleDiv = document.getElementById('console-output');
+      const line = document.createElement('div');
+      line.className = 'console-line';
+      
+      const icon = type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '📝';
+      const color = type === 'error' ? '#f87171' : type === 'warning' ? '#fbbf24' : '#94a3b8';
+      
+      line.style.color = color;
+      line.textContent = `${icon} ${message}`;
+      consoleDiv.appendChild(line);
+      consoleDiv.scrollTop = consoleDiv.scrollHeight;
+    }
+    
+    // Test framework simple
+    let testsPassed = 0;
+    let testsFailed = 0;
+    let testsTotal = 0;
+    
+    function runTest(name, testFn) {
+      testsTotal++;
+      const resultDiv = document.getElementById('test-results');
+      const testDiv = document.createElement('div');
+      
+      try {
+        const result = testFn();
+        if (result === true || result === undefined) {
+          testsPassed++;
+          testDiv.className = 'test-result success';
+          testDiv.innerHTML = `<span class="icon">✅</span> <strong>${name}</strong>`;
+        } else {
+          testsFailed++;
+          testDiv.className = 'test-result error';
+          testDiv.innerHTML = `<span class="icon">❌</span> <strong>${name}</strong>: ${result}`;
+        }
+      } catch (error) {
+        testsFailed++;
+        testDiv.className = 'test-result error';
+        testDiv.innerHTML = `<span class="icon">❌</span> <strong>${name}</strong>: ${error.message}`;
+      }
+      
+      resultDiv.appendChild(testDiv);
+    }
+    
+    function updateSummary() {
+      document.getElementById('summary').style.display = 'block';
+      document.getElementById('total-tests').textContent = testsTotal;
+      document.getElementById('passed-tests').textContent = testsPassed;
+      document.getElementById('failed-tests').textContent = testsFailed;
+    }
+    
+    // Crear elementos necesarios del DOM (simulación mínima)
+    function setupMockDOM() {
+      const mockHTML = `
+        <div id="test-simulator" style="display: none;">
+          <input type="number" id="sim-amount" value="1000000">
+          <input type="number" id="sim-usd-buy-price" value="950">
+          <input type="number" id="sim-usd-sell-price" value="970">
+          <input type="number" id="sim-buy-fee" value="1.0">
+          <input type="number" id="sim-sell-fee" value="1.0">
+          <input type="number" id="sim-transfer-fee-usd" value="0">
+          <input type="number" id="sim-bank-commission" value="0">
+          <input type="number" id="matrix-min-percent" value="0">
+          <input type="number" id="matrix-max-percent" value="2">
+          <input type="number" id="matrix-step-percent" value="0.5">
+          <input type="number" id="matrix-usd-min" value="940">
+          <input type="number" id="matrix-usd-max" value="980">
+          <input type="number" id="matrix-usdt-min" value="1000">
+          <input type="number" id="matrix-usdt-max" value="1040">
+          <input type="number" id="filter-min-profit" value="-5">
+          <input type="number" id="filter-max-profit" value="10">
+          
+          <button id="toggle-advanced">Toggle</button>
+          <button id="generate-risk-matrix">Generate</button>
+          <button id="apply-matrix-filter">Apply Filter</button>
+          <button id="reset-matrix-filter">Reset Filter</button>
+          <button id="btn-reset-config">Reset Config</button>
+          
+          <div id="advanced-config" style="display: none;"></div>
+          <div id="risk-matrix-result" style="display: none;">
+            <table id="risk-matrix-table"></table>
+          </div>
+          <div id="filter-results" style="display: none;">
+            <span id="filter-count">0</span>
+          </div>
+        </div>
+      `;
+      
+      document.body.insertAdjacentHTML('beforeend', mockHTML);
+    }
+    
+    // Ejecutar tests después de cargar el script
+    window.addEventListener('load', () => {
+      setupMockDOM();
+      
+      console.log('🧪 Iniciando tests de runtime...');
+      
+      const section1 = document.createElement('div');
+      section1.className = 'test-section';
+      section1.innerHTML = '<h2>📦 Test 1: Existencia de Funciones</h2>';
+      document.getElementById('test-results').appendChild(section1);
+      
+      runTest('setupAdvancedSimulator existe', () => {
+        return typeof setupAdvancedSimulator === 'function';
+      });
+      
+      runTest('loadDefaultSimulatorValues existe', () => {
+        return typeof loadDefaultSimulatorValues === 'function';
+      });
+      
+      runTest('resetSimulatorConfig existe', () => {
+        return typeof resetSimulatorConfig === 'function';
+      });
+      
+      runTest('generateRiskMatrix existe', () => {
+        return typeof generateRiskMatrix === 'function';
+      });
+      
+      runTest('applyMatrixFilter existe', () => {
+        return typeof applyMatrixFilter === 'function';
+      });
+      
+      runTest('resetMatrixFilter existe', () => {
+        return typeof resetMatrixFilter === 'function';
+      });
+      
+      runTest('calculateProfitMatrix NO debe existir (eliminada)', () => {
+        return typeof calculateProfitMatrix === 'undefined';
+      });
+      
+      const section2 = document.createElement('div');
+      section2.className = 'test-section';
+      section2.innerHTML = '<h2>🔌 Test 2: Inicialización de Event Listeners</h2>';
+      document.getElementById('test-results').appendChild(section2);
+      
+      runTest('setupAdvancedSimulator se ejecuta sin errores', () => {
+        try {
+          setupAdvancedSimulator();
+          return true;
+        } catch (error) {
+          return error.message;
+        }
+      });
+      
+      const section3 = document.createElement('div');
+      section3.className = 'test-section';
+      section3.innerHTML = '<h2>✅ Test 3: Funciones Ejecutables</h2>';
+      document.getElementById('test-results').appendChild(section3);
+      
+      runTest('loadDefaultSimulatorValues se ejecuta sin errores', () => {
+        try {
+          loadDefaultSimulatorValues();
+          return true;
+        } catch (error) {
+          return error.message;
+        }
+      });
+      
+      runTest('resetSimulatorConfig se ejecuta sin errores', () => {
+        try {
+          resetSimulatorConfig();
+          return true;
+        } catch (error) {
+          return error.message;
+        }
+      });
+      
+      runTest('resetMatrixFilter se ejecuta sin errores', () => {
+        try {
+          resetMatrixFilter();
+          return true;
+        } catch (error) {
+          return error.message;
+        }
+      });
+      
+      const section4 = document.createElement('div');
+      section4.className = 'test-section';
+      section4.innerHTML = '<h2>⚠️ Test 4: Validaciones</h2>';
+      document.getElementById('test-results').appendChild(section4);
+      
+      runTest('generateRiskMatrix valida USD min >= max', () => {
+        // Configurar valores inválidos
+        document.getElementById('matrix-usd-min').value = '1000';
+        document.getElementById('matrix-usd-max').value = '900';
+        
+        // Mock alert
+        let alertCalled = false;
+        const originalAlert = window.alert;
+        window.alert = (msg) => { alertCalled = true; };
+        
+        generateRiskMatrix();
+        
+        window.alert = originalAlert;
+        return alertCalled ? true : 'No se validó USD min >= max';
+      });
+      
+      runTest('generateRiskMatrix valida USDT min >= max', () => {
+        // Restaurar valores USD válidos
+        document.getElementById('matrix-usd-min').value = '940';
+        document.getElementById('matrix-usd-max').value = '980';
+        
+        // Configurar valores USDT inválidos
+        document.getElementById('matrix-usdt-min').value = '1050';
+        document.getElementById('matrix-usdt-max').value = '1000';
+        
+        let alertCalled = false;
+        const originalAlert = window.alert;
+        window.alert = (msg) => { alertCalled = true; };
+        
+        generateRiskMatrix();
+        
+        window.alert = originalAlert;
+        return alertCalled ? true : 'No se validó USDT min >= max';
+      });
+      
+      runTest('generateRiskMatrix valida fee entre 0% y 10%', () => {
+        // Restaurar valores válidos
+        document.getElementById('matrix-usdt-min').value = '1000';
+        document.getElementById('matrix-usdt-max').value = '1040';
+        
+        // Fee inválido (>10%)
+        document.getElementById('sim-buy-fee').value = '15';
+        
+        let alertCalled = false;
+        const originalAlert = window.alert;
+        window.alert = (msg) => { alertCalled = true; };
+        
+        generateRiskMatrix();
+        
+        window.alert = originalAlert;
+        
+        // Restaurar fee válido
+        document.getElementById('sim-buy-fee').value = '1.0';
+        
+        return alertCalled ? true : 'No se validó fee > 10%';
+      });
+      
+      updateSummary();
+      
+      console.log(`🎯 Tests completados: ${testsPassed}/${testsTotal} pasados, ${testsFailed} fallidos`);
+      
+      if (errors.length > 0) {
+        console.error(`⚠️ Se detectaron ${errors.length} errores durante la ejecución`);
+      } else {
+        console.log('✅ No se detectaron errores de runtime');
+      }
+    });
+  </script>
+  
+  <!-- Cargar el script del popup -->
+  <script src="src/popup.js"></script>
+</body>
+</html>

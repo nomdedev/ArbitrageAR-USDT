@@ -17,7 +17,7 @@
       <div id="dataStatus" class="data-status"></div>
     </div>
     <div class="header-buttons">
-      <span id="version-indicator" class="version-indicator" title="Versión instalada">v5.0.22</span>
+      <span id="version-indicator" class="version-indicator" title="Versión instalada">v5.0.31</span>
       <button id="settings" class="btn-settings" title="Configurar notificaciones">
         <span>⚙️</span>
       </button>
@@ -89,36 +89,24 @@
         <div class="filter-section">
           <label class="filter-label">
             <span class="filter-icon">🔄</span>
-            Tipo de operación:
+            Tipo:
           </label>
           <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="no-p2p">
+              <span class="btn-icon">⚡</span>
+              <span class="btn-text">Directo</span>
+              <span class="btn-count" id="count-no-p2p">0</span>
+            </button>
+            <button class="filter-btn" data-filter="p2p">
+              <span class="btn-icon">🤝</span>
+              <span class="btn-text">P2P</span>
+              <span class="btn-count" id="count-p2p">0</span>
+            </button>
             <button class="filter-btn" data-filter="all">
               <span class="btn-icon">🎯</span>
               <span class="btn-text">Todas</span>
               <span class="btn-count" id="count-all">0</span>
             </button>
-            <button class="filter-btn active" data-filter="no-p2p">
-              <span class="btn-icon">🏦</span>
-              <span class="btn-text">Sin P2P</span>
-              <span class="btn-count" id="count-no-p2p">0</span>
-              <span class="btn-badge fast">⚡ Rápido</span>
-            </button>
-            <button class="filter-btn" data-filter="p2p">
-              <span class="btn-icon">🤝</span>
-              <span class="btn-text">Con P2P</span>
-              <span class="btn-count" id="count-p2p">0</span>
-              <span class="btn-badge flexible">📈 Mayor spread</span>
-            </button>
-          </div>
-        </div>
-        <div class="filter-info">
-          <div class="info-item">
-            <span class="info-icon">⚡</span>
-            <span class="info-text"><strong>Sin P2P (por defecto):</strong> Operaciones instantáneas (24-48hs)</span>
-          </div>
-          <div class="info-item">
-            <span class="info-icon">🕒</span>
-            <span class="info-text"><strong>Con P2P:</strong> Requiere coordinación vendedor (horas/días)</span>
           </div>
         </div>
       </div>
@@ -134,25 +122,18 @@
     <section id="tab-simulator" class="tab-content">
       <div class="simulator-container">
         <div class="simulator-header">
-          <h3>💰 Simular con Monto Personalizado</h3>
-          <p>Calcula la ganancia exacta con tu inversión</p>
+          <h3>� Calculadora de Arbitraje</h3>
+          <p>Configura los parámetros y analiza la matriz de rendimientos</p>
         </div>
         
         <div class="simulator-input">
-          <label for="sim-amount">Monto a invertir (ARS):</label>
+          <label for="sim-amount">Monto de referencia (ARS):</label>
           <input type="number" id="sim-amount" value="1000000" min="1000" max="10000000" step="1000">
         </div>
 
-        <div class="simulator-route-selector">
-          <label for="sim-route">Ruta:</label>
-          <select id="sim-route">
-            <option value="">-- Carga primero las rutas --</option>
-          </select>
-        </div>
-
-        <!-- Configuración Avanzada -->
+        <!-- Configuración de Parámetros -->
         <div class="simulator-advanced-toggle">
-          <button id="toggle-advanced" class="btn-toggle-advanced">⚙️ Configuración Avanzada</button>
+          <button id="toggle-advanced" class="btn-toggle-advanced">⚙️ Parámetros de Cálculo</button>
         </div>
 
         <div id="advanced-config" class="advanced-config" style="display: none;">
@@ -218,13 +199,73 @@
           </div>
         </div>
 
-        <div class="simulator-actions">
-          <button id="sim-calculate" class="btn-simulate">Calcular Ganancia</button>
-          <button id="sim-load-defaults" class="btn-load-defaults">📥 Cargar Valores por Defecto</button>
-        </div>
+        <!-- Sección: Matriz de Riesgo/Rendimiento -->
+        <div class="risk-matrix-section">
+          <h3>📊 Matriz de Análisis de Rentabilidad</h3>
+          <p>Visualiza la ganancia según diferentes escenarios de precios USD/USDT</p>
 
-        <div id="sim-results" class="simulator-results" style="display: none;">
-          <!-- Resultados dinámicos aquí -->
+          <div class="matrix-controls">
+            <div class="matrix-control-item">
+              <label for="matrix-usd-min">USD Mínimo (ARS):</label>
+              <input type="number" id="matrix-usd-min" step="10" value="940" min="800" max="1200">
+            </div>
+            <div class="matrix-control-item">
+              <label for="matrix-usd-max">USD Máximo (ARS):</label>
+              <input type="number" id="matrix-usd-max" step="10" value="980" min="800" max="1200">
+            </div>
+            <div class="matrix-control-item">
+              <label for="matrix-usdt-min">USDT Mínimo (ARS):</label>
+              <input type="number" id="matrix-usdt-min" step="10" value="1000" min="900" max="1300">
+            </div>
+            <div class="matrix-control-item">
+              <label for="matrix-usdt-max">USDT Máximo (ARS):</label>
+              <input type="number" id="matrix-usdt-max" step="10" value="1040" min="900" max="1300">
+            </div>
+            <button id="generate-risk-matrix" class="matrix-generate-btn">🔍 Generar Matriz de Análisis</button>
+          </div>
+
+          <div id="risk-matrix-result" style="display: none;">
+            <!-- Filtros visuales -->
+            <div class="matrix-filters">
+              <h4>🎯 Filtros de Rentabilidad</h4>
+              <div class="filter-controls-matrix">
+                <div class="filter-item">
+                  <label for="filter-min-profit">Ganancia mínima (%):</label>
+                  <input type="number" id="filter-min-profit" step="0.5" value="-5" min="-10" max="10">
+                </div>
+                <div class="filter-item">
+                  <label for="filter-max-profit">Ganancia máxima (%):</label>
+                  <input type="number" id="filter-max-profit" step="0.5" value="10" min="-10" max="20">
+                </div>
+                <button id="apply-matrix-filter" class="btn-apply-filter">Aplicar Filtro</button>
+                <button id="reset-matrix-filter" class="btn-reset-filter">Resetear</button>
+              </div>
+              <div class="filter-results" id="filter-results" style="display: none;">
+                <span id="filter-count">0</span> combinaciones visibles
+              </div>
+            </div>
+            
+            <div class="matrix-table-container">
+              <table class="risk-matrix-table" id="risk-matrix-table">
+                <!-- Contenido generado dinámicamente -->
+              </table>
+            </div>
+
+            <div class="matrix-legend">
+              <div class="legend-item">
+                <div class="legend-color positive"></div>
+                <span class="legend-label">Rentable (> 1%)</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color neutral"></div>
+                <span class="legend-label">Marginal (0% - 1%)</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color negative"></div>
+                <span class="legend-label">Pérdida (< 0%)</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -268,6 +309,7 @@
     </div>
   </footer>
 </div>
+<script src="ValidationService.js"></script>
 <script src="popup.js"></script>
 </body>
 </html>
