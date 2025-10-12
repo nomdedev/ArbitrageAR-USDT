@@ -50,8 +50,9 @@ function validateInputData(oficial, usdt, usdtUsd) {
     return false;
   }
 
-  const officialSellPrice = parseFloat(oficial.venta) || 0;
-  if (!officialSellPrice || officialSellPrice <= 0) {
+  // CORREGIDO v5.0.34: Usar precio de COMPRA (nosotros compramos USD al banco)
+  const officialBuyPrice = parseFloat(oficial.compra) || 0;
+  if (!officialBuyPrice || officialBuyPrice <= 0) {
     log('⚠️ Precio oficial inválido');
     return false;
   }
@@ -131,15 +132,16 @@ function calculateRoute(buyExchange, sellExchange, oficial, usdt, usdtUsd, userF
 
     if (!buyData || !sellData) return null;
 
-    const officialSellPrice = parseFloat(oficial.venta);
+    // CORREGIDO v5.0.34: Usar precio de COMPRA (nosotros compramos USD al banco)
+    const officialBuyPrice = parseFloat(oficial.compra);
     // CORREGIDO v5.0.9: Usar monto configurado por el usuario
     const initialAmount = userFees.defaultSimAmount || 100000;
 
     // Paso 1: Aplicar comisión bancaria si existe
     const initialAfterBankFee = initialAmount * (1 - userFees.bankCommissionFee / 100);
 
-    // Paso 2: Comprar USD oficial
-    const usdPurchased = initialAfterBankFee / officialSellPrice;
+    // Paso 2: Comprar USD oficial (usamos precio de COMPRA del usuario)
+    const usdPurchased = initialAfterBankFee / officialBuyPrice;
 
     // Paso 3: Obtener ratio USD/USDT para el exchange comprador
     // CORREGIDO v5.0.10: Fallback conservador a 1.05 USD (valor realista)
@@ -253,8 +255,9 @@ async function calculateOptimizedRoutes(oficial, usdt, usdtUsd) {
   const userFees = await loadUserFees();
   log('🔧 [DEBUG] Fees cargados:', userFees);
 
-  const officialSellPrice = parseFloat(oficial.venta);
-  log(`💰 [DEBUG] Precio oficial: $${officialSellPrice} ARS`);
+  // CORREGIDO v5.0.34: Usar precio de COMPRA (nosotros compramos USD al banco)
+  const officialBuyPrice = parseFloat(oficial.compra);
+  log(`💰 [DEBUG] Precio oficial COMPRA (nosotros compramos USD): $${officialBuyPrice} ARS`);
 
   // Fees de transferencia entre exchanges
   const transferFees = {

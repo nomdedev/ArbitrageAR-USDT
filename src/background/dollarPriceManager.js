@@ -35,18 +35,21 @@ class DollarPriceManager {
       const dollarPriceSource = userSettings.dollarPriceSource || 'auto';
       
       if (dollarPriceSource === 'manual') {
-        // Usar precio manual configurado por el usuario (precio de VENTA del dólar)
+        // CORREGIDO v5.0.34: El precio manual es lo que PAGAMOS para COMPRAR USD
         const manualPrice = userSettings.manualDollarPrice || 950;
-        log(`💵 [MANUAL] Usando precio manual del dólar VENTA: $${manualPrice}`);
+        log(`💵 [MANUAL] Usando precio manual del dólar COMPRA: $${manualPrice}`);
         
-        // IMPORTANTE: El precio manual es el precio de VENTA del dólar (lo que pagamos por 1 USD)
+        // IMPORTANTE: El precio manual es el precio de COMPRA (lo que pagamos por 1 USD)
         const manualData = {
-          compra: manualPrice * 0.98, // Precio de compra estimado (no se usa en cálculos)
-          venta: manualPrice, // ESTE es el precio real que se usa en todos los cálculos
+          compra: manualPrice, // ESTE es el precio que PAGAMOS para comprar USD
+          venta: manualPrice * 0.98, // Precio estimado si vendiéramos (no se usa)
           source: 'manual',
           bank: 'Manual',
           timestamp: new Date().toISOString()
         };
+        
+        log(`💵 [MANUAL] Datos retornados:`, manualData);
+        return manualData;
         
         log(`💵 [MANUAL] Datos retornados:`, manualData);
         return manualData;
@@ -90,7 +93,8 @@ class DollarPriceManager {
       const ventaValues = banks.map(b => ({ price: b.venta, name: b.name }));
       
       // NUEVO v5.0.33: Log detallado de bancos usados (ya filtrados)
-      const bankNames = banks.map(b => `${b.name || 'Unknown'} ($${b.venta.toFixed(2)})`).join(', ');
+      // CORREGIDO v5.0.34: Mostrar precio de COMPRA (lo que PAGAMOS para comprar USD)
+      const bankNames = banks.map(b => `${b.name || 'Unknown'} (COMPRA: $${b.compra.toFixed(2)})`).join(', ');
       log(`💵 [CONSENSO] Calculando consenso SOLO con ${banks.length} bancos ${userSettings.selectedBanks && userSettings.selectedBanks.length > 0 ? 'SELECCIONADOS' : 'disponibles (sin filtro)'}`);
       log(`💵 [CONSENSO] Bancos para análisis de cluster: [${bankNames}]`);
       
@@ -126,16 +130,16 @@ class DollarPriceManager {
       const consensoCompra = compraCluster.reduce((sum, item) => sum + item.price, 0) / compraCluster.length;
       const consensoVenta = ventaCluster.reduce((sum, item) => sum + item.price, 0) / ventaCluster.length;
       
-      // Log detallado del cluster encontrado
-      const clusterBanks = ventaCluster.map(item => `${item.name} ($${item.price.toFixed(2)})`).join(', ');
-      const clusterMin = Math.min(...ventaCluster.map(item => item.price));
-      const clusterMax = Math.max(...ventaCluster.map(item => item.price));
-      const variance = ((clusterMax - clusterMin) / consensoVenta * 100).toFixed(2);
+      // CORREGIDO v5.0.34: Log del cluster de COMPRA (lo que PAGAMOS para comprar USD)
+      const clusterBanks = compraCluster.map(item => `${item.name} ($${item.price.toFixed(2)})`).join(', ');
+      const clusterMin = Math.min(...compraCluster.map(item => item.price));
+      const clusterMax = Math.max(...compraCluster.map(item => item.price));
+      const variance = ((clusterMax - clusterMin) / consensoCompra * 100).toFixed(2);
       
-      log(`💵 [CONSENSO] Cluster más grande: ${ventaCluster.length} de ${banks.length} bancos (${(ventaCluster.length/banks.length*100).toFixed(0)}%)`);
-      log(`💵 [CONSENSO] Bancos en cluster: [${clusterBanks}]`);
+      log(`💵 [CONSENSO] Cluster más grande: ${compraCluster.length} de ${banks.length} bancos (${(compraCluster.length/banks.length*100).toFixed(0)}%)`);
+      log(`💵 [CONSENSO] Bancos en cluster COMPRA: [${clusterBanks}]`);
       log(`💵 [CONSENSO] Rango del cluster: $${clusterMin.toFixed(2)} - $${clusterMax.toFixed(2)} (varianza: ${variance}%)`);
-      log(`💵 [CONSENSO] Promedio del cluster: $${consensoVenta.toFixed(2)} VENTA`);
+      log(`💵 [CONSENSO] Precio COMPRA consenso (lo que PAGAMOS por USD): $${consensoCompra.toFixed(2)}`);
       
       return {
         compra: consensoCompra,
@@ -155,8 +159,8 @@ class DollarPriceManager {
       const compraValues = banks.map(b => b.compra).sort((a, b) => a - b);
       const ventaValues = banks.map(b => b.venta).sort((a, b) => a - b);
       
-      // NUEVO v5.0.32: Log detallado de bancos usados
-      const bankNames = banks.map(b => `${b.name || 'Unknown'} ($${b.compra})`).join(', ');
+      // CORREGIDO v5.0.34: Log detallado mostrando precio de COMPRA
+      const bankNames = banks.map(b => `${b.name || 'Unknown'} (COMPRA: $${b.compra})`).join(', ');
       log(`💵 [MEDIANA] Bancos disponibles para cálculo: [${bankNames}]`);
       
       const getMedian = (arr) => {
@@ -167,8 +171,8 @@ class DollarPriceManager {
       const medianaCompra = getMedian(compraValues);
       const medianaVenta = getMedian(ventaValues);
       
-      log(`💵 [MEDIANA] Usando MEDIANA del dólar: $${medianaVenta.toFixed(2)} VENTA (${banks.length} bancos)`);
-      log(`💵 [MEDIANA] Rango de precios: $${Math.min(...ventaValues).toFixed(2)} - $${Math.max(...ventaValues).toFixed(2)}`);
+      log(`💵 [MEDIANA] Usando MEDIANA del dólar COMPRA (lo que PAGAMOS): $${medianaCompra.toFixed(2)} (${banks.length} bancos)`);
+      log(`💵 [MEDIANA] Rango de precios COMPRA: $${Math.min(...compraValues).toFixed(2)} - $${Math.max(...compraValues).toFixed(2)}`);
       
       return {
         compra: medianaCompra,
@@ -187,8 +191,8 @@ class DollarPriceManager {
       const compraValues = banks.map(b => b.compra).sort((a, b) => a - b);
       const ventaValues = banks.map(b => b.venta).sort((a, b) => a - b);
       
-      // NUEVO v5.0.32: Log detallado de bancos usados
-      const bankNames = banks.map(b => `${b.name || 'Unknown'} ($${b.compra})`).join(', ');
+      // CORREGIDO v5.0.34: Log detallado mostrando precio de COMPRA
+      const bankNames = banks.map(b => `${b.name || 'Unknown'} (COMPRA: $${b.compra})`).join(', ');
       log(`💵 [PROM.RECORTADO] Bancos disponibles: [${bankNames}]`);
       
       const trimPercent = 0.10; // 10% de cada extremo
@@ -200,7 +204,7 @@ class DollarPriceManager {
       const avgCompra = trimmedCompra.reduce((sum, val) => sum + val, 0) / trimmedCompra.length;
       const avgVenta = trimmedVenta.reduce((sum, val) => sum + val, 0) / trimmedVenta.length;
       
-      log(`💵 [PROM.RECORTADO] Usando PROMEDIO RECORTADO del dólar: $${avgVenta.toFixed(2)} VENTA (${trimmedVenta.length}/${banks.length} bancos)`);
+      log(`💵 [PROM.RECORTADO] Usando PROMEDIO RECORTADO COMPRA (lo que PAGAMOS): $${avgCompra.toFixed(2)} (${trimmedCompra.length}/${banks.length} bancos)`);
       
       return {
         compra: avgCompra,
