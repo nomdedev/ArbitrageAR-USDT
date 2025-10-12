@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔄 Force Reload Extension v5.0.35</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .warning {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    .success {
+      background: #d1e7dd;
+      border-left: 4px solid #198754;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    button {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 0;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #c82333;
+    }
+    .step {
+      margin: 15px 0;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+    .code {
+      background: #f1f3f4;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔄 Force Reload Extension v5.0.35</h1>
+
+  <div class="container">
+    <h2>🚨 Problema Detectado</h2>
+    <div class="warning">
+      <h3>Cache de Datos Antiguos</h3>
+      <p>La extensión puede tener datos cacheados de ANTES del fix v5.0.35, causando que siga mostrando precios incorrectos ($1423 en lugar de >1450).</p>
+      <p><strong>Solución:</strong> Recargar completamente la extensión para limpiar caches.</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>📋 Pasos para Solucionar</h2>
+
+    <div class="step">
+      <h3>1. Abrir Chrome Extensions</h3>
+      <p>Abre una nueva pestaña y ve a: <code class="code">chrome://extensions/</code></p>
+      <p>O presiona <kbd>Ctrl+Shift+I</kbd> → Application → Extensions</p>
+    </div>
+
+    <div class="step">
+      <h3>2. Encontrar la Extensión</h3>
+      <p>Busca "arbitrarARS" en la lista de extensiones.</p>
+    </div>
+
+    <div class="step">
+      <h3>3. Recargar la Extensión</h3>
+      <p>Haz clic en el botón <strong>"Recargar"</strong> (ícono de refresh ↻) en la extensión.</p>
+      <p><em>Esto forzará la recarga del código actualizado y limpiará los caches.</em></p>
+    </div>
+
+    <div class="step">
+      <h3>4. Verificar</h3>
+      <p>Vuelve a la extensión y verifica que ahora muestre precios >1450.</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>🔍 Verificación Automática</h2>
+    <button onclick="verificarEstado()">▶️ Verificar Estado Actual</button>
+    <div id="verificacion"></div>
+  </div>
+
+  <script>
+    async function verificarEstado() {
+      const output = document.getElementById('verificacion');
+      output.innerHTML = '<div class="step"><p>⏳ Verificando estado de la extensión...</p></div>';
+
+      try {
+        // Verificar si podemos acceder a chrome.storage (solo funciona si estamos en contexto de extensión)
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+          output.innerHTML = '<div class="success"><p>✅ Estamos en contexto de extensión</p><p>Intentando acceder a configuración...</p></div>';
+
+          // Intentar obtener configuración
+          const result = await chrome.storage.local.get(['notificationSettings']);
+          const settings = result.notificationSettings || {};
+
+          output.innerHTML += '<div class="step"><p><strong>Configuración encontrada:</strong></p><pre>' + JSON.stringify(settings, null, 2) + '</pre></div>';
+
+          // Verificar versión del manifest
+          const manifest = chrome.runtime.getManifest();
+          output.innerHTML += '<div class="step"><p><strong>Versión actual:</strong> ' + manifest.version + '</p></div>';
+
+          if (manifest.version === '5.0.35') {
+            output.innerHTML += '<div class="success"><p>✅ Versión correcta instalada</p></div>';
+          } else {
+            output.innerHTML += '<div class="warning"><p>⚠️ Versión incorrecta. Debería ser 5.0.35</p></div>';
+          }
+
+        } else {
+          output.innerHTML = '<div class="warning"><p>⚠️ No estamos en contexto de extensión</p><p>Este script debe ejecutarse desde la extensión, no desde un archivo local.</p></div>';
+        }
+
+      } catch (error) {
+        output.innerHTML = '<div class="warning"><p>❌ Error verificando estado: ' + error.message + '</p></div>';
+      }
+    }
+  </script>
+</body>
+</html>

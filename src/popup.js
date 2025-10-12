@@ -1331,6 +1331,10 @@ async function loadBankRates() {
     });
     
     if (response && response.bankRates) {
+      // NUEVO v5.0.37: Guardar datos de bancos en currentData para usar en matriz
+      if (!currentData) currentData = {};
+      currentData.banks = response.bankRates;
+      
       displayBanks(response.bankRates);
     } else {
       throw new Error('No se pudieron obtener datos de bancos');
@@ -1497,29 +1501,101 @@ function resetSimulatorConfig() {
 }
 
 // NUEVO v5.0.31: Generar Matriz de Riesgo mejorada (sin rutas)
-function generateRiskMatrix() {
+async function generateRiskMatrix() {
   const amountInput = document.getElementById('sim-amount');
   const amount = parseFloat(amountInput?.value) || 1000000;
-  
+
   // Validar monto
   if (!amount || amount < 1000) {
     alert('⚠️ Ingresa un monto válido (mínimo $1,000 ARS)');
     return;
   }
-  
-  // Obtener rangos de la matriz
-  const usdMin = parseFloat(document.getElementById('matrix-usd-min')?.value) || 940;
-  const usdMax = parseFloat(document.getElementById('matrix-usd-max')?.value) || 980;
-  const usdtMin = parseFloat(document.getElementById('matrix-usdt-min')?.value) || 1000;
-  const usdtMax = parseFloat(document.getElementById('matrix-usdt-max')?.value) || 1040;
-  
+
+  // NUEVO v5.0.36: Obtener datos dinámicos de bancos y exchanges
+  // En lugar de usar inputs fijos, usar datos reales de bancos principales y exchanges USDT
+
+  // Obtener datos de bancos principales (compra de dólar)
+  let usdPrices = [];
+  let usdtPrices = [];
+
+  // Intentar obtener datos de bancos del consenso actual
+  if (!currentData || !currentData.banks || Object.keys(currentData.banks).length === 0) {
+    // Si no hay datos de bancos, intentar cargarlos
+    console.log('💵 [MATRIZ] No hay datos de bancos, cargando...');
+    try {
+      await loadBankRates();
+      // Pequeña pausa para asegurar que los datos se guarden
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } catch (error) {
+      console.warn('💵 [MATRIZ] Error cargando bancos para matriz:', error);
+    }
+  }
+
+  if (currentData && currentData.banks) {
+    // Usar precios de compra de bancos principales (corregidos después del fix)
+    const bankCompraPrices = Object.values(currentData.banks)
+      .filter(bank => bank.compra && bank.compra > 0)
+      .map(bank => bank.compra)
+      .sort((a, b) => a - b);
+
+    if (bankCompraPrices.length >= 3) {
+      // Tomar precios representativos: mínimo, mediana, máximo de bancos principales
+      const minCompra = Math.min(...bankCompraPrices);
+      const maxCompra = Math.max(...bankCompraPrices);
+      const medianCompra = bankCompraPrices[Math.floor(bankCompraPrices.length / 2)];
+
+      usdPrices = [minCompra, minCompra + (medianCompra - minCompra) * 0.5, medianCompra, medianCompra + (maxCompra - medianCompra) * 0.5, maxCompra];
+      console.log('💵 [MATRIZ] Usando precios USD compra de bancos:', usdPrices.map(p => p.toFixed(2)));
+    }
+  }
+
+  // Si no hay datos de bancos, usar valores por defecto
+  if (usdPrices.length === 0) {
+    const usdMin = parseFloat(document.getElementById('matrix-usd-min')?.value) || 940;
+    const usdMax = parseFloat(document.getElementById('matrix-usd-max')?.value) || 980;
+    for (let i = 0; i < 5; i++) {
+      usdPrices.push(usdMin + (usdMax - usdMin) * i / 4);
+    }
+    console.log('💵 [MATRIZ] Usando precios USD por defecto:', usdPrices.map(p => p.toFixed(2)));
+  }
+
+  // Obtener datos de exchanges USDT (venta)
+  if (currentData && currentData.exchanges) {
+    // Usar precios de venta de exchanges USDT más grandes
+    const usdtSellPrices = Object.values(currentData.exchanges)
+      .filter(exchange => exchange.venta && exchange.venta > 0)
+      .map(exchange => exchange.venta)
+      .sort((a, b) => b - a); // Orden descendente para tomar los más altos primero
+
+    if (usdtSellPrices.length >= 3) {
+      // Tomar los 5 precios de venta más altos (exchanges más grandes)
+      usdtPrices = usdtSellPrices.slice(0, 5);
+      console.log('💰 [MATRIZ] Usando precios USDT venta de exchanges:', usdtPrices.map(p => p.toFixed(2)));
+    }
+  }
+
+  // Si no hay datos de exchanges, usar valores por defecto
+  if (usdtPrices.length === 0) {
+    const usdtMin = parseFloat(document.getElementById('matrix-usdt-min')?.value) || 1000;
+    const usdtMax = parseFloat(document.getElementById('matrix-usdt-max')?.value) || 1040;
+    for (let i = 0; i < 5; i++) {
+      usdtPrices.push(usdtMin + (usdtMax - usdtMin) * i / 4);
+    }
+    console.log('💰 [MATRIZ] Usando precios USDT por defecto:', usdtPrices.map(p => p.toFixed(2)));
+  }
+
   // Validaciones de rangos
+  const usdMin = Math.min(...usdPrices);
+  const usdMax = Math.max(...usdPrices);
+  const usdtMin = Math.min(...usdtPrices);
+  const usdtMax = Math.max(...usdtPrices);
+
   if (usdMin >= usdMax) {
-    alert('⚠️ El USD mínimo debe ser menor que el USD máximo');
+    alert('⚠️ Error: Los precios USD no son válidos');
     return;
   }
   if (usdtMin >= usdtMax) {
-    alert('⚠️ El USDT mínimo debe ser menor que el USDT máximo');
+    alert('⚠️ Error: Los precios USDT no son válidos');
     return;
   }
   
@@ -1541,23 +1617,13 @@ function generateRiskMatrix() {
   
   console.log('📊 Generando matriz con parámetros:', {
     amount,
-    usdRange: [usdMin, usdMax],
-    usdtRange: [usdtMin, usdtMax],
+    usdPrices: usdPrices.map(p => p.toFixed(2)),
+    usdtPrices: usdtPrices.map(p => p.toFixed(2)),
     fees: { buy: buyFeePercent, sell: sellFeePercent, transfer: transferFeeUSD, bank: bankCommissionPercent }
   });
-  
+
   // Tasa USD a USDT (normalmente 1:1, pero puede variar ligeramente)
   const usdToUsdtRate = 1.0;
-  
-  // Generar valores para la matriz (5x5)
-  const usdPrices = [];
-  const usdtPrices = [];
-  const matrixSize = 5;
-  
-  for (let i = 0; i < matrixSize; i++) {
-    usdPrices.push(usdMin + (usdMax - usdMin) * i / (matrixSize - 1));
-    usdtPrices.push(usdtMin + (usdtMax - usdtMin) * i / (matrixSize - 1));
-  }
   
   // Crear tabla HTML
   let tableHTML = '<thead><tr><th>USD Compra \\ USDT Venta</th>';
@@ -1719,8 +1785,8 @@ function displayDollarInfo(officialData) {
     return;
   }
 
-  // Actualizar valores - mostrar precio de VENTA (lo que pagamos por comprar USD)
-  dollarPrice.textContent = `$${formatNumber(officialData.venta)}`;
+  // CORREGIDO v5.0.35: Después del fix de campos API, mostrar precio de COMPRA (lo que pagamos por comprar USD)
+  dollarPrice.textContent = `$${formatNumber(officialData.compra)}`;
   dollarSource.textContent = `Fuente: ${getDollarSourceDisplay(officialData)}`;
 
   // Mostrar la información
