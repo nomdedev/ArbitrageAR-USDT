@@ -1502,6 +1502,10 @@ function resetSimulatorConfig() {
 
 // NUEVO v5.0.31: Generar Matriz de Riesgo mejorada (sin rutas)
 async function generateRiskMatrix() {
+  console.log('🔍 [MATRIZ] Iniciando generateRiskMatrix...');
+  console.log('🔍 [MATRIZ] currentData:', currentData ? 'existe' : 'null');
+  console.log('🔍 [MATRIZ] currentData.banks:', currentData?.banks ? Object.keys(currentData.banks).length + ' bancos' : 'no existe');
+  console.log('🔍 [MATRIZ] currentData.usdt:', currentData?.usdt ? Object.keys(currentData.usdt).length + ' exchanges' : 'no existe');
   const amountInput = document.getElementById('sim-amount');
   const amount = parseFloat(amountInput?.value) || 1000000;
 
@@ -1520,23 +1524,27 @@ async function generateRiskMatrix() {
 
   // Intentar obtener datos de bancos del consenso actual
   if (!currentData || !currentData.banks || Object.keys(currentData.banks).length === 0) {
+    console.log('💵 [MATRIZ] No hay datos de bancos, intentando cargar...');
     // Si no hay datos de bancos, intentar cargarlos
-    console.log('💵 [MATRIZ] No hay datos de bancos, cargando...');
     try {
       await loadBankRates();
       // Pequeña pausa para asegurar que los datos se guarden
       await new Promise(resolve => setTimeout(resolve, 500));
+      console.log('💵 [MATRIZ] Datos de bancos cargados:', currentData?.banks ? Object.keys(currentData.banks).length + ' bancos' : 'falló');
     } catch (error) {
       console.warn('💵 [MATRIZ] Error cargando bancos para matriz:', error);
     }
   }
 
   if (currentData && currentData.banks) {
+    console.log('💵 [MATRIZ] Procesando datos de bancos...');
     // Usar precios de compra de bancos principales (corregidos después del fix)
     const bankCompraPrices = Object.values(currentData.banks)
       .filter(bank => bank.compra && bank.compra > 0)
       .map(bank => bank.compra)
       .sort((a, b) => a - b);
+
+    console.log('💵 [MATRIZ] Precios de compra encontrados:', bankCompraPrices);
 
     if (bankCompraPrices.length >= 1) {
       // NUEVO v5.0.39: Lógica específica del usuario
@@ -1568,11 +1576,14 @@ async function generateRiskMatrix() {
 
   // Obtener datos de exchanges USDT (venta)
   if (currentData && currentData.usdt) {
+    console.log('💰 [MATRIZ] Procesando datos de USDT...');
     // Usar precios de venta de exchanges USDT más grandes
     const usdtSellPrices = Object.values(currentData.usdt)
       .filter(exchange => exchange.venta && exchange.venta > 0)
       .map(exchange => exchange.venta)
       .sort((a, b) => b - a); // Orden descendente para tomar los más altos primero
+
+    console.log('💰 [MATRIZ] Precios de venta USDT encontrados:', usdtSellPrices);
 
     if (usdtSellPrices.length >= 5) {
       // NUEVO v5.0.39: Tomar exactamente los 5 precios más altos
