@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Debug: Datos Reales de Dolarito</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1400px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 { color: #2c3e50; }
+    .info-box {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+    th {
+      background: #3498db;
+      color: white;
+      padding: 12px;
+      text-align: left;
+    }
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+    .selected {
+      background: #d1fae5;
+      font-weight: bold;
+    }
+    button {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    button:hover {
+      background: #2980b9;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+    .warning {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 15px;
+      margin: 15px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Debug: Datos Reales de Dolarito.ar</h1>
+  
+  <button onclick="verificarDatos()">▶️ Obtener Datos de API</button>
+  
+  <div id="resultado"></div>
+
+  <script>
+    async function verificarDatos() {
+      const output = document.getElementById('resultado');
+      output.innerHTML = '<div class="info-box"><p>⏳ Obteniendo datos de dolarito.ar...</p></div>';
+
+      try {
+        // 1. Obtener configuración del usuario
+        let settings = {};
+        if (chrome && chrome.storage && chrome.storage.local) {
+          const result = await chrome.storage.local.get('notificationSettings');
+          settings = result.notificationSettings || {};
+        } else {
+          // Valores por defecto cuando no está en contexto de extensión
+          settings = { selectedBanks: ['nacion', 'galicia', 'santander', 'bbva', 'ciudad'] };
+        }
+
+        // 2. Obtener datos de dolarito
+        const response = await fetch('https://www.dolarito.ar/cotizacion/bancos');
+        const htmlText = await response.text();
+        const jsonMatch = htmlText.match(/"bankQuotations":\s*({[^}]*"quotations":\s*\[[^\]]*\][^}]*})/);
+        
+        if (!jsonMatch) {
+          output.innerHTML = '<div class="info-box"><p>❌ No se pudieron obtener datos</p></div>';
+          return;
+        }
+
+        const bankData = JSON.parse(`{${jsonMatch[1]}}`);
+        const quotations = bankData.quotations || [];
+
+        let html = '<div class="info-box">';
+        html += '<h2>📊 Datos RAW de la API</h2>';
+        html += '<p>Primeros 3 bancos para verificar estructura:</p>';
+        html += '<pre>' + JSON.stringify(quotations.slice(0, 3), null, 2) + '</pre>';
+        html += '</div>';
+
+        // Mapeo de códigos
+        const getBankCode = (fullName) => {
+          const bankCodes = {
+            'Banco Nación': 'nacion',
+            'BBVA Banco Francés': 'bbva',
+            'BBVA': 'bbva',
+            'Banco Piano': 'piano',
+            'Banco Hipotecario': 'hipotecario',
+            'Banco Galicia': 'galicia',
+            'Banco Santander Río': 'santander',
+            'Banco Santander': 'santander',
+            'Banco Ciudad': 'ciudad',
+            'Banco Supervielle': 'supervielle',
+            'Banco Patagonia': 'patagonia',
+            'Banco Comafi': 'comafi',
+            'ICBC': 'icbc',
+            'Bind': 'bind',
+            'Bancor': 'bancor',
+            'Nuevo Banco del Chaco': 'chaco',
+            'Banco Chaco': 'chaco',
+            'Banco de la Pampa': 'pampa',
+            'Banco Pampa': 'pampa',
+            'Banco Provincia': 'provincia',
+            'Banco de la Provincia de Buenos Aires': 'provincia',
+            'Banco Columbia': 'columbia',
+            'Banco Macro': 'macro'
+          };
+          return bankCodes[fullName] || fullName.toLowerCase().replace(/[^a-z]/g, '');
+        };
+
+        // Bancos principales (según tu selección)
+        const bancosSeleccionados = settings.selectedBanks || ['nacion', 'galicia', 'santander', 'bbva', 'ciudad'];
+
+        html += '<div class="info-box">';
+        html += '<h2>🏦 Tu Configuración</h2>';
+        html += `<p><strong>Bancos seleccionados:</strong> ${bancosSeleccionados.join(', ')}</p>`;
+        html += '</div>';
+
+        // Procesar TODOS los bancos
+        const allBanks = [];
+        quotations.forEach(quote => {
+          const bankName = quote.name?.trim();
+          const buyPrice = parseFloat(quote.buy);
+          const sellPrice = parseFloat(quote.sell);
+
+          if (bankName && !isNaN(buyPrice) && !isNaN(sellPrice) && buyPrice > 0 && sellPrice > 0) {
+            const bankCode = getBankCode(bankName);
+            const isSelected = bancosSeleccionados.includes(bankCode);
+            
+            allBanks.push({
+              code: bankCode,
+              name: bankName,
+              buy_raw: buyPrice,     // Valor RAW de la API (quote.buy)
+              sell_raw: sellPrice,   // Valor RAW de la API (quote.sell)
+              compra: buyPrice,      // Lo que nosotros "compramos" (lo guardamos en compra)
+              venta: sellPrice,      // Lo que nosotros "vendemos" (lo guardamos en venta)
+              isSelected: isSelected
+            });
+          }
+        });
+
+        // Mostrar TODOS los bancos con indicador de selección
+        html += '<div class="info-box">';
+        html += '<h2>💰 Todos los Bancos (Datos Procesados)</h2>';
+        html += '<table>';
+        html += '<thead><tr>';
+        html += '<th>✓</th>';
+        html += '<th>Banco</th>';
+        html += '<th>Código</th>';
+        html += '<th>quote.buy (API RAW)</th>';
+        html += '<th>quote.sell (API RAW)</th>';
+        html += '<th>▶️ Guardamos en "compra"</th>';
+        html += '<th>▶️ Guardamos en "venta"</th>';
+        html += '<th>🎯 USAMOS (compra)</th>';
+        html += '</tr></thead>';
+        html += '<tbody>';
+        
+        allBanks.forEach(bank => {
+          const rowClass = bank.isSelected ? 'class="selected"' : '';
+          const checkMark = bank.isSelected ? '✅' : '❌';
+          html += `<tr ${rowClass}>`;
+          html += `<td>${checkMark}</td>`;
+          html += `<td>${bank.name}</td>`;
+          html += `<td><code>${bank.code}</code></td>`;
+          html += `<td>$${bank.buy_raw.toFixed(2)}</td>`;
+          html += `<td>$${bank.sell_raw.toFixed(2)}</td>`;
+          html += `<td>$${bank.compra.toFixed(2)}</td>`;
+          html += `<td>$${bank.venta.toFixed(2)}</td>`;
+          html += `<td><strong>$${bank.compra.toFixed(2)}</strong></td>`;
+          html += `</tr>`;
+        });
+        
+        html += '</tbody></table>';
+        html += '</div>';
+
+        // Filtrar solo seleccionados
+        const selectedBanks = allBanks.filter(b => b.isSelected);
+
+        html += '<div class="info-box">';
+        html += `<h2>✅ Bancos Seleccionados (${selectedBanks.length})</h2>`;
+        html += '<table>';
+        html += '<thead><tr>';
+        html += '<th>Banco</th>';
+        html += '<th>Precio que USAMOS (compra)</th>';
+        html += '</tr></thead>';
+        html += '<tbody>';
+        selectedBanks.forEach(bank => {
+          html += `<tr class="selected">`;
+          html += `<td><strong>${bank.name}</strong></td>`;
+          html += `<td><strong>$${bank.compra.toFixed(2)}</strong></td>`;
+          html += `</tr>`;
+        });
+        html += '</tbody></table>';
+        html += '</div>';
+
+        // Calcular CONSENSO con los seleccionados
+        const findConsensusCluster = (banks, tolerance = 0.02) => {
+          if (banks.length === 0) return [];
+          
+          const sorted = banks.slice().sort((a, b) => a.compra - b.compra);
+          let bestCluster = [];
+          
+          for (let i = 0; i < sorted.length; i++) {
+            const center = sorted[i].compra;
+            const cluster = sorted.filter(bank => {
+              const diff = Math.abs(bank.compra - center) / center;
+              return diff <= tolerance;
+            });
+            
+            if (cluster.length > bestCluster.length) {
+              bestCluster = cluster;
+            }
+          }
+          
+          return bestCluster;
+        };
+
+        const cluster = findConsensusCluster(selectedBanks);
+        const consenso = cluster.length > 0 
+          ? cluster.reduce((sum, bank) => sum + bank.compra, 0) / cluster.length 
+          : 0;
+
+        html += '<div class="info-box">';
+        html += '<h2>🎯 Resultado del CONSENSO</h2>';
+        html += `<p><strong>Cluster encontrado:</strong> ${cluster.length} de ${selectedBanks.length} bancos (${Math.round(cluster.length/selectedBanks.length*100)}%)</p>`;
+        html += '<table>';
+        html += '<thead><tr><th>Banco en Cluster</th><th>Precio COMPRA</th></tr></thead>';
+        html += '<tbody>';
+        cluster.forEach(bank => {
+          html += `<tr style="background: #fff3cd;">`;
+          html += `<td>${bank.name}</td>`;
+          html += `<td><strong>$${bank.compra.toFixed(2)}</strong></td>`;
+          html += `</tr>`;
+        });
+        html += '</tbody></table>';
+        html += `<h3 style="color: #10b981;">💰 PRECIO CONSENSO FINAL: $${consenso.toFixed(2)}</h3>`;
+        html += '</div>';
+
+        // Verificación
+        if (Math.abs(consenso - 1417) < 5) {
+          html += '<div class="warning">';
+          html += '<h3>⚠️ PROBLEMA IDENTIFICADO</h3>';
+          html += `<p>El consenso da $${consenso.toFixed(2)} que coincide con tu reporte de $1417.</p>`;
+          html += '<p><strong>ANÁLISIS:</strong></p>';
+          html += '<p>Si todos tus bancos tienen valores > $1450 pero el consenso da $1417, significa que:</p>';
+          html += '<ol>';
+          html += '<li>Los campos quote.buy y quote.sell de la API están INVERTIDOS respecto a lo que esperamos</li>';
+          html += '<li>quote.buy = lo que el banco COMPRA (nosotros vendemos) = precio más BAJO</li>';
+          html += '<li>quote.sell = lo que el banco VENDE (nosotros compramos) = precio más ALTO</li>';
+          html += '</ol>';
+          html += '<p><strong>SOLUCIÓN:</strong> Debemos usar quote.sell en vez de quote.buy</p>';
+          html += '</div>';
+        } else if (consenso > 1450) {
+          html += '<div class="info-box" style="background: #d1fae5;">';
+          html += '<h3>✅ CORRECTO</h3>';
+          html += `<p>El consenso $${consenso.toFixed(2)} está en el rango esperado (> $1450)</p>`;
+          html += '</div>';
+        }
+
+        // Mostrar diferencia entre buy y sell
+        const avgBuy = selectedBanks.reduce((sum, b) => sum + b.buy_raw, 0) / selectedBanks.length;
+        const avgSell = selectedBanks.reduce((sum, b) => sum + b.sell_raw, 0) / selectedBanks.length;
+        
+        html += '<div class="info-box">';
+        html += '<h2>📊 Análisis de Campos API</h2>';
+        html += '<table>';
+        html += '<tr><td><strong>Promedio quote.buy</strong></td><td>$' + avgBuy.toFixed(2) + '</td></tr>';
+        html += '<tr><td><strong>Promedio quote.sell</strong></td><td>$' + avgSell.toFixed(2) + '</td></tr>';
+        html += '<tr><td><strong>Diferencia</strong></td><td>$' + Math.abs(avgSell - avgBuy).toFixed(2) + '</td></tr>';
+        html += '</table>';
+        
+        if (avgBuy < avgSell) {
+          html += '<p>✅ quote.buy < quote.sell (normal: el banco compra más barato y vende más caro)</p>';
+          html += '<p><strong>Conclusión:</strong> quote.buy = banco compra (nosotros vendemos) = MÁS BAJO</p>';
+          html += '<p><strong>Conclusión:</strong> quote.sell = banco vende (nosotros compramos) = MÁS ALTO ✅</p>';
+          html += '<p style="color: red; font-weight: bold;">⚠️ ESTAMOS USANDO EL CAMPO INCORRECTO - Deberíamos usar quote.sell</p>';
+        } else {
+          html += '<p>⚠️ quote.buy > quote.sell (esto es raro)</p>';
+        }
+        html += '</div>';
+
+        output.innerHTML = html;
+
+      } catch (error) {
+        output.innerHTML = `<div class="info-box" style="background: #fee2e2;">
+          <h3>❌ Error</h3>
+          <p>${error.message}</p>
+          <pre>${error.stack}</pre>
+        </div>`;
+      }
+    }
+
+    // Auto-ejecutar
+    window.addEventListener('load', () => {
+      setTimeout(verificarDatos, 500);
+    });
+  </script>
+</body>
+</html>

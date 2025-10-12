@@ -126,8 +126,8 @@ class DataService {
           
           bankRates[bankCode] = {
             name: bankName,
-            compra: buyPrice,
-            venta: sellPrice,
+            compra: sellPrice,  // FIX v5.0.35: Usar sellPrice (precio que pagamos al banco)
+            venta: buyPrice,    // FIX v5.0.35: Usar buyPrice (precio que recibimos del banco)
             spread: sellPrice - buyPrice,
             timestamp: new Date().toISOString(),
             source: 'dolarito'
