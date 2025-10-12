@@ -1538,14 +1538,21 @@ async function generateRiskMatrix() {
       .map(bank => bank.compra)
       .sort((a, b) => a - b);
 
-    if (bankCompraPrices.length >= 3) {
-      // Tomar precios representativos: mínimo, mediana, máximo de bancos principales
-      const minCompra = Math.min(...bankCompraPrices);
-      const maxCompra = Math.max(...bankCompraPrices);
-      const medianCompra = bankCompraPrices[Math.floor(bankCompraPrices.length / 2)];
+    if (bankCompraPrices.length >= 1) {
+      // NUEVO v5.0.39: Lógica específica del usuario
+      // USD mínimo = menor precio de compra de bancos principales
+      // USD máximo = mínimo + 50%
+      const usdMin = Math.min(...bankCompraPrices);
+      const usdMax = usdMin * 1.5; // +50% sobre el mínimo
 
-      usdPrices = [minCompra, minCompra + (medianCompra - minCompra) * 0.5, medianCompra, medianCompra + (maxCompra - medianCompra) * 0.5, maxCompra];
-      console.log('💵 [MATRIZ] Usando precios USD compra de bancos:', usdPrices.map(p => p.toFixed(2)));
+      // Generar 5 puntos equidistantes entre min y max
+      usdPrices = [];
+      for (let i = 0; i < 5; i++) {
+        usdPrices.push(usdMin + (usdMax - usdMin) * i / 4);
+      }
+
+      console.log('💵 [MATRIZ] USD - Mínimo de bancos:', usdMin.toFixed(2), 'Máximo (min+50%):', usdMax.toFixed(2));
+      console.log('💵 [MATRIZ] Precios USD generados:', usdPrices.map(p => p.toFixed(2)));
     }
   }
 
@@ -1560,17 +1567,21 @@ async function generateRiskMatrix() {
   }
 
   // Obtener datos de exchanges USDT (venta)
-  if (currentData && currentData.exchanges) {
+  if (currentData && currentData.usdt) {
     // Usar precios de venta de exchanges USDT más grandes
-    const usdtSellPrices = Object.values(currentData.exchanges)
+    const usdtSellPrices = Object.values(currentData.usdt)
       .filter(exchange => exchange.venta && exchange.venta > 0)
       .map(exchange => exchange.venta)
       .sort((a, b) => b - a); // Orden descendente para tomar los más altos primero
 
-    if (usdtSellPrices.length >= 3) {
-      // Tomar los 5 precios de venta más altos (exchanges más grandes)
+    if (usdtSellPrices.length >= 5) {
+      // NUEVO v5.0.39: Tomar exactamente los 5 precios más altos
       usdtPrices = usdtSellPrices.slice(0, 5);
-      console.log('💰 [MATRIZ] Usando precios USDT venta de exchanges:', usdtPrices.map(p => p.toFixed(2)));
+      console.log('💰 [MATRIZ] Usando los 5 precios USDT venta más altos:', usdtPrices.map(p => p.toFixed(2)));
+    } else if (usdtSellPrices.length >= 1) {
+      // Si hay menos de 5, usar todos los disponibles
+      usdtPrices = usdtSellPrices;
+      console.log('💰 [MATRIZ] Usando todos los precios USDT disponibles:', usdtPrices.map(p => p.toFixed(2)));
     }
   }
 
