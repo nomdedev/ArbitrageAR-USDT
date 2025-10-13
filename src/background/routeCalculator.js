@@ -78,32 +78,34 @@ function getValidExchanges(usdt, usdtUsd) {
       return false;
     }
 
-    // CORREGIDO v5.0.8: Validación USD/USDT más permisiva
-    if (usdtUsd?.[key]) {
-      const askPrice = parseFloat(usdtUsd[key].totalAsk || usdtUsd[key].ask);
-      
-      // Solo rechazar si el dato existe pero es claramente inválido
-      if (askPrice && !isNaN(askPrice) && askPrice > 0) {
-        // Rechazar si es exactamente 1.0 (sin spread, sospechoso)
-        if (askPrice === 1.0) {
-          log(`⚠️ [DEBUG] ${key}: USD/USDT = 1.0 exacto (sin spread real), excluyendo`);
-          return false;
-        }
-        
-        // Rechazar si está fuera del rango esperado (0.95 - 1.15)
-        if (askPrice < 0.95 || askPrice > 1.15) {
-          log(`⚠️ [DEBUG] ${key}: USD/USDT fuera de rango (${askPrice}), excluyendo`);
-          return false;
-        }
-      }
-      // Si askPrice es inválido, permitir pero loguear advertencia
-      else if (!askPrice || isNaN(askPrice) || askPrice <= 0) {
-        log(`ℹ️ [DEBUG] ${key}: Sin datos USD/USDT válidos, usará fallback`);
-      }
-    } else {
-      // Exchange sin datos USD/USDT en la API, permitir con fallback
-      log(`ℹ️ [DEBUG] ${key}: Sin datos USD/USDT, usará fallback 1.0 conservador`);
+    // NUEVO v5.0.73: Solo usar exchanges con datos USD/USDT reales
+    if (!usdtUsd?.[key]) {
+      log(`❌ [DEBUG] ${key}: Sin datos USD/USDT en API, excluyendo (no usar fallbacks)`);
+      return false;
     }
+
+    const askPrice = parseFloat(usdtUsd[key].totalAsk || usdtUsd[key].ask);
+    
+    // Validar que el precio USD/USDT sea válido y realista
+    if (!askPrice || isNaN(askPrice) || askPrice <= 0) {
+      log(`❌ [DEBUG] ${key}: Precio USD/USDT inválido (${askPrice}), excluyendo`);
+      return false;
+    }
+
+    // Rechazar si es exactamente 1.0 (sin spread, sospechoso)
+    if (askPrice === 1.0) {
+      log(`⚠️ [DEBUG] ${key}: USD/USDT = 1.0 exacto (sin spread real), excluyendo`);
+      return false;
+    }
+    
+    // Rechazar si está fuera del rango esperado (0.95 - 1.15)
+    if (askPrice < 0.95 || askPrice > 1.15) {
+      log(`⚠️ [DEBUG] ${key}: USD/USDT fuera de rango (${askPrice}), excluyendo`);
+      return false;
+    }
+
+    log(`✅ [DEBUG] ${key}: USD/USDT = ${askPrice.toFixed(4)} (válido)`);
+
 
     log(`✅ [DEBUG] ${key}: Exchange válido`);
     return true;
@@ -144,22 +146,11 @@ function calculateRoute(buyExchange, sellExchange, oficial, usdt, usdtUsd, userF
     const usdPurchased = initialAfterBankFee / officialBuyPrice;
 
     // Paso 3: Obtener ratio USD/USDT para el exchange comprador
-    // CORREGIDO v5.0.10: Fallback conservador a 1.05 USD (valor realista)
+    // NUEVO v5.0.73: Ya no usamos fallbacks, el exchange fue validado en getValidExchanges()
     // CriptoYA muestra: totalAsk = cuántos USD necesito para comprar 1 USDT
-    let usdToUsdtRate;
-    if (usdtUsd?.[buyExchange]) {
-      usdToUsdtRate = parseFloat(usdtUsd[buyExchange].totalAsk || usdtUsd[buyExchange].ask);
-    }
-
-    // Si no hay tasa válida, usar fallback 1.05 (valor realista del mercado)
-    if (!usdToUsdtRate || isNaN(usdToUsdtRate) || usdToUsdtRate <= 0) {
-      log(`⚠️ ${buyExchange}: Sin USD/USDT válido, usando fallback 1.05 (realista)`);
-      usdToUsdtRate = 1.05;  // NUEVO v5.0.10: Valor realista del mercado
-    } else if (usdToUsdtRate === 1.0) {
-      log(`⚠️ ${buyExchange}: USD/USDT = 1.0 exacto (verificar si es real o placeholder)`);
-    } else {
-      log(`✅ ${buyExchange}: USD/USDT = ${usdToUsdtRate.toFixed(4)}`);
-    }
+    const usdToUsdtRate = parseFloat(usdtUsd[buyExchange].totalAsk || usdtUsd[buyExchange].ask);
+    
+    log(`✅ ${buyExchange}: USD/USDT = ${usdToUsdtRate.toFixed(4)}`)
 
     // Paso 4: Comprar USDT
     const usdtPurchased = usdPurchased / usdToUsdtRate;
