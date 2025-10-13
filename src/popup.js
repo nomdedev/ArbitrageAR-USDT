@@ -44,11 +44,12 @@ function formatNumber(num) {
 
 // NUEVO: Formateo específico para ratios USD/USDT con 3 decimales
 function formatUsdUsdtRatio(num) {
+  // No mostrar valores por fallback. Si no hay dato real, devolver 'N/D'.
   if (num === undefined || num === null || isNaN(num)) {
-    console.warn('formatUsdUsdtRatio recibió valor inválido:', num);
-    return '1.000';
+    // No usar fallback 1.000 porque puede inducir a error
+    return 'N/D';
   }
-  return num.toLocaleString('es-AR', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+  return Number(num).toLocaleString('es-AR', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
 }
 
 // NUEVO: Formateo específico para porcentajes de comisión con mayor precisión
@@ -1303,7 +1304,7 @@ function showRouteGuideFromData(route) {
     isSingleExchange: route.isSingleExchange || false,
     profitPercentage: route.profitPercentage || 0,
     officialPrice: route.officialPrice || 0,
-    usdToUsdtRate: route.usdToUsdtRate || 1,
+  usdToUsdtRate: (typeof route.usdToUsdtRate === 'number' && isFinite(route.usdToUsdtRate)) ? route.usdToUsdtRate : null,
     usdtArsBid: route.usdtArsBid || 0,
     sellPrice: route.usdtArsBid || 0,
     transferFeeUSD: route.transferFeeUSD || 0,
@@ -1351,7 +1352,7 @@ function showRouteGuide(index) {
     isSingleExchange: route.isSingleExchange || false,
     profitPercentage: route.profitPercentage || route.profitPercent || 0,
     officialPrice: route.officialPrice || 0,
-    usdToUsdtRate: route.usdToUsdtRate || 1,
+  usdToUsdtRate: (typeof route.usdToUsdtRate === 'number' && isFinite(route.usdToUsdtRate)) ? route.usdToUsdtRate : null,
     usdtArsBid: route.usdtArsBid || 0,
     sellPrice: route.usdtArsBid || 0,
     transferFeeUSD: route.transferFeeUSD || 0,
@@ -1465,7 +1466,7 @@ function calculateGuideValues(arb) {
     finalAmount: calc.finalAmount || (calc.arsFromSale || ((calc.usdtAfterFees || calc.usdPurchased || ((calc.initial || 100000) / (arb.officialPrice || 1000))) * (arb.sellPrice || arb.usdtArsBid || 1000))),
     profit: calc.netProfit || ((calc.finalAmount || calc.arsFromSale || ((calc.usdtAfterFees || calc.usdPurchased || ((calc.initial || 100000) / (arb.officialPrice || 1000))) * (arb.sellPrice || arb.usdtArsBid || 1000))) - (calc.initial || 100000)),
     profitPercentage: correctProfitPercentage,  // USAR EL VALOR CORRECTO
-    usdToUsdtRate: arb.usdToUsdtRate || 1,
+  usdToUsdtRate: (typeof arb.usdToUsdtRate === 'number' && isFinite(arb.usdToUsdtRate)) ? arb.usdToUsdtRate : null,
     usdtArsBid: arb.usdtArsBid || (arb.sellPrice || 1000),
     fees: arb.fees || { trading: 0, withdrawal: 0, total: 0 },
     broker: arb.broker || 'Exchange'
@@ -1527,7 +1528,7 @@ function generateGuideSteps(values) {
             <span class="calc-arrow">→</span>
             <span class="calc-result">${formatNumber(usdtAfterFees)} USDT</span>
           </div>
-          ${usdToUsdtRate > 1.005 ? `
+          ${ (typeof usdToUsdtRate === 'number' && isFinite(usdToUsdtRate) && usdToUsdtRate > 1.005) ? `
           <div class="step-simple-warning">
             ⚠️ El exchange cobra ${formatCommissionPercent((usdToUsdtRate - 1) * 100)}% para esta conversión
           </div>

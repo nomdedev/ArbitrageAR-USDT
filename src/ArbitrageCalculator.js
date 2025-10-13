@@ -137,8 +137,15 @@ class ArbitrageCalculator {
     const usdPurchased = initialAfterBankFee / officialSellPrice;
 
     // PASO 2: Comprar USDT
-    const usdToUsdtRate = parseFloat(buyUsdRate.totalAsk) || parseFloat(buyUsdRate.ask) || 1.05;
-    if (!usdToUsdtRate || usdToUsdtRate <= 0) return null;
+    // Obtener tasa USD/USDT únicamente si está disponible. NO usar fallback 1.05.
+    let usdToUsdtRate = null;
+    if (buyUsdRate) {
+      const totalAsk = parseFloat(buyUsdRate.totalAsk);
+      const ask = parseFloat(buyUsdRate.ask);
+      if (isFinite(totalAsk) && totalAsk > 0) usdToUsdtRate = totalAsk;
+      else if (isFinite(ask) && ask > 0) usdToUsdtRate = ask;
+    }
+    if (!usdToUsdtRate || usdToUsdtRate <= 0) return null; // Excluir exchanges sin tasa USD/USDT
 
     const usdtPurchased = usdPurchased / usdToUsdtRate;
 
