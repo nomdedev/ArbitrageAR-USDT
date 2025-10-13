@@ -85,6 +85,94 @@ function getDollarSourceDisplay(official) {
 }
 
 // ============================================
+// FUNCIONES DE VALIDACIÓN DE DATOS v5.0.74
+// ============================================
+
+/**
+ * Calcular nivel de frescura de los datos
+ */
+function getDataFreshnessLevel(timestamp) {
+  if (!timestamp) {
+    return {
+      level: 'stale',
+      icon: '🔴',
+      color: '#dc3545',
+      ageMinutes: null,
+      message: 'Sin timestamp'
+    };
+  }
+
+  const now = Date.now();
+  const dataTime = new Date(timestamp).getTime();
+  const ageMs = now - dataTime;
+  const ageMinutes = Math.floor(ageMs / 60000);
+
+  if (ageMinutes < 3) {
+    return {
+      level: 'fresh',
+      icon: '🟢',
+      color: '#28a745',
+      ageMinutes,
+      message: 'Datos frescos'
+    };
+  } else if (ageMinutes < 5) {
+    return {
+      level: 'moderate',
+      icon: '🟡',
+      color: '#ffc107',
+      ageMinutes,
+      message: 'Datos recientes'
+    };
+  } else {
+    return {
+      level: 'stale',
+      icon: '🔴',
+      color: '#dc3545',
+      ageMinutes,
+      message: 'Datos desactualizados'
+    };
+  }
+}
+
+/**
+ * Validar coherencia de cálculos de una ruta
+ */
+function validateRouteCalculations(route) {
+  const warnings = [];
+  
+  // Validar profit razonable
+  if (route.profitPercentage > 50) {
+    warnings.push('Profit extremadamente alto (>50%), verificar datos');
+  }
+  
+  if (route.profitPercentage < -90) {
+    warnings.push('Pérdida extrema (<-90%), verificar datos');
+  }
+  
+  // Validar USD/USDT ratio
+  if (route.calculation?.usdToUsdtRate) {
+    const ratio = route.calculation.usdToUsdtRate;
+    if (ratio < 0.95 || ratio > 1.15) {
+      warnings.push(`Ratio USD/USDT fuera de rango (${ratio.toFixed(4)})`);
+    }
+  }
+  
+  // Validar montos
+  if (route.calculation?.initialAmount <= 0) {
+    warnings.push('Monto inicial inválido');
+  }
+  
+  if (route.calculation?.finalAmount < 0) {
+    warnings.push('Monto final negativo');
+  }
+  
+  return {
+    isValid: warnings.length === 0,
+    warnings
+  };
+}
+
+// ============================================
 // FUNCIONES DE VALIDACIÓN Y SEGURIDAD v5.0.28
 // ============================================
 
@@ -1538,24 +1626,46 @@ async function loadBankRates() {
 function updateLastUpdateTimestamp(timestamp) {
   const container = document.getElementById('last-update');
   if (!timestamp) {
-    container.textContent = '⏰ Sin datos de actualización';
+    container.innerHTML = '<span class="status-stale">🔴 Sin datos de actualización</span>';
     return;
   }
   
   const date = new Date(timestamp);
   const timeStr = date.toLocaleTimeString('es-AR');
   
-  // NUEVO v5.0.28: Agregar indicador de frescura
-  if (window.validationService) {
-    const freshness = window.validationService.getDataFreshnessLevel(timestamp);
-    container.innerHTML = `
-      <span style="color: ${freshness.color}">${freshness.icon}</span>
-      <span>Última actualización: ${timeStr}</span>
-      ${freshness.ageMinutes !== null ? `<span class="age-info">(hace ${freshness.ageMinutes} min)</span>` : ''}
-    `;
-  } else {
-    container.textContent = `⏰ Última actualización: ${timeStr}`;
+  // NUEVO v5.0.74: Indicador de frescura mejorado
+  const freshness = getDataFreshnessLevel(timestamp);
+  
+  container.innerHTML = `
+    <span class="freshness-indicator" style="color: ${freshness.color}">${freshness.icon}</span>
+    <span class="timestamp-text">${timeStr}</span>
+    ${freshness.ageMinutes !== null ? `<span class="age-text">(hace ${freshness.ageMinutes} min)</span>` : ''}
+  `;
+  
+  // Agregar clase CSS según nivel de frescura
+  container.className = `last-update-container ${freshness.level}`;
+  
+  // NUEVO v5.0.74: Mostrar advertencia si datos muy desactualizados
+  if (freshness.level === 'stale' && freshness.ageMinutes > 5) {
+    showDataFreshnessWarning(freshness.ageMinutes);
   }
+}
+
+/**
+ * Mostrar advertencia de datos desactualizados
+ */
+function showDataFreshnessWarning(ageMinutes) {
+  const warningContainer = document.getElementById('data-warning');
+  if (!warningContainer) return;
+  
+  warningContainer.innerHTML = `
+    <div class="warning-banner stale-data">
+      <span class="warning-icon">⚠️</span>
+      <span class="warning-text">Los datos tienen más de ${ageMinutes} minutos. Actualiza para ver precios frescos.</span>
+      <button class="warning-refresh-btn" onclick="fetchAndDisplay()">🔄 Actualizar</button>
+    </div>
+  `;
+  warningContainer.style.display = 'block';
 }
 
 // NUEVO v5.0.31: Configuración del simulador (sin rutas)
