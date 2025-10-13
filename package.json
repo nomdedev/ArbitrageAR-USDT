@@ -1,0 +1,55 @@
+{
+  "name": "arbitragear-extension",
+  "version": "5.0.0",
+  "description": "Extensión de Chrome para detectar oportunidades de arbitraje entre el dólar oficial argentino y exchanges de USDT",
+  "main": "src/background/main.js",
+  "scripts": {
+    "test": "node tests/run-all-tests.js",
+    "test:all": "node tests/run-all-tests.js",
+    "test:complete": "node tests/test-complete-flow.js",
+    "test:communication": "node tests/test-communication.js",
+    "test:ui": "node tests/test-popup-ui.js",
+    "test:coverage": "echo 'Coverage not implemented yet'",
+    "lint": "echo 'No linter configured yet'",
+    "build": "mkdir -p dist && cp -r src/* dist/ && cp manifest.json dist/ && cp -r icons dist/",
+    "build:prod": "npm run clean:dist && npm run build && npm run minify",
+    "minify": "echo 'Minification not implemented yet'",
+    "clean": "rm -rf node_modules package-lock.json",
+    "clean:dist": "rm -rf dist",
+    "package": "npm run build:prod && cd dist && zip -r ../ArbitrageAR-v$(node -p \"require('../package.json').version\").zip .",
+    "package:cws": "npm run package",
+    "validate:build": "node -e \"console.log('Build validation not implemented yet')\"",
+    "dev": "echo 'Development server not implemented yet'",
+    "watch": "echo 'Watch mode not implemented yet'"
+  },
+  "keywords": [
+    "chrome-extension",
+    "arbitrage",
+    "cryptocurrency",
+    "argentina",
+    "usdt",
+    "dollar"
+  ],
+  "author": "ArbitrageAR Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nomdedev/ArbitrageAR-USDT.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nomdedev/ArbitrageAR-USDT/issues"
+  },
+  "homepage": "https://github.com/nomdedev/ArbitrageAR-USDT#readme",
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "Chrome >= 88",
+    "Firefox >= 85",
+    "Edge >= 88"
+  ]
+}

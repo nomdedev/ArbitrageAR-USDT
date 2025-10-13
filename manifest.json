@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "arbitrarARS",
-  "version": "5.0.40",
-  "description": "Extensión Brave para arbitrarARS - Dólar Oficial -> USDT Broker usando Dolarito y CriptoYA APIs",
+  "name": "ArbitrARS - Detector de Arbitraje",
+  "version": "5.0.72",
+  "description": "Extensión para navegadores Chromium que detecta oportunidades de arbitraje entre el Dólar Oficial argentino y USDT en exchanges locales",
   "permissions": [
     "storage",
     "alarms",
@@ -15,8 +15,7 @@
     "https://*.dolarito.ar/*"
   ],
   "background": {
-    "service_worker": "src/background/main.js",
-    "type": "module"
+    "service_worker": "src/background/main-simple.js"
   },
   "action": {
     "default_popup": "src/popup.html",
@@ -34,6 +33,6 @@
     "128": "icons/icon128.png"
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self';"
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
   }
 }

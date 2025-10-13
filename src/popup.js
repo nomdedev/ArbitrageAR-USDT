@@ -6,9 +6,16 @@ let currentFilter = 'no-p2p'; // CORREGIDO v5.0.12: Volver a 'no-p2p' pero con d
 let allRoutes = []; // NUEVO: Cache de todas las rutas sin filtrar
 
 // Modo debug para reducir logs excesivos
-const DEBUG_MODE = true;
+const DEBUG_MODE = false; // PRODUCCIÓN: Desactivado después de diagnosticar problema
 
 console.log('🚀 Popup.js cargado correctamente');
+
+// Función de logging condicional
+function log(...args) {
+  if (DEBUG_MODE) {
+    console.log(...args);
+  }
+}
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
@@ -21,7 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
   checkForUpdates(); // NUEVO: Verificar actualizaciones disponibles
   loadUserSettings(); // NUEVO v5.0.28: Cargar configuración del usuario
   fetchAndDisplay();
-  loadBanksData();
+  // CORREGIDO v5.0.46: No cargar bancos automáticamente ya que no está soportado en versión simplificada
+  // loadBanksData(); // Deshabilitado - funcionalidad no disponible
 });
 
 // Formateo de números
@@ -84,19 +92,55 @@ function getDollarSourceDisplay(official) {
  * Cargar configuración del usuario
  */
 function loadUserSettings() {
-  chrome.storage.local.get([
-    'dataFreshnessWarning',
-    'riskAlertsEnabled',
-    'requireConfirmHighAmount',
-    'minProfitWarning'
-  ], (result) => {
+  chrome.storage.local.get('notificationSettings', (result) => {
+    const settings = result.notificationSettings || {};
+
     userSettings = {
-      dataFreshnessWarning: result.dataFreshnessWarning !== false, // default true
-      riskAlertsEnabled: result.riskAlertsEnabled !== false, // default true
-      requireConfirmHighAmount: result.requireConfirmHighAmount !== false, // default true
-      minProfitWarning: result.minProfitWarning || 0.5
+      // Notificaciones
+      notificationsEnabled: settings.notificationsEnabled !== false,
+      alertType: settings.alertType || 'all',
+      customThreshold: settings.customThreshold || 5,
+      soundEnabled: settings.soundEnabled !== false,
+
+      // Exchanges preferidos
+      preferredExchanges: settings.preferredExchanges || [],
+
+      // Validación y seguridad
+      dataFreshnessWarning: settings.dataFreshnessWarning !== false,
+      riskAlertsEnabled: settings.riskAlertsEnabled !== false,
+      requireConfirmHighAmount: settings.requireConfirmHighAmount !== false,
+      minProfitWarning: settings.minProfitWarning || 0.5,
+
+      // Preferencias de rutas
+      showNegativeRoutes: settings.showNegativeRoutes !== false, // Por defecto MOSTRAR rutas negativas
+      preferSingleExchange: settings.preferSingleExchange || false,
+      maxRoutesDisplay: settings.maxRoutesDisplay || 20,
+      profitThreshold: settings.profitThreshold || 1.0, // Por defecto 1% - configurable en options
+
+      // NUEVO v5.0.56: Modos de display adicionales
+      sortByProfit: settings.sortByProfit !== false, // Por defecto ordenar por profit
+      showOnlyProfitable: settings.showOnlyProfitable || false, // Por defecto mostrar todas
+      
+      // Simulador
+      defaultSimAmount: settings.defaultSimAmount || 1000000,
+
+      // Fees personalizados
+      extraTradingFee: settings.extraTradingFee || 0,
+      extraWithdrawalFee: settings.extraWithdrawalFee || 0,
+      extraTransferFee: settings.extraTransferFee || 0,
+      bankCommissionFee: settings.bankCommissionFee || 0,
+
+      // Configuración de precio del dólar
+      dollarPriceSource: settings.dollarPriceSource || 'auto',
+      manualDollarPrice: settings.manualDollarPrice || 950,
+      preferredBank: settings.preferredBank || 'mediana',
+
+      // Configuración de bancos
+      showBestBankPrice: settings.showBestBankPrice || false,
+      selectedBanks: settings.selectedBanks || []
     };
-    console.log('⚙️ Configuración de seguridad cargada:', userSettings);
+
+    console.log('⚙️ Configuración completa del usuario cargada desde storage:', userSettings);
   });
 }
 
@@ -111,7 +155,7 @@ function updateDataStatusIndicator(data) {
   const health = window.validationService.generateSystemHealthReport(data);
   
   // Obtener frescura del precio oficial
-  const freshness = window.validationService.getDataFreshnessLevel(data.officialPrice?.timestamp);
+  const freshness = window.validationService.getDataFreshnessLevel(data.oficial?.timestamp);
   
   // Construir HTML del indicador
   let html = `<span class="freshness-indicator" style="color: ${freshness.color}">${freshness.icon}</span>`;
@@ -139,7 +183,7 @@ function addRiskIndicatorToRoute(route, params) {
   
   const risk = window.validationService.calculateRouteRiskLevel(
     route,
-    route.profitPercent,
+    route.profitPercentage,
     params
   );
   
@@ -261,7 +305,7 @@ function applyP2PFilter() {
   // Mostrar rutas filtradas
   if (currentData) {
     if (DEBUG_MODE) console.log('🔍 Llamando displayOptimizedRoutes con', filteredRoutes.length, 'rutas');
-    displayOptimizedRoutes(filteredRoutes, currentData.official);
+    displayOptimizedRoutes(filteredRoutes, currentData.oficial);
   } else {
     console.warn('⚠️ currentData es null, no se puede mostrar rutas');
   }
@@ -284,7 +328,7 @@ function updateFilterCounts() {
   if (countP2P) countP2P.textContent = p2pCount;
   if (countNoP2P) countNoP2P.textContent = noP2pCount;
   
-  console.log(`📊 Contadores actualizados - Total: ${allCount}, P2P: ${p2pCount}, No P2P: ${noP2pCount}`);
+  log(`📊 Contadores actualizados - Total: ${allCount}, P2P: ${p2pCount}, No P2P: ${noP2pCount}`);
 }
 
 // Navegación entre tabs
@@ -314,7 +358,7 @@ function setupTabNavigation() {
         const amountInput = document.getElementById('sim-amount');
         if (amountInput && !amountInput.value) {
           amountInput.value = userSettings.defaultSimAmount;
-          console.log(`🔧 Monto default del simulador: $${userSettings.defaultSimAmount.toLocaleString()}`);
+          log(`🔧 Monto default del simulador: $${userSettings.defaultSimAmount.toLocaleString()}`);
         }
       }
     });
@@ -450,7 +494,7 @@ async function fetchAndDisplay(retryCount = 0) {
           <div class="error-container">
             <h3>⏰ Timeout de Conexión</h3>
             <p>El background no respondió en 15 segundos.</p>
-            <button onclick="location.reload()" class="retry-btn">🔄 Reintentar</button>
+            <button class="retry-btn" data-action="reload">🔄 Reintentar</button>
             <details style="margin-top: 10px;">
               <summary>Información de Debug</summary>
               <p><small>Runtime disponible: ${!!chrome.runtime}</small></p>
@@ -488,7 +532,7 @@ async function fetchAndDisplay(retryCount = 0) {
             <div class="error-container">
               <h3>❌ Error de Comunicación</h3>
               <p>Error: ${chrome.runtime.lastError.message}</p>
-              <button onclick="location.reload()" class="retry-btn">🔄 Reintentar</button>
+              <button class="retry-btn" data-action="reload">🔄 Reintentar</button>
             </div>
           `;
           return;
@@ -510,7 +554,7 @@ async function fetchAndDisplay(retryCount = 0) {
           <div class="error-container">
             <h3>⏰ Timeout del Background</h3>
             <p>El procesamiento tomó demasiado tiempo.</p>
-            <button onclick="location.reload()" class="retry-btn">🔄 Reintentar</button>
+            <button class="retry-btn" data-action="reload">🔄 Reintentar</button>
             <p><small>Si el problema persiste, recarga la extensión.</small></p>
           </div>
         `;
@@ -522,7 +566,7 @@ async function fetchAndDisplay(retryCount = 0) {
           <div class="error-container">
             <h3>⏰ Timeout de APIs</h3>
             <p>Las APIs externas no responden.</p>
-            <button onclick="location.reload()" class="retry-btn">🔄 Reintentar</button>
+            <button class="retry-btn" data-action="reload">🔄 Reintentar</button>
             <p><small>Verifica tu conexión a internet.</small></p>
           </div>
         `;
@@ -534,7 +578,7 @@ async function fetchAndDisplay(retryCount = 0) {
           <div class="error-container">
             <h3>🏥 Background No Saludable</h3>
             <p>Las APIs externas no están disponibles.</p>
-            <button onclick="location.reload()" class="retry-btn">🔄 Reintentar</button>
+            <button class="retry-btn" data-action="reload">🔄 Reintentar</button>
             <p><small>Esto puede ser temporal. Intenta de nuevo en unos minutos.</small></p>
           </div>
         `;
@@ -567,7 +611,7 @@ async function fetchAndDisplay(retryCount = 0) {
         <div class="error-container">
           <h3>❌ Error de Envío</h3>
           <p>No se pudo comunicar con el background: ${error.message}</p>
-          <button onclick="location.reload()" class="retry-btn">🔄 Reintentar</button>
+          <button class="retry-btn" data-action="reload">🔄 Reintentar</button>
         </div>
       `;
     }
@@ -586,65 +630,69 @@ function applyUserPreferences(routes) {
     if (DEBUG_MODE) console.log('🔍 [POPUP] applyUserPreferences: rutas vacías o no array, retornando vacío');
     return routes;
   }
-  
+
   let filtered = [...routes]; // Copia para no mutar original
   if (DEBUG_MODE) console.log('🔍 [POPUP] applyUserPreferences: copia inicial tiene', filtered.length, 'rutas');
-  
-  // 1. Filtrar rutas negativas si el usuario no quiere verlas (default: mostrar)
-  filtered = applyNegativeFilter(filtered, userSettings?.showNegativeRoutes);
-  
+
+  // MEJORADO v5.0.64: Filtro unificado por ganancia mínima (separa visualización de notificaciones)
+  filtered = applyMinProfitFilter(filtered, userSettings?.filterMinProfit);
+
   // 2. Filtrar por exchanges preferidos del usuario
   filtered = applyPreferredExchangesFilter(filtered, userSettings?.preferredExchanges);
-  
-  // 3. Ordenar priorizando rutas single-exchange si el usuario lo prefiere
-  filtered = applySorting(filtered, userSettings.preferSingleExchange);
-  
-  // 3. Limitar cantidad de rutas mostradas
+
+  // 3. Ordenar rutas según preferencias del usuario
+  filtered = applySorting(filtered, userSettings.preferSingleExchange, userSettings.sortByProfit);
+
+  // 4. Limitar cantidad de rutas mostradas
   const maxDisplay = userSettings.maxRoutesDisplay || 20;
   filtered = applyLimit(filtered, maxDisplay);
-  
-  if (DEBUG_MODE) console.log('🔍 [POPUP] applyUserPreferences retornando', filtered.length, 'rutas');
+
+  if (DEBUG_MODE) console.log('🔍 [POPUP] applyUserPreferences retornando', filtered.length, 'rutas finales');
   return filtered;
 }
 
-// Funciones helper para reducir complejidad de applyUserPreferences
-function applyNegativeFilter(routes, showNegative) {
-  if (showNegative === false) {
-    const beforeCount = routes.length;
-    const filtered = routes.filter(r => r.profitPercent >= 0);
-    if (DEBUG_MODE) console.log(`🔧 [POPUP] Filtradas ${beforeCount - filtered.length} rutas negativas, quedan ${filtered.length}`);
-    return filtered;
-  }
-  if (DEBUG_MODE) console.log('🔍 [POPUP] No se filtran rutas negativas');
-  return routes;
+// MEJORADO v5.0.64: Filtro unificado que reemplaza applyProfitThresholdFilter, applyOnlyProfitableFilter y applyNegativeFilter
+function applyMinProfitFilter(routes, filterMinProfit) {
+  // filterMinProfit por defecto es -10.0% (muestra casi todo)
+  // Usuario puede configurar desde -10% hasta +20%
+  const minProfit = filterMinProfit ?? -10.0;
+  
+  const beforeCount = routes.length;
+  const filtered = routes.filter(r => r.profitPercentage >= minProfit);
+  if (DEBUG_MODE) console.log(`🔧 [POPUP] Filtradas por ganancia mínima ${minProfit}%: ${beforeCount} → ${filtered.length} rutas`);
+  return filtered;
 }
 
 function applyPreferredExchangesFilter(routes, preferredExchanges) {
+  // Si no hay exchanges preferidos configurados, mostrar todas las rutas
   if (!preferredExchanges || !Array.isArray(preferredExchanges) || preferredExchanges.length === 0) {
-    if (DEBUG_MODE) console.log('🔍 [POPUP] No hay exchanges preferidos configurados');
+    if (DEBUG_MODE) console.log('🔍 [POPUP] No hay exchanges preferidos configurados - mostrando todas las rutas');
     return routes;
   }
-  
+
   const beforeCount = routes.length;
   const filtered = routes.filter(route => {
     // Una ruta pasa el filtro si al menos uno de sus exchanges está en la lista preferida
-    return preferredExchanges.includes(route.buyExchange) || 
+    return preferredExchanges.includes(route.buyExchange) ||
            (route.sellExchange && preferredExchanges.includes(route.sellExchange));
   });
-  
+
   if (DEBUG_MODE) console.log(`🔧 [POPUP] Exchanges preferidos (${preferredExchanges.join(', ')}): ${beforeCount} → ${filtered.length} rutas`);
   return filtered;
 }
 
-function applySorting(routes, preferSingleExchange) {
+function applySorting(routes, preferSingleExchange, sortByProfit) {
   if (preferSingleExchange === true) {
     routes.sort((a, b) => {
       if (a.isSingleExchange !== b.isSingleExchange) {
         return b.isSingleExchange - a.isSingleExchange;
       }
-      return b.profitPercent - a.profitPercent;
+      return b.profitPercentage - a.profitPercentage;
     });
     if (DEBUG_MODE) console.log('🔧 [POPUP] Rutas ordenadas priorizando mismo broker');
+  } else if (sortByProfit === true) {
+    routes.sort((a, b) => b.profitPercentage - a.profitPercentage);
+    if (DEBUG_MODE) console.log('🔧 [POPUP] Rutas ordenadas por ganancia descendente');
   }
   return routes;
 }
@@ -665,10 +713,10 @@ function displayArbitrages(arbitrages, official) {
   
   arbitrages.forEach((arb, index) => {
     // Determinar si es ganancia o pérdida
-    const { isNegative, profitClass, profitBadgeClass } = getProfitClasses(arb.profitPercent);
+    const { isNegative, profitClass, profitBadgeClass } = getProfitClasses(arb.profitPercentage);
     
     // Indicadores especiales
-    const lowProfitIndicator = arb.profitPercent >= 0 && arb.profitPercent < 1 ? '<span class="low-profit-tag">👁️ Solo vista</span>' : '';
+    const lowProfitIndicator = arb.profitPercentage >= 0 && arb.profitPercentage < 1 ? '<span class="low-profit-tag">👁️ Solo vista</span>' : '';
     const negativeIndicator = isNegative ? '<span class="negative-tag">⚠️ Pérdida</span>' : '';
     
     // Símbolo según ganancia/pérdida
@@ -681,7 +729,7 @@ function displayArbitrages(arbitrages, official) {
       <div class="arbitrage-card ${profitClass}" data-index="${index}">
         <div class="card-header">
           <h3>🏦 ${arb.broker}</h3>
-          <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${formatNumber(arb.profitPercent)}% ${lowProfitIndicator}${negativeIndicator}</div>
+          <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${formatNumber(arb.profitPercentage)}% ${lowProfitIndicator}${negativeIndicator}</div>
         </div>
         <div class="card-body">
           <div class="price-row">
@@ -709,7 +757,7 @@ function displayArbitrages(arbitrages, official) {
           </div>
           <div class="price-row">
             <span class="price-label">✅ Ganancia Neta</span>
-            <span class="price-value net-profit">+${formatNumber(arb.profitPercent)}%</span>
+            <span class="price-value net-profit">+${formatNumber(arb.profitPercentage)}%</span>
           </div>
           ` : ''}
         </div>
@@ -740,18 +788,48 @@ function displayOptimizedRoutes(routes, official) {
   console.log('🔍 [POPUP] displayOptimizedRoutes() llamado con', routes?.length, 'rutas');
   const container = document.getElementById('optimized-routes');
   console.log('🔍 [POPUP] container encontrado:', !!container);
-  
+
   if (!routes || routes.length === 0) {
-    console.log('🔍 [POPUP] No hay rutas para mostrar, mostrando mensaje vacío');
-    container.innerHTML = '<p class="info">📊 No hay rutas disponibles en este momento.</p>';
+    console.log('🔍 [POPUP] No hay rutas para mostrar, mostrando mensaje informativo');
+    container.innerHTML = `
+      <div class="market-status">
+        <h3>📊 Estado del Mercado</h3>
+        <p>No se encontraron rutas de arbitraje que cumplan con tus criterios de filtrado.</p>
+        <div class="market-info">
+          <p><strong>Posibles causas:</strong></p>
+          <ul>
+            <li>🎯 <strong>Umbral de ganancia muy alto:</strong> Prueba bajar el umbral mínimo en Configuración</li>
+            <li>🏦 <strong>Exchanges preferidos restrictivos:</strong> Agrega más exchanges en Configuración</li>
+            <li>� <strong>Mercado en equilibrio:</strong> Las tasas están muy cercanas al dólar oficial</li>
+            <li>🔄 <strong>Filtro P2P activo:</strong> Cambia a "Todas" o "No P2P" en los filtros</li>
+          </ul>
+          <p><small>Tu configuración actual: Umbral ${userSettings?.profitThreshold || 1.0}%, Exchanges: ${userSettings?.preferredExchanges?.length ? userSettings.preferredExchanges.join(', ') : 'Todos'}</small></p>
+        </div>
+        <button class="retry-btn" data-action="reload" style="margin-top: 15px;">🔄 Actualizar Datos</button>
+        <button class="settings-btn" onclick="chrome.runtime.openOptionsPage()" style="margin-top: 10px;">⚙️ Revisar Configuración</button>
+      </div>
+    `;
     return;
   }
 
-  console.log('🔍 [POPUP] Generando HTML para', routes.length, 'rutas');
+  // Ordenar rutas por rentabilidad (de mayor a menor ganancia)
+  // CORREGIDO v5.0.71: Usar calculation.profitPercentage para consistencia
+  routes.sort((a, b) => {
+    const profitA = a.calculation?.profitPercentage !== undefined ? a.calculation.profitPercentage : (a.profitPercentage || 0);
+    const profitB = b.calculation?.profitPercentage !== undefined ? b.calculation.profitPercentage : (b.profitPercentage || 0);
+    return profitB - profitA;
+  });
+
+  console.log('🔍 [POPUP] Generando HTML para', routes.length, 'rutas ordenadas por rentabilidad');
   let html = '';
   
   routes.forEach((route, index) => {
-    const { isNegative, profitClass, profitBadgeClass } = getProfitClasses(route.profitPercent);
+    // CORREGIDO v5.0.71: Usar calculation.profitPercentage para consistencia con la guía
+    const displayProfitPercentage = route.calculation?.profitPercentage !== undefined 
+      ? route.calculation.profitPercentage 
+      : route.profitPercentage || 0;
+    
+    const { isNegative, profitClass, profitBadgeClass } = getProfitClasses(displayProfitPercentage);
     
     // Indicadores
     const negativeIndicator = isNegative ? '<span class="negative-tag">⚠️ Pérdida</span>' : '';
@@ -773,8 +851,22 @@ function displayOptimizedRoutes(routes, official) {
       ? `<strong>${route.buyExchange}</strong>`
       : `<strong>${route.buyExchange}</strong> → <strong>${route.sellExchange}</strong>`;
     
+    // CORREGIDO v5.0.72: Guardar la ruta completa como JSON en data-route para evitar problemas de índices
+    const routeData = JSON.stringify({
+      buyExchange: route.buyExchange,
+      sellExchange: route.sellExchange,
+      isSingleExchange: route.isSingleExchange,
+      profitPercentage: displayProfitPercentage,
+      officialPrice: route.officialPrice,
+      usdToUsdtRate: route.usdToUsdtRate,
+      usdtArsBid: route.usdtArsBid,
+      transferFeeUSD: route.transferFeeUSD,
+      calculation: route.calculation,
+      fees: route.fees
+    });
+    
     html += `
-      <div class="route-card ${profitClass} ${isP2P ? 'is-p2p' : 'is-direct'}" data-index="${index}">
+      <div class="route-card ${profitClass} ${isP2P ? 'is-p2p' : 'is-direct'}" data-index="${index}" data-route='${routeData.replace(/'/g, "&apos;")}'>
         <div class="route-header">
           <div class="route-title">
             <h3>${route.isSingleExchange ? '🎯' : '🔀'} Ruta ${index + 1}</h3>
@@ -782,7 +874,7 @@ function displayOptimizedRoutes(routes, official) {
               ${singleExchangeBadge}
               ${p2pBadge}
             </div>
-            <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${formatNumber(route.profitPercent)}% ${negativeIndicator}</div>
+            <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${formatNumber(displayProfitPercentage)}% ${negativeIndicator}</div>
           </div>
         </div>
         
@@ -804,36 +896,50 @@ function displayOptimizedRoutes(routes, official) {
   
   container.innerHTML = html;
   
-  // Agregar event listeners a las tarjetas - Click va directo a la guía
-  const routeCards = document.querySelectorAll('.route-card');
+  // CORREGIDO v5.0.64: Seleccionar route-cards del container correcto
+  const routeCards = container.querySelectorAll('.route-card');
+  
+  console.log(`🔍 [POPUP] Agregando event listeners a ${routeCards.length} route-cards`);
   
   routeCards.forEach((card, idx) => {
     card.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
       
-      const index = parseInt(this.dataset.index);
+      // CORREGIDO v5.0.72: Usar data-route en lugar de índice para obtener la ruta exacta
+      const routeData = this.dataset.route;
+      if (!routeData) {
+        console.error('❌ [POPUP] No se encontró data-route en la tarjeta');
+        return;
+      }
       
-      // Remover selección previa
-      document.querySelectorAll('.route-card').forEach(c => c.classList.remove('selected'));
-      this.classList.add('selected');
-      
-      // Mostrar guía paso a paso
-      showRouteGuide(index);
+      try {
+        const route = JSON.parse(routeData);
+        console.log(`🖱️ [POPUP] Click en route-card:`, route.buyExchange, '→', route.sellExchange);
+        
+        // Remover selección previa
+        container.querySelectorAll('.route-card').forEach(c => c.classList.remove('selected'));
+        this.classList.add('selected');
+        
+        // Mostrar guía paso a paso con la ruta exacta
+        showRouteGuideFromData(route);
+      } catch (error) {
+        console.error('❌ [POPUP] Error al parsear data-route:', error);
+      }
     });
   });
   
   console.log('✅ [POPUP] displayOptimizedRoutes() completado - HTML generado y aplicado');
 }
 
-// NUEVA FUNCIÓN v5.0.5: Mostrar guía de una ruta optimizada
-function showRouteGuide(index) {
-  if (!currentData?.optimizedRoutes?.[index]) {
-    console.warn('No hay ruta disponible para el índice:', index);
+// NUEVA FUNCIÓN v5.0.72: Mostrar guía desde datos de ruta directos (sin índice)
+function showRouteGuideFromData(route) {
+  console.log(`🔍 [POPUP] showRouteGuideFromData() llamado con ruta:`, route);
+  
+  if (!route) {
+    console.warn(`❌ [POPUP] No hay datos de ruta disponibles`);
     return;
   }
-  
-  const route = currentData.optimizedRoutes[index];
   
   // Convertir ruta a formato de arbitraje para la guía
   const arbitrage = {
@@ -841,7 +947,7 @@ function showRouteGuide(index) {
     buyExchange: route.buyExchange || 'N/A',
     sellExchange: route.sellExchange || route.buyExchange || 'N/A',
     isSingleExchange: route.isSingleExchange || false,
-    profitPercent: route.profitPercent || route.profitPercentage || 0,
+    profitPercentage: route.profitPercentage || 0,
     officialPrice: route.officialPrice || 0,
     usdToUsdtRate: route.usdToUsdtRate || 1,
     usdtArsBid: route.usdtArsBid || 0,
@@ -851,7 +957,7 @@ function showRouteGuide(index) {
     fees: route.fees || { trading: 0, withdrawal: 0 }
   };
   
-  console.log('🔄 Arbitrage convertido:', arbitrage);
+  console.log('🔄 [POPUP] Arbitrage convertido:', arbitrage);
   
   selectedArbitrage = arbitrage;
   displayStepByStepGuide(arbitrage);
@@ -859,10 +965,58 @@ function showRouteGuide(index) {
   // Cambiar a la pestaña de guía
   const guideTab = document.querySelector('[data-tab="guide"]');
   if (guideTab) {
-    console.log('✅ Cambiando a pestaña de guía');
+    console.log('✅ [POPUP] Cambiando a pestaña de guía');
     guideTab.click();
   } else {
-    console.error('❌ No se encontró el botón de la pestaña guía');
+    console.error('❌ [POPUP] No se encontró el botón de la pestaña guía');
+  }
+}
+
+// FUNCIÓN LEGACY v5.0.5: Mostrar guía de una ruta optimizada (POR ÍNDICE - DEPRECADO en v5.0.72)
+// Mantener para compatibilidad pero ya no se usa
+function showRouteGuide(index) {
+  console.log(`🔍 [POPUP] showRouteGuide() llamado con índice: ${index}`);
+  console.log(`🔍 [POPUP] currentData existe:`, !!currentData);
+  console.log(`🔍 [POPUP] currentData.optimizedRoutes existe:`, !!currentData?.optimizedRoutes);
+  console.log(`🔍 [POPUP] currentData.optimizedRoutes.length:`, currentData?.optimizedRoutes?.length);
+  
+  if (!currentData?.optimizedRoutes?.[index]) {
+    console.warn(`❌ [POPUP] No hay ruta disponible para el índice: ${index}`);
+    console.warn(`   currentData:`, currentData);
+    return;
+  }
+  
+  const route = currentData.optimizedRoutes[index];
+  console.log(`✅ [POPUP] Ruta encontrada para índice ${index}:`, route);
+  
+  // Convertir ruta a formato de arbitraje para la guía
+  const arbitrage = {
+    broker: route.isSingleExchange ? route.buyExchange : `${route.buyExchange} → ${route.sellExchange}`,
+    buyExchange: route.buyExchange || 'N/A',
+    sellExchange: route.sellExchange || route.buyExchange || 'N/A',
+    isSingleExchange: route.isSingleExchange || false,
+    profitPercentage: route.profitPercentage || route.profitPercent || 0,
+    officialPrice: route.officialPrice || 0,
+    usdToUsdtRate: route.usdToUsdtRate || 1,
+    usdtArsBid: route.usdtArsBid || 0,
+    sellPrice: route.usdtArsBid || 0,
+    transferFeeUSD: route.transferFeeUSD || 0,
+    calculation: route.calculation || {},
+    fees: route.fees || { trading: 0, withdrawal: 0 }
+  };
+  
+  console.log('🔄 [POPUP] Arbitrage convertido:', arbitrage);
+  
+  selectedArbitrage = arbitrage;
+  displayStepByStepGuide(arbitrage);
+  
+  // Cambiar a la pestaña de guía
+  const guideTab = document.querySelector('[data-tab="guide"]');
+  if (guideTab) {
+    console.log('✅ [POPUP] Cambiando a pestaña de guía');
+    guideTab.click();
+  } else {
+    console.error('❌ [POPUP] No se encontró el botón de la pestaña guía');
   }
 }
 
@@ -940,6 +1094,13 @@ function getProfitClasses(profitPercent) {
 // Calcular valores para la guía paso a paso
 function calculateGuideValues(arb) {
   const calc = arb.calculation || {};
+  
+  // CORREGIDO v5.0.71: Usar profitPercentage de calculation para consistencia
+  // Si existe calculation.profitPercentage, usarlo; sino usar el top-level
+  const correctProfitPercentage = calc.profitPercentage !== undefined 
+    ? calc.profitPercentage 
+    : arb.profitPercentage || 0;
+  
   return {
     estimatedInvestment: calc.initial || 100000,
     officialPrice: arb.officialPrice || 1000,
@@ -949,7 +1110,7 @@ function calculateGuideValues(arb) {
     arsFromSale: calc.arsFromSale || ((calc.usdtAfterFees || calc.usdPurchased || ((calc.initial || 100000) / (arb.officialPrice || 1000))) * (arb.sellPrice || arb.usdtArsBid || 1000)),
     finalAmount: calc.finalAmount || (calc.arsFromSale || ((calc.usdtAfterFees || calc.usdPurchased || ((calc.initial || 100000) / (arb.officialPrice || 1000))) * (arb.sellPrice || arb.usdtArsBid || 1000))),
     profit: calc.netProfit || ((calc.finalAmount || calc.arsFromSale || ((calc.usdtAfterFees || calc.usdPurchased || ((calc.initial || 100000) / (arb.officialPrice || 1000))) * (arb.sellPrice || arb.usdtArsBid || 1000))) - (calc.initial || 100000)),
-    profitPercent: arb.profitPercent || 0,
+    profitPercentage: correctProfitPercentage,  // USAR EL VALOR CORRECTO
     usdToUsdtRate: arb.usdToUsdtRate || 1,
     usdtArsBid: arb.usdtArsBid || (arb.sellPrice || 1000),
     fees: arb.fees || { trading: 0, withdrawal: 0, total: 0 },
@@ -958,8 +1119,8 @@ function calculateGuideValues(arb) {
 }
 
 // Generar HTML del header de la guía
-function generateGuideHeader(broker, profitPercent) {
-  const isProfitable = profitPercent >= 0;
+function generateGuideHeader(broker, profitPercentage) {
+  const isProfitable = profitPercentage >= 0;
   return `
     <div class="guide-header-simple">
       <div class="guide-title">
@@ -969,7 +1130,7 @@ function generateGuideHeader(broker, profitPercent) {
         <span class="profit-icon">${isProfitable ? '📈' : '📉'}</span>
         <span class="profit-text">
           ${isProfitable ? 'Ganancia' : 'Pérdida'}: 
-          <strong>${isProfitable ? '+' : ''}${formatNumber(profitPercent)}%</strong>
+          <strong>${isProfitable ? '+' : ''}${formatNumber(profitPercentage)}%</strong>
         </span>
       </div>
     </div>
@@ -978,7 +1139,7 @@ function generateGuideHeader(broker, profitPercent) {
 
 // Generar HTML de los pasos de la guía (SIMPLIFICADO)
 function generateGuideSteps(values) {
-  const { estimatedInvestment, officialPrice, usdAmount, usdToUsdtRate, usdtAfterFees, usdtArsBid, arsFromSale, finalAmount, profit, profitPercent, broker } = values;
+  const { estimatedInvestment, officialPrice, usdAmount, usdToUsdtRate, usdtAfterFees, usdtArsBid, arsFromSale, finalAmount, profit, profitPercentage, broker } = values;
 
   return `
     <div class="steps-simple">
@@ -1052,7 +1213,7 @@ function generateGuideSteps(values) {
             <div class="profit-main">
               <span class="profit-icon">${profit >= 0 ? '📈' : '📉'}</span>
               <span class="profit-amount">${profit >= 0 ? '+' : ''}$${formatNumber(profit)}</span>
-              <span class="profit-percent">(${profit >= 0 ? '+' : ''}${formatNumber(profitPercent)}%)</span>
+              <span class="profit-percent">(${profit >= 0 ? '+' : ''}${formatNumber(profitPercentage)}%)</span>
             </div>
             <div class="profit-subtitle">
               ${profit >= 0 ? 'Ganancia neta' : 'Pérdida neta'}
@@ -1135,39 +1296,42 @@ function setupGuideAnimations(container) {
 
 // Función principal refactorizada para mostrar guía paso a paso
 function displayStepByStepGuide(arb) {
-  log('📝 Generando guía paso a paso para:', arb);
+  console.log('📝 [POPUP] displayStepByStepGuide() llamado con:', arb);
 
   const container = document.getElementById('selected-arbitrage-guide');
   if (!container) {
-    log('❌ No se encontró el contenedor selected-arbitrage-guide');
+    console.error('❌ [POPUP] No se encontró el contenedor selected-arbitrage-guide');
     return;
   }
 
-  log('✅ Contenedor de guía encontrado');
+  console.log('✅ [POPUP] Contenedor de guía encontrado:', container);
 
   // Validar datos mínimos necesarios
   if (!arb.broker) {
-    log('❌ Datos incompletos del arbitraje:', arb);
+    console.error('❌ [POPUP] Datos incompletos del arbitraje:', arb);
     container.innerHTML = '<p class="error">❌ Error: Datos incompletos del arbitraje</p>';
     return;
   }
 
   // Calcular valores usando función auxiliar
   const values = calculateGuideValues(arb);
-  log('📊 Valores calculados para la guía:', values);
+  console.log('📊 [POPUP] Valores calculados para la guía:', values);
 
   // Generar HTML completo usando funciones auxiliares (SIMPLIFICADO)
   const html = `
     <div class="guide-container-simple">
-      ${generateGuideHeader(values.broker, values.profitPercent)}
+      ${generateGuideHeader(values.broker, values.profitPercentage)}
       ${generateGuideSteps(values)}
     </div>
   `;
 
+  console.log('📄 [POPUP] HTML generado, insertando en container...');
   container.innerHTML = html;
+  console.log('✅ [POPUP] HTML insertado correctamente');
 
   // Configurar animaciones y event listeners
   setupGuideAnimations(container);
+  console.log('✅ [POPUP] Guía paso a paso mostrada correctamente');
 }
 
 // Cargar datos de bancos
@@ -1308,49 +1472,61 @@ function updateBanksTimestamp() {
   }
 }
 
-// NUEVO: Cargar datos de bancos desde dolarito.ar
+// CORREGIDO v5.0.69: Función para cargar cotizaciones bancarias reales
 async function loadBankRates() {
+  const container = document.getElementById('banks-list');
   const refreshBtn = document.getElementById('refresh-banks');
-  const timestampEl = document.getElementById('banks-last-update');
+  
+  // Mostrar loading
+  container.innerHTML = `
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Cargando cotizaciones bancarias...</p>
+    </div>
+  `;
+  
+  // Deshabilitar botón mientras carga
+  if (refreshBtn) {
+    refreshBtn.disabled = true;
+    refreshBtn.textContent = '⏳ Cargando...';
+  }
   
   try {
-    // Deshabilitar botón durante la carga
-    if (refreshBtn) {
-      refreshBtn.disabled = true;
-      refreshBtn.textContent = '⏳ Cargando...';
-    }
-    
-    // Solicitar datos al background con configuración de usuario
-    const response = await new Promise((resolve) => {
-      chrome.runtime.sendMessage({ 
-        action: 'getBankRates',
-        userSettings: {
-          selectedBanks: userSettings?.selectedBanks || []
-        }
-      }, resolve);
-    });
+    // Solicitar datos al background
+    const response = await chrome.runtime.sendMessage({ action: 'getBankRates' });
     
     if (response && response.bankRates) {
-      // NUEVO v5.0.37: Guardar datos de bancos en currentData para usar en matriz
-      if (!currentData) currentData = {};
-      currentData.banks = response.bankRates;
-      
-      displayBanks(response.bankRates);
+      console.log('[POPUP] 🏦 Cotizaciones bancarias recibidas:', Object.keys(response.bankRates).length, 'bancos');
+      await displayBanks(response.bankRates);
     } else {
-      throw new Error('No se pudieron obtener datos de bancos');
+      // Sin datos disponibles
+      container.innerHTML = `
+        <div class="select-prompt">
+          <p>📊 No hay cotizaciones bancarias disponibles</p>
+          <p style="margin-top: 8px; font-size: 0.85em;">
+            Los datos se obtienen automáticamente de <strong>dolarito.ar</strong> y <strong>CriptoYa</strong>
+          </p>
+          <p style="margin-top: 8px; font-size: 0.85em; color: #94a3b8;">
+            Intenta actualizar nuevamente en unos momentos
+          </p>
+        </div>
+      `;
     }
-    
   } catch (error) {
-    console.error('Error cargando datos de bancos:', error);
-    const container = document.getElementById('banks-list');
+    console.error('[POPUP] ❌ Error al cargar cotizaciones bancarias:', error);
     container.innerHTML = `
       <div class="select-prompt">
-        <p>❌ Error al cargar datos de bancos</p>
-        <p style="margin-top: 8px; font-size: 0.85em;">Intenta nuevamente en unos momentos</p>
+        <p>⚠️ Error al cargar cotizaciones bancarias</p>
+        <p style="margin-top: 8px; font-size: 0.85em; color: #ef4444;">
+          ${error.message || 'Error desconocido'}
+        </p>
+        <p style="margin-top: 8px; font-size: 0.85em; color: #94a3b8;">
+          Intenta actualizar nuevamente
+        </p>
       </div>
     `;
   } finally {
-    // Re-habilitar botón
+    // Rehabilitar botón
     if (refreshBtn) {
       refreshBtn.disabled = false;
       refreshBtn.textContent = '🔄 Actualizar';
@@ -1475,7 +1651,7 @@ function resetSimulatorConfig() {
   
   // Verificar que todos existan
   const missingElements = Object.entries(elements)
-    .filter(([key, el]) => !el)
+    .filter(([key, value]) => !value)
     .map(([key]) => key);
   
   if (missingElements.length > 0) {
@@ -1501,11 +1677,12 @@ function resetSimulatorConfig() {
 }
 
 // NUEVO v5.0.31: Generar Matriz de Riesgo mejorada (sin rutas)
-async function generateRiskMatrix() {
-  console.log('🔍 [MATRIZ] Iniciando generateRiskMatrix...');
+async function generateRiskMatrix(useCustomParams = false) {
+  console.log('🔍 [MATRIZ] Iniciando generateRiskMatrix...', useCustomParams ? 'con parámetros personalizados' : 'con datos automáticos');
   console.log('🔍 [MATRIZ] currentData:', currentData ? 'existe' : 'null');
   console.log('🔍 [MATRIZ] currentData.banks:', currentData?.banks ? Object.keys(currentData.banks).length + ' bancos' : 'no existe');
   console.log('🔍 [MATRIZ] currentData.usdt:', currentData?.usdt ? Object.keys(currentData.usdt).length + ' exchanges' : 'no existe');
+
   const amountInput = document.getElementById('sim-amount');
   const amount = parseFloat(amountInput?.value) || 1000000;
 
@@ -1515,118 +1692,140 @@ async function generateRiskMatrix() {
     return;
   }
 
-  // NUEVO v5.0.36: Obtener datos dinámicos de bancos y exchanges
-  // En lugar de usar inputs fijos, usar datos reales de bancos principales y exchanges USDT
-
-  // Obtener datos de bancos principales (compra de dólar)
   let usdPrices = [];
   let usdtPrices = [];
 
-  // Intentar obtener datos de bancos del consenso actual
-  if (!currentData || !currentData.banks || Object.keys(currentData.banks).length === 0) {
-    console.log('💵 [MATRIZ] No hay datos de bancos, intentando cargar...');
-    // Si no hay datos de bancos, intentar cargarlos
-    try {
-      await loadBankRates();
-      // Pequeña pausa para asegurar que los datos se guarden
-      await new Promise(resolve => setTimeout(resolve, 500));
-      console.log('💵 [MATRIZ] Datos de bancos cargados:', currentData?.banks ? Object.keys(currentData.banks).length + ' bancos' : 'falló');
-    } catch (error) {
-      console.warn('💵 [MATRIZ] Error cargando bancos para matriz:', error);
+  if (useCustomParams) {
+    // MODO PERSONALIZADO: Usar valores de los inputs
+    log('[MATRIZ] Usando parámetros personalizados del usuario');
+    const usdMinInput = parseFloat(document.getElementById('matrix-usd-min')?.value) || (currentData?.oficial?.compra || 1000);
+    const usdMaxInput = parseFloat(document.getElementById('matrix-usd-max')?.value) || (currentData?.oficial?.compra * 1.5 || 1500);
+    const usdtMinInput = parseFloat(document.getElementById('matrix-usdt-min')?.value) || 1000;
+    const usdtMaxInput = parseFloat(document.getElementById('matrix-usdt-max')?.value) || 1100;
+
+    // Validaciones de rangos para modo personalizado
+    if (usdMinInput >= usdMaxInput) {
+      alert('⚠️ El USD mínimo debe ser menor que el USD máximo');
+      return;
     }
-  }
+    if (usdtMinInput >= usdtMaxInput) {
+      alert('⚠️ El USDT mínimo debe ser menor que el USDT máximo');
+      return;
+    }
 
-  if (currentData && currentData.banks) {
-    console.log('💵 [MATRIZ] Procesando datos de bancos...');
-    // Usar precios de compra de bancos principales (corregidos después del fix)
-    const bankCompraPrices = Object.values(currentData.banks)
-      .filter(bank => bank.compra && bank.compra > 0)
-      .map(bank => bank.compra)
-      .sort((a, b) => a - b);
+    // Generar valores equidistantes para modo personalizado
+    for (let i = 0; i < 5; i++) {
+      usdPrices.push(usdMinInput + (usdMaxInput - usdMinInput) * i / 4);
+      usdtPrices.push(usdtMinInput + (usdtMaxInput - usdtMinInput) * i / 4);
+    }
 
-    console.log('💵 [MATRIZ] Precios de compra encontrados:', bankCompraPrices);
+    log('[MATRIZ] Parámetros personalizados - USD:', usdPrices.map(p => p.toFixed(2)), 'USDT:', usdtPrices.map(p => p.toFixed(2)));
+  } else {
+    // MODO AUTOMÁTICO: Usar lógica dinámica con datos reales
+    log('[MATRIZ] Usando modo automático con datos dinámicos');
 
-    if (bankCompraPrices.length >= 1) {
-      // NUEVO v5.0.39: Lógica específica del usuario
-      // USD mínimo = menor precio de compra de bancos principales
-      // USD máximo = mínimo + 50%
-      const usdMin = Math.min(...bankCompraPrices);
-      const usdMax = usdMin * 1.5; // +50% sobre el mínimo
+    // Intentar obtener datos de bancos del consenso actual
+    if (!currentData || !currentData.banks || Object.keys(currentData.banks).length === 0) {
+      log('[MATRIZ] No hay datos de bancos, intentando cargar...');
+      try {
+        await loadBankRates();
+        // Pequeña pausa para asegurar que los datos se guarden
+        await new Promise(resolve => setTimeout(resolve, 500));
+        log('[MATRIZ] Datos de bancos cargados:', currentData?.banks ? Object.keys(currentData.banks).length + ' bancos' : 'falló');
+      } catch (error) {
+        console.warn('[MATRIZ] Error cargando bancos:', error);
+      }
+    }
 
-      // Generar 5 puntos equidistantes entre min y max
-      usdPrices = [];
+    // Procesar datos de bancos para USD
+    if (currentData && currentData.banks) {
+      log('[MATRIZ] Procesando datos de bancos...');
+      const bankCompraPrices = Object.values(currentData.banks)
+        .filter(bank => bank.compra && bank.compra > 0)
+        .map(bank => bank.compra)
+        .sort((a, b) => a - b);
+
+      log('[MATRIZ] Precios de compra encontrados:', bankCompraPrices.length, 'bancos');
+
+      if (bankCompraPrices.length >= 1) {
+        // USD mínimo = menor precio de compra de bancos principales
+        // USD máximo = mínimo + 50%
+        const usdMin = Math.min(...bankCompraPrices);
+        const usdMax = usdMin * 1.5; // +50% sobre el mínimo
+
+        // Generar 5 puntos equidistantes entre min y max
+        for (let i = 0; i < 5; i++) {
+          usdPrices.push(usdMin + (usdMax - usdMin) * i / 4);
+        }
+
+        log('[MATRIZ] USD - Mínimo de bancos:', usdMin.toFixed(2), 'Máximo (min+50%):', usdMax.toFixed(2));
+        log('[MATRIZ] Precios USD generados:', usdPrices.length, 'valores');
+      }
+    }
+
+    // Si no hay datos de bancos, usar precio oficial o fallback
+    if (usdPrices.length === 0) {
+      const usdMin = currentData?.oficial?.compra || parseFloat(document.getElementById('matrix-usd-min')?.value) || 1000;
+      const usdMax = usdMin * 1.5;
       for (let i = 0; i < 5; i++) {
         usdPrices.push(usdMin + (usdMax - usdMin) * i / 4);
       }
+      log('[MATRIZ] Usando precio oficial o fallback para USD:', usdMin.toFixed(2));
+    }
 
-      console.log('💵 [MATRIZ] USD - Mínimo de bancos:', usdMin.toFixed(2), 'Máximo (min+50%):', usdMax.toFixed(2));
-      console.log('💵 [MATRIZ] Precios USD generados:', usdPrices.map(p => p.toFixed(2)));
+    // Procesar datos de exchanges USDT
+    if (currentData && currentData.usdt) {
+      log('[MATRIZ] Procesando datos de USDT...');
+      const usdtSellPrices = Object.values(currentData.usdt)
+        .filter(exchange => exchange.venta && exchange.venta > 0)
+        .map(exchange => exchange.venta)
+        .sort((a, b) => b - a); // Orden descendente para tomar los más altos primero
+
+      log('[MATRIZ] Precios de venta USDT encontrados:', usdtSellPrices.length, 'exchanges');
+
+      if (usdtSellPrices.length >= 5) {
+        // Tomar exactamente los 5 precios más altos
+        usdtPrices = usdtSellPrices.slice(0, 5);
+        log('[MATRIZ] Usando los 5 precios USDT venta más altos');
+      } else if (usdtSellPrices.length >= 1) {
+        // Si hay menos de 5, usar todos los disponibles
+        usdtPrices = usdtSellPrices;
+        log('[MATRIZ] Usando todos los precios USDT disponibles:', usdtPrices.length);
+      }
+    }
+
+    // Si no hay datos de exchanges, usar valores por defecto
+    if (usdtPrices.length === 0) {
+      const usdtMin = parseFloat(document.getElementById('matrix-usdt-min')?.value) || 1000;
+      const usdtMax = parseFloat(document.getElementById('matrix-usdt-max')?.value) || 1100;
+      for (let i = 0; i < 5; i++) {
+        usdtPrices.push(usdtMin + (usdtMax - usdtMin) * i / 4);
+      }
+      log('[MATRIZ] Usando precios USDT por defecto');
     }
   }
 
-  // Si no hay datos de bancos, usar valores por defecto
-  if (usdPrices.length === 0) {
-    const usdMin = parseFloat(document.getElementById('matrix-usd-min')?.value) || 940;
-    const usdMax = parseFloat(document.getElementById('matrix-usd-max')?.value) || 980;
-    for (let i = 0; i < 5; i++) {
-      usdPrices.push(usdMin + (usdMax - usdMin) * i / 4);
-    }
-    console.log('💵 [MATRIZ] Usando precios USD por defecto:', usdPrices.map(p => p.toFixed(2)));
-  }
+  // Validaciones finales de rangos
+  const finalUsdMin = Math.min(...usdPrices);
+  const finalUsdMax = Math.max(...usdPrices);
+  const finalUsdtMin = Math.min(...usdtPrices);
+  const finalUsdtMax = Math.max(...usdtPrices);
 
-  // Obtener datos de exchanges USDT (venta)
-  if (currentData && currentData.usdt) {
-    console.log('💰 [MATRIZ] Procesando datos de USDT...');
-    // Usar precios de venta de exchanges USDT más grandes
-    const usdtSellPrices = Object.values(currentData.usdt)
-      .filter(exchange => exchange.venta && exchange.venta > 0)
-      .map(exchange => exchange.venta)
-      .sort((a, b) => b - a); // Orden descendente para tomar los más altos primero
-
-    console.log('💰 [MATRIZ] Precios de venta USDT encontrados:', usdtSellPrices);
-
-    if (usdtSellPrices.length >= 5) {
-      // NUEVO v5.0.39: Tomar exactamente los 5 precios más altos
-      usdtPrices = usdtSellPrices.slice(0, 5);
-      console.log('💰 [MATRIZ] Usando los 5 precios USDT venta más altos:', usdtPrices.map(p => p.toFixed(2)));
-    } else if (usdtSellPrices.length >= 1) {
-      // Si hay menos de 5, usar todos los disponibles
-      usdtPrices = usdtSellPrices;
-      console.log('💰 [MATRIZ] Usando todos los precios USDT disponibles:', usdtPrices.map(p => p.toFixed(2)));
-    }
-  }
-
-  // Si no hay datos de exchanges, usar valores por defecto
-  if (usdtPrices.length === 0) {
-    const usdtMin = parseFloat(document.getElementById('matrix-usdt-min')?.value) || 1000;
-    const usdtMax = parseFloat(document.getElementById('matrix-usdt-max')?.value) || 1040;
-    for (let i = 0; i < 5; i++) {
-      usdtPrices.push(usdtMin + (usdtMax - usdtMin) * i / 4);
-    }
-    console.log('💰 [MATRIZ] Usando precios USDT por defecto:', usdtPrices.map(p => p.toFixed(2)));
-  }
-
-  // Validaciones de rangos
-  const usdMin = Math.min(...usdPrices);
-  const usdMax = Math.max(...usdPrices);
-  const usdtMin = Math.min(...usdtPrices);
-  const usdtMax = Math.max(...usdtPrices);
-
-  if (usdMin >= usdMax) {
+  if (finalUsdMin >= finalUsdMax) {
     alert('⚠️ Error: Los precios USD no son válidos');
     return;
   }
-  if (usdtMin >= usdtMax) {
+  if (finalUsdtMin >= finalUsdtMax) {
     alert('⚠️ Error: Los precios USDT no son válidos');
     return;
   }
-  
+
   // Obtener parámetros configurables
   const buyFeePercent = parseFloat(document.getElementById('sim-buy-fee')?.value) || 1.0;
   const sellFeePercent = parseFloat(document.getElementById('sim-sell-fee')?.value) || 1.0;
   const transferFeeUSD = parseFloat(document.getElementById('sim-transfer-fee-usd')?.value) || 0;
   const bankCommissionPercent = parseFloat(document.getElementById('sim-bank-commission')?.value) || 0;
-  
+
   // Validaciones de parámetros
   if (buyFeePercent < 0 || buyFeePercent > 10) {
     alert('⚠️ El fee de compra debe estar entre 0% y 10%');
@@ -1636,58 +1835,49 @@ async function generateRiskMatrix() {
     alert('⚠️ El fee de venta debe estar entre 0% y 10%');
     return;
   }
-  
-  console.log('📊 Generando matriz con parámetros:', {
-    amount,
-    usdPrices: usdPrices.map(p => p.toFixed(2)),
-    usdtPrices: usdtPrices.map(p => p.toFixed(2)),
-    fees: { buy: buyFeePercent, sell: sellFeePercent, transfer: transferFeeUSD, bank: bankCommissionPercent }
-  });
 
-  // Tasa USD a USDT (normalmente 1:1, pero puede variar ligeramente)
-  const usdToUsdtRate = 1.0;
-  
   // Crear tabla HTML
   let tableHTML = '<thead><tr><th>USD Compra \\ USDT Venta</th>';
   usdtPrices.forEach(price => {
     tableHTML += `<th>$${price.toFixed(0)}</th>`;
   });
   tableHTML += '</tr></thead><tbody>';
-  
+
   // Calcular rentabilidad para cada combinación
   usdPrices.forEach(usdPrice => {
     tableHTML += `<tr><td><strong>$${usdPrice.toFixed(0)}</strong></td>`;
-    
+
     usdtPrices.forEach(usdtPrice => {
       // Calcular ganancia con estos precios
       const bankCommissionARS = amount * (bankCommissionPercent / 100);
       const amountAfterBankCommission = amount - bankCommissionARS;
-      
+
       // Paso 1: Comprar USD
       const step1_usd = amountAfterBankCommission / usdPrice;
-      
-      // Paso 2: Comprar USDT con USD
+
+      // Paso 2: Comprar USDT con USD (usando tasa de conversión)
+      const usdToUsdtRate = usdPrice / usdtPrice; // Tasa USD/USDT
       const step2_usdt = step1_usd / usdToUsdtRate;
-      
+
       // Paso 3: Aplicar fee de compra
       const buyFeeDecimal = buyFeePercent / 100;
       const step2_usdtAfterFee = step2_usdt * (1 - buyFeeDecimal);
-      
+
       // Paso 4: Fee de transferencia (si aplica)
       const transferFeeUSDT = transferFeeUSD / usdToUsdtRate;
       const step3_usdtAfterTransfer = step2_usdtAfterFee - transferFeeUSDT;
-      
+
       // Paso 5: Vender USDT por ARS
       const step4_ars = step3_usdtAfterTransfer * usdtPrice;
-      
+
       // Paso 6: Aplicar fee de venta
       const sellFeeDecimal = sellFeePercent / 100;
       const finalAmount = step4_ars * (1 - sellFeeDecimal);
-      
+
       // Calcular ganancia
       const profit = finalAmount - amount;
       const profitPercent = (profit / amount) * 100;
-      
+
       // Determinar clase CSS según rentabilidad
       let cellClass = 'matrix-cell-negative';
       if (profitPercent > 1.0) {
@@ -1695,27 +1885,27 @@ async function generateRiskMatrix() {
       } else if (profitPercent >= 0) {
         cellClass = 'matrix-cell-neutral';
       }
-      
+
       tableHTML += `<td class="${cellClass}" title="Ganancia: $${formatNumber(profit)} ARS (${profitPercent.toFixed(2)}%)">${profitPercent.toFixed(2)}%</td>`;
     });
-    
+
     tableHTML += '</tr>';
   });
-  
+
   tableHTML += '</tbody>';
-  
+
   // Mostrar matriz
   const matrixTable = document.getElementById('risk-matrix-table');
   const matrixResult = document.getElementById('risk-matrix-result');
-  
+
   if (!matrixTable || !matrixResult) {
     alert('⚠️ Error: elementos de la matriz no encontrados');
     return;
   }
-  
+
   matrixTable.innerHTML = tableHTML;
   matrixResult.style.display = 'block';
-  
+
   // Scroll hacia la matriz
   matrixResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
@@ -1815,36 +2005,47 @@ function displayDollarInfo(officialData) {
   dollarInfo.style.display = 'block';
 }
 
-// Mostrar diálogo para recalcular con precio personalizado
+// MEJORADO v5.0.48: Recálculo funcional con opción de cambiar precio
 async function showRecalculateDialog() {
-  const customPrice = prompt(
-    '💵 Ingresa el precio del dólar para recalcular:\n\n' +
-    'Este será usado temporalmente para esta sesión.\n' +
-    'Para cambiar permanentemente, usa el botón de configuración.',
-    '950'
-  );
+  // Obtener configuración actual
+  const settings = await chrome.storage.local.get('notificationSettings');
+  const userSettings = settings.notificationSettings || {};
+  
+  const currentPrice = currentData?.oficial?.compra || 1000;
+  const isManual = userSettings.dollarPriceSource === 'manual';
+  
+  const message = isManual 
+    ? `💵 Precio manual actual: $${currentPrice.toFixed(2)}\n\n` +
+      'Puedes cambiarlo en Configuración o ingresa un nuevo valor temporal:'
+    : `💵 Precio automático actual: $${currentPrice.toFixed(2)}\n\n` +
+      'Para usar un precio personalizado, activa "Precio manual" en Configuración.\n\n' +
+      'Por ahora, ¿quieres cambiar temporalmente a modo manual?';
+  
+  const customPrice = prompt(message, currentPrice.toFixed(2));
 
   if (customPrice && !isNaN(customPrice) && parseFloat(customPrice) > 0) {
     const price = parseFloat(customPrice);
-    console.log(`🔄 Recalculando con precio personalizado: $${price}`);
     
-    // Enviar precio personalizado al background para recálculo temporal
-    chrome.runtime.sendMessage({
-      action: 'recalculateWithCustomPrice',
-      customPrice: price
-    }, (data) => {
-      if (chrome.runtime.lastError) {
-        console.error('Error recalculando:', chrome.runtime.lastError);
-        return;
-      }
-      
-      if (data && data.optimizedRoutes) {
-        console.log('✅ Recálculo completado con precio personalizado');
-        currentData = data;
-        displayDataFromBackground(data);
-        displayDollarInfo(data.oficial);
-      }
-    });
+    // Actualizar a modo manual con el nuevo precio
+    const newSettings = {
+      ...userSettings,
+      dollarPriceSource: 'manual',
+      manualDollarPrice: price
+    };
+    
+    // Guardar en storage (esto disparará el listener en background)
+    await chrome.storage.local.set({ notificationSettings: newSettings });
+    
+    // Mostrar confirmación
+    alert(`✅ Precio actualizado a $${price.toFixed(2)}\n\nRecalculando rutas...`);
+    
+    // Esperar un momento para que el background procese
+    setTimeout(() => {
+      fetchAndDisplay(true); // Forzar actualización
+    }, 500);
+  } else if (!customPrice) {
+    // Usuario canceló, solo refrescar datos actuales
+    fetchAndDisplay(true);
   }
 }
 
@@ -1941,3 +2142,10 @@ function setupUpdateBannerButtons(updateInfo) {
     };
   }
 }
+
+// Event listener global para botones de retry
+document.addEventListener('click', function(event) {
+  if (event.target.classList.contains('retry-btn') && event.target.dataset.action === 'reload') {
+    location.reload();
+  }
+});

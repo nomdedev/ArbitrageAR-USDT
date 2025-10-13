@@ -17,7 +17,7 @@
       <div id="dataStatus" class="data-status"></div>
     </div>
     <div class="header-buttons">
-      <span id="version-indicator" class="version-indicator" title="Versión instalada">v5.0.31</span>
+      <span id="version-indicator" class="version-indicator" title="Versión instalada">v5.0.51</span>
       <button id="settings" class="btn-settings" title="Configurar notificaciones">
         <span>⚙️</span>
       </button>
@@ -207,21 +207,21 @@
           <div class="matrix-controls">
             <div class="matrix-control-item">
               <label for="matrix-usd-min">USD Mínimo (ARS):</label>
-              <input type="number" id="matrix-usd-min" step="10" value="940" min="800" max="1200">
+              <input type="number" id="matrix-usd-min" step="10" value="1400" min="800" max="2000" placeholder="Auto">
             </div>
             <div class="matrix-control-item">
               <label for="matrix-usd-max">USD Máximo (ARS):</label>
-              <input type="number" id="matrix-usd-max" step="10" value="980" min="800" max="1200">
+              <input type="number" id="matrix-usd-max" step="10" value="2100" min="800" max="2500" placeholder="Auto">
             </div>
             <div class="matrix-control-item">
               <label for="matrix-usdt-min">USDT Mínimo (ARS):</label>
-              <input type="number" id="matrix-usdt-min" step="10" value="1000" min="900" max="1300">
+              <input type="number" id="matrix-usdt-min" step="10" value="1000" min="900" max="1300" placeholder="Auto">
             </div>
             <div class="matrix-control-item">
               <label for="matrix-usdt-max">USDT Máximo (ARS):</label>
-              <input type="number" id="matrix-usdt-max" step="10" value="1040" min="900" max="1300">
+              <input type="number" id="matrix-usdt-max" step="10" value="1100" min="900" max="1300" placeholder="Auto">
             </div>
-            <button id="generate-risk-matrix" class="matrix-generate-btn">🔍 Generar Matriz de Análisis</button>
+            <button id="generate-risk-matrix" class="matrix-generate-btn">� Regenerar con Parámetros</button>
           </div>
 
           <div id="risk-matrix-result" style="display: none;">
@@ -285,14 +285,19 @@
 
     <!-- TAB: Bancos -->
     <section id="tab-banks" class="tab-content">
-      <div class="banks-intro">
-        <h2>🏦 Cotizaciones Dólar Oficial por Banco</h2>
-        <p>Información actualizada desde <strong>dolarito.ar</strong> y <strong>CriptoYa</strong></p>
-        <div class="banks-controls">
-          <button id="refresh-banks" class="btn-refresh">🔄 Actualizar</button>
-          <span id="banks-last-update" class="banks-timestamp"></span>
+      <div class="banks-header-compact">
+        <div class="banks-title-section">
+          <h2>🏦 Dólar Oficial por Banco</h2>
+          <p class="banks-subtitle">Cotizaciones en tiempo real</p>
+        </div>
+        <div class="banks-actions">
+          <button id="refresh-banks" class="btn-refresh-compact">
+            <span class="refresh-icon">🔄</span>
+            <span class="refresh-text">Actualizar</span>
+          </button>
         </div>
       </div>
+      <div id="banks-last-update" class="banks-timestamp-compact"></div>
       <div id="banks-list">
         <div class="loading">
           <div class="spinner"></div>

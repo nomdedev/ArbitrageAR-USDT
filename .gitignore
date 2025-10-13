@@ -43,10 +43,21 @@ build/
 .temp/
 tmp/
 
-# User-specific storage data
-storage/
-*.db
-*.sqlite
+# Chrome extension development
+chrome-extension-dev/
+chrome-user-data/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Cache directories
+.parcel-cache/
+.eslintcache
+
+# Backup files
+*.bak
+*.backup
 
 # Backup files
 *.bak

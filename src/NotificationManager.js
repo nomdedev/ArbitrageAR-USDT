@@ -24,12 +24,12 @@ class NotificationManager {
     }
 
     // Verificar umbral de ganancia
-    if (arbitrage.profitPercent < (settings.minProfitThreshold || 1)) {
+    if (arbitrage.profitPercentage < (settings.minProfitThreshold || 1)) {
       return false;
     }
 
     // Evitar notificar el mismo arbitraje repetidamente
-    const arbitrageKey = `${arbitrage.buyExchange}-${arbitrage.sellExchange}-${arbitrage.profitPercent.toFixed(2)}`;
+    const arbitrageKey = `${arbitrage.buyExchange}-${arbitrage.sellExchange}-${arbitrage.profitPercentage.toFixed(2)}`;
     if (this.notifiedArbitrages.has(arbitrageKey)) {
       return false;
     }
@@ -48,7 +48,7 @@ class NotificationManager {
       return;
     }
 
-    const profitFormatted = arbitrage.profitPercent.toFixed(2);
+    const profitFormatted = arbitrage.profitPercentage.toFixed(2);
     const routeDesc = arbitrage.isSingleExchange
       ? arbitrage.buyExchange
       : `${arbitrage.buyExchange} → ${arbitrage.sellExchange}`;
@@ -59,7 +59,7 @@ class NotificationManager {
         iconUrl: 'icons/icon128.png',
         title: `¡Oportunidad de Arbitraje! +${profitFormatted}%`,
         message: `Ruta: ${routeDesc}\nGanancia: $${arbitrage.calculation.netProfit.toLocaleString()} ARS`,
-        priority: arbitrage.profitPercent >= 5 ? 2 : 1
+        priority: arbitrage.profitPercentage >= 5 ? 2 : 1
       });
 
       // Marcar como notificado

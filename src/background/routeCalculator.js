@@ -210,7 +210,13 @@ function calculateRoute(buyExchange, sellExchange, oficial, usdt, usdtUsd, userF
     // Determinar si la ruta requiere P2P trading
     const requiresP2P = buyExchange.toLowerCase().endsWith('p2p') || sellExchange.toLowerCase().endsWith('p2p');
 
+    // Determinar el nombre del broker para mostrar
+    const broker = buyExchange === sellExchange 
+      ? buyExchange 
+      : `${buyExchange} → ${sellExchange}`;
+
     return {
+      broker,  // CRÍTICO: Campo esperado por popup.js
       buyExchange,
       sellExchange,
       isSingleExchange: buyExchange === sellExchange,
@@ -226,7 +232,7 @@ function calculateRoute(buyExchange, sellExchange, oficial, usdt, usdtUsd, userF
         finalAmount,
         netProfit
       },
-      officialPrice: officialSellPrice,
+      officialPrice: officialBuyPrice,
       usdToUsdtRate,
       usdtArsBid,
       fees: {

@@ -8,7 +8,8 @@ import { log, CACHE_CONFIG } from './config.js';
 import {
   fetchDolaritoOficial,
   fetchCriptoyaUSDT,
-  fetchCriptoyaUSDTtoUSD
+  fetchCriptoyaUSDTtoUSD,
+  fetchCriptoyaUSDTtoUSD_NoRateLimit
 } from './dataFetcher.js';
 import { calculateOptimizedRoutes } from './routeCalculator.js';
 import { checkAndNotify } from './notifications.js';
@@ -16,7 +17,11 @@ import { dollarPriceManager } from './dollarPriceManager.js';
 import { updateChecker } from './updateChecker.js';
 
 console.log('✅ [BACKGROUND] Todos los imports completados exitosamente en:', new Date().toISOString());
-console.log('🚀 [BACKGROUND] Iniciando inicialización del service worker...');
+console.log('� [BACKGROUND] Verificando funciones importadas...');
+console.log('- fetchCriptoyaUSDTtoUSD:', typeof fetchCriptoyaUSDTtoUSD);
+console.log('- fetchCriptoyaUSDT:', typeof fetchCriptoyaUSDT);
+console.log('- calculateOptimizedRoutes:', typeof calculateOptimizedRoutes);
+console.log('�🚀 [BACKGROUND] Iniciando inicialización del service worker...');
 
 // Estado global del background
 let currentData = null;
@@ -67,7 +72,7 @@ async function recalculateWithCustomDollarPrice(customPrice) {
     console.log('📡 [DEBUG] Consultando APIs para recálculo...');
     const [usdt, usdtUsd] = await Promise.all([
       fetchCriptoyaUSDT(),
-      fetchCriptoyaUSDTtoUSD()
+      fetchCriptoyaUSDTtoUSD_NoRateLimit() // 🧪 TEST: Sin rate limiting
     ]);
 
     // Crear objeto oficial con precio personalizado
@@ -151,7 +156,7 @@ async function updateData() {
         };
       }),
       fetchCriptoyaUSDT(),
-      fetchCriptoyaUSDTtoUSD()
+      fetchCriptoyaUSDTtoUSD_NoRateLimit() // 🧪 TEST: Sin rate limiting
     ]);
 
     console.log(`📊 [DEBUG] Datos obtenidos - Oficial: ${!!oficial}, USDT: ${!!usdt}, USDT/USD: ${!!usdtUsd}`);
@@ -588,7 +593,6 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
   }
 });
 
-
 console.log('✅ [BACKGROUND] Storage listener registrado exitosamente');
 
 // Inicializar cuando se carga el service worker
@@ -600,8 +604,3 @@ console.log('🔄 [BACKGROUND] Inicializando update checker...');
 updateChecker.initialize().catch(error => {
   console.error('❌ [BACKGROUND] Error inicializando update checker:', error);
 });
-
-
-// Inicializar cuando se carga el service worker
-console.log('🚀 [BACKGROUND] Llamando initialize()...');
-initialize();

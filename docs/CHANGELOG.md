@@ -2,6 +2,28 @@
 
 Todos los cambios notables de este proyecto serán documentados en este archivo.
 
+## 🔧 HOTFIX RECIENTE - Configuración por Defecto Más Permisiva
+
+**Fecha**: 12 de octubre de 2025  
+**Tipo**: UX IMPROVEMENT - Valores por defecto más amigables
+
+### ⚙️ Cambios en Configuración por Defecto
+- **Umbral de ganancia mínimo:** Cambiado de `1.5%` a `1.0%` para mostrar más oportunidades
+- **Mostrar rutas negativas:** Activado por defecto (`true`) para que usuarios sepan que el sistema funciona
+- **Motivo:** Los usuarios reportaban "no routes available" porque el umbral 1.5% era demasiado restrictivo
+
+### 📊 Impacto en UX
+- **Antes:** Solo rutas ≥1.5% mostradas, usuarios pensaban que el sistema no funcionaba
+- **Ahora:** Todas las rutas ≥1.0% mostradas + rutas negativas, usuarios ven que el sistema está activo
+- **Beneficio:** Mejor experiencia inicial, usuarios entienden que la extensión funciona correctamente
+
+### 🔧 Archivos Modificados
+- `src/options.js`: DEFAULT_SETTINGS.profitThreshold = 1.0
+- `src/popup.js`: loadUserSettings() default profitThreshold = 1.0
+- `docs/CHANGELOG.md`: Actualizada documentación de valores por defecto
+
+---
+
 ## [3.2.1] - 2025-10-02 - HOTFIX CRÍTICO
 
 ### 🐛 BUG FIX CRÍTICO
@@ -151,11 +173,12 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 ### ⚙️ Configuración por Defecto
 ```
 Notificaciones: ✅ Activadas
-Tipo: Todas (≥1.5%)
+Tipo: Todas (≥1.0%)
 Frecuencia: Cada 15 minutos
 Sonido: ✅ Activado
 Exchanges: Todos
 Horario silencioso: ❌ Desactivado
+Mostrar rutas negativas: ✅ Activado
 ```
 
 ### 📄 Documentación

@@ -9,29 +9,37 @@
 <body>
   <div class="options-container">
     <header class="options-header">
-      <h1>⚙️ Configuración de Alertas</h1>
-      <p>Personaliza cómo y cuándo quieres recibir notificaciones de oportunidades de arbitraje</p>
+      <h1>⚙️ Configuración de ArbitrageAR</h1>
+      <p>Personaliza todas las funciones de la extensión para optimizar tu experiencia de arbitraje</p>
     </header>
 
-    <main class="options-content">
-      <!-- SECCIÓN 1: Activar/Desactivar Notificaciones -->
-      <section class="settings-section">
-        <h2>🔔 Notificaciones</h2>
-        <div class="setting-item">
-          <div class="setting-info">
-            <label for="notifications-enabled" class="setting-label">Activar notificaciones</label>
-            <p class="setting-description">Recibe alertas cuando aparezcan oportunidades rentables</p>
-          </div>
-          <label class="switch">
-            <input type="checkbox" id="notifications-enabled" checked>
-            <span class="slider"></span>
-          </label>
-        </div>
-      </section>
+    <!-- Navegación por pestañas -->
+    <nav class="tabs-nav">
+      <button class="tab-button active" data-tab="notifications">🔔 Notificaciones</button>
+      <button class="tab-button" data-tab="routes">📊 Rutas</button>
+      <button class="tab-button" data-tab="fees">💸 Fees</button>
+      <button class="tab-button" data-tab="advanced">🔧 Avanzado</button>
+    </nav>
 
-      <!-- SECCIÓN 2: Tipos de Alertas -->
-      <section class="settings-section" id="alert-types-section">
-        <h2>📊 Tipos de Alertas</h2>
+    <main class="options-content">
+      <!-- PESTAÑA 1: NOTIFICACIONES -->
+      <div id="notifications-tab" class="tab-content active">
+        <section class="settings-section">
+          <h2>🔔 Sistema de Notificaciones</h2>
+          <div class="setting-item">
+            <div class="setting-info">
+              <label for="notifications-enabled" class="setting-label">Activar notificaciones</label>
+              <p class="setting-description">Recibe alertas automáticas cuando aparezcan oportunidades rentables</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="notifications-enabled" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </section>
+
+        <section class="settings-section" id="alert-types-section">
+          <h2>📊 Tipos de Alertas</h2>
         
         <div class="setting-item">
           <div class="setting-info">
@@ -115,58 +123,166 @@
             </label>
           </div>
         </div>
-      </section>
+        </section>
+      </div>
 
-      <!-- SECCIÓN 4: Preferencias de Rutas (NUEVO v5.0) -->
-      <section class="settings-section">
-        <h2>🎯 Preferencias de Rutas</h2>
+      <!-- PESTAÑA 2: RUTAS -->
+      <div id="routes-tab" class="tab-content">
+        <!-- REFACTORIZADO v5.0.64: Separación clara Display vs Alertas -->
+        <section class="settings-section">
+          <h2>📊 Visualización de Rutas</h2>
+          <p class="section-description">Controla qué rutas se muestran en el popup principal</p>
         
         <div class="setting-item">
           <div class="setting-info">
-            <label for="show-negative-routes" class="setting-label">Mostrar rutas negativas</label>
-            <p class="setting-description">Ver rutas con pérdida para análisis de mercado</p>
+            <label for="max-routes-display" class="setting-label">
+              Máximo de rutas a mostrar
+            </label>
+            <p class="setting-description">Cantidad de rutas visibles en el popup (1-50)</p>
+          </div>
+          <div class="input-group">
+            <input 
+              type="number" 
+              id="max-routes-display" 
+              min="1" 
+              max="50" 
+              value="20"
+              aria-label="Número máximo de rutas a mostrar">
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="sort-by-profit" class="setting-label">
+              Ordenar rutas por ganancia
+            </label>
+            <p class="setting-description">Mostrar primero las rutas con mayor porcentaje de ganancia</p>
           </div>
           <label class="switch">
-            <input type="checkbox" id="show-negative-routes" checked>
-            <span class="slider"></span>
+            <input type="checkbox" id="sort-by-profit" checked>
+            <span class="slider" role="switch" aria-checked="true"></span>
           </label>
         </div>
 
         <div class="setting-item">
           <div class="setting-info">
-            <label for="prefer-single-exchange" class="setting-label">Priorizar rutas en mismo broker</label>
+            <label for="prefer-single-exchange" class="setting-label">
+              Priorizar rutas en mismo broker
+            </label>
             <p class="setting-description">Mostrar primero las rutas sin transferencia blockchain</p>
           </div>
           <label class="switch">
             <input type="checkbox" id="prefer-single-exchange">
-            <span class="slider"></span>
+            <span class="slider" role="switch" aria-checked="false"></span>
           </label>
+        </div>
+      </section>
+
+      <!-- NUEVA SECCIÓN v5.0.64: Filtros de Display -->
+      <section class="settings-section">
+        <h2>🔍 Filtros de Display</h2>
+        <p class="section-description">
+          ⚠️ <strong>Importante:</strong> Estos filtros solo afectan qué rutas VES en el popup.
+          Las notificaciones se configuran en la pestaña "Notificaciones".
+        </p>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="filter-min-profit" class="setting-label">
+              Ganancia mínima para mostrar
+            </label>
+            <p class="setting-description">
+              Solo mostrar rutas con ganancia superior a este porcentaje (-10% a +20%)
+            </p>
+          </div>
+          <div class="input-group">
+            <input 
+              type="number" 
+              id="filter-min-profit" 
+              min="-10" 
+              max="20" 
+              step="0.1" 
+              value="-10"
+              aria-label="Ganancia mínima en porcentaje">
+            <span class="input-suffix">%</span>
+          </div>
+          <p class="setting-hint">
+            💡 Usa <code>-10%</code> para ver todas las rutas (incluidas las negativas)
+          </p>
         </div>
 
         <div class="setting-item">
           <div class="setting-info">
-            <label for="default-sim-amount" class="setting-label">Monto por defecto simulador (ARS)</label>
+            <label for="default-sim-amount" class="setting-label">
+              Monto por defecto simulador (ARS)
+            </label>
             <p class="setting-description">Monto inicial al abrir el simulador</p>
           </div>
           <div class="input-group">
-            <input type="number" id="default-sim-amount" min="1000" max="10000000" step="1000" value="100000">
-          </div>
-        </div>
-
-        <div class="setting-item">
-          <div class="setting-info">
-            <label for="max-routes-display" class="setting-label">Máximo de rutas a mostrar</label>
-            <p class="setting-description">Cantidad de rutas visibles en el popup (1-50)</p>
-          </div>
-          <div class="input-group">
-            <input type="number" id="max-routes-display" min="1" max="50" value="20">
+            <input 
+              type="number" 
+              id="default-sim-amount" 
+              min="1000" 
+              max="10000000" 
+              step="1000" 
+              value="100000"
+              aria-label="Monto en pesos argentinos">
           </div>
         </div>
       </section>
 
-      <!-- SECCIÓN 5: Fees Personalizados -->
-      <section class="settings-section">
-        <h2>💸 Fees Personalizados</h2>
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="show-only-profitable" class="setting-label">Mostrar solo rutas rentables</label>
+            <p class="setting-description">Ocultar automáticamente todas las rutas con pérdida</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="show-only-profitable">
+            <span class="slider"></span>
+          </label>
+        </div>
+        </section>
+
+        <!-- SECCIÓN: Exchanges Preferidos -->
+        <section class="settings-section">
+          <h2>🏢 Exchanges Preferidos</h2>
+          <div class="setting-info">
+            <p class="setting-description">Selecciona tus exchanges favoritos para priorizar sus rutas en los resultados.</p>
+          </div>
+          
+          <div class="checkbox-grid">
+            <label class="checkbox-item">
+              <input type="checkbox" name="exchange" value="binance">
+              <span>Binance</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" name="exchange" value="buenbit">
+              <span>Buenbit</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" name="exchange" value="lemoncash">
+              <span>Lemon Cash</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" name="exchange" value="ripio">
+              <span>Ripio</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" name="exchange" value="fiwind">
+              <span>FiWind</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" name="exchange" value="letsbit">
+              <span>LetsBit</span>
+            </label>
+          </div>
+        </section>
+      </div>
+
+      <!-- PESTAÑA 3: FEES -->
+      <div id="fees-tab" class="tab-content">
+        <section class="settings-section">
+          <h2>💸 Fees Personalizados</h2>
         <div class="setting-info">
           <p class="setting-description">Ajusta los fees según tu experiencia real con cada exchange. Estos valores se sumarán a los cálculos de arbitraje.</p>
         </div>
@@ -221,11 +337,38 @@
             <p class="setting-description" style="color: #fbbf24;">Estos fees SE SUMAN a los fees predeterminados de cada exchange. Úsalos solo si tu exchange cobra fees adicionales no contemplados en los cálculos base.</p>
           </div>
         </div>
-      </section>
 
-      <!-- SECCIÓN 6: Configuración del Precio del Dólar -->
-      <section class="settings-section">
-        <h2>💵 Configuración del Precio del Dólar</h2>
+        <!-- NUEVO: Fees por Broker -->
+        <section class="settings-section">
+          <h2>🏦 Fees Específicos por Broker</h2>
+          <div class="setting-info">
+            <p class="setting-description">Configura fees específicos para cada broker/exchange. Útil cuando algunos brokers tienen comisiones diferentes para compra y venta.</p>
+          </div>
+
+          <div class="broker-fees-container">
+            <table id="broker-fees-table" class="broker-fees-table">
+              <thead>
+                <tr>
+                  <th>Broker/Exchange</th>
+                  <th>Fee Compra (%)</th>
+                  <th>Fee Venta (%)</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="broker-fees-body">
+                <!-- Filas dinámicas se agregarán aquí -->
+              </tbody>
+            </table>
+            <button type="button" id="add-broker-fee" class="add-broker-btn">➕ Agregar Broker</button>
+          </div>
+        </section>
+        </section>
+      </div>
+
+      <!-- PESTAÑA 4: AVANZADO -->
+      <div id="advanced-tab" class="tab-content">
+        <section class="settings-section">
+          <h2>💵 Configuración del Precio del Dólar</h2>
         <div class="setting-info">
           <p class="setting-description">Los precios del dólar oficial varían entre bancos. Configura cómo quieres obtener este precio para cálculos más precisos.</p>
         </div>
@@ -302,6 +445,88 @@
             <p class="setting-description">Para mayor precisión, usa el precio manual con el valor exacto al que compraste USD, o selecciona tu banco específico en modo automático.</p>
           </div>
         </div>
+      </section>
+
+      <!-- SECCIÓN 5.1: Configuración de APIs -->
+      <section class="settings-section">
+        <h2>🔗 Configuración de APIs</h2>
+        <div class="setting-info">
+          <p class="setting-description">Personaliza las URLs de las APIs utilizadas para obtener datos de precios. Útil para usar endpoints alternativos o personalizados.</p>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="dolarapi-url" class="setting-label">URL de DolarAPI</label>
+            <p class="setting-description">API para obtener precios del dólar oficial de bancos</p>
+          </div>
+          <div class="input-group">
+            <input type="url" id="dolarapi-url" value="https://dolarapi.com/v1/dolares/oficial" placeholder="https://dolarapi.com/v1/dolares/oficial">
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="criptoya-usdt-ars-url" class="setting-label">URL de CriptoYa (USDT/ARS)</label>
+            <p class="setting-description">API para obtener precios de USDT en pesos argentinos</p>
+          </div>
+          <div class="input-group">
+            <input type="url" id="criptoya-usdt-ars-url" value="https://criptoya.com/api/usdt/ars/1" placeholder="https://criptoya.com/api/usdt/ars/1">
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="criptoya-usdt-usd-url" class="setting-label">URL de CriptoYa (USDT/USD)</label>
+            <p class="setting-description">API para obtener precios de USDT en dólares estadounidenses</p>
+          </div>
+          <div class="input-group">
+            <input type="url" id="criptoya-usdt-usd-url" value="https://criptoya.com/api/usdt/usd/1" placeholder="https://criptoya.com/api/usdt/usd/1">
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label class="setting-label">⚠️ Importante</label>
+            <p class="setting-description" style="color: #f59e0b;">Cambiar estas URLs puede afectar el funcionamiento de la extensión. Asegúrate de que los endpoints alternativos tengan la misma estructura de respuesta.</p>
+          </div>
+        </div>
+
+        <!-- NUEVO: Configuración de intervalos -->
+        <section class="settings-section">
+          <h2>⏱️ Intervalos de Actualización</h2>
+          <div class="setting-info">
+            <p class="setting-description">Configura la frecuencia de actualización de datos y timeouts para adaptarte a tu conexión y necesidades.</p>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label for="update-interval" class="setting-label">Intervalo de actualización (minutos)</label>
+              <p class="setting-description">Cada cuánto tiempo se actualizan los precios automáticamente</p>
+            </div>
+            <div class="input-group">
+              <input type="number" id="update-interval" min="1" max="60" step="1" value="5" placeholder="5">
+              <span class="input-suffix">min</span>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label for="request-timeout" class="setting-label">Timeout de requests (segundos)</label>
+              <p class="setting-description">Tiempo máximo de espera para cada request a las APIs</p>
+            </div>
+            <div class="input-group">
+              <input type="number" id="request-timeout" min="5" max="120" step="5" value="10" placeholder="10">
+              <span class="input-suffix">seg</span>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label class="setting-label">💡 Recomendación</label>
+              <p class="setting-description">Para conexiones lentas, aumenta el timeout. Para datos más frescos, reduce el intervalo (pero consume más batería/datos).</p>
+            </div>
+          </div>
+        </section>
       </section>
 
       <!-- SECCIÓN 6.1: Configuración de Bancos -->
@@ -417,62 +642,62 @@
         </div>
       </section>
 
-      <!-- SECCIÓN 7: Exchanges Favoritos -->
+      <!-- SECCIÓN 4.2: Seguridad y Validación -->
       <section class="settings-section">
-        <h2>🏦 Exchanges Preferidos</h2>
+        <h2>🔒 Seguridad y Validación</h2>
         <div class="setting-info">
-          <p class="setting-description">Solo recibir alertas de exchanges específicos (deja vacío para todos)</p>
+          <p class="setting-description">Configuraciones de seguridad para proteger tus operaciones y datos.</p>
         </div>
-        
-        <div class="exchanges-grid">
-          <label class="exchange-checkbox">
-            <input type="checkbox" name="exchange" value="buenbit">
-            <span>Buenbit</span>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="data-freshness-warning" class="setting-label">Alertar datos desactualizados</label>
+            <p class="setting-description">Mostrar advertencia si los precios tienen más de 5 minutos</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="data-freshness-warning" checked>
+            <span class="slider"></span>
           </label>
-          <label class="exchange-checkbox">
-            <input type="checkbox" name="exchange" value="ripio">
-            <span>Ripio</span>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="risk-alerts-enabled" class="setting-label">Alertas de riesgo</label>
+            <p class="setting-description">Mostrar semáforo de riesgo en rutas con alta volatilidad</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="risk-alerts-enabled" checked>
+            <span class="slider"></span>
           </label>
-          <label class="exchange-checkbox">
-            <input type="checkbox" name="exchange" value="binance">
-            <span>Binance</span>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="require-confirm-high-amount" class="setting-label">Confirmar montos altos</label>
+            <p class="setting-description">Pedir confirmación para simulaciones mayores a $500.000</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="require-confirm-high-amount" checked>
+            <span class="slider"></span>
           </label>
-          <label class="exchange-checkbox">
-            <input type="checkbox" name="exchange" value="satoshitango">
-            <span>SatoshiTango</span>
-          </label>
-          <label class="exchange-checkbox">
-            <input type="checkbox" name="exchange" value="letsbit">
-            <span>Letsbit</span>
-          </label>
-          <label class="exchange-checkbox">
-            <input type="checkbox" name="exchange" value="lemoncash">
-            <span>Lemon</span>
-          </label>
-          <label class="exchange-checkbox">
-            <input type="checkbox" name="exchange" value="decrypto">
-            <span>Decrypto</span>
-          </label>
-          <label class="exchange-checkbox">
-            <input type="checkbox" name="exchange" value="fiwind">
-            <span>Fiwind</span>
-          </label>
-          <label class="exchange-checkbox">
-            <input type="checkbox" name="exchange" value="belo">
-            <span>Belo</span>
-          </label>
-          <label class="exchange-checkbox">
-            <input type="checkbox" name="exchange" value="tiendacrypto">
-            <span>TiendaCrypto</span>
-          </label>
-          <label class="exchange-checkbox">
-            <input type="checkbox" name="exchange" value="bitso">
-            <span>Bitso</span>
-          </label>
-          <label class="exchange-checkbox">
-            <input type="checkbox" name="exchange" value="cryptomkt">
-            <span>CryptoMKT</span>
-          </label>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="min-profit-warning" class="setting-label">Umbral de alerta de ganancia (%)</label>
+            <p class="setting-description">Mostrar advertencia si la ganancia calculada es menor a este porcentaje</p>
+          </div>
+          <div class="input-group">
+            <input type="number" id="min-profit-warning" min="0.1" max="5" step="0.1" value="0.5" placeholder="0.5">
+            <span class="input-suffix">%</span>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label class="setting-label">💡 Recomendación</label>
+            <p class="setting-description">Mantén activadas las validaciones de seguridad para operaciones seguras. El umbral de ganancia mínimo te ayuda a identificar oportunidades riesgosas.</p>
+          </div>
         </div>
       </section>
 
@@ -505,13 +730,17 @@
         </div>
       </section>
 
-      <!-- SECCIÓN 8: Test de Notificación -->
+      <!-- SECCIÓN: Test de Notificación -->
       <section class="settings-section">
         <h2>🧪 Prueba</h2>
         <button id="test-notification" class="test-button">
           🔔 Enviar notificación de prueba
         </button>
       </section>
+      </div>
+
+      <!-- PESTAÑA 4: AVANZADO (continuación) -->
+      <!-- Las secciones avanzadas ya están arriba -->
     </main>
 
     <footer class="options-footer">
