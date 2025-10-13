@@ -113,6 +113,75 @@
           </div>
         </div>
       </div>
+
+      <!-- NUEVO v5.0.75: Filtros Avanzados -->
+      <div class="advanced-filters">
+        <button class="toggle-filters-btn" id="toggle-advanced-filters">
+          <span class="toggle-icon">⚙️</span>
+          <span class="toggle-text">Filtros Avanzados</span>
+          <span class="toggle-arrow">▼</span>
+        </button>
+
+        <div class="filters-panel" id="advanced-filters-panel" style="display: none;">
+          <!-- Filtro por Exchange -->
+          <div class="filter-group">
+            <label class="filter-group-label">
+              <span class="filter-group-icon">🏦</span>
+              Exchange:
+            </label>
+            <select id="filter-exchange" class="filter-select">
+              <option value="all">Todos los exchanges</option>
+            </select>
+          </div>
+
+          <!-- Filtro por Rango de Profit -->
+          <div class="filter-group">
+            <label class="filter-group-label">
+              <span class="filter-group-icon">📊</span>
+              Profit mínimo:
+            </label>
+            <div class="filter-range-container">
+              <input type="range" id="filter-profit-min" class="filter-range" min="-10" max="20" step="0.5" value="0">
+              <span class="filter-range-value" id="filter-profit-value">0%</span>
+            </div>
+          </div>
+
+          <!-- Toggle Ocultar Negativas -->
+          <div class="filter-group">
+            <label class="filter-toggle-label">
+              <input type="checkbox" id="filter-hide-negative" class="filter-checkbox">
+              <span class="filter-toggle-text">
+                <span class="filter-toggle-icon">🚫</span>
+                Ocultar rutas negativas
+              </span>
+            </label>
+          </div>
+
+          <!-- Ordenar por -->
+          <div class="filter-group">
+            <label class="filter-group-label">
+              <span class="filter-group-icon">🔢</span>
+              Ordenar por:
+            </label>
+            <select id="filter-sort" class="filter-select">
+              <option value="profit-desc">Profit (mayor a menor)</option>
+              <option value="profit-asc">Profit (menor a mayor)</option>
+              <option value="exchange-asc">Exchange (A-Z)</option>
+              <option value="investment-desc">Inversión (mayor a menor)</option>
+            </select>
+          </div>
+
+          <!-- Botones de acción -->
+          <div class="filter-actions">
+            <button class="btn-filter-apply" id="apply-filters">
+              <span>✓</span> Aplicar Filtros
+            </button>
+            <button class="btn-filter-reset" id="reset-filters">
+              <span>⟲</span> Resetear
+            </button>
+          </div>
+        </div>
+      </div>
       
       <div id="loading" class="loading">
         <div class="spinner"></div>

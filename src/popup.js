@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupTabNavigation();
   setupRefreshButton();
   setupFilterButtons(); // NUEVO: Configurar filtros P2P
+  setupAdvancedFilters(); // NUEVO v5.0.75: Configurar filtros avanzados
   setupDollarPriceControls(); // NUEVO: Configurar controles del precio del dólar
   setupAdvancedSimulator(); // NUEVO v5.0.31: Configurar simulador sin rutas
   checkForUpdates(); // NUEVO: Verificar actualizaciones disponibles
@@ -359,6 +360,7 @@ function isP2PRoute(route) {
 }
 
 // CORREGIDO v5.0.12: Aplicar filtro P2P según selección del usuario
+// ACTUALIZADO v5.0.75: Ahora usa applyAllFilters para incluir filtros avanzados
 function applyP2PFilter() {
   if (DEBUG_MODE) console.log('🔍 applyP2PFilter() llamado con filtro:', currentFilter);
   if (DEBUG_MODE) console.log('🔍 allRoutes:', allRoutes?.length);
@@ -367,6 +369,15 @@ function applyP2PFilter() {
     console.warn('⚠️ No hay rutas disponibles para filtrar');
     return;
   }
+  
+  // NUEVO v5.0.75: Poblar exchanges y usar filtros avanzados
+  populateExchangeFilter();
+  applyAllFilters();
+  updateFilterCounts();
+  return;
+  
+  // --- CÓDIGO ANTERIOR COMENTADO PARA REFERENCIA ---
+  /*
 
   // Aplicar filtro P2P según selección
   let filteredRoutes;
@@ -400,6 +411,7 @@ function applyP2PFilter() {
 
   // Actualizar contadores en los botones
   updateFilterCounts();
+  */
 }
 
 // NUEVO: Actualizar contadores de rutas en filtros
@@ -417,6 +429,260 @@ function updateFilterCounts() {
   if (countNoP2P) countNoP2P.textContent = noP2pCount;
   
   log(`📊 Contadores actualizados - Total: ${allCount}, P2P: ${p2pCount}, No P2P: ${noP2pCount}`);
+}
+
+// ============================================
+// FILTROS AVANZADOS v5.0.75
+// ============================================
+
+// Estado de filtros avanzados
+let advancedFilters = {
+  exchange: 'all',
+  profitMin: 0,
+  hideNegative: false,
+  sortBy: 'profit-desc'
+};
+
+/**
+ * Configurar filtros avanzados
+ */
+function setupAdvancedFilters() {
+  // Toggle panel
+  const toggleBtn = document.getElementById('toggle-advanced-filters');
+  const panel = document.getElementById('advanced-filters-panel');
+  
+  if (toggleBtn && panel) {
+    toggleBtn.addEventListener('click', () => {
+      const isVisible = panel.style.display !== 'none';
+      panel.style.display = isVisible ? 'none' : 'block';
+      const arrow = toggleBtn.querySelector('.toggle-arrow');
+      if (arrow) arrow.textContent = isVisible ? '▼' : '▲';
+    });
+  }
+
+  // Filtro de exchange - Poblar con exchanges únicos
+  populateExchangeFilter();
+
+  // Filtro de profit mínimo - Actualizar valor mostrado
+  const profitRange = document.getElementById('filter-profit-min');
+  const profitValue = document.getElementById('filter-profit-value');
+  
+  if (profitRange && profitValue) {
+    profitRange.addEventListener('input', (e) => {
+      const value = parseFloat(e.target.value);
+      profitValue.textContent = `${value}%`;
+      advancedFilters.profitMin = value;
+    });
+  }
+
+  // Toggle ocultar negativas
+  const hideNegative = document.getElementById('filter-hide-negative');
+  if (hideNegative) {
+    hideNegative.addEventListener('change', (e) => {
+      advancedFilters.hideNegative = e.target.checked;
+    });
+  }
+
+  // Filtro de exchange
+  const exchangeSelect = document.getElementById('filter-exchange');
+  if (exchangeSelect) {
+    exchangeSelect.addEventListener('change', (e) => {
+      advancedFilters.exchange = e.target.value;
+    });
+  }
+
+  // Ordenar por
+  const sortSelect = document.getElementById('filter-sort');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', (e) => {
+      advancedFilters.sortBy = e.target.value;
+    });
+  }
+
+  // Botón aplicar
+  const applyBtn = document.getElementById('apply-filters');
+  if (applyBtn) {
+    applyBtn.addEventListener('click', () => {
+      applyAllFilters();
+    });
+  }
+
+  // Botón resetear
+  const resetBtn = document.getElementById('reset-filters');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      resetAdvancedFilters();
+    });
+  }
+}
+
+/**
+ * Poblar select de exchanges con opciones únicas
+ */
+function populateExchangeFilter() {
+  const select = document.getElementById('filter-exchange');
+  if (!select || !allRoutes) return;
+
+  // Obtener exchanges únicos
+  const exchangesSet = new Set();
+  allRoutes.forEach(route => {
+    if (route.buyExchange) exchangesSet.add(route.buyExchange);
+    if (route.sellExchange) exchangesSet.add(route.sellExchange);
+  });
+
+  const exchanges = Array.from(exchangesSet).sort();
+
+  // Limpiar opciones existentes (excepto "Todos")
+  select.innerHTML = '<option value="all">Todos los exchanges</option>';
+
+  // Agregar opciones
+  exchanges.forEach(exchange => {
+    const option = document.createElement('option');
+    option.value = exchange;
+    option.textContent = exchange.charAt(0).toUpperCase() + exchange.slice(1);
+    select.appendChild(option);
+  });
+
+  log(`📊 Filtro de exchanges poblado con ${exchanges.length} opciones`);
+}
+
+/**
+ * Aplicar todos los filtros (P2P + Avanzados)
+ */
+function applyAllFilters() {
+  if (!allRoutes || allRoutes.length === 0) {
+    console.warn('⚠️ No hay rutas para filtrar');
+    return;
+  }
+
+  log('🔍 Aplicando filtros avanzados:', advancedFilters);
+
+  // Paso 1: Filtro P2P (como antes)
+  let filteredRoutes;
+  switch (currentFilter) {
+    case 'p2p':
+      filteredRoutes = allRoutes.filter(route => isP2PRoute(route));
+      break;
+    case 'no-p2p':
+      filteredRoutes = allRoutes.filter(route => !isP2PRoute(route));
+      break;
+    case 'all':
+    default:
+      filteredRoutes = [...allRoutes];
+      break;
+  }
+
+  log(`🔍 Después de filtro P2P: ${filteredRoutes.length} rutas`);
+
+  // Paso 2: Filtro por exchange
+  if (advancedFilters.exchange !== 'all') {
+    filteredRoutes = filteredRoutes.filter(route => 
+      route.buyExchange === advancedFilters.exchange ||
+      route.sellExchange === advancedFilters.exchange
+    );
+    log(`🔍 Después de filtro exchange (${advancedFilters.exchange}): ${filteredRoutes.length} rutas`);
+  }
+
+  // Paso 3: Filtro por profit mínimo
+  if (advancedFilters.profitMin !== 0) {
+    filteredRoutes = filteredRoutes.filter(route => 
+      route.profitPercentage >= advancedFilters.profitMin
+    );
+    log(`🔍 Después de filtro profit mínimo (${advancedFilters.profitMin}%): ${filteredRoutes.length} rutas`);
+  }
+
+  // Paso 4: Ocultar negativas
+  if (advancedFilters.hideNegative) {
+    filteredRoutes = filteredRoutes.filter(route => route.profitPercentage >= 0);
+    log(`🔍 Después de ocultar negativas: ${filteredRoutes.length} rutas`);
+  }
+
+  // Paso 5: Aplicar preferencias de usuario (como antes)
+  filteredRoutes = applyUserPreferences(filteredRoutes);
+  log(`🔍 Después de preferencias usuario: ${filteredRoutes.length} rutas`);
+
+  // Paso 6: Ordenar
+  filteredRoutes = sortRoutes(filteredRoutes, advancedFilters.sortBy);
+  log(`🔍 Después de ordenar (${advancedFilters.sortBy}): ${filteredRoutes.length} rutas`);
+
+  // Mostrar rutas
+  if (currentData) {
+    displayOptimizedRoutes(filteredRoutes, currentData.oficial);
+  }
+
+  // Cerrar panel después de aplicar
+  const panel = document.getElementById('advanced-filters-panel');
+  const toggleBtn = document.getElementById('toggle-advanced-filters');
+  if (panel) panel.style.display = 'none';
+  if (toggleBtn) {
+    const arrow = toggleBtn.querySelector('.toggle-arrow');
+    if (arrow) arrow.textContent = '▼';
+  }
+}
+
+/**
+ * Ordenar rutas según criterio
+ */
+function sortRoutes(routes, sortBy) {
+  const sorted = [...routes];
+
+  switch (sortBy) {
+    case 'profit-desc':
+      sorted.sort((a, b) => b.profitPercentage - a.profitPercentage);
+      break;
+    case 'profit-asc':
+      sorted.sort((a, b) => a.profitPercentage - b.profitPercentage);
+      break;
+    case 'exchange-asc':
+      sorted.sort((a, b) => {
+        const nameA = (a.buyExchange || '').toLowerCase();
+        const nameB = (b.buyExchange || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+      break;
+    case 'investment-desc':
+      sorted.sort((a, b) => {
+        const investA = a.calculation?.initialAmount || 0;
+        const investB = b.calculation?.initialAmount || 0;
+        return investB - investA;
+      });
+      break;
+    default:
+      // Por defecto: profit descendente
+      sorted.sort((a, b) => b.profitPercentage - a.profitPercentage);
+  }
+
+  return sorted;
+}
+
+/**
+ * Resetear filtros avanzados a valores por defecto
+ */
+function resetAdvancedFilters() {
+  advancedFilters = {
+    exchange: 'all',
+    profitMin: 0,
+    hideNegative: false,
+    sortBy: 'profit-desc'
+  };
+
+  // Resetear UI
+  const exchangeSelect = document.getElementById('filter-exchange');
+  const profitRange = document.getElementById('filter-profit-min');
+  const profitValue = document.getElementById('filter-profit-value');
+  const hideNegative = document.getElementById('filter-hide-negative');
+  const sortSelect = document.getElementById('filter-sort');
+
+  if (exchangeSelect) exchangeSelect.value = 'all';
+  if (profitRange) profitRange.value = '0';
+  if (profitValue) profitValue.textContent = '0%';
+  if (hideNegative) hideNegative.checked = false;
+  if (sortSelect) sortSelect.value = 'profit-desc';
+
+  log('🔄 Filtros avanzados reseteados');
+
+  // Reaplicar filtros
+  applyAllFilters();
 }
 
 // Navegación entre tabs
