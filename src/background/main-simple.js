@@ -346,6 +346,298 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
 }
 
 // ============================================
+// CÁLCULO DE RUTAS DIRECTAS USDT → ARS
+// ============================================
+
+async function calculateDirectUsdtToArsRoutes(usdt, userSettings = {}) {
+  log('🔍 [CALC] Calculando rutas directas USDT → ARS...');
+
+  if (!usdt) {
+    log('❌ [CALC] No hay datos de USDT disponibles');
+    return [];
+  }
+
+  const routes = [];
+  const initialUsdtAmount = userSettings.defaultUsdtAmount || 1000; // 1000 USDT por defecto
+
+  log(`💎 [CALC] Monto inicial: ${initialUsdtAmount} USDT`);
+  log(`🔍 [CALC] Procesando ${Object.keys(usdt).length} exchanges...`);
+
+  for (const [exchange, data] of Object.entries(usdt)) {
+    // Validación básica
+    if (!data || typeof data !== 'object' || !data.totalBid) {
+      log(`⚠️ [CALC] Exchange ${exchange} sin datos válidos para venta`);
+      continue;
+    }
+    if (exchange === 'time' || exchange === 'timestamp') continue;
+
+    // Obtener configuración de fees del broker
+    const brokerFees = userSettings.brokerFees || [];
+    const brokerFeeConfig = brokerFees.find(fee =>
+      fee.broker.toLowerCase() === exchange.toLowerCase()
+    );
+
+    // PASO 1: Vender USDT directamente por ARS
+    const sellPrice = data.totalBid; // Precio de venta USDT/ARS
+    const arsFromSale = initialUsdtAmount * sellPrice;
+
+    log(`💰 [${exchange}] Venta directa: ${initialUsdtAmount} USDT × ${sellPrice} = $${arsFromSale.toFixed(2)} ARS`);
+
+    // PASO 2: Aplicar fee de venta si está configurado
+    let arsAfterFee = arsFromSale;
+    let sellFeeAmount = 0;
+
+    if (userSettings.applyFeesInCalculation && brokerFeeConfig?.sellFee > 0) {
+      const sellFeePercent = brokerFeeConfig.sellFee / 100;
+      sellFeeAmount = arsFromSale * sellFeePercent;
+      arsAfterFee = arsFromSale - sellFeeAmount;
+      log(`💸 [${exchange}] Fee venta ${brokerFeeConfig.sellFee}% = $${sellFeeAmount.toFixed(2)} ARS`);
+    }
+
+    // PASO 3: Aplicar fees fijos si están configurados
+    let finalAmount = arsAfterFee;
+    let withdrawalFee = 0;
+    let transferFee = 0;
+    let bankFee = 0;
+
+    if (userSettings.applyFeesInCalculation) {
+      withdrawalFee = userSettings.extraWithdrawalFee || 0;
+      transferFee = userSettings.extraTransferFee || 0;
+      bankFee = userSettings.bankCommissionFee || 0;
+      const totalFixedFees = withdrawalFee + transferFee + bankFee;
+      finalAmount = arsAfterFee - totalFixedFees;
+
+      if (totalFixedFees > 0) {
+        log(`💸 [${exchange}] Fees fijos = $${totalFixedFees} ARS`);
+      }
+    }
+
+    // Calcular "ganancia" (en realidad es el monto recibido en ARS)
+    const profitArs = finalAmount - (initialUsdtAmount * sellPrice); // Negativo porque aplicamos fees
+    const profitPercent = (profitArs / (initialUsdtAmount * sellPrice)) * 100;
+
+    // Crear objeto de ruta directa
+    routes.push({
+      broker: exchange,
+      routeType: 'direct_usdt_ars',
+      description: `Vender ${initialUsdtAmount} USDT por ARS en ${exchange}`,
+      isDirectSale: true,
+      requiresP2P: exchange.toLowerCase().includes('p2p'),
+      profitPercent: profitPercent, // Será negativo si hay fees
+      profitPercentage: profitPercent,
+      arsReceived: finalAmount,
+      usdtSold: initialUsdtAmount,
+      exchangeRate: sellPrice,
+      calculation: {
+        initialUsdtAmount,
+        arsFromSale,
+        arsAfterFee,
+        finalAmount,
+        feesApplied: sellFeeAmount + withdrawalFee + transferFee + bankFee
+      },
+      fees: {
+        sell: sellFeeAmount,
+        withdrawal: withdrawalFee,
+        transfer: transferFee,
+        bank: bankFee,
+        total: sellFeeAmount + withdrawalFee + transferFee + bankFee
+      },
+      config: {
+        applyFees: userSettings.applyFeesInCalculation || false,
+        brokerSpecificFees: !!brokerFeeConfig
+      }
+    });
+  }
+
+  // Ordenar por mejor precio recibido (ARS más altos primero)
+  routes.sort((a, b) => b.arsReceived - a.arsReceived);
+
+  log(`✅ [CALC] Calculadas ${routes.length} rutas directas USDT→ARS`);
+  return routes.slice(0, 20); // Top 20
+}
+
+// ============================================
+// CÁLCULO DE RUTAS USD → USDT
+// ============================================
+
+async function calculateUsdToUsdtRoutes(oficial, usdt, usdtUsd, userSettings = {}) {
+  log('🔍 [CALC] Calculando rutas USD → USDT...');
+
+  if (!oficial || !usdt) {
+    log('❌ [CALC] Faltan datos básicos para calcular USD→USDT');
+    return [];
+  }
+
+  const routes = [];
+  const initialUsdAmount = userSettings.defaultUsdAmount || 1000; // 1000 USD por defecto
+
+  log(`💵 [CALC] Monto inicial: ${initialUsdAmount} USD`);
+  log(`🔍 [CALC] Procesando ${Object.keys(usdt).length} exchanges...`);
+
+  for (const [exchange, data] of Object.entries(usdt)) {
+    // Validación básica
+    if (!data || typeof data !== 'object') {
+      log(`⚠️ [CALC] Exchange ${exchange} sin datos válidos`);
+      continue;
+    }
+    if (exchange === 'time' || exchange === 'timestamp') continue;
+
+    // Obtener configuración de fees del broker
+    const brokerFees = userSettings.brokerFees || [];
+    const brokerFeeConfig = brokerFees.find(fee =>
+      fee.broker.toLowerCase() === exchange.toLowerCase()
+    );
+
+    // PASO 1: Calcular tasa USDT/USD
+    let usdToUsdtRate;
+    let rateSource = 'unknown';
+
+    if (usdtUsd?.[exchange]?.totalAsk) {
+      // Caso 1: Cotización directa
+      usdToUsdtRate = usdtUsd[exchange].totalAsk;
+      rateSource = 'direct_api';
+      log(`💱 [${exchange}] Tasa USDT/USD directa: ${usdToUsdtRate}`);
+    } else if (data.totalAsk && oficial.compra) {
+      // Caso 2: Calcular indirectamente
+      const usdtArsPrice = data.totalAsk;
+      const calculatedRate = usdtArsPrice / oficial.compra;
+
+      if (calculatedRate >= 0.95 && calculatedRate <= 1.15) {
+        usdToUsdtRate = calculatedRate;
+        rateSource = 'calculated';
+        log(`🧮 [${exchange}] Tasa USDT/USD calculada: ${usdToUsdtRate.toFixed(4)}`);
+      } else {
+        log(`❌ [${exchange}] Tasa calculada fuera de rango: ${calculatedRate.toFixed(4)}`);
+        continue;
+      }
+    } else {
+      log(`❌ [${exchange}] No se puede calcular tasa USDT/USD`);
+      continue;
+    }
+
+    // PASO 2: Comprar USDT con USD
+    const usdtPurchased = initialUsdAmount / usdToUsdtRate;
+    log(`💎 [${exchange}] Compra: ${initialUsdAmount} USD → ${usdtPurchased.toFixed(4)} USDT`);
+
+    // PASO 3: Aplicar fee de compra si está configurado
+    let usdtAfterFee = usdtPurchased;
+    let buyFeeAmount = 0;
+
+    if (userSettings.applyFeesInCalculation && brokerFeeConfig?.buyFee > 0) {
+      const buyFeePercent = brokerFeeConfig.buyFee / 100;
+      buyFeeAmount = usdtPurchased * buyFeePercent;
+      usdtAfterFee = usdtPurchased - buyFeeAmount;
+      log(`💸 [${exchange}] Fee compra ${brokerFeeConfig.buyFee}% = ${buyFeeAmount.toFixed(4)} USDT`);
+    }
+
+    // Calcular eficiencia (USDT recibidos por USD invertido)
+    const efficiency = usdtAfterFee / initialUsdAmount;
+
+    // Crear objeto de ruta de compra
+    routes.push({
+      broker: exchange,
+      routeType: 'usd_to_usdt',
+      description: `Comprar USDT con ${initialUsdAmount} USD en ${exchange}`,
+      isPurchaseRoute: true,
+      requiresP2P: exchange.toLowerCase().includes('p2p'),
+      usdToUsdtRate,
+      usdtReceived: usdtAfterFee,
+      usdInvested: initialUsdAmount,
+      efficiency, // USDT por USD (más alto = mejor)
+      exchangeRate: usdToUsdtRate,
+      calculation: {
+        initialUsdAmount,
+        usdToUsdtRate,
+        usdtPurchased,
+        usdtAfterFee,
+        rateSource
+      },
+      fees: {
+        buy: buyFeeAmount,
+        total: buyFeeAmount
+      },
+      config: {
+        applyFees: userSettings.applyFeesInCalculation || false,
+        brokerSpecificFees: !!brokerFeeConfig,
+        rateSource
+      }
+    });
+  }
+
+  // Ordenar por mejor eficiencia (más USDT por USD)
+  routes.sort((a, b) => b.efficiency - a.efficiency);
+
+  log(`✅ [CALC] Calculadas ${routes.length} rutas USD→USDT`);
+  return routes.slice(0, 20); // Top 20
+}
+
+// ============================================
+// FUNCIÓN PRINCIPAL UNIFICADA DE CÁLCULO
+// ============================================
+
+async function calculateAllRoutes(oficial, usdt, usdtUsd, userSettings = {}) {
+  log('🚀 [CALC] Iniciando cálculo unificado de todas las rutas...');
+
+  const routeType = userSettings.routeType || 'arbitrage'; // 'arbitrage', 'direct_usdt_ars', 'usd_to_usdt', 'all'
+
+  const results = {
+    arbitrage: [],
+    directUsdtArs: [],
+    usdToUsdt: [],
+    timestamp: Date.now()
+  };
+
+  // Calcular rutas según el tipo solicitado
+  if (routeType === 'arbitrage' || routeType === 'all') {
+    log('🔄 Calculando rutas de arbitraje ARS→USD→USDT→ARS...');
+    results.arbitrage = await calculateSimpleRoutes(oficial, usdt, usdtUsd);
+  }
+
+  if (routeType === 'direct_usdt_ars' || routeType === 'all') {
+    log('🔄 Calculando rutas directas USDT→ARS...');
+    results.directUsdtArs = await calculateDirectUsdtToArsRoutes(usdt, userSettings);
+  }
+
+  if (routeType === 'usd_to_usdt' || routeType === 'all') {
+    log('🔄 Calculando rutas USD→USDT...');
+    results.usdToUsdt = await calculateUsdToUsdtRoutes(oficial, usdt, usdtUsd, userSettings);
+  }
+
+  log(`✅ [CALC] Cálculo completado:`, {
+    arbitrage: results.arbitrage.length,
+    directUsdtArs: results.directUsdtArs.length,
+    usdToUsdt: results.usdToUsdt.length
+  });
+
+  // Combinar todas las rutas si se pidió 'all', manteniendo el tipo identificado
+  if (routeType === 'all') {
+    const allRoutes = [
+      ...results.arbitrage.map(r => ({ ...r, routeCategory: 'arbitrage' })),
+      ...results.directUsdtArs.map(r => ({ ...r, routeCategory: 'direct_usdt_ars' })),
+      ...results.usdToUsdt.map(r => ({ ...r, routeCategory: 'usd_to_usdt' }))
+    ];
+
+    // Para rutas combinadas, ordenar por relevancia según el tipo
+    allRoutes.sort((a, b) => {
+      if (a.routeCategory === 'arbitrage' && b.routeCategory !== 'arbitrage') return -1;
+      if (b.routeCategory === 'arbitrage' && a.routeCategory !== 'arbitrage') return 1;
+
+      // Dentro de cada categoría, ordenar por rentabilidad
+      if (a.routeCategory === b.routeCategory) {
+        return (b.profitPercent || b.efficiency || 0) - (a.profitPercent || a.efficiency || 0);
+      }
+
+      return 0;
+    });
+
+    return allRoutes.slice(0, 50);
+  }
+
+  // Si se pidió un tipo específico, devolver solo ese
+  return results[routeType.replace('direct_usdt_ars', 'directUsdtArs').replace('usd_to_usdt', 'usdToUsdt')] || [];
+}
+
+// ============================================
 // ESTADO GLOBAL
 // ============================================
 
@@ -401,8 +693,10 @@ async function updateData() {
       return null;
     }
     
-    // CORREGIDO v5.0.47: Usar await porque calculateSimpleRoutes es async
-    const optimizedRoutes = await calculateSimpleRoutes(oficial, usdt, usdtUsd);
+    // CORREGIDO v5.0.47: Usar await porque calculateAllRoutes es async
+    // MEJORADO v5.0.75: Calcular todos los tipos de rutas según configuración
+    const routeType = userSettings.routeType || 'arbitrage'; // 'arbitrage', 'direct_usdt_ars', 'usd_to_usdt', 'all'
+    const optimizedRoutes = await calculateAllRoutes(oficial, usdt, usdtUsd, { ...userSettings, routeType });
     
     log(`✅ Datos actualizados: ${optimizedRoutes.length} rutas`);
     

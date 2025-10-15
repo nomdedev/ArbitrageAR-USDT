@@ -100,6 +100,8 @@ async function loadSettings() {
     document.getElementById('max-routes-display').value = settings.maxRoutesDisplay ?? 20;
     document.getElementById('filter-min-profit').value = settings.filterMinProfit ?? -10.0;
     document.getElementById('sort-by-profit').checked = settings.sortByProfit ?? true;
+    // NUEVO v5.0.75: Tipo de rutas a calcular
+    document.getElementById('route-type').value = settings.routeType ?? 'arbitrage';
     
     // NUEVO v5.0.4: Fees personalizados
     document.getElementById('extra-trading-fee').value = settings.extraTradingFee ?? 0;
@@ -315,6 +317,8 @@ async function saveSettings() {
       maxRoutesDisplay: parseInt(document.getElementById('max-routes-display').value),
       filterMinProfit: parseFloat(document.getElementById('filter-min-profit').value) ?? -10.0,
       sortByProfit: document.getElementById('sort-by-profit').checked,
+      // NUEVO v5.0.75: Tipo de rutas a calcular
+      routeType: document.getElementById('route-type').value,
       // NUEVO v5.0.4: Fees personalizados
       extraTradingFee: parseFloat(document.getElementById('extra-trading-fee').value) || 0,
       extraWithdrawalFee: parseFloat(document.getElementById('extra-withdrawal-fee').value) || 0,

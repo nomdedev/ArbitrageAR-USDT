@@ -1151,16 +1151,17 @@ function displayOptimizedRoutes(routes, official) {
     container.innerHTML = `
       <div class="market-status">
         <h3>📊 Estado del Mercado</h3>
-        <p>No se encontraron rutas de arbitraje que cumplan con tus criterios de filtrado.</p>
+        <p>No se encontraron rutas que cumplan con tus criterios de filtrado.</p>
         <div class="market-info">
           <p><strong>Posibles causas:</strong></p>
           <ul>
             <li>🎯 <strong>Umbral de ganancia muy alto:</strong> Prueba bajar el umbral mínimo en Configuración</li>
             <li>🏦 <strong>Exchanges preferidos restrictivos:</strong> Agrega más exchanges en Configuración</li>
-            <li>� <strong>Mercado en equilibrio:</strong> Las tasas están muy cercanas al dólar oficial</li>
-            <li>🔄 <strong>Filtro P2P activo:</strong> Cambia a "Todas" o "No P2P" en los filtros</li>
+            <li>💰 <strong>Tipo de ruta incorrecto:</strong> Cambia el tipo de rutas en Configuración (Arbitraje, USDT→ARS, etc.)</li>
+            <li>🔄 <strong>Mercado en equilibrio:</strong> Las tasas están muy cercanas al dólar oficial</li>
+            <li>🤝 <strong>Filtro P2P activo:</strong> Cambia a "Todas" o "No P2P" en los filtros</li>
           </ul>
-          <p><small>Tu configuración actual: Umbral ${userSettings?.profitThreshold || 1.0}%, Exchanges: ${userSettings?.preferredExchanges?.length ? userSettings.preferredExchanges.join(', ') : 'Todos'}</small></p>
+          <p><small>Tu configuración actual: Umbral ${userSettings?.profitThreshold || 1.0}%, Tipo: ${userSettings?.routeType || 'arbitrage'}</small></p>
         </div>
         <button class="retry-btn" data-action="reload" style="margin-top: 15px;">🔄 Actualizar Datos</button>
         <button class="settings-btn" onclick="chrome.runtime.openOptionsPage()" style="margin-top: 10px;">⚙️ Revisar Configuración</button>
@@ -1169,124 +1170,413 @@ function displayOptimizedRoutes(routes, official) {
     return;
   }
 
-  // Ordenar rutas por rentabilidad (de mayor a menor ganancia)
-  // CORREGIDO v5.0.71: Usar calculation.profitPercentage para consistencia
+  // Ordenar rutas por relevancia según el tipo
   routes.sort((a, b) => {
-    const profitA = a.calculation?.profitPercentage !== undefined ? a.calculation.profitPercentage : (a.profitPercentage || 0);
-    const profitB = b.calculation?.profitPercentage !== undefined ? b.calculation.profitPercentage : (b.profitPercentage || 0);
-    return profitB - profitA;
+    // Para rutas de arbitraje, ordenar por profitPercentage
+    if (a.routeCategory === 'arbitrage' || (!a.routeCategory && a.profitPercentage !== undefined)) {
+      const profitA = a.profitPercentage || 0;
+      const profitB = b.profitPercentage || 0;
+      return profitB - profitA;
+    }
+    // Para rutas directas USDT→ARS, ordenar por arsReceived
+    if (a.routeCategory === 'direct_usdt_ars' || a.isDirectSale) {
+      const arsA = a.arsReceived || 0;
+      const arsB = b.arsReceived || 0;
+      return arsB - arsA;
+    }
+    // Para rutas USD→USDT, ordenar por efficiency
+    if (a.routeCategory === 'usd_to_usdt' || a.isPurchaseRoute) {
+      const effA = a.efficiency || 0;
+      const effB = b.efficiency || 0;
+      return effB - effA;
+    }
+    // Fallback
+    return 0;
   });
 
-  console.log('🔍 [POPUP] Generando HTML para', routes.length, 'rutas ordenadas por rentabilidad');
+  console.log('🔍 [POPUP] Generando HTML para', routes.length, 'rutas ordenadas');
   let html = '';
-  
+
   routes.forEach((route, index) => {
-    // CORREGIDO v5.0.71: Usar calculation.profitPercentage para consistencia con la guía
-    const displayProfitPercentage = route.calculation?.profitPercentage !== undefined 
-      ? route.calculation.profitPercentage 
-      : route.profitPercentage || 0;
-    
-    const { isNegative, profitClass, profitBadgeClass } = getProfitClasses(displayProfitPercentage);
-    
+    // Determinar tipo de ruta y métricas de display
+    const routeType = getRouteType(route);
+    const displayMetrics = getRouteDisplayMetrics(route, routeType);
+
+    const { isNegative, profitClass, profitBadgeClass } = getProfitClasses(displayMetrics.percentage);
+
     // Indicadores
     const negativeIndicator = isNegative ? '<span class="negative-tag">⚠️ Pérdida</span>' : '';
     const profitSymbol = isNegative ? '' : '+';
-    
-    // Badge especial para single-exchange
-    const singleExchangeBadge = route.isSingleExchange 
-      ? '<span class="single-exchange-badge">🎯 Mismo Broker</span>' 
-      : '';
-    
-    // NUEVO: Badge P2P
-    const isP2P = isP2PRoute(route);
-    const p2pBadge = isP2P 
-      ? '<span class="p2p-badge">🤝 P2P</span>' 
-      : '<span class="no-p2p-badge">⚡ Directo</span>';
-    
-    // Ruta simplificada (comprar → transferir → vender)
-    const routeDescription = route.isSingleExchange
-      ? `<strong>${route.buyExchange}</strong>`
-      : `<strong>${route.buyExchange}</strong> → <strong>${route.sellExchange}</strong>`;
-    
-    // CORREGIDO v5.0.72: Guardar la ruta completa como JSON en data-route para evitar problemas de índices
+
+    // Badges según tipo de ruta
+    const typeBadge = getRouteTypeBadge(routeType);
+    const p2pBadge = getP2PBadge(route);
+
+    // Descripción de la ruta según el tipo
+    const routeDescription = getRouteDescription(route, routeType);
+
+    // CORREGIDO v5.0.72: Guardar la ruta completa como JSON en data-route
     const routeData = JSON.stringify({
-      buyExchange: route.buyExchange,
-      sellExchange: route.sellExchange,
-      isSingleExchange: route.isSingleExchange,
-      profitPercentage: displayProfitPercentage,
-      officialPrice: route.officialPrice,
-      usdToUsdtRate: route.usdToUsdtRate,
-      usdtArsBid: route.usdtArsBid,
-      transferFeeUSD: route.transferFeeUSD,
-      calculation: route.calculation,
-      fees: route.fees
+      ...route,
+      routeType: routeType,
+      displayMetrics: displayMetrics
     });
-    
+
     html += `
-      <div class="route-card ${profitClass} ${isP2P ? 'is-p2p' : 'is-direct'}" data-index="${index}" data-route='${routeData.replace(/'/g, "&apos;")}'>
+      <div class="route-card ${profitClass} ${routeType}" data-index="${index}" data-route='${routeData.replace(/'/g, "&apos;")}'>
         <div class="route-header">
           <div class="route-title">
-            <h3>${route.isSingleExchange ? '🎯' : '🔀'} Ruta ${index + 1}</h3>
+            <h3>${getRouteIcon(routeType)} Ruta ${index + 1}</h3>
             <div class="route-badges">
-              ${singleExchangeBadge}
+              ${typeBadge}
               ${p2pBadge}
             </div>
-            <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${formatNumber(displayProfitPercentage)}% ${negativeIndicator}</div>
+            <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${formatNumber(displayMetrics.percentage)}% ${negativeIndicator}</div>
           </div>
         </div>
-        
+
         <div class="route-compact">
           <div class="route-summary-line">
             <span class="route-exchanges">🏦 ${routeDescription}</span>
           </div>
           <div class="route-profit-line">
-            <span class="profit-amount">${profitSymbol}$${formatNumber(Math.abs(route.calculation.netProfit))} ARS</span>
-            <span class="investment-info">sobre $${formatNumber(route.calculation.initial)} ARS</span>
+            <span class="profit-amount">${displayMetrics.mainValue}</span>
+            <span class="investment-info">${displayMetrics.secondaryInfo}</span>
           </div>
           <div class="route-action">
-            <span class="click-to-expand">👆 Click para ver guía paso a paso</span>
+            <span class="click-to-expand">👆 Click para ver detalles</span>
           </div>
         </div>
       </div>
     `;
   });
-  
+
   container.innerHTML = html;
-  
+
   // CORREGIDO v5.0.64: Seleccionar route-cards del container correcto
   const routeCards = container.querySelectorAll('.route-card');
-  
+
   console.log(`🔍 [POPUP] Agregando event listeners a ${routeCards.length} route-cards`);
-  
+
   routeCards.forEach((card, idx) => {
     card.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
-      
+
       // CORREGIDO v5.0.72: Usar data-route en lugar de índice para obtener la ruta exacta
       const routeData = this.dataset.route;
       if (!routeData) {
         console.error('❌ [POPUP] No se encontró data-route en la tarjeta');
         return;
       }
-      
+
       try {
         const route = JSON.parse(routeData);
-        console.log(`🖱️ [POPUP] Click en route-card:`, route.buyExchange, '→', route.sellExchange);
-        
+        console.log(`🖱️ [POPUP] Click en route-card tipo ${route.routeType}:`, route.broker || route.buyExchange);
+
         // Remover selección previa
         container.querySelectorAll('.route-card').forEach(c => c.classList.remove('selected'));
         this.classList.add('selected');
-        
-        // Mostrar guía paso a paso con la ruta exacta
-        showRouteGuideFromData(route);
+
+        // Mostrar detalles según el tipo de ruta
+        showRouteDetailsByType(route);
       } catch (error) {
         console.error('❌ [POPUP] Error al parsear data-route:', error);
       }
     });
   });
-  
+
   console.log('✅ [POPUP] displayOptimizedRoutes() completado - HTML generado y aplicado');
+}
+
+// ============================================
+// FUNCIONES AUXILIARES PARA TIPOS DE RUTAS
+// ============================================
+
+function getRouteType(route) {
+  // Determinar tipo de ruta basado en propiedades del objeto
+  if (route.routeCategory) {
+    return route.routeCategory;
+  }
+  if (route.routeType) {
+    return route.routeType;
+  }
+  if (route.isDirectSale || route.arsReceived) {
+    return 'direct_usdt_ars';
+  }
+  if (route.isPurchaseRoute || route.efficiency) {
+    return 'usd_to_usdt';
+  }
+  return 'arbitrage'; // default
+}
+
+function getRouteDisplayMetrics(route, routeType) {
+  switch (routeType) {
+    case 'direct_usdt_ars':
+      const arsReceived = route.arsReceived || 0;
+      const usdtSold = route.usdtSold || route.calculation?.initialUsdtAmount || 1000;
+      const exchangeRate = route.exchangeRate || 0;
+      const percentage = route.profitPercent || 0;
+
+      return {
+        percentage: percentage,
+        mainValue: `$${formatNumber(arsReceived)} ARS`,
+        secondaryInfo: `vendiendo ${usdtSold} USDT`
+      };
+
+    case 'usd_to_usdt':
+      const usdtReceived = route.usdtReceived || 0;
+      const usdInvested = route.usdInvested || route.calculation?.initialUsdAmount || 1000;
+      const efficiency = route.efficiency || 0;
+
+      return {
+        percentage: (efficiency - 1) * 100, // Convertir efficiency a porcentaje
+        mainValue: `${formatNumber(usdtReceived)} USDT`,
+        secondaryInfo: `por ${usdInvested} USD invertidos`
+      };
+
+    default: // arbitrage
+      const profitPercentage = route.profitPercentage || route.calculation?.profitPercentage || 0;
+      const netProfit = Math.abs(route.calculation?.netProfit || 0);
+      const initial = route.calculation?.initialAmount || route.calculation?.initial || 100000;
+
+      return {
+        percentage: profitPercentage,
+        mainValue: `${profitPercentage >= 0 ? '+' : ''}$${formatNumber(netProfit)} ARS`,
+        secondaryInfo: `sobre $${formatNumber(initial)} ARS`
+      };
+  }
+}
+
+function getRouteTypeBadge(routeType) {
+  switch (routeType) {
+    case 'direct_usdt_ars':
+      return '<span class="route-type-badge direct-sale">💰 USDT→ARS</span>';
+    case 'usd_to_usdt':
+      return '<span class="route-type-badge purchase">💎 USD→USDT</span>';
+    default:
+      return '<span class="route-type-badge arbitrage">🔄 Arbitraje</span>';
+  }
+}
+
+function getP2PBadge(route) {
+  const isP2P = route.requiresP2P || (route.broker && route.broker.toLowerCase().includes('p2p'));
+  return isP2P
+    ? '<span class="p2p-badge">🤝 P2P</span>'
+    : '<span class="no-p2p-badge">⚡ Directo</span>';
+}
+
+function getRouteDescription(route, routeType) {
+  switch (routeType) {
+    case 'direct_usdt_ars':
+      return `<strong>${route.broker}</strong> - Venta directa`;
+    case 'usd_to_usdt':
+      return `<strong>${route.broker}</strong> - Compra USDT`;
+    default: // arbitrage
+      if (route.isSingleExchange) {
+        return `<strong>${route.buyExchange}</strong>`;
+      } else {
+        return `<strong>${route.buyExchange}</strong> → <strong>${route.sellExchange}</strong>`;
+      }
+  }
+}
+
+function getRouteIcon(routeType) {
+  switch (routeType) {
+    case 'direct_usdt_ars':
+      return '💰';
+    case 'usd_to_usdt':
+      return '💎';
+    default:
+      return route.isSingleExchange ? '🎯' : '🔀';
+  }
+}
+
+function showRouteDetailsByType(route) {
+  const routeType = getRouteType(route);
+
+  switch (routeType) {
+    case 'direct_usdt_ars':
+      showDirectUsdtArsDetails(route);
+      break;
+    case 'usd_to_usdt':
+      showUsdToUsdtDetails(route);
+      break;
+    default:
+      showRouteGuideFromData(route);
+      break;
+  }
+}
+
+// ============================================
+// FUNCIONES DE DETALLES PARA TIPOS ESPECÍFICOS
+// ============================================
+
+function showDirectUsdtArsDetails(route) {
+  console.log('💰 Mostrando detalles de venta directa USDT→ARS:', route);
+
+  const modal = document.getElementById('route-details-modal');
+  const content = modal.querySelector('.modal-content');
+
+  const usdtAmount = route.usdtSold || route.calculation?.initialUsdtAmount || 1000;
+  const arsReceived = route.arsReceived || 0;
+  const exchangeRate = route.exchangeRate || 0;
+  const fees = route.fees || {};
+
+  content.innerHTML = `
+    <div class="modal-header">
+      <h2>💰 Venta Directa USDT → ARS</h2>
+      <span class="modal-close">&times;</span>
+    </div>
+    <div class="modal-body">
+      <div class="route-summary">
+        <div class="summary-item">
+          <span class="label">Exchange:</span>
+          <span class="value">${route.broker}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">USDT a vender:</span>
+          <span class="value">${usdtAmount} USDT</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">ARS recibidos:</span>
+          <span class="value">$${formatNumber(arsReceived)}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Tasa de cambio:</span>
+          <span class="value">$${formatNumber(exchangeRate)} ARS/USDT</span>
+        </div>
+      </div>
+
+      <div class="route-steps">
+        <h3>Pasos a seguir:</h3>
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Accede a tu cuenta en ${route.broker}</h4>
+            <p>Inicia sesión en la plataforma de ${route.broker}</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Vende ${usdtAmount} USDT por ARS</h4>
+            <p>Coloca una orden de venta al precio de $${formatNumber(exchangeRate)} ARS por USDT</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Recibe $${formatNumber(arsReceived)} ARS</h4>
+            <p>Los pesos argentinos estarán disponibles en tu cuenta bancaria</p>
+          </div>
+        </div>
+      </div>
+
+      ${fees.total > 0 ? `
+      <div class="fees-info">
+        <h4>Comisiones aplicadas:</h4>
+        <div class="fee-breakdown">
+          ${fees.sell > 0 ? `<div>Comisión de venta: $${formatNumber(fees.sell)}</div>` : ''}
+          ${fees.withdrawal > 0 ? `<div>Comisión de retiro: $${formatNumber(fees.withdrawal)}</div>` : ''}
+          ${fees.transfer > 0 ? `<div>Comisión de transferencia: $${formatNumber(fees.transfer)}</div>` : ''}
+          ${fees.bank > 0 ? `<div>Comisión bancaria: $${formatNumber(fees.bank)}</div>` : ''}
+          <div class="fee-total">Total fees: $${formatNumber(fees.total)}</div>
+        </div>
+      </div>
+      ` : ''}
+    </div>
+  `;
+
+  modal.style.display = 'block';
+}
+
+function showUsdToUsdtDetails(route) {
+  console.log('💎 Mostrando detalles de compra USD→USDT:', route);
+
+  const modal = document.getElementById('route-details-modal');
+  const content = modal.querySelector('.modal-content');
+
+  const usdAmount = route.usdInvested || route.calculation?.initialUsdAmount || 1000;
+  const usdtReceived = route.usdtReceived || 0;
+  const exchangeRate = route.exchangeRate || 0;
+  const efficiency = route.efficiency || 0;
+  const fees = route.fees || {};
+
+  content.innerHTML = `
+    <div class="modal-header">
+      <h2>💎 Compra USDT con USD</h2>
+      <span class="modal-close">&times;</span>
+    </div>
+    <div class="modal-body">
+      <div class="route-summary">
+        <div class="summary-item">
+          <span class="label">Exchange:</span>
+          <span class="value">${route.broker}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">USD a invertir:</span>
+          <span class="value">$${usdAmount} USD</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">USDT recibidos:</span>
+          <span class="value">${formatNumber(usdtReceived)} USDT</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Tasa USD/USDT:</span>
+          <span class="value">${formatNumber(exchangeRate)}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Eficiencia:</span>
+          <span class="value">${formatNumber(efficiency * 100)}%</span>
+        </div>
+      </div>
+
+      <div class="route-steps">
+        <h3>Pasos a seguir:</h3>
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Convierte ARS a USD</h4>
+            <p>Compra $${usdAmount} USD usando el dólar oficial o cuevas</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Accede a ${route.broker}</h4>
+            <p>Inicia sesión en la plataforma</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Compra USDT con USD</h4>
+            <p>Invierte $${usdAmount} USD para recibir ${formatNumber(usdtReceived)} USDT</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h4>Guarda tus USDT</h4>
+            <p>Los USDT estarán disponibles en tu wallet para usar en arbitraje o trading</p>
+          </div>
+        </div>
+      </div>
+
+      ${fees.total > 0 ? `
+      <div class="fees-info">
+        <h4>Comisiones aplicadas:</h4>
+        <div class="fee-breakdown">
+          ${fees.buy > 0 ? `<div>Comisión de compra: ${formatNumber(fees.buy)} USDT</div>` : ''}
+          <div class="fee-total">Total fees: ${formatNumber(fees.total)} USDT</div>
+        </div>
+      </div>
+      ` : ''}
+    </div>
+  `;
+
+  modal.style.display = 'block';
 }
 
 // NUEVA FUNCIÓN v5.0.72: Mostrar guía desde datos de ruta directos (sin índice)

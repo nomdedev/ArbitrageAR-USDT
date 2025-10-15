@@ -229,6 +229,32 @@
               aria-label="Monto en pesos argentinos">
           </div>
         </div>
+
+        <!-- NUEVA SECCIÓN v5.0.75: Tipo de Rutas -->
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="route-type" class="setting-label">
+              Tipo de rutas a calcular
+            </label>
+            <p class="setting-description">
+              Elige qué tipo de oportunidades buscar según tu situación
+            </p>
+          </div>
+          <div class="input-group">
+            <select id="route-type" aria-label="Tipo de rutas">
+              <option value="arbitrage">🔄 Arbitraje completo (ARS→USD→USDT→ARS)</option>
+              <option value="direct_usdt_ars">💰 Venta directa USDT→ARS</option>
+              <option value="usd_to_usdt">💎 Compra USDT con USD</option>
+              <option value="all">📊 Todas las rutas</option>
+            </select>
+          </div>
+          <p class="setting-hint">
+            💡 <strong>Arbitraje:</strong> Para quienes tienen ARS<br>
+            💰 <strong>USDT→ARS:</strong> Para quienes ya tienen USDT<br>
+            💎 <strong>USD→USDT:</strong> Para comparar precios de compra de USDT<br>
+            📊 <strong>Todas:</strong> Ver todas las oportunidades disponibles
+          </p>
+        </div>
       </section>
 
         <div class="setting-item">
