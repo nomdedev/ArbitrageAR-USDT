@@ -3503,29 +3503,32 @@ p.error {
 
 .btn-apply-filter,
 .btn-reset-filter {
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 0.9em;
-  font-weight: 600;
+  /* Hereda estilos de .btn */
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--input-transition);
   border: none;
 }
 
 .btn-apply-filter {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  /* Usa .btn-primary */
+  background: var(--gradient-primary);
   color: white;
+  box-shadow: var(--shadow-md);
 }
 
 .btn-apply-filter:hover {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  background: var(--gradient-primary-hover);
+  transform: var(--hover-lift);
+  box-shadow: var(--shadow-lg);
 }
 
 .btn-reset-filter {
   background: rgba(71, 85, 105, 0.4);
-  color: #cbd5e1;
+  color: var(--text-secondary);
   border: 1px solid rgba(148, 163, 184, 0.3);
 }
 
@@ -5015,5 +5018,187 @@ p.error {
 
 .modal-content::-webkit-scrollbar-thumb:hover {
   background: rgba(59, 130, 246, 0.5);
+}
+
+/* ============================================
+   SISTEMA DE COMPONENTES REUTILIZABLES v5.0.80
+   ============================================ */
+
+/* 🎯 BOTONES BASE */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: var(--input-transition);
+  border: 1px solid transparent;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Variantes de botones */
+.btn-primary {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--gradient-primary-hover);
+  transform: var(--hover-lift);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-success {
+  background: var(--gradient-success);
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-success:hover:not(:disabled) {
+  background: var(--gradient-success-hover);
+  transform: var(--hover-lift);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.btn-warning {
+  background: var(--gradient-warning);
+  color: white;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.btn-error {
+  background: var(--gradient-error);
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-neutral {
+  background: var(--gradient-neutral);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-neutral:hover:not(:disabled) {
+  background: var(--gradient-neutral-hover);
+  transform: var(--hover-lift);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Botones outline */
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--primary-blue);
+  color: var(--primary-blue);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: var(--primary-blue);
+  color: white;
+}
+
+/* Tamaños de botones */
+.btn-sm {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-xs);
+}
+
+.btn-lg {
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: var(--font-size-base);
+}
+
+/* 🃏 CARDS BASE */
+.card {
+  background: var(--card-bg);
+  backdrop-filter: var(--backdrop-blur);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-card);
+  border: var(--border-card);
+  transition: var(--transition-fast);
+}
+
+.card:hover {
+  transform: var(--hover-lift);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--border-hover);
+}
+
+/* 📊 BADGES BASE */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+}
+
+.badge-success {
+  background: var(--gradient-success);
+  color: white;
+}
+
+.badge-warning {
+  background: var(--gradient-warning);
+  color: white;
+}
+
+.badge-error {
+  background: var(--gradient-error);
+  color: white;
+}
+
+.badge-info {
+  background: var(--gradient-info);
+  color: white;
+}
+
+/* 🔄 ANIMACIONES REUTILIZABLES */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Clases de animación */
+.animate-fade-in {
+  animation: fadeIn var(--anim-duration-normal) ease-out;
+}
+
+.animate-slide-in {
+  animation: slideIn var(--anim-duration-normal) ease-out;
+}
+
+.animate-pulse {
+  animation: pulse var(--anim-duration-slow) ease-in-out infinite;
 }
 
