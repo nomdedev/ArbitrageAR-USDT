@@ -309,7 +309,7 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
       usdToUsdtRate,
       usdtArsBid: sellPrice,
       calculation: {
-        initial: initialAmount,
+        initialAmount: initialAmount,
         usdPurchased,
         usdtPurchased,
         usdtAfterFees,

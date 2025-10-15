@@ -54,7 +54,8 @@ async function runCompleteTestSuite() {
   const testFiles = [
     'test-complete-flow.js',
     'test-communication.js',
-    'test-popup-ui.js'
+    'test-popup-ui.js',
+    'test-advanced-filters.js'
   ];
 
   const results = {

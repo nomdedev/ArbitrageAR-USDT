@@ -4,6 +4,15 @@ let selectedArbitrage = null;
 let userSettings = null; // NUEVO v5.0: Configuración del usuario
 let currentFilter = 'no-p2p'; // CORREGIDO v5.0.12: Volver a 'no-p2p' pero con debug forzado
 let allRoutes = []; // NUEVO: Cache de todas las rutas sin filtrar
+let filteredRoutes = []; // NUEVO: Cache de rutas filtradas para navegación
+
+// Estado global para filtros avanzados
+let advancedFilters = {
+  exchange: 'all',
+  profitMin: 0,
+  hideNegative: false,
+  sortBy: 'profit-desc'
+};
 
 // Modo debug para reducir logs excesivos
 const DEBUG_MODE = false; // PRODUCCIÓN: Desactivado después de diagnosticar problema
@@ -26,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupAdvancedFilters(); // NUEVO v5.0.75: Configurar filtros avanzados
   setupDollarPriceControls(); // NUEVO: Configurar controles del precio del dólar
   setupAdvancedSimulator(); // NUEVO v5.0.31: Configurar simulador sin rutas
+  setupRouteDetailsModal(); // NUEVO: Configurar modal de detalles de ruta
   checkForUpdates(); // NUEVO: Verificar actualizaciones disponibles
   loadUserSettings(); // NUEVO v5.0.28: Cargar configuración del usuario
   fetchAndDisplay();
@@ -435,14 +445,6 @@ function updateFilterCounts() {
 // ============================================
 // FILTROS AVANZADOS v5.0.75
 // ============================================
-
-// Estado de filtros avanzados
-let advancedFilters = {
-  exchange: 'all',
-  profitMin: 0,
-  hideNegative: false,
-  sortBy: 'profit-desc'
-};
 
 /**
  * Configurar filtros avanzados
@@ -2363,6 +2365,38 @@ function setupDollarPriceControls() {
   }
 }
 
+/**
+ * Configurar modal de detalles de ruta
+ */
+function setupRouteDetailsModal() {
+  console.log('📱 [POPUP] Configurando modal de detalles de ruta');
+
+  // Event listener para cerrar modal
+  const modalClose = document.getElementById('modal-close');
+  if (modalClose) {
+    modalClose.addEventListener('click', closeRouteDetailsModal);
+  }
+
+  // Event listener para cerrar modal al hacer click en el overlay
+  const modalOverlay = document.getElementById('route-details-modal');
+  if (modalOverlay) {
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) {
+        closeRouteDetailsModal();
+      }
+    });
+  }
+
+  // Event listener para cerrar modal con tecla Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modalOverlay && modalOverlay.style.display === 'flex') {
+      closeRouteDetailsModal();
+    }
+  });
+
+  console.log('✅ [POPUP] Modal de detalles configurado');
+}
+
 // Mostrar información del precio del dólar
 function displayDollarInfo(officialData) {
   const dollarInfo = document.getElementById('dollar-info');
@@ -2518,6 +2552,419 @@ function setupUpdateBannerButtons(updateInfo) {
       }
     };
   }
+}
+
+// ==========================================
+// FUNCIONES DE FILTRADO AVANZADO
+// ==========================================
+
+/**
+ * Poblar el dropdown de exchanges con las opciones disponibles
+ */
+function populateExchangeFilter() {
+  const exchangeSelect = document.getElementById('filter-exchange');
+  if (!exchangeSelect) return;
+
+  // Obtener exchanges únicos de todas las rutas
+  const exchanges = new Set();
+  allRoutes.forEach(route => {
+    if (route.buyExchange) exchanges.add(route.buyExchange);
+    if (route.sellExchange) exchanges.add(route.sellExchange);
+  });
+
+  // Limpiar opciones existentes excepto "Todos"
+  while (exchangeSelect.children.length > 1) {
+    exchangeSelect.removeChild(exchangeSelect.lastChild);
+  }
+
+  // Agregar exchanges ordenados alfabéticamente
+  Array.from(exchanges).sort().forEach(exchange => {
+    const option = document.createElement('option');
+    option.value = exchange;
+    option.textContent = exchange;
+    exchangeSelect.appendChild(option);
+  });
+
+  log(`🏦 Poblado dropdown de exchanges: ${exchanges.size} exchanges encontrados`);
+}
+
+/**
+ * Aplicar todos los filtros combinados (P2P + Avanzados)
+ */
+function applyAllFilters() {
+  if (!allRoutes || allRoutes.length === 0) {
+    console.warn('⚠️ No hay rutas disponibles para filtrar');
+    return;
+  }
+
+  log('🔍 Aplicando todos los filtros...', {
+    p2pFilter: currentFilter,
+    advancedFilters: advancedFilters
+  });
+
+  // Paso 1: Aplicar filtro P2P básico
+  let filteredRoutes = applyP2PFilterOnly(allRoutes);
+
+  // Paso 2: Aplicar filtros avanzados
+  filteredRoutes = applyAdvancedFiltersOnly(filteredRoutes);
+
+  // Paso 3: Ordenar según configuración
+  filteredRoutes = sortRoutes(filteredRoutes, advancedFilters.sortBy);
+
+  // Paso 4: Mostrar rutas filtradas
+  displayFilteredRoutes(filteredRoutes);
+
+  // Paso 5: Actualizar contadores
+  updateFilterCounts();
+
+  log(`✅ Filtros aplicados: ${filteredRoutes.length} rutas de ${allRoutes.length} total`);
+}
+
+/**
+ * Aplicar solo el filtro P2P básico
+ */
+function applyP2PFilterOnly(routes) {
+  switch (currentFilter) {
+    case 'p2p':
+      return routes.filter(route => isP2PRoute(route));
+    case 'no-p2p':
+      return routes.filter(route => !isP2PRoute(route));
+    case 'all':
+    default:
+      return [...routes];
+  }
+}
+
+/**
+ * Aplicar solo los filtros avanzados
+ */
+function applyAdvancedFiltersOnly(routes) {
+  let filtered = [...routes];
+
+  // Filtro por exchange
+  if (advancedFilters.exchange !== 'all') {
+    filtered = filtered.filter(route =>
+      route.buyExchange === advancedFilters.exchange ||
+      route.sellExchange === advancedFilters.exchange
+    );
+  }
+
+  // Filtro por profit mínimo
+  if (advancedFilters.profitMin > 0) {
+    filtered = filtered.filter(route => route.profitPercentage >= advancedFilters.profitMin);
+  }
+
+  // Ocultar rutas negativas
+  if (advancedFilters.hideNegative) {
+    filtered = filtered.filter(route => route.profitPercentage >= 0);
+  }
+
+  return filtered;
+}
+
+/**
+ * Ordenar rutas según criterio seleccionado
+ */
+function sortRoutes(routes, sortBy) {
+  const sorted = [...routes];
+
+  switch (sortBy) {
+    case 'profit-desc':
+      return sorted.sort((a, b) => b.profitPercentage - a.profitPercentage);
+    case 'profit-asc':
+      return sorted.sort((a, b) => a.profitPercentage - b.profitPercentage);
+    case 'exchange-asc':
+      return sorted.sort((a, b) => (a.buyExchange || '').localeCompare(b.buyExchange || ''));
+    case 'investment-desc':
+      return sorted.sort((a, b) => b.calculation?.initialAmount - a.calculation?.initialAmount);
+    default:
+      return sorted;
+  }
+}
+
+/**
+ * Mostrar las rutas filtradas en el DOM
+ */
+function displayFilteredRoutes(routes) {
+  // Guardar las rutas filtradas para navegación
+  filteredRoutes = routes;
+
+  const container = document.getElementById('optimized-routes');
+  if (!container) return;
+
+  if (routes.length === 0) {
+    container.innerHTML = `
+      <div class="no-routes">
+        <div class="no-routes-icon">🔍</div>
+        <div class="no-routes-text">No se encontraron rutas con los filtros aplicados</div>
+        <button class="btn-reset-filters" onclick="resetAllFilters()">Resetear Filtros</button>
+      </div>
+    `;
+    return;
+  }
+
+  // Generar HTML para las rutas usando el formato original
+  let html = '';
+
+  routes.forEach((route, index) => {
+    // CORREGIDO v5.0.71: Usar calculation.profitPercentage para consistencia
+    const displayProfitPercentage = route.calculation?.profitPercentage !== undefined
+      ? route.calculation.profitPercentage
+      : route.profitPercentage || 0;
+
+    const { isNegative, profitClass, profitBadgeClass } = getProfitClasses(displayProfitPercentage);
+
+    // Indicadores
+    const negativeIndicator = isNegative ? '<span class="negative-tag">⚠️ Pérdida</span>' : '';
+    const profitSymbol = isNegative ? '' : '+';
+
+    // Badge especial para single-exchange
+    const singleExchangeBadge = route.isSingleExchange
+      ? '<span class="single-exchange-badge">🎯 Mismo Broker</span>'
+      : '';
+
+    // NUEVO: Badge P2P
+    const isP2P = isP2PRoute(route);
+    const p2pBadge = isP2P ? '<span class="p2p-badge">🤝 P2P</span>' : '';
+
+    // Calcular valores para mostrar usando el monto configurado por el usuario
+    const calc = route.calculation || {};
+    const userReferenceAmount = userSettings?.defaultSimAmount || 1000000;
+    const calculatedAmount = calc.initialAmount || 100000;
+    
+    // Si el cálculo se hizo con el mismo monto, usar valores tal cual
+    // Si el cálculo se hizo con un monto diferente, ajustar proporcionalmente
+    const ratio = calculatedAmount !== 0 ? userReferenceAmount / calculatedAmount : 1;
+    const shouldAdjust = Math.abs(ratio - 1) > 0.01; // Solo ajustar si diferencia significativa
+    
+    const initialAmount = userReferenceAmount;
+    const finalAmount = shouldAdjust && calc.finalAmount ? calc.finalAmount * ratio : (calc.finalAmount || initialAmount);
+    const netProfit = shouldAdjust && calc.netProfit ? calc.netProfit * ratio : (calc.netProfit || 0);
+
+    html += `
+      <div class="route-card ${profitClass}" data-route-id="${route.buyExchange}_${route.sellExchange}_${index}">
+        <div class="route-header">
+          <div class="route-info">
+            <span class="route-exchange">${route.buyExchange} → ${route.sellExchange}</span>
+            <span class="route-profit ${profitBadgeClass}">${profitSymbol}${formatNumber(displayProfitPercentage)}%</span>
+          </div>
+          <div class="route-badges">
+            ${singleExchangeBadge}
+            ${p2pBadge}
+            ${negativeIndicator}
+          </div>
+        </div>
+
+        <div class="route-details">
+          <div class="route-row">
+            <span class="route-label">Inversión inicial:</span>
+            <span class="route-value">$${formatNumber(initialAmount)}</span>
+          </div>
+          <div class="route-row">
+            <span class="route-label">Resultado final:</span>
+            <span class="route-value ${netProfit >= 0 ? 'positive' : 'negative'}">$${formatNumber(finalAmount)}</span>
+          </div>
+          <div class="route-row">
+            <span class="route-label">Ganancia neta:</span>
+            <span class="route-value ${netProfit >= 0 ? 'positive' : 'negative'}">${netProfit >= 0 ? '+' : ''}$${formatNumber(netProfit)}</span>
+          </div>
+        </div>
+
+        <div class="route-actions">
+          <div class="route-click-indicator" title="Click para ver detalles">
+            <span class="click-icon">👁️</span>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+
+  // Agregar event listeners para expandir/contraer tarjetas
+  document.querySelectorAll('.route-card').forEach((card) => {
+    card.addEventListener('click', (e) => {
+      // Evitar que el click se propague si se hizo en un botón o link
+      if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A') {
+        return;
+      }
+
+      const routeId = card.getAttribute('data-route-id');
+      if (routeId) {
+        // Extraer el index del route-id (último segmento después del último _)
+        const index = parseInt(routeId.split('_').pop());
+        if (!isNaN(index)) {
+          selectArbitrage(index);
+        }
+      }
+    });
+  });
+
+  log(`✅ Mostradas ${routes.length} rutas filtradas`);
+}
+
+/**
+ * Seleccionar un arbitraje de las rutas filtradas y mostrar modal
+ */
+function selectArbitrage(index) {
+  if (!filteredRoutes || !filteredRoutes[index]) {
+    console.warn(`❌ No hay ruta filtrada disponible para el índice: ${index}`);
+    return;
+  }
+
+  const route = filteredRoutes[index];
+  console.log(`✅ [POPUP] Ruta filtrada seleccionada para índice ${index}:`, route);
+
+  // Convertir ruta a formato de arbitraje para la guía
+  const arbitrage = {
+    broker: route.isSingleExchange ? route.buyExchange : `${route.buyExchange} → ${route.sellExchange}`,
+    buyExchange: route.buyExchange || 'N/A',
+    sellExchange: route.sellExchange || route.buyExchange || 'N/A',
+    isSingleExchange: route.isSingleExchange || false,
+    profitPercentage: route.profitPercentage || 0,
+    officialPrice: route.officialPrice || 0,
+    usdToUsdtRate: (typeof route.usdToUsdtRate === 'number' && isFinite(route.usdToUsdtRate)) ? route.usdToUsdtRate : null,
+    usdtArsBid: route.usdtArsBid || 0,
+    sellPrice: route.usdtArsBid || 0,
+    transferFeeUSD: route.transferFeeUSD || 0,
+    calculation: route.calculation || {},
+    fees: route.fees || { trading: 0, withdrawal: 0 }
+  };
+
+  console.log('🔄 [POPUP] Arbitrage convertido:', arbitrage);
+
+  // Abrir modal con los detalles
+  openRouteDetailsModal(arbitrage);
+}
+
+/**
+ * Abrir modal con detalles de la ruta
+ */
+function openRouteDetailsModal(arbitrage) {
+  console.log('📱 [POPUP] Abriendo modal de detalles para:', arbitrage);
+
+  // Calcular valores usando función auxiliar
+  const values = calculateGuideValues(arbitrage);
+  console.log('📊 [POPUP] Valores calculados para el modal:', values);
+
+  // Actualizar título del modal
+  const modalTitle = document.getElementById('modal-title');
+  if (modalTitle) {
+    modalTitle.textContent = `Ruta: ${values.broker}`;
+  }
+
+  // Generar HTML del modal usando funciones auxiliares
+  const modalHtml = `
+    <div class="guide-container-simple">
+      ${generateGuideHeader(values.broker, values.profitPercentage)}
+      ${generateGuideSteps(values)}
+    </div>
+  `;
+
+  // Insertar contenido en el modal
+  const modalBody = document.getElementById('modal-body');
+  if (modalBody) {
+    modalBody.innerHTML = modalHtml;
+    console.log('✅ [POPUP] Contenido insertado en el modal');
+
+    // Configurar animaciones
+    setupGuideAnimations(modalBody);
+  } else {
+    console.error('❌ [POPUP] No se encontró el body del modal');
+  }
+
+  // Mostrar modal
+  const modal = document.getElementById('route-details-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+    console.log('✅ [POPUP] Modal mostrado');
+  } else {
+    console.error('❌ [POPUP] No se encontró el modal');
+  }
+}
+
+/**
+ * Cerrar modal de detalles de ruta
+ */
+function closeRouteDetailsModal() {
+  console.log('📱 [POPUP] Cerrando modal de detalles');
+
+  const modal = document.getElementById('route-details-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    console.log('✅ [POPUP] Modal cerrado');
+  }
+}
+
+/**
+ * Función global para resetear todos los filtros
+ */
+function resetAllFilters() {
+  // Resetear filtro P2P
+  currentFilter = 'no-p2p';
+  const defaultButton = document.querySelector('[data-filter="no-p2p"]');
+  if (defaultButton) {
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    defaultButton.classList.add('active');
+  }
+
+  // Resetear filtros avanzados
+  resetAdvancedFilters();
+}
+
+/**
+ * Actualizar contadores de filtros
+ */
+function updateFilterCounts() {
+  if (!allRoutes || allRoutes.length === 0) return;
+
+  const counts = {
+    'no-p2p': allRoutes.filter(route => !isP2PRoute(route)).length,
+    'p2p': allRoutes.filter(route => isP2PRoute(route)).length,
+    'all': allRoutes.length
+  };
+
+  Object.keys(counts).forEach(filter => {
+    const countElement = document.getElementById(`count-${filter}`);
+    if (countElement) {
+      countElement.textContent = counts[filter];
+    }
+  });
+}
+
+// Función auxiliar para mostrar notificaciones toast
+function showToast(message, type = 'info') {
+  // Crear elemento toast si no existe
+  let toast = document.getElementById('toast-notification');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast-notification';
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 10000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      animation: toastSlideIn 0.3s ease-out;
+    `;
+    document.body.appendChild(toast);
+  }
+
+  toast.textContent = message;
+  toast.style.background = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6';
+
+  // Auto-remover después de 3 segundos
+  setTimeout(() => {
+    if (toast.parentNode) {
+      toast.remove();
+    }
+  }, 3000);
 }
 
 // Event listener global para botones de retry
