@@ -1160,6 +1160,24 @@ main::-webkit-scrollbar-thumb {
   vertical-align: middle;
 }
 
+/* Indicadores de pérdida debajo del broker */
+.broker-loss-indicator,
+.route-loss-indicator {
+  margin-top: 4px;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.broker-loss-indicator .negative-tag,
+.route-loss-indicator .negative-tag {
+  display: inline-block;
+  margin-left: 0;
+  font-size: 0.75em;
+  padding: 3px 6px;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
 /* Card con pérdida */
 .arbitrage-card.negative-profit {
   border-color: rgba(239, 68, 68, 0.3);
@@ -3108,6 +3126,7 @@ footer {
   gap: 6px;
   min-height: 40px;
   overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .filter-btn:hover {
@@ -5200,5 +5219,214 @@ p.error {
 
 .animate-pulse {
   animation: pulse var(--anim-duration-slow) ease-in-out infinite;
+}
+
+/* ============================================
+   ESTILOS PARA PESTAÑA DE EXCHANGES v5.0.75
+   ============================================ */
+
+.exchange-filters {
+  background: var(--card-bg);
+  backdrop-filter: var(--backdrop-blur);
+  border-radius: var(--border-radius);
+  padding: 10px;
+  margin-bottom: var(--spacing-md);
+  border: var(--border-card);
+  box-shadow: var(--shadow-card);
+}
+
+.filter-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+}
+
+.filter-input {
+  padding: var(--spacing-sm);
+  border: var(--border-input);
+  border-radius: var(--border-radius-sm);
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  transition: var(--transition-fast);
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.filter-btn {
+  position: relative;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.4) 100%);
+  border: 2px solid rgba(71, 85, 105, 0.5);
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  overflow: hidden;
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.filter-btn:hover {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(51, 65, 85, 0.5) 100%);
+  border-color: rgba(59, 130, 246, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+}
+
+.filter-btn.active {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(37, 99, 235, 0.2) 100%);
+  border-color: #3b82f6;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.exchanges-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.exchange-card {
+  background: var(--card-bg);
+  backdrop-filter: var(--backdrop-blur);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  border: var(--border-card);
+  box-shadow: var(--shadow-card);
+  transition: var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.exchange-card:hover {
+  transform: var(--hover-lift);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--border-hover);
+}
+
+.exchange-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--indicator-width);
+  background: var(--profit-positive);
+  opacity: var(--indicator-opacity);
+  transition: var(--transition-fast);
+}
+
+.exchange-card[data-type="oficial"]::before {
+  background: var(--profit-high);
+}
+
+.exchange-card[data-type="usdt_ars"]::before {
+  background: var(--accent-color);
+}
+
+.exchange-card[data-type="usdt_usd"]::before {
+  background: var(--profit-positive);
+}
+
+.exchange-card:hover::before {
+  opacity: var(--indicator-opacity-hover);
+}
+
+.exchange-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.exchange-name {
+  font-weight: 600;
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+}
+
+.exchange-type {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  padding: 2px var(--spacing-xs);
+  border-radius: var(--border-radius-sm);
+  font-weight: 500;
+}
+
+.exchange-rates {
+  margin-bottom: var(--spacing-sm);
+}
+
+.exchange-rate {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+}
+
+.exchange-rate:last-child {
+  margin-bottom: 0;
+}
+
+.rate-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.rate-value {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+
+.exchange-source {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-align: right;
+  border-top: 1px solid var(--border-color);
+  padding-top: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Responsive para exchanges */
+@media (max-width: 768px) {
+  .exchanges-list {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-section {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .filter-buttons {
+    justify-content: center;
+  }
 }
 

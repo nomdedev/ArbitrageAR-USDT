@@ -19,6 +19,17 @@ const DEBUG_MODE = false; // PRODUCCIÓN: Desactivado después de diagnosticar p
 
 console.log('🚀 Popup.js cargado correctamente');
 
+// Importar util para entornos CommonJS (tests Node) y hacer fallback para navegador
+try {
+  // En Node esto exportará la función
+  const utils = require('./utils.js');
+  if (utils && typeof utils.getProfitClasses === 'function') {
+    global.getProfitClasses = utils.getProfitClasses;
+  }
+} catch(e) {
+  // En navegador 'require' no está definido: dejamos que getProfitClasses esté definido en el scope global cuando se cargue desde <script>
+}
+
 // Función de logging condicional
 function log(...args) {
   if (DEBUG_MODE) {
@@ -729,9 +740,18 @@ function setupRefreshButton() {
     loadBanksData();
   });
   
-  // Botón de configuración
+  // Botón de configuración - Mostrar/ocultar filtros avanzados
   document.getElementById('settings').addEventListener('click', () => {
-    chrome.runtime.openOptionsPage();
+    const panel = document.getElementById('advanced-filters-panel');
+    const toggleBtn = document.getElementById('toggle-advanced-filters');
+    
+    if (panel && toggleBtn) {
+      // Simular click en el botón de toggle para mostrar/ocultar el panel
+      toggleBtn.click();
+    } else {
+      // Fallback: abrir página de opciones si no hay panel de filtros
+      chrome.runtime.openOptionsPage();
+    }
   });
 }
 
@@ -1086,7 +1106,8 @@ function displayArbitrages(arbitrages, official) {
       <div class="arbitrage-card ${profitClass}" data-index="${index}">
         <div class="card-header">
           <h3>🏦 ${arb.broker}</h3>
-          <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${formatNumber(arb.profitPercentage)}% ${lowProfitIndicator}${negativeIndicator}</div>
+          ${negativeIndicator ? `<div class="broker-loss-indicator">${negativeIndicator}</div>` : ''}
+          <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${formatNumber(arb.profitPercentage)}% ${lowProfitIndicator}</div>
         </div>
         <div class="card-body">
           <div class="price-row">
@@ -1227,11 +1248,12 @@ function displayOptimizedRoutes(routes, official) {
         <div class="route-header">
           <div class="route-title">
             <h3>${getRouteIcon(routeType)} Ruta ${index + 1}</h3>
+            ${negativeIndicator ? `<div class="route-loss-indicator">${negativeIndicator}</div>` : ''}
             <div class="route-badges">
               ${typeBadge}
               ${p2pBadge}
             </div>
-            <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${formatNumber(displayMetrics.percentage)}% ${negativeIndicator}</div>
+            <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${formatNumber(displayMetrics.percentage)}%</div>
           </div>
         </div>
 
@@ -1713,30 +1735,8 @@ function setSafeHTML(element, html) {
 }
 
 // Función helper para calcular clases de profit
-function getProfitClasses(profitPercent) {
-  const isNegative = profitPercent < 0;
-  const isHighProfit = profitPercent > 5;
-  
-  let profitClass;
-  if (isNegative) {
-    profitClass = 'negative-profit';
-  } else if (isHighProfit) {
-    profitClass = 'high-profit';
-  } else {
-    profitClass = '';
-  }
-  
-  let profitBadgeClass;
-  if (isNegative) {
-    profitBadgeClass = 'negative';
-  } else if (isHighProfit) {
-    profitBadgeClass = 'high';
-  } else {
-    profitBadgeClass = '';
-  }
-  
-  return { isNegative, profitClass, profitBadgeClass };
-}
+// Usar util compartida para calcular clases de profit (permite testing en Node)
+// ...existing code...
 
 // Calcular valores para la guía paso a paso
 function calculateGuideValues(arb) {
@@ -1993,98 +1993,383 @@ function loadBanksData() {
   loadBankRates();
 }
 
-// Mostrar lista de bancos desde dolarito.ar + criptoya
-async function displayBanks(bankRates) {
+// Obtener datos de exchanges desde las APIs configuradas
+async function fetchExchangeRatesFromAPIs() {
+  try {
+    // Obtener configuración de usuario para las URLs de APIs
+    const settings = await chrome.storage.local.get('notificationSettings');
+    const userSettings = settings.notificationSettings || {};
+
+    // URLs por defecto
+    const defaultUrls = {
+      dolarApiUrl: 'https://dolarapi.com/v1/dolares/oficial',
+      criptoyaUsdtArsUrl: 'https://criptoya.com/api/usdt/ars/1',
+      criptoyaUsdtUsdUrl: 'https://criptoya.com/api/usdt/usd/1'
+    };
+
+    // Usar URLs configuradas o por defecto
+    const urls = {
+      dolarApiUrl: userSettings.dolarApiUrl || defaultUrls.dolarApiUrl,
+      criptoyaUsdtArsUrl: userSettings.criptoyaUsdtArsUrl || defaultUrls.criptoyaUsdtArsUrl,
+      criptoyaUsdtUsdUrl: userSettings.criptoyaUsdtUsdUrl || defaultUrls.criptoyaUsdtUsdUrl
+    };
+
+    console.log('[POPUP] 📡 Obteniendo datos de APIs:', urls);
+
+    // Obtener datos de las 3 APIs en paralelo
+    const [dolarResponse, usdtArsResponse, usdtUsdResponse] = await Promise.allSettled([
+      fetch(urls.dolarApiUrl).then(r => r.json()),
+      fetch(urls.criptoyaUsdtArsUrl).then(r => r.json()),
+      fetch(urls.criptoyaUsdtUsdUrl).then(r => r.json())
+    ]);
+
+    const exchangeRates = {};
+
+    // Procesar dólar oficial
+    if (dolarResponse.status === 'fulfilled') {
+      const dolarData = dolarResponse.value;
+      exchangeRates['oficial'] = {
+        name: 'Dólar Oficial',
+        type: 'oficial',
+        rates: {
+          compra: dolarData.compra,
+          venta: dolarData.venta
+        },
+        source: 'dolarapi.com',
+        timestamp: new Date(dolarData.fechaActualizacion || Date.now()).getTime()
+      };
+    }
+
+    // Procesar USDT/ARS exchanges
+    if (usdtArsResponse.status === 'fulfilled') {
+      const usdtArsData = usdtArsResponse.value;
+      Object.entries(usdtArsData).forEach(([exchange, data]) => {
+        exchangeRates[exchange] = {
+          name: getExchangeDisplayName(exchange),
+          type: 'usdt_ars',
+          rates: {
+            compra: data.bid, // bid = precio de compra para el exchange
+            venta: data.ask   // ask = precio de venta para el exchange
+          },
+          source: 'criptoya.com',
+          timestamp: data.time * 1000
+        };
+      });
+    }
+
+    // Procesar USDT/USD exchanges
+    if (usdtUsdResponse.status === 'fulfilled') {
+      const usdtUsdData = usdtUsdResponse.value;
+      Object.entries(usdtUsdData).forEach(([exchange, data]) => {
+        // Si el exchange ya existe (de USDT/ARS), agregar rates USD
+        if (exchangeRates[exchange]) {
+          exchangeRates[exchange].usdRates = {
+            compra: data.bid,
+            venta: data.ask
+          };
+        } else {
+          // Nuevo exchange solo con USD
+          exchangeRates[exchange] = {
+            name: getExchangeDisplayName(exchange),
+            type: 'usdt_usd',
+            usdRates: {
+              compra: data.bid,
+              venta: data.ask
+            },
+            source: 'criptoya.com',
+            timestamp: data.time * 1000
+          };
+        }
+      });
+    }
+
+    console.log('[POPUP] ✅ Datos obtenidos de', Object.keys(exchangeRates).length, 'exchanges');
+    return exchangeRates;
+
+  } catch (error) {
+    console.error('[POPUP] ❌ Error obteniendo datos de APIs:', error);
+    throw error;
+  }
+}
+
+// Mostrar lista de exchanges con sus rates
+async function displayExchangeRates(exchangeRates) {
   const container = document.getElementById('banks-list');
-  
-  if (!bankRates || Object.keys(bankRates).length === 0) {
+
+  if (!exchangeRates || Object.keys(exchangeRates).length === 0) {
     container.innerHTML = `
       <div class="select-prompt">
-        <p>📊 No hay datos de bancos disponibles</p>
-        <p style="margin-top: 8px; font-size: 0.85em;">Presiona el botón "Actualizar" para cargar las cotizaciones desde dolarito.ar y CriptoYa</p>
+        <p>📊 No hay datos de exchanges disponibles</p>
+        <p style="margin-top: 8px; font-size: 0.85em;">Presiona el botón "Actualizar" para cargar las cotizaciones</p>
       </div>
     `;
     return;
   }
-  
-  // Obtener configuración de usuario
-  const showBestOnly = userSettings?.showBestBankPrice ?? false;
-  const selectedBanks = userSettings?.selectedBanks ?? [];
-  
-  let banks = Object.entries(bankRates);
-  
-  // Filtrar bancos seleccionados si hay selección específica
-  if (selectedBanks.length > 0) {
-    banks = banks.filter(([bankCode]) => selectedBanks.includes(bankCode));
-  }
-  
-  // Ordenar por precio de compra más bajo
-  banks.sort((a, b) => a[1].compra - b[1].compra);
-  
-  // Si solo mostrar mejor precio, mostrar solo el primero
-  if (showBestOnly && banks.length > 0) {
-    const [bestBankCode, bestRates] = banks[0];
-    const bestBankName = getBankDisplayName(bestBankCode);
-    
-    container.innerHTML = `
-      <div class="best-bank-highlight">
-        <div class="best-bank-header">
-          <div class="best-bank-icon">🏆</div>
-          <div class="best-bank-title">Mejor Precio de Compra</div>
-        </div>
-        <div class="best-bank-content">
-          <div class="best-bank-name">${bestBankName}</div>
-          <div class="best-bank-price">$${formatNumber(bestRates.compra)}</div>
-          <div class="best-bank-source">Fuente: ${bestRates.source === 'dolarito' ? 'dolarito.ar' : 'CriptoYa'}</div>
+
+  // Controles de filtro
+  const filterControls = `
+    <div class="exchange-filters">
+      <div class="filter-section">
+        <input type="text" id="exchange-search" placeholder="Buscar exchange..." class="filter-input">
+        <div class="filter-buttons">
+          <button class="filter-btn active" data-filter="all">Todos</button>
+          <button class="filter-btn" data-filter="oficial">Oficial</button>
+          <button class="filter-btn" data-filter="usdt_ars">USDT/ARS</button>
+          <button class="filter-btn" data-filter="usdt_usd">USDT/USD</button>
         </div>
       </div>
-    `;
-    updateBanksTimestamp();
-    return;
-  }
-  
-  // Mostrar todos los bancos (modo normal compacto)
-  let html = '';
-  
-  banks.forEach(([bankCode, rates]) => {
-    const bankName = getBankDisplayName(bankCode);
-    const spread = rates.venta - rates.compra;
-    const spreadPercent = ((spread / rates.compra) * 100).toFixed(2);
-    
-    // Determinar fuente(s)
-    let sourceText = rates.source === 'dolarito' ? 'dolarito.ar' : 'CriptoYa';
-    let hasCriptoya = rates.criptoya ? true : false;
-    
-    html += `
-      <div class="bank-card compact">
-        <div class="bank-header-compact">
-          <div class="bank-name">${bankName}</div>
-          <div class="bank-source-compact">${sourceText}${hasCriptoya ? '+C' : ''}</div>
-        </div>
-        <div class="bank-prices-compact">
-          <div class="bank-price-compact">
-            <span class="price-label">Compra:</span>
-            <span class="price-value">$${formatNumber(rates.compra)}</span>
-            ${hasCriptoya ? `<span class="price-alt">(C:$${formatNumber(rates.criptoya.compra)})</span>` : ''}
+    </div>
+  `;
+
+  // Preparar datos para mostrar
+  let exchanges = Object.entries(exchangeRates);
+
+  // Función para renderizar exchanges
+  const renderExchanges = (filteredExchanges) => {
+    let html = '';
+
+    filteredExchanges.forEach(([exchangeCode, exchangeData]) => {
+      const { name, type, rates, usdRates, source } = exchangeData;
+
+      // Determinar qué rates mostrar
+      let displayRates = '';
+      let rateType = '';
+
+      if (type === 'oficial' && rates) {
+        displayRates = `
+          <div class="exchange-rate">
+            <span class="rate-label">ARS/USD:</span>
+            <span class="rate-value">$${formatNumber(rates.compra)} / $${formatNumber(rates.venta)}</span>
           </div>
-          <div class="bank-price-compact">
-            <span class="price-label">Venta:</span>
-            <span class="price-value">$${formatNumber(rates.venta)}</span>
-            ${hasCriptoya ? `<span class="price-alt">(C:$${formatNumber(rates.criptoya.venta)})</span>` : ''}
+        `;
+        rateType = 'Oficial';
+      } else if (type === 'usdt_ars' && rates) {
+        displayRates = `
+          <div class="exchange-rate">
+            <span class="rate-label">USDT/ARS:</span>
+            <span class="rate-value">$${formatNumber(rates.compra)} / $${formatNumber(rates.venta)}</span>
           </div>
-          <div class="bank-spread-compact">Spread: ${spreadPercent}%</div>
+        `;
+        rateType = 'USDT/ARS';
+      } else if (type === 'usdt_usd' && usdRates) {
+        displayRates = `
+          <div class="exchange-rate">
+            <span class="rate-label">USDT/USD:</span>
+            <span class="rate-value">$${formatNumber(usdRates.compra)} / $${formatNumber(usdRates.venta)}</span>
+          </div>
+        `;
+        rateType = 'USDT/USD';
+      }
+
+      // Si tiene ambos rates, mostrar ambos
+      if (rates && usdRates) {
+        displayRates = `
+          <div class="exchange-rate">
+            <span class="rate-label">USDT/ARS:</span>
+            <span class="rate-value">$${formatNumber(rates.compra)} / $${formatNumber(rates.venta)}</span>
+          </div>
+          <div class="exchange-rate">
+            <span class="rate-label">USDT/USD:</span>
+            <span class="rate-value">$${formatNumber(usdRates.compra)} / $${formatNumber(usdRates.venta)}</span>
+          </div>
+        `;
+        rateType = 'USDT/ARS + USD';
+      }
+
+      html += `
+        <div class="exchange-card" data-type="${type}" data-name="${name.toLowerCase()}">
+          <div class="exchange-header">
+            <div class="exchange-name">${name}</div>
+            <div class="exchange-type">${rateType}</div>
+          </div>
+          <div class="exchange-rates">
+            ${displayRates}
+          </div>
+          <div class="exchange-source">Fuente: ${source}</div>
         </div>
-      </div>
-    `;
-  });
-  
-  container.innerHTML = html;
-  
+      `;
+    });
+
+    return html;
+  };
+
+  // HTML completo
+  container.innerHTML = `
+    ${filterControls}
+    <div class="exchanges-list">
+      ${renderExchanges(exchanges)}
+    </div>
+  `;
+
+  // Configurar event listeners para filtros
+  setupExchangeFilters(exchanges);
+
   // Actualizar timestamp
   updateBanksTimestamp();
 }
 
-// Obtener nombre legible del banco
+// Configurar filtros de exchanges
+function setupExchangeFilters(allExchanges) {
+  const searchInput = document.getElementById('exchange-search');
+  const filterButtons = document.querySelectorAll('[data-filter]');
+
+  const applyFilters = () => {
+    const searchTerm = searchInput.value.toLowerCase();
+    const activeFilter = document.querySelector('[data-filter].active')?.dataset.filter || 'all';
+
+    let filtered = allExchanges;
+
+    // Filtrar por tipo
+    if (activeFilter !== 'all') {
+      filtered = filtered.filter(([code, data]) => data.type === activeFilter);
+    }
+
+    // Filtrar por búsqueda
+    if (searchTerm) {
+      filtered = filtered.filter(([code, data]) =>
+        data.name.toLowerCase().includes(searchTerm) ||
+        code.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    // Renderizar resultados filtrados
+    const exchangesList = document.querySelector('.exchanges-list');
+    if (exchangesList) {
+      exchangesList.innerHTML = filtered.length > 0 ?
+        filtered.map(([code, data]) => {
+          const { name, type, rates, usdRates, source } = data;
+
+          let displayRates = '';
+          let rateType = '';
+
+          if (type === 'oficial' && rates) {
+            displayRates = `
+              <div class="exchange-rate">
+                <span class="rate-label">ARS/USD:</span>
+                <span class="rate-value">$${formatNumber(rates.compra)} / $${formatNumber(rates.venta)}</span>
+              </div>
+            `;
+            rateType = 'Oficial';
+          } else if (type === 'usdt_ars' && rates) {
+            displayRates = `
+              <div class="exchange-rate">
+                <span class="rate-label">USDT/ARS:</span>
+                <span class="rate-value">$${formatNumber(rates.compra)} / $${formatNumber(rates.venta)}</span>
+              </div>
+            `;
+            rateType = 'USDT/ARS';
+          } else if (type === 'usdt_usd' && usdRates) {
+            displayRates = `
+              <div class="exchange-rate">
+                <span class="rate-label">USDT/USD:</span>
+                <span class="rate-value">$${formatNumber(usdRates.compra)} / $${formatNumber(usdRates.venta)}</span>
+              </div>
+            `;
+            rateType = 'USDT/USD';
+          }
+
+          if (rates && usdRates) {
+            displayRates = `
+              <div class="exchange-rate">
+                <span class="rate-label">USDT/ARS:</span>
+                <span class="rate-value">$${formatNumber(rates.compra)} / $${formatNumber(rates.venta)}</span>
+              </div>
+              <div class="exchange-rate">
+                <span class="rate-label">USDT/USD:</span>
+                <span class="rate-value">$${formatNumber(usdRates.compra)} / $${formatNumber(usdRates.venta)}</span>
+              </div>
+            `;
+            rateType = 'USDT/ARS + USD';
+          }
+
+          return `
+            <div class="exchange-card" data-type="${type}" data-name="${name.toLowerCase()}">
+              <div class="exchange-header">
+                <div class="exchange-name">${name}</div>
+                <div class="exchange-type">${rateType}</div>
+              </div>
+              <div class="exchange-rates">
+                ${displayRates}
+              </div>
+              <div class="exchange-source">Fuente: ${source}</div>
+            </div>
+          `;
+        }).join('') :
+        '<div class="no-results">No se encontraron exchanges que coincidan con los filtros</div>';
+    }
+  };
+
+  // Event listeners
+  searchInput?.addEventListener('input', applyFilters);
+
+  filterButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      filterButtons.forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+      applyFilters();
+    });
+  });
+}
+
+// Obtener nombre legible del exchange
+function getExchangeDisplayName(exchangeCode) {
+  const exchangeNames = {
+    // Exchanges principales
+    'binance': 'Binance',
+    'buenbit': 'Buenbit',
+    'ripio': 'Ripio',
+    'satoshitango': 'SatoshiTango',
+    'decrypto': 'DeCrypto',
+    'letsbit': 'LetsBit',
+    'fiwind': 'FiWind',
+    'lemoncash': 'Lemon Cash',
+    'belo': 'Belo',
+    'tiendacrypto': 'TiendaCrypto',
+    'bybit': 'Bybit',
+    'kucoin': 'KuCoin',
+    'okx': 'OKX',
+    'huobi': 'Huobi',
+    'bitget': 'Bitget',
+    'gateio': 'Gate.io',
+    'mexc': 'MEXC',
+    'poloniex': 'Poloniex',
+    'kraken': 'Kraken',
+    'coinbase': 'Coinbase',
+    'bitstamp': 'Bitstamp',
+    'gemini': 'Gemini',
+    'bitfinex': 'Bitfinex',
+    'cexio': 'CEX.IO',
+    'bitso': 'Bitso',
+    'bitsoalpha': 'Bitso Alpha',
+    'universalcoins': 'Universal Coins',
+    'pluscrypto': 'PlusCrypto',
+    'eluter': 'Eluter',
+    'paydecep2p': 'PayDece P2P',
+    'eldoradop2p': 'Eldorado P2P',
+    'trubit': 'Trubit',
+    'bingxp2p': 'BingX P2P',
+    'lemoncashp2p': 'Lemon Cash P2P',
+    'cocoscrypto': 'Coco\'s Crypto',
+    'coinexp2p': 'CoinEx P2P',
+    'cryptomktpro': 'CryptoMKT Pro',
+    'wallbit': 'Wallbit',
+    'mexcp2p': 'MEXC P2P',
+    'bybitp2p': 'Bybit P2P',
+    'binancep2p': 'Binance P2P',
+    'huobip2p': 'Huobi P2P',
+    'okexp2p': 'OKX P2P',
+    'kucoinp2p': 'KuCoin P2P',
+    'bitgetp2p': 'Bitget P2P',
+    'banexcoin': 'Banexcoin',
+    'xapo': 'Xapo',
+    'x4t': 'X4T',
+    'saldo': 'Saldo',
+    'pluscrypto': 'PlusCrypto',
+    'vitawallet': 'VitaWallet'
+  };
+
+  return exchangeNames[exchangeCode] || exchangeCode.charAt(0).toUpperCase() + exchangeCode.slice(1);
+}
 function getBankDisplayName(bankCode) {
   const bankNames = {
     'nacion': 'Banco Nación',
@@ -2123,35 +2408,35 @@ function updateBanksTimestamp() {
 async function loadBankRates() {
   const container = document.getElementById('banks-list');
   const refreshBtn = document.getElementById('refresh-banks');
-  
+
   // Mostrar loading
   container.innerHTML = `
     <div class="loading">
       <div class="spinner"></div>
-      <p>Cargando cotizaciones bancarias...</p>
+      <p>Cargando cotizaciones de exchanges...</p>
     </div>
   `;
-  
+
   // Deshabilitar botón mientras carga
   if (refreshBtn) {
     refreshBtn.disabled = true;
     refreshBtn.textContent = '⏳ Cargando...';
   }
-  
+
   try {
-    // Solicitar datos al background
-    const response = await chrome.runtime.sendMessage({ action: 'getBankRates' });
-    
-    if (response && response.bankRates) {
-      console.log('[POPUP] 🏦 Cotizaciones bancarias recibidas:', Object.keys(response.bankRates).length, 'bancos');
-      await displayBanks(response.bankRates);
+    // Obtener datos directamente de las APIs configuradas
+    const exchangeRates = await fetchExchangeRatesFromAPIs();
+
+    if (exchangeRates && Object.keys(exchangeRates).length > 0) {
+      console.log('[POPUP] 📊 Cotizaciones de exchanges obtenidas:', Object.keys(exchangeRates).length, 'exchanges');
+      await displayExchangeRates(exchangeRates);
     } else {
       // Sin datos disponibles
       container.innerHTML = `
         <div class="select-prompt">
-          <p>📊 No hay cotizaciones bancarias disponibles</p>
+          <p>📊 No hay cotizaciones disponibles</p>
           <p style="margin-top: 8px; font-size: 0.85em;">
-            Los datos se obtienen automáticamente de <strong>dolarito.ar</strong> y <strong>CriptoYa</strong>
+            Los datos se obtienen de <strong>dolarapi.com</strong>, <strong>criptoya.com</strong>
           </p>
           <p style="margin-top: 8px; font-size: 0.85em; color: #94a3b8;">
             Intenta actualizar nuevamente en unos momentos
@@ -2160,10 +2445,10 @@ async function loadBankRates() {
       `;
     }
   } catch (error) {
-    console.error('[POPUP] ❌ Error al cargar cotizaciones bancarias:', error);
+    console.error('[POPUP] ❌ Error al cargar cotizaciones:', error);
     container.innerHTML = `
       <div class="select-prompt">
-        <p>⚠️ Error al cargar cotizaciones bancarias</p>
+        <p>⚠️ Error al cargar cotizaciones</p>
         <p style="margin-top: 8px; font-size: 0.85em; color: #ef4444;">
           ${error.message || 'Error desconocido'}
         </p>
