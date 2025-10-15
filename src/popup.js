@@ -1735,8 +1735,30 @@ function setSafeHTML(element, html) {
 }
 
 // Función helper para calcular clases de profit
-// Usar util compartida para calcular clases de profit (permite testing en Node)
-// ...existing code...
+function getProfitClasses(profitPercent) {
+  const isNegative = profitPercent < 0;
+  const isHighProfit = profitPercent > 5;
+  
+  let profitClass;
+  if (isNegative) {
+    profitClass = 'negative-profit';
+  } else if (isHighProfit) {
+    profitClass = 'high-profit';
+  } else {
+    profitClass = '';
+  }
+  
+  let profitBadgeClass;
+  if (isNegative) {
+    profitBadgeClass = 'negative';
+  } else if (isHighProfit) {
+    profitBadgeClass = 'high';
+  } else {
+    profitBadgeClass = '';
+  }
+  
+  return { isNegative, profitClass, profitBadgeClass };
+}
 
 // Calcular valores para la guía paso a paso
 function calculateGuideValues(arb) {
