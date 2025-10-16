@@ -1,6 +1,6 @@
 # ArbitrageAR - Detector de Arbitraje Dólar Oficial → USDT 🚀
 
-[![Version](https://img.shields.io/badge/version-5.0.0-blue.svg)](https://github.com/nomdedev/ArbitrageAR-USDT)
+[![Version](https://img.shields.io/badge/version-5.0.1-blue.svg)](https://github.com/nomdedev/ArbitrageAR-USDT)
 [![Tests](https://img.shields.io/badge/tests-passing-green.svg)](tests/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -9,45 +9,87 @@ Extensión profesional para navegadores Chromium que detecta oportunidades de ar
 ## ✨ Características Principales
 
 - 🎯 **Detección Inteligente**: Algoritmos avanzados para identificar oportunidades rentables
-- ⚙️ **Configuración Avanzada**: 4 pestañas de configuración personalizable
+- ⚙️ **Configuración Avanzada**: Configuración completa del precio del dólar (automático/manual)
 - 🔔 **Notificaciones Smart**: Alertas configurables por umbral y exchange
 - 📊 **Múltiples Exchanges**: Soporte para Binance, Buenbit, Lemon Cash y más
 - 🏦 **Datos Bancarios**: Integración con múltiples bancos para precios precisos
 - 📈 **Simulador**: Herramientas avanzadas para calcular ganancias potenciales
+- 🔧 **Precio Manual**: Configuración manual del precio del dólar para escenarios específicos
+- 🛠️ **Sistema de Diagnóstico**: Herramientas avanzadas de debugging y troubleshooting
+
+## 🆕 Últimas Mejoras (v5.0.0)
+
+### ✅ Precio Manual del Dólar
+- **Configuración flexible**: Opción para usar precio automático (bancos) o manual
+- **Actualización en tiempo real**: Los cambios se reflejan inmediatamente en el popup
+- **Persistencia**: Configuración guardada automáticamente en Chrome Storage
+- **Validación**: Verificación de sintaxis y comunicación background-options
+
+### ✅ Reorganización del Proyecto
+- **Estructura limpia**: Archivos organizados en carpetas lógicas
+- **Carpeta diagnostics**: Scripts de diagnóstico y debugging centralizados
+- **Documentación**: README actualizado con estructura actual
+- **Limpieza**: Eliminación de archivos temporales y código obsoleto
+
+### ✅ Sistema de Comunicación Mejorado
+- **Mensajes bidireccionales**: Comunicación robusta entre options y background
+- **Invalidación de cache**: Actualización automática de datos al cambiar configuración
+- **Logging detallado**: Sistema de debugging para troubleshooting
 
 ## 📁 Estructura del Proyecto
 
 ```
 ArbitrageAR-USDT/
-├── src/                    # Código fuente principal
-│   ├── background/         # Service Worker y lógica backend
-│   │   ├── main.js        # Service worker principal
-│   │   ├── dataFetcher.js # APIs externas (CriptoYa, DolarAPI)
-│   │   ├── routeCalculator.js # Cálculos de arbitraje
-│   │   └── notifications.js   # Sistema de notificaciones
-│   ├── popup/             # Interfaz del popup
-│   │   ├── popup.html/js/css # UI principal
-│   └── options/           # Página de configuración
-│       ├── options.html/js/css # Configuración avanzada
-├── tests/                  # Suite completa de testing
-│   ├── run-all-tests.js   # Ejecutor de tests
-│   ├── test-complete-flow.js # Tests end-to-end
-│   ├── test-communication.js # Tests de comunicación
-│   └── test-popup-ui.js   # Tests de interfaz
-├── docs/                   # Documentación completa
+├── diagnostics/           # 🆕 Archivos de diagnóstico y debugging
+│   ├── diagnostico_completo_config.js
+│   ├── diagnostico_completo_problema.js
+│   ├── diagnostico_dolar_config.js
+│   ├── diagnostico_popup_background.js
+│   └── README.md
+├── docs/                  # Documentación completa
 │   ├── changelog/         # Historial de versiones
-│   ├── DEPLOYMENT_GUIDE.md # Guía de despliegue
-│   └── *.md               # Documentación específica
-├── icons/                  # Iconos de la extensión
-├── manifest.json          # Configuración de Chrome Extension
-├── package.json           # Dependencias y scripts
-├── DEPLOYMENT_GUIDE.md    # 🚀 Guía de producción
+│   ├── ANALISIS_ERRORES_ESTETICOS.md
+│   ├── ANALISIS_SIMULADOR_COMPLETO.md
+│   ├── ARQUITECTURA_TECNICA.md
+│   ├── DEPLOYMENT_GUIDE.md
+│   ├── GUIA_USO.md
+│   ├── INSTALACION.md
+│   ├── TESTING_INSTRUCTIONS.md
+│   └── *.md
+├── icons/                 # Iconos de la extensión
+│   ├── icon16.png
+│   ├── icon32.png
+│   ├── icon48.png
+│   └── icon128.png
+├── scripts/               # Scripts de automatización
+│   ├── fix_profit_threshold.bat
+│   ├── subir-a-github.bat
+│   └── subir-a-github.ps1
+├── src/                   # Código fuente principal
+│   ├── background/        # Service Worker y lógica backend
+│   │   └── main-simple.js # Lógica principal del background
+│   ├── DataService.js     # Servicio de datos
+│   ├── options.html/js/css # Página de configuración
+│   ├── popup.html/js/css   # Interfaz del popup
+│   ├── renderHelpers.js   # Helpers de renderizado
+│   ├── utils.js           # Utilidades generales
+│   ├── ValidationService.js # Servicio de validación
+│   └── utils/             # Utilidades específicas
+│       └── bankCalculations.js
+├── tests/                 # Suite completa de testing
+│   ├── run-all-tests.js   # Ejecutor de tests
+│   ├── run-configurability-tests.js
+│   ├── test-*.js          # Tests específicos
+│   ├── GUIA_DIAGNOSTICO_CONFIGURACION.md
+│   └── VERIFICACION_CONSENSO_BANCOS.md
+├── .git/                  # Control de versiones
+├── .gitignore            # Archivos ignorados por git
+├── LICENSE               # Licencia MIT
+├── manifest.json         # Configuración de Chrome Extension
+├── package.json          # Dependencias y scripts de Node.js
+├── package-lock.json     # Lockfile de dependencias
 └── README.md             # Este archivo
 ```
-├── scripts/                # Scripts de automatización
-├── icons/                  # Iconos de la extensión
-├── manifest.json          # Configuración de la extensión
-└── README.md              # Este archivo
 ```
 
 ## 🚀 Instalación
@@ -96,50 +138,69 @@ ArbitrageAR-USDT/
 ### Pruebas
 ```bash
 # Ejecutar todos los tests
-npm test
+cd tests && node run-all-tests.js
+
+# Tests de configurabilidad
+cd tests && node run-configurability-tests.js
 
 # Tests específicos
-npm run test:popup
-npm run test:communication
-npm run test:flow
+cd tests && node test-bank-filters.js
+cd tests && node test-notifications.js
+```
+
+### Sistema de Diagnóstico
+La carpeta `diagnostics/` contiene herramientas avanzadas de debugging:
+
+```bash
+# Diagnóstico completo de configuración
+cd diagnostics && node diagnostico_completo_config.js
+
+# Diagnóstico de precio del dólar
+cd diagnostics && node diagnostico_dolar_config.js
+
+# Diagnóstico de comunicación popup-background
+cd diagnostics && node diagnostico_popup_background.js
 ```
 
 ### Build y Empaquetado
 ```bash
-# Build para producción
-npm run build
-
-# Crear paquete .zip para Chrome Web Store
-npm run package
+# Verificar sintaxis de archivos principales
+node -c src/options.js
+node -c src/popup.js
+node -c src/background/main-simple.js
 ```
 
 ### Arquitectura
-- **Service Worker**: Maneja la lógica backend y sincronización
-- **Popup**: Interfaz de usuario principal
-- **Options Page**: Configuración avanzada
-- **Background Scripts**: Comunicación con APIs externas
+- **Background Service Worker**: Maneja la lógica backend y sincronización
+- **Popup**: Interfaz de usuario principal con display de precios
+- **Options Page**: Configuración avanzada con precio manual del dólar
+- **DataService**: Comunicación con APIs externas (CriptoYa, DolarAPI)
+- **ValidationService**: Validación de datos y configuración
 
 ## 📊 APIs Utilizadas
 
-- **CriptoYa API**: Precios de exchanges locales
-- **DolarAPI**: Cotizaciones del dólar oficial
-- **Chrome Storage API**: Persistencia de configuración
-- **Chrome Notifications API**: Alertas del sistema
+- **CriptoYa API**: Precios de exchanges locales (USDT/ARS)
+- **DolarAPI**: Cotizaciones del dólar oficial argentino
+- **Chrome Storage API**: Persistencia de configuración de usuario
+- **Chrome Runtime API**: Comunicación entre componentes de la extensión
+- **Chrome Notifications API**: Alertas del sistema operativo
 
 ## 🔒 Seguridad
 
 - ✅ **Sin almacenamiento de datos sensibles**
 - ✅ **Comunicación HTTPS obligatoria**
 - ✅ **CSP (Content Security Policy) configurado**
-- ✅ **Validación de inputs**
-- ✅ **Rate limiting en APIs**
+- ✅ **Validación de inputs del usuario**
+- ✅ **Rate limiting en APIs externas**
+- ✅ **Validación de sintaxis en tiempo real**
 
 ## 📈 Rendimiento
 
 - **Tiempo de respuesta**: < 2 segundos
 - **Uso de memoria**: < 50MB
-- **CPU**: Mínimo impacto
-- **Actualizaciones**: Cada 30 segundos (configurable)
+- **CPU**: Mínimo impacto en el sistema
+- **Actualizaciones**: Cada 5 minutos (configurable)
+- **Cache inteligente**: Invalidación automática al cambiar configuración
 
 ## 🤝 Contribuir
 
@@ -161,13 +222,16 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 ## 📞 Soporte
 
-- 📧 **Email**: soporte@arbitragear.com
-- 🐛 **Issues**: [GitHub Issues](https://github.com/nomdedev/ArbitrageAR-USDT/issues)
+-  **Issues**: [GitHub Issues](https://github.com/nomdedev/ArbitrageAR-USDT/issues)
 - 📖 **Documentación**: [docs/](docs/)
+- 🔧 **Diagnóstico**: [diagnostics/](diagnostics/) - Herramientas de debugging
+- 📋 **Testing**: [tests/](tests/) - Suite completa de pruebas
 
 ---
 
 **⚠️ Descargo de responsabilidad**: Esta herramienta es para fines informativos. El trading de criptomonedas implica riesgos financieros. Usa con responsabilidad.
+
+**📅 Última actualización**: Octubre 2025 - Reorganización completa del proyecto y mejoras en configuración de precio manual.
 
 ## 🏗️ Arquitectura SOLID
 
@@ -447,6 +511,38 @@ git push origin feature/mi-mejora
 ```
 
 ## 🐛 Troubleshooting
+
+### 🔍 Problema: El sistema usa precio manual en lugar de automático
+
+**Síntomas:**
+- El precio del dólar aparece como "manual_fallback" o "manual"
+- Configuración está en "auto" pero no funciona
+- No se calculan precios de consenso bancario
+
+**Diagnóstico rápido:**
+1. Abre la consola del navegador (F12)
+2. Copia y pega el contenido del archivo `diagnostico_dolar_avanzado.js`
+3. Ejecuta `diagnosticarSistemaDolar()` en la consola
+
+**Soluciones:**
+
+**Opción A - Diagnóstico automático:**
+```javascript
+// Copia y pega esto en la consola del navegador (F12)
+diagnosticarSistemaDolar()
+```
+
+**Opción B - Reset completo (si el diagnóstico falla):**
+```javascript
+// Copia y pega esto en la consola del navegador (F12)
+resetearConfiguracionCompleta()
+```
+
+**Verificación manual:**
+- Ve a Configuración → Precio del Dólar
+- Debe estar seleccionado "Automático (consenso bancario)"
+- Debe haber al menos 3 bancos seleccionados
+- Método debe ser "Consenso" o "Promedio"
 
 ### La extensión no carga datos:
 - Verifica conexión a internet

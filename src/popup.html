@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>arbitrarARS</title>
 <link rel="stylesheet" href="popup.css" />
-<link rel="stylesheet" href="popup-guide-simple.css" />
 </head>
 <body>
 <div class="container">
@@ -17,7 +16,7 @@
       <div id="dataStatus" class="data-status"></div>
     </div>
     <div class="header-buttons">
-      <span id="version-indicator" class="version-indicator" title="Versión instalada">v5.0.51</span>
+      <span id="version-indicator" class="version-indicator" title="Versión instalada">v5.0.75</span>
       <button id="settings" class="btn-settings" title="Configurar notificaciones">
         <span>⚙️</span>
       </button>
@@ -34,7 +33,7 @@
       <div class="update-text">
         <strong>Nueva actualización disponible</strong>
         <p class="update-version-info">
-          <span class="current-version">v5.0.20</span>
+          <span class="current-version">v5.0.75</span>
           <span class="version-arrow">→</span>
           <span class="new-version" id="new-version">Nueva versión</span>
         </p>
@@ -70,9 +69,6 @@
         <button id="recalculate-with-custom" class="btn-recalculate" title="Recalcular con precio personalizado">
           🔄 Recalcular
         </button>
-        <button id="configure-dollar" class="btn-configure" title="Configurar precio del dólar">
-          ⚙️
-        </button>
       </div>
     </div>
   </div>
@@ -89,23 +85,18 @@
       <!-- Controles de filtro -->
       <div class="filter-controls">
         <div class="filter-section">
-          <label class="filter-label">
-          </label>
           <div class="filter-buttons">
-            <button class="filter-btn active" data-filter="no-p2p">
+            <button class="filter-btn active" data-filter="no-p2p" title="Mostrar solo rutas directas (sin P2P)">
               <span class="btn-icon">⚡</span>
               <span class="btn-count" id="count-no-p2p">0</span>
             </button>
-            <button class="filter-btn" data-filter="p2p">
+            <button class="filter-btn" data-filter="p2p" title="Mostrar solo rutas P2P (persona a persona)">
               <span class="btn-icon">🤝</span>
               <span class="btn-count" id="count-p2p">0</span>
             </button>
-            <button class="filter-btn" data-filter="all">
+            <button class="filter-btn" data-filter="all" title="Mostrar todas las rutas disponibles">
               <span class="btn-icon">🎯</span>
               <span class="btn-count" id="count-all">0</span>
-            </button>
-            <button class="filter-btn" id="toggle-advanced-filters">
-              <span class="btn-icon">⚙️</span>
             </button>
           </div>
         </div>
@@ -117,72 +108,6 @@
       </div>
       <div id="optimized-routes"></div>
     </section>
-
-      <!-- Panel de Filtros Avanzados (Desplegable) -->
-      <div id="advanced-filters-panel" class="advanced-filters-panel" style="display: none;">
-        <div class="filters-panel-header">
-          <h4>⚙️ Filtros Avanzados</h4>
-        </div>
-        <div class="filters-panel-body">
-          <!-- Filtro por Exchange -->
-          <div class="filter-group">
-            <label class="filter-group-label">
-              <span class="filter-group-icon">🏦</span>
-              Exchange:
-            </label>
-            <select id="filter-exchange" class="filter-select">
-              <option value="all">Todos los exchanges</option>
-            </select>
-          </div>
-
-          <!-- Filtro por Rango de Profit -->
-          <div class="filter-group">
-            <label class="filter-group-label">
-              <span class="filter-group-icon">📊</span>
-              Profit mínimo:
-            </label>
-            <div class="filter-range-container">
-              <input type="range" id="filter-profit-min" class="filter-range" min="-10" max="20" step="0.5" value="0">
-              <span class="filter-range-value" id="filter-profit-value">0%</span>
-            </div>
-          </div>
-
-          <!-- Toggle Ocultar Negativas -->
-          <div class="filter-group">
-            <label class="filter-toggle-label">
-              <input type="checkbox" id="filter-hide-negative" class="filter-checkbox">
-              <span class="filter-toggle-text">
-                <span class="filter-toggle-icon">🚫</span>
-                Ocultar rutas negativas
-              </span>
-            </label>
-          </div>
-
-          <!-- Ordenar por -->
-          <div class="filter-group">
-            <label class="filter-group-label">
-              <span class="filter-group-icon">🔢</span>
-              Ordenar por:
-            </label>
-            <select id="filter-sort" class="filter-select">
-              <option value="profit-desc">Profit (mayor a menor)</option>
-              <option value="profit-asc">Profit (menor a mayor)</option>
-              <option value="exchange-asc">Exchange (A-Z)</option>
-              <option value="investment-desc">Inversión (mayor a menor)</option>
-            </select>
-          </div>
-
-          <!-- Botones de Acción -->
-          <div class="filter-actions">
-            <button class="btn-filter-apply" id="apply-filters">
-              <span>✓</span> Aplicar
-            </button>
-            <button class="btn-filter-reset" id="reset-filters">
-              <span>⟲</span> Resetear
-            </button>
-          </div>
-        </div>
-      </div>
 
     <!-- TAB: Simulador con Monto Personalizado -->
     <section id="tab-simulator" class="tab-content">

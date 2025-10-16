@@ -43,13 +43,12 @@ document.addEventListener('DOMContentLoaded', () => {
   setupTabNavigation();
   setupRefreshButton();
   setupFilterButtons(); // NUEVO: Configurar filtros P2P
-  setupAdvancedFilters(); // NUEVO v5.0.75: Configurar filtros avanzados
-  setupDollarPriceControls(); // NUEVO: Configurar controles del precio del dólar
   setupAdvancedSimulator(); // NUEVO v5.0.31: Configurar simulador sin rutas
   setupRouteDetailsModal(); // NUEVO: Configurar modal de detalles de ruta
   checkForUpdates(); // NUEVO: Verificar actualizaciones disponibles
   loadUserSettings(); // NUEVO v5.0.28: Cargar configuración del usuario
   fetchAndDisplay();
+  setupStorageListener(); // NUEVO: Escuchar cambios en configuración
   // CORREGIDO v5.0.46: No cargar bancos automáticamente ya que no está soportado en versión simplificada
   // loadBanksData(); // Deshabilitado - funcionalidad no disponible
 });
@@ -100,6 +99,20 @@ function getDollarSourceDisplay(official) {
       return `💰 ${official.bank} (menor precio)`;
     case 'dolarapi_fallback':
       return '🔄 DolarAPI (fallback)';
+    case 'dolarapi_oficial':
+      return '🌐 DolarAPI (oficial)';
+    case 'criptoya_banks':
+      // Mostrar método específico cuando se usan bancos de CriptoYa
+      const methodDisplay = {
+        'consenso': 'consenso',
+        'promedio': 'promedio',
+        'mejor-compra': 'mejor compra',
+        'mejor-venta': 'mejor venta'
+      };
+      const methodText = methodDisplay[official.method] || official.method || 'método';
+      return `🏦 Bancos CriptoYa (${methodText})`;
+    case 'manual_fallback':
+      return '🔄 Manual (fallback)';
     case 'hardcoded_fallback':
       return '⚠️ Fallback fijo';
     default:
@@ -206,12 +219,18 @@ function loadUserSettings() {
   chrome.storage.local.get('notificationSettings', (result) => {
     const settings = result.notificationSettings || {};
 
+    log(`⚙️ Cargando configuración: manualDollarPrice = ${settings.manualDollarPrice}`);
+
     userSettings = {
       // Notificaciones
       notificationsEnabled: settings.notificationsEnabled !== false,
       alertType: settings.alertType || 'all',
       customThreshold: settings.customThreshold || 5,
+      notificationFrequency: settings.notificationFrequency || '15min',
       soundEnabled: settings.soundEnabled !== false,
+      quietHours: settings.quietHours || false,
+      quietStart: settings.quietStart || '22:00',
+      quietEnd: settings.quietEnd || '08:00',
 
       // Exchanges preferidos
       preferredExchanges: settings.preferredExchanges || [],
@@ -220,6 +239,7 @@ function loadUserSettings() {
       dataFreshnessWarning: settings.dataFreshnessWarning !== false,
       riskAlertsEnabled: settings.riskAlertsEnabled !== false,
       requireConfirmHighAmount: settings.requireConfirmHighAmount !== false,
+      highAmountThreshold: settings.highAmountThreshold || 500000,
       minProfitWarning: settings.minProfitWarning || 0.5,
 
       // Preferencias de rutas
@@ -240,15 +260,38 @@ function loadUserSettings() {
       extraWithdrawalFee: settings.extraWithdrawalFee || 0,
       extraTransferFee: settings.extraTransferFee || 0,
       bankCommissionFee: settings.bankCommissionFee || 0,
+      brokerFees: settings.brokerFees || [], // Array de fees por broker
+
+      // APIs configurables
+      dolarApiUrl: settings.dolarApiUrl || 'https://dolarapi.com/v1/dolares/oficial',
+      criptoyaUsdtArsUrl: settings.criptoyaUsdtArsUrl || 'https://criptoya.com/api/usdt/ars/1',
+      criptoyaUsdtUsdUrl: settings.criptoyaUsdtUsdUrl || 'https://criptoya.com/api/usdt/usd/1',
+      updateIntervalMinutes: settings.updateIntervalMinutes || 5,
+      requestTimeoutSeconds: settings.requestTimeoutSeconds || 10,
 
       // Configuración de precio del dólar
       dollarPriceSource: settings.dollarPriceSource || 'auto',
-      manualDollarPrice: settings.manualDollarPrice || 950,
-      preferredBank: settings.preferredBank || 'mediana',
+      manualDollarPrice: settings.manualDollarPrice || 1400,
+      preferredBank: settings.preferredBank || 'consenso',
 
       // Configuración de bancos
       showBestBankPrice: settings.showBestBankPrice || false,
-      selectedBanks: settings.selectedBanks || []
+      selectedBanks: settings.selectedBanks || ['nacion', 'galicia', 'santander', 'bbva', 'icbc'],
+
+      // NUEVO v5.0.76: Configuración de interfaz consolidada
+      simulatorDefaultAmount: settings.simulatorDefaultAmount || 100000,
+      interfaceMinProfitDisplay: settings.interfaceMinProfitDisplay || -10,
+      interfaceMaxRoutesDisplay: settings.interfaceMaxRoutesDisplay || 20,
+      interfaceSortByProfit: settings.interfaceSortByProfit !== false,
+      interfaceShowOnlyProfitable: settings.interfaceShowOnlyProfitable || false,
+      interfacePreferSingleExchange: settings.interfacePreferSingleExchange || false,
+      interfaceShowProfitColors: settings.interfaceShowProfitColors !== false,
+      interfaceCompactView: settings.interfaceCompactView || false,
+      interfaceShowExchangeIcons: settings.interfaceShowExchangeIcons !== false,
+      interfaceShowTimestamps: settings.interfaceShowTimestamps || false,
+      interfaceShowBankPrices: settings.interfaceShowBankPrices !== false,
+      interfaceBankDisplayMode: settings.interfaceBankDisplayMode || 'top-3',
+      interfaceBankUpdateInterval: settings.interfaceBankUpdateInterval || 10
     };
 
     console.log('⚙️ Configuración completa del usuario cargada desde storage:', userSettings);
@@ -406,7 +449,7 @@ function applyP2PFilter() {
   switch (currentFilter) {
     case 'p2p':
       filteredRoutes = allRoutes.filter(route => isP2PRoute(route));
-      if (DEBUG_MODE) console.log(`� Filtro P2P: ${filteredRoutes.length} rutas P2P de ${allRoutes.length}`);
+      if (DEBUG_MODE) console.log(`🔍 Filtro P2P: ${filteredRoutes.length} rutas P2P de ${allRoutes.length}`);
       break;
     case 'no-p2p':
       filteredRoutes = allRoutes.filter(route => !isP2PRoute(route));
@@ -569,7 +612,16 @@ function applyAllFilters() {
     return;
   }
 
-  log('🔍 Aplicando filtros avanzados:', advancedFilters);
+  // Usar configuraciones de interfaz centralizadas en lugar de advancedFilters
+  const interfaceSettings = userSettings || {};
+
+  log('🔍 Aplicando filtros de interfaz:', {
+    minProfit: interfaceSettings.interfaceMinProfitDisplay,
+    maxRoutes: interfaceSettings.interfaceMaxRoutesDisplay,
+    sortByProfit: interfaceSettings.interfaceSortByProfit,
+    showOnlyProfitable: interfaceSettings.interfaceShowOnlyProfitable,
+    preferSingleExchange: interfaceSettings.interfacePreferSingleExchange
+  });
 
   // Paso 1: Filtro P2P (como antes)
   let filteredRoutes;
@@ -588,49 +640,40 @@ function applyAllFilters() {
 
   log(`🔍 Después de filtro P2P: ${filteredRoutes.length} rutas`);
 
-  // Paso 2: Filtro por exchange
-  if (advancedFilters.exchange !== 'all') {
-    filteredRoutes = filteredRoutes.filter(route => 
-      route.buyExchange === advancedFilters.exchange ||
-      route.sellExchange === advancedFilters.exchange
+  // Paso 2: Filtro por profit mínimo de interfaz
+  const minProfit = interfaceSettings.interfaceMinProfitDisplay || -10;
+  if (minProfit > -100) { // Solo filtrar si no es un valor muy bajo
+    filteredRoutes = filteredRoutes.filter(route =>
+      route.profitPercentage >= minProfit
     );
-    log(`🔍 Después de filtro exchange (${advancedFilters.exchange}): ${filteredRoutes.length} rutas`);
+    log(`🔍 Después de filtro profit mínimo (${minProfit}%): ${filteredRoutes.length} rutas`);
   }
 
-  // Paso 3: Filtro por profit mínimo
-  if (advancedFilters.profitMin !== 0) {
-    filteredRoutes = filteredRoutes.filter(route => 
-      route.profitPercentage >= advancedFilters.profitMin
-    );
-    log(`🔍 Después de filtro profit mínimo (${advancedFilters.profitMin}%): ${filteredRoutes.length} rutas`);
-  }
-
-  // Paso 4: Ocultar negativas
-  if (advancedFilters.hideNegative) {
+  // Paso 3: Mostrar solo rentables (si está activado)
+  if (interfaceSettings.interfaceShowOnlyProfitable) {
     filteredRoutes = filteredRoutes.filter(route => route.profitPercentage >= 0);
-    log(`🔍 Después de ocultar negativas: ${filteredRoutes.length} rutas`);
+    log(`🔍 Después de mostrar solo rentables: ${filteredRoutes.length} rutas`);
   }
 
-  // Paso 5: Aplicar preferencias de usuario (como antes)
+  // Paso 4: Aplicar preferencias de usuario (como antes)
   filteredRoutes = applyUserPreferences(filteredRoutes);
   log(`🔍 Después de preferencias usuario: ${filteredRoutes.length} rutas`);
 
-  // Paso 6: Ordenar
-  filteredRoutes = sortRoutes(filteredRoutes, advancedFilters.sortBy);
-  log(`🔍 Después de ordenar (${advancedFilters.sortBy}): ${filteredRoutes.length} rutas`);
+  // Paso 5: Ordenar según configuración de interfaz
+  const sortBy = interfaceSettings.interfaceSortByProfit ? 'profit-desc' : 'profit-asc';
+  filteredRoutes = sortRoutes(filteredRoutes, sortBy);
+  log(`🔍 Después de ordenar (${sortBy}): ${filteredRoutes.length} rutas`);
+
+  // Paso 6: Limitar cantidad máxima de rutas
+  const maxRoutes = interfaceSettings.interfaceMaxRoutesDisplay || 20;
+  if (filteredRoutes.length > maxRoutes) {
+    filteredRoutes = filteredRoutes.slice(0, maxRoutes);
+    log(`🔍 Después de limitar a ${maxRoutes} rutas: ${filteredRoutes.length} rutas`);
+  }
 
   // Mostrar rutas
   if (currentData) {
     displayOptimizedRoutes(filteredRoutes, currentData.oficial);
-  }
-
-  // Cerrar panel después de aplicar
-  const panel = document.getElementById('advanced-filters-panel');
-  const toggleBtn = document.getElementById('toggle-advanced-filters');
-  if (panel) panel.style.display = 'none';
-  if (toggleBtn) {
-    const arrow = toggleBtn.querySelector('.toggle-arrow');
-    if (arrow) arrow.textContent = '▼';
   }
 }
 
@@ -729,6 +772,11 @@ function setupTabNavigation() {
           log(`🔧 Monto default del simulador: $${userSettings.defaultSimAmount.toLocaleString()}`);
         }
       }
+
+      // NUEVO: Si se abre la pestaña de bancos, cargar datos
+      if (tabId === 'banks') {
+        loadBanksData();
+      }
     });
   });
 }
@@ -751,6 +799,56 @@ function setupRefreshButton() {
     } else {
       // Fallback: abrir página de opciones si no hay panel de filtros
       chrome.runtime.openOptionsPage();
+    }
+  });
+}
+
+// ============================================
+// LISTENER DE CAMBIOS EN CONFIGURACIÓN
+// ============================================
+
+function setupStorageListener() {
+  log('👂 Configurando listener de cambios en storage...');
+
+  chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace === 'local' && changes.notificationSettings) {
+      log('⚙️ Configuración cambió - actualizando popup...');
+
+      const oldSettings = changes.notificationSettings.oldValue || {};
+      const newSettings = changes.notificationSettings.newValue || {};
+
+      log('📊 Cambio detectado:', {
+        old_manualDollarPrice: oldSettings.manualDollarPrice,
+        new_manualDollarPrice: newSettings.manualDollarPrice,
+        old_dollarPriceSource: oldSettings.dollarPriceSource,
+        new_dollarPriceSource: newSettings.dollarPriceSource
+      });
+
+      // Verificar qué cambió
+      const relevantChanges = [
+        'dollarPriceSource',
+        'manualDollarPrice',
+        'preferredBank',
+        'selectedBanks',
+        'routeType',
+        'profitThreshold'
+      ];
+
+      const hasRelevantChange = relevantChanges.some(key =>
+        JSON.stringify(oldSettings[key]) !== JSON.stringify(newSettings[key])
+      );
+
+      if (hasRelevantChange) {
+        log('🔄 Cambio relevante detectado - recargando datos...');
+
+        // Recargar configuración del usuario
+        loadUserSettings();
+
+        // Forzar actualización de datos
+        setTimeout(() => {
+          fetchAndDisplay(true);
+        }, 200); // Pequeño delay para asegurar que la configuración se actualizó
+      }
     }
   });
 }
@@ -795,8 +893,23 @@ function handleCacheIndicator(data, retryCount) {
 }
 
 function handleSuccessfulData(data, container) {
+  console.log('📊 [SUCCESS] handleSuccessfulData() llamado con data:', {
+    tieneOficial: !!data.oficial,
+    oficialCompra: data.oficial?.compra,
+    oficialSource: data.oficial?.source,
+    oficialTimestamp: data.oficial?.timestamp ? new Date(data.oficial.timestamp).toLocaleString() : 'N/A',
+    lastUpdate: data.lastUpdate ? new Date(data.lastUpdate).toLocaleString() : 'N/A',
+    rutasCount: data.optimizedRoutes?.length || 0
+  });
+
   currentData = data;
-  updateLastUpdateTimestamp(data.lastUpdate);
+  
+  // Actualizar timestamp de última actualización
+  const lastUpdateEl = document.getElementById('last-update');
+  if (lastUpdateEl && data.lastUpdate) {
+    updateTimestampWithFreshness(lastUpdateEl, data.lastUpdate);
+  }
+  
   displayMarketHealth(data.marketHealth);
   
   // NUEVO v5.0.28: Actualizar indicador de estado de datos
@@ -804,7 +917,10 @@ function handleSuccessfulData(data, container) {
   
   // NUEVO: Mostrar información del precio del dólar
   if (data.oficial) {
+    console.log('📊 [SUCCESS] Llamando displayDollarInfo() con data.oficial');
     displayDollarInfo(data.oficial);
+  } else {
+    console.log('⚠️ [SUCCESS] No hay data.oficial - no se mostrará precio del dólar');
   }
 
   if (data.error && !data.usingCache) {
@@ -859,7 +975,7 @@ async function fetchAndDisplay(retryCount = 0) {
   try {
     console.log('📤 [POPUP] Solicitando datos al background...');
     console.log('📤 [POPUP] Verificando runtime disponible:', !!chrome.runtime);
-    console.log('� [POPUP] Verificando sendMessage disponible:', !!chrome.runtime?.sendMessage);
+    console.log('📤 [POPUP] Verificando sendMessage disponible:', !!chrome.runtime?.sendMessage);
     
     // Timeout para detectar si el callback nunca se ejecuta
     let responseReceived = false;
@@ -899,7 +1015,15 @@ async function fetchAndDisplay(retryCount = 0) {
         responseReceived = true;
         clearTimeout(timeoutId);
         
-        console.log('📥 [POPUP] Callback ejecutado - Datos recibidos:', data);
+        console.log('📥 [POPUP] Callback ejecutado - Datos recibidos del background:', {
+          tieneData: !!data,
+          oficialCompra: data?.oficial?.compra,
+          oficialSource: data?.oficial?.source,
+          rutasCount: data?.optimizedRoutes?.length || 0,
+          lastUpdate: data?.lastUpdate ? new Date(data.lastUpdate).toLocaleString() : 'N/A',
+          error: data?.error,
+          usingCache: data?.usingCache
+        });
         console.log('📥 [POPUP] chrome.runtime.lastError:', chrome.runtime.lastError);
         
         if (chrome.runtime.lastError) {
@@ -1121,7 +1245,7 @@ function displayArbitrages(arbitrages, official) {
           </div>
           ` : ''}
           <div class="price-row">
-            <span class="price-label">� USD → USDT</span>
+            <span class="price-label">💱 USD → USDT</span>
             <span class="price-value">${formatUsdUsdtRatio(arb.usdToUsdtRate)} USD/USDT</span>
           </div>
           <div class="price-row">
@@ -1166,6 +1290,13 @@ function displayOptimizedRoutes(routes, official) {
   console.log('🔍 [POPUP] displayOptimizedRoutes() llamado con', routes?.length, 'rutas');
   const container = document.getElementById('optimized-routes');
   console.log('🔍 [POPUP] container encontrado:', !!container);
+
+  // Obtener configuraciones de interfaz
+  const interfaceSettings = userSettings || {};
+  const showProfitColors = interfaceSettings.interfaceShowProfitColors !== false;
+  const compactView = interfaceSettings.interfaceCompactView || false;
+  const showExchangeIcons = interfaceSettings.interfaceShowExchangeIcons !== false;
+  const showTimestamps = interfaceSettings.interfaceShowTimestamps || false;
 
   if (!routes || routes.length === 0) {
     console.log('🔍 [POPUP] No hay rutas para mostrar, mostrando mensaje informativo');
@@ -1223,7 +1354,7 @@ function displayOptimizedRoutes(routes, official) {
     const routeType = getRouteType(route);
     const displayMetrics = getRouteDisplayMetrics(route, routeType);
 
-    const { isNegative, profitClass, profitBadgeClass } = getProfitClasses(displayMetrics.percentage);
+    const { isNegative, profitClass, profitBadgeClass } = showProfitColors ? getProfitClasses(displayMetrics.percentage) : { isNegative: false, profitClass: '', profitBadgeClass: '' };
 
     // Indicadores
     const negativeIndicator = isNegative ? '<span class="negative-tag">⚠️ Pérdida</span>' : '';
@@ -1232,6 +1363,15 @@ function displayOptimizedRoutes(routes, official) {
     // Badges según tipo de ruta
     const typeBadge = getRouteTypeBadge(routeType);
     const p2pBadge = getP2PBadge(route);
+
+    // Aplicar vista compacta si está configurada
+    const compactClass = compactView ? 'compact-view' : '';
+
+    // Aplicar íconos de exchanges si está configurado
+    const exchangeIcon = showExchangeIcons ? getExchangeIcon(route.buyExchange) : '';
+
+    // Timestamps si está configurado
+    const timestampInfo = showTimestamps && route.timestamp ? `<div class="route-timestamp">🕐 ${new Date(route.timestamp).toLocaleTimeString()}</div>` : '';
 
     // Descripción de la ruta según el tipo
     const routeDescription = getRouteDescription(route, routeType);
@@ -1244,10 +1384,10 @@ function displayOptimizedRoutes(routes, official) {
     });
 
     html += `
-      <div class="route-card ${profitClass} ${routeType}" data-index="${index}" data-route='${routeData.replace(/'/g, "&apos;")}'>
+      <div class="route-card ${profitClass} ${routeType} ${compactClass}" data-index="${index}" data-route='${routeData.replace(/'/g, "&apos;")}'>
         <div class="route-header">
           <div class="route-title">
-            <h3>${getRouteIcon(routeType)} Ruta ${index + 1}</h3>
+            <h3>${getRouteIcon(routeType)} Ruta ${index + 1} ${exchangeIcon}</h3>
             ${negativeIndicator ? `<div class="route-loss-indicator">${negativeIndicator}</div>` : ''}
             <div class="route-badges">
               ${typeBadge}
@@ -1265,6 +1405,7 @@ function displayOptimizedRoutes(routes, official) {
             <span class="profit-amount">${displayMetrics.mainValue}</span>
             <span class="investment-info">${displayMetrics.secondaryInfo}</span>
           </div>
+          ${timestampInfo}
           <div class="route-action">
             <span class="click-to-expand">👆 Click para ver detalles</span>
           </div>
@@ -1412,6 +1553,24 @@ function getRouteIcon(routeType) {
     default:
       return route.isSingleExchange ? '🎯' : '🔀';
   }
+}
+
+// Función auxiliar para obtener ícono de exchange
+function getExchangeIcon(exchangeName) {
+  if (!exchangeName) return '';
+
+  const icons = {
+    'binance': ' 🟡',
+    'buenbit': ' 🔵',
+    'lemoncash': ' 🟢',
+    'ripio': ' 🟠',
+    'fiwind': ' 🟣',
+    'letsbit': ' 🔴',
+    'default': ' 🏦'
+  };
+
+  const normalizedName = exchangeName.toLowerCase();
+  return icons[normalizedName] || icons.default;
 }
 
 function showRouteDetailsByType(route) {
@@ -2118,6 +2277,22 @@ async function fetchExchangeRatesFromAPIs() {
 async function displayExchangeRates(exchangeRates) {
   const container = document.getElementById('banks-list');
 
+  // Obtener configuraciones de interfaz
+  const interfaceSettings = userSettings || {};
+  const showBankPrices = interfaceSettings.interfaceShowBankPrices !== false;
+  const bankDisplayMode = interfaceSettings.interfaceBankDisplayMode || 'top-3';
+
+  // Si no se deben mostrar precios bancarios, ocultar la sección
+  if (!showBankPrices) {
+    container.innerHTML = `
+      <div class="select-prompt">
+        <p>🏦 Los precios bancarios están ocultos</p>
+        <p style="margin-top: 8px; font-size: 0.85em;">Puedes activarlos en Configuración → Interfaz → Bancos en Popup</p>
+      </div>
+    `;
+    return;
+  }
+
   if (!exchangeRates || Object.keys(exchangeRates).length === 0) {
     container.innerHTML = `
       <div class="select-prompt">
@@ -2145,6 +2320,27 @@ async function displayExchangeRates(exchangeRates) {
 
   // Preparar datos para mostrar
   let exchanges = Object.entries(exchangeRates);
+
+  // Aplicar modo de display bancario
+  if (bankDisplayMode === 'best-only') {
+    // Encontrar el exchange con el mejor precio de compra (ARS/USD oficial)
+    const oficialExchanges = exchanges.filter(([code, data]) => data.type === 'oficial');
+    if (oficialExchanges.length > 0) {
+      const bestExchange = oficialExchanges.reduce((best, current) => {
+        const [code, data] = current;
+        return (!best || data.rates.compra < best[1].rates.compra) ? current : best;
+      });
+      exchanges = [bestExchange];
+    }
+  } else if (bankDisplayMode === 'top-3') {
+    // Mostrar solo los top 3 exchanges oficiales por precio de compra
+    const oficialExchanges = exchanges
+      .filter(([code, data]) => data.type === 'oficial')
+      .sort((a, b) => a[1].rates.compra - b[1].rates.compra)
+      .slice(0, 3);
+    exchanges = oficialExchanges;
+  }
+  // Para 'all', mostrar todos los exchanges (comportamiento actual)
 
   // Función para renderizar exchanges
   const renderExchanges = (filteredExchanges) => {
@@ -2488,14 +2684,10 @@ async function loadBankRates() {
   }
 }
 
-// Actualizar timestamp con indicador de frescura
-function updateLastUpdateTimestamp(timestamp) {
-  const container = document.getElementById('last-update');
-  if (!timestamp) {
-    container.innerHTML = '<span class="status-stale">🔴 Sin datos de actualización</span>';
-    return;
-  }
-  
+/**
+ * Actualizar timestamp con indicador de frescura
+ */
+function updateTimestampWithFreshness(container, timestamp) {
   const date = new Date(timestamp);
   const timeStr = date.toLocaleTimeString('es-AR');
   
@@ -2573,36 +2765,43 @@ function setupAdvancedSimulator() {
 function loadDefaultSimulatorValues() {
   // Cargar valores desde la configuración del usuario y datos actuales
   const officialPrice = currentData?.dollarPrice || 950;
-  
+
   // Verificar que los elementos existan antes de asignar valores
+  const simAmountInput = document.getElementById('sim-amount');
   const usdBuyInput = document.getElementById('sim-usd-buy-price');
   const usdSellInput = document.getElementById('sim-usd-sell-price');
   const buyFeeInput = document.getElementById('sim-buy-fee');
   const sellFeeInput = document.getElementById('sim-sell-fee');
   const transferFeeInput = document.getElementById('sim-transfer-fee-usd');
   const bankCommissionInput = document.getElementById('sim-bank-commission');
-  
+
   if (!usdBuyInput || !usdSellInput || !buyFeeInput || !sellFeeInput || !transferFeeInput || !bankCommissionInput) {
     console.warn('⚠️ No se encontraron todos los inputs del simulador');
     return;
   }
-  
+
+  // Monto por defecto desde configuración de interfaz
+  if (simAmountInput && userSettings?.simulatorDefaultAmount) {
+    simAmountInput.value = userSettings.simulatorDefaultAmount;
+  }
+
   // Precios del dólar
   usdBuyInput.value = officialPrice.toFixed(2);
   usdSellInput.value = (officialPrice * 1.02).toFixed(2);
-  
+
   // Fees desde configuración
   const buyFee = (userSettings?.extraTradingFee || 0) + 1.0; // 1% base + extra
   const sellFee = (userSettings?.extraTradingFee || 0) + 1.0;
   const transferFee = userSettings?.transferFeeUSD || 0;
   const bankCommission = userSettings?.bankCommissionFee || 0;
-  
+
   buyFeeInput.value = buyFee.toFixed(2);
   sellFeeInput.value = sellFee.toFixed(2);
   transferFeeInput.value = transferFee.toFixed(2);
   bankCommissionInput.value = bankCommission.toFixed(2);
-  
+
   console.log('✅ Valores por defecto cargados en simulador:', {
+    defaultAmount: userSettings?.simulatorDefaultAmount,
     usdPrice: officialPrice,
     buyFee,
     sellFee,
@@ -2996,18 +3195,33 @@ function setupRouteDetailsModal() {
 
 // Mostrar información del precio del dólar
 function displayDollarInfo(officialData) {
+  console.log('💵 [DISPLAY] displayDollarInfo() llamado con:', {
+    officialData: officialData,
+    compra: officialData?.compra,
+    source: officialData?.source,
+    timestamp: officialData?.timestamp ? new Date(officialData.timestamp).toLocaleString() : 'N/A'
+  });
+
   const dollarInfo = document.getElementById('dollar-info');
   const dollarPrice = document.getElementById('dollar-current-price');
   const dollarSource = document.getElementById('dollar-source-text');
 
   if (!dollarInfo || !officialData) {
+    console.log('❌ [DISPLAY] No hay dollarInfo o officialData - ocultando elemento');
     if (dollarInfo) dollarInfo.style.display = 'none';
     return;
   }
 
+  console.log(`💵 [DISPLAY] Actualizando display del dólar: $${officialData.compra} (${officialData.source})`);
+
   // CORREGIDO v5.0.35: Después del fix de campos API, mostrar precio de COMPRA (lo que pagamos por comprar USD)
   dollarPrice.textContent = `$${formatNumber(officialData.compra)}`;
   dollarSource.textContent = `Fuente: ${getDollarSourceDisplay(officialData)}`;
+
+  console.log('✅ [DISPLAY] Display actualizado:', {
+    precioMostrado: dollarPrice.textContent,
+    fuenteMostrada: dollarSource.textContent
+  });
 
   // Mostrar la información
   dollarInfo.style.display = 'block';

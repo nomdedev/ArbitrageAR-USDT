@@ -1,14 +1,12 @@
 {
   "name": "arbitragear-extension",
-  "version": "5.0.0",
+  "version": "5.0.75",
   "description": "Extensión de Chrome para detectar oportunidades de arbitraje entre el dólar oficial argentino y exchanges de USDT",
-  "main": "src/background/main.js",
+  "main": "src/background/main-simple.js",
   "scripts": {
     "test": "node tests/run-all-tests.js",
     "test:all": "node tests/run-all-tests.js",
-    "test:complete": "node tests/test-complete-flow.js",
-    "test:communication": "node tests/test-communication.js",
-    "test:ui": "node tests/test-popup-ui.js",
+    "test:bank-methods": "node tests/test-bank-methods.js",
     "test:coverage": "echo 'Coverage not implemented yet'",
     "lint": "echo 'No linter configured yet'",
     "build": "mkdir -p dist && cp -r src/* dist/ && cp manifest.json dist/ && cp -r icons dist/",

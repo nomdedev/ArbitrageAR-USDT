@@ -185,7 +185,7 @@ class DataService {
   // NUEVO v5.0.22: Normalizar nombres de bancos de CriptoYa
   normalizeBankName(code) {
     const bankNames = {
-      'nacion': 'Banco Nación',
+      'bna': 'Banco Nación',
       'bbva': 'BBVA',
       'piano': 'Banco Piano',
       'hipotecario': 'Banco Hipotecario',
@@ -210,7 +210,7 @@ class DataService {
   // NUEVO v5.0.31: Convertir nombre completo de banco a código
   getBankCode(fullName) {
     const bankCodes = {
-      'Banco Nación': 'nacion',
+      'Banco Nación': 'bna',
       'BBVA Banco Francés': 'bbva',
       'BBVA': 'bbva',
       'Banco Piano': 'piano',

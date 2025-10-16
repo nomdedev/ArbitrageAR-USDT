@@ -6,7 +6,8 @@
   "permissions": [
     "storage",
     "alarms",
-    "notifications"
+    "notifications",
+    "activeTab"
   ],
   "options_page": "src/options.html",
   "host_permissions": [

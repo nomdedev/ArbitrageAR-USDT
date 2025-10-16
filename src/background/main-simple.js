@@ -6,6 +6,153 @@
 console.log('🔧 [BACKGROUND] Iniciando service worker...');
 
 // ============================================
+// IMPORTACIONES INLINE DE UTILIDADES
+// ============================================
+
+// Funciones de cálculo bancario centralizadas (inline para compatibilidad)
+const BANK_CALCULATIONS = {
+  DEFAULT_BANKS: ['bna', 'galicia', 'santander', 'bbva', 'icbc'],
+
+  calculateBankConsensus(bankData, selectedBanks = null) {
+    let filteredBanks = bankData;
+    if (selectedBanks && Array.isArray(selectedBanks) && selectedBanks.length > 0) {
+      filteredBanks = {};
+      selectedBanks.forEach(bankName => {
+        if (bankData[bankName]) {
+          filteredBanks[bankName] = bankData[bankName];
+        }
+      });
+    }
+
+    const prices = Object.values(filteredBanks)
+      .filter(bank => bank && typeof bank.ask === 'number' && bank.ask > 0)
+      .map(bank => bank.ask)
+      .sort((a, b) => a - b);
+
+    if (prices.length === 0) return null;
+
+    const mid = Math.floor(prices.length / 2);
+    const median = prices.length % 2 === 0
+      ? (prices[mid - 1] + prices[mid]) / 2
+      : prices[mid];
+
+    return {
+      price: Math.round(median * 100) / 100,
+      method: 'consenso',
+      banksCount: prices.length,
+      source: 'criptoya_banks'
+    };
+  },
+
+  calculateBankAverage(bankData, selectedBanks = null) {
+    let filteredBanks = bankData;
+    if (selectedBanks && Array.isArray(selectedBanks) && selectedBanks.length > 0) {
+      filteredBanks = {};
+      selectedBanks.forEach(bankName => {
+        if (bankData[bankName]) {
+          filteredBanks[bankName] = bankData[bankName];
+        }
+      });
+    }
+
+    const prices = Object.values(filteredBanks)
+      .filter(bank => bank && typeof bank.ask === 'number' && bank.ask > 0)
+      .map(bank => bank.ask);
+
+    if (prices.length === 0) return null;
+
+    const average = prices.reduce((sum, price) => sum + price, 0) / prices.length;
+
+    return {
+      price: Math.round(average * 100) / 100,
+      method: 'promedio',
+      banksCount: prices.length,
+      source: 'criptoya_banks'
+    };
+  },
+
+  calculateBestBuy(bankData, selectedBanks = null) {
+    let filteredBanks = bankData;
+    if (selectedBanks && Array.isArray(selectedBanks) && selectedBanks.length > 0) {
+      filteredBanks = {};
+      selectedBanks.forEach(bankName => {
+        if (bankData[bankName]) {
+          filteredBanks[bankName] = bankData[bankName];
+        }
+      });
+    }
+
+    const prices = Object.values(filteredBanks)
+      .filter(bank => bank && typeof bank.ask === 'number' && bank.ask > 0)
+      .map(bank => bank.ask);
+
+    if (prices.length === 0) return null;
+
+    const bestPrice = Math.min(...prices);
+
+    return {
+      price: Math.round(bestPrice * 100) / 100,
+      method: 'mejor-compra',
+      banksCount: prices.length,
+      source: 'criptoya_banks'
+    };
+  },
+
+  calculateBestSell(bankData, selectedBanks = null) {
+    let filteredBanks = bankData;
+    if (selectedBanks && Array.isArray(selectedBanks) && selectedBanks.length > 0) {
+      filteredBanks = {};
+      selectedBanks.forEach(bankName => {
+        if (bankData[bankName]) {
+          filteredBanks[bankName] = bankData[bankName];
+        }
+      });
+    }
+
+    const prices = Object.values(filteredBanks)
+      .filter(bank => bank && typeof bank.ask === 'number' && bank.ask > 0)
+      .map(bank => bank.ask);
+
+    if (prices.length === 0) return null;
+
+    const bestPrice = Math.max(...prices);
+
+    return {
+      price: Math.round(bestPrice * 100) / 100,
+      method: 'mejor-venta',
+      banksCount: prices.length,
+      source: 'criptoya_banks'
+    };
+  },
+
+  calculateDollarPrice(bankData, method, selectedBanks = null) {
+    switch (method) {
+      case 'consenso':
+        return this.calculateBankConsensus(bankData, selectedBanks);
+      case 'promedio':
+        return this.calculateBankAverage(bankData, selectedBanks);
+      case 'mejor-compra':
+        return this.calculateBestBuy(bankData, selectedBanks);
+      case 'mejor-venta':
+        return this.calculateBestSell(bankData, selectedBanks);
+      default:
+        if (typeof method === 'string' && method.length > 0 && bankData[method]) {
+          const bank = bankData[method];
+          if (bank && typeof bank.ask === 'number' && bank.ask > 0) {
+            return {
+              price: Math.round(bank.ask * 100) / 100,
+              method: `solo-${method}`,
+              banksCount: 1,
+              source: 'criptoya_banks'
+            };
+          }
+        }
+        return null;
+    }
+  }
+};
+
+// ============================================
 // CONFIGURACIÓN INLINE
 // ============================================
 
@@ -95,6 +242,26 @@ async function fetchUSDTtoUSD(userSettings) {
   return await fetchWithRateLimit(url);
 }
 
+async function fetchBankDollarRates(userSettings) {
+  const url = userSettings.criptoyaBanksUrl || 'https://criptoya.com/api/bancostodos';
+  const data = await fetchWithRateLimit(url);
+  if (data && typeof data === 'object') {
+    return {
+      ...data,
+      source: 'criptoya_banks',
+      timestamp: Date.now()
+    };
+  }
+  return null;
+}
+
+// ============================================
+// FUNCIONES DE CÁLCULO ESTADÍSTICO PARA PRECIOS DE BANCOS
+// ============================================
+
+// Funciones centralizadas - eliminadas duplicaciones
+// Usar BANK_CALCULATIONS.calculateBankConsensus, etc.
+
 // ============================================
 // CÁLCULO DE RUTAS SIMPLIFICADO
 // ============================================
@@ -135,10 +302,10 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
   }
   
   const routes = [];
-  const officialPrice = oficial.compra;
+  const officialPrice = oficial.venta; // CORREGIDO: Usar precio de venta (lo que pagan los usuarios)
   const applyFees = userSettings.applyFeesInCalculation || false; // false por defecto
   
-  log(`🔍 [CALC] Precio oficial USD: $${officialPrice} ARS`);
+  log(`🔍 [CALC] Precio oficial USD (venta): $${officialPrice} ARS`);
   log(`🔍 [CALC] Monto inicial: $${initialAmount.toLocaleString()} ARS`);
   log(`🔍 [CALC] Aplicar fees: ${applyFees ? 'SÍ' : 'NO'}`);
   log(`🔍 [CALC] Procesando ${Object.keys(usdt).length} exchanges...`);
@@ -497,10 +664,10 @@ async function calculateUsdToUsdtRoutes(oficial, usdt, usdtUsd, userSettings = {
       usdToUsdtRate = usdtUsd[exchange].totalAsk;
       rateSource = 'direct_api';
       log(`💱 [${exchange}] Tasa USDT/USD directa: ${usdToUsdtRate}`);
-    } else if (data.totalAsk && oficial.compra) {
+    } else if (data.totalAsk && oficial.venta) {
       // Caso 2: Calcular indirectamente
       const usdtArsPrice = data.totalAsk;
-      const calculatedRate = usdtArsPrice / oficial.compra;
+      const calculatedRate = usdtArsPrice / oficial.venta;
 
       if (calculatedRate >= 0.95 && calculatedRate <= 1.15) {
         usdToUsdtRate = calculatedRate;
@@ -638,6 +805,186 @@ async function calculateAllRoutes(oficial, usdt, usdtUsd, userSettings = {}) {
 }
 
 // ============================================
+// SISTEMA DE NOTIFICACIONES
+// ============================================
+
+let lastNotificationTime = 0;
+let notifiedArbitrages = new Set(); // Para evitar notificar el mismo arbitraje repetidamente
+
+async function shouldSendNotification(settings, arbitrage) {
+  // 1. Verificar si las notificaciones están habilitadas
+  if (!settings.notificationsEnabled) {
+    return false;
+  }
+
+  // 2. Verificar horario silencioso
+  if (settings.quietHoursEnabled) {
+    const now = new Date();
+    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    const start = settings.quietStart;
+    const end = settings.quietEnd;
+
+    // Si el horario atraviesa medianoche (ej: 22:00 - 08:00)
+    if (start > end) {
+      if (currentTime >= start || currentTime <= end) {
+        return false; // Está en horario silencioso
+      }
+    } else {
+      if (currentTime >= start && currentTime <= end) {
+        return false; // Está en horario silencioso
+      }
+    }
+  }
+
+  // 3. Verificar frecuencia de notificaciones
+  const now = Date.now();
+  const frequencies = {
+    'always': 0,
+    '5min': 5 * 60 * 1000,
+    '15min': 15 * 60 * 1000,
+    '30min': 30 * 60 * 1000,
+    '1hour': 60 * 60 * 1000,
+    'once': Infinity
+  };
+
+  const minInterval = frequencies[settings.notificationFrequency] || frequencies['15min'];
+  if (now - lastNotificationTime < minInterval) {
+    return false;
+  }
+
+  // 4. Verificar umbral mínimo según el tipo de alerta
+  // Para alertas personalizadas, permitir cualquier umbrales configurado por el usuario
+  // Para alertas predefinidas, mantener mínimo de 1%
+  let minThreshold = 1.0;
+  if (settings.alertType === 'custom') {
+    minThreshold = 0.1; // Permitir umbrales muy bajos para personalización
+  }
+
+  if (arbitrage.profitPercent < minThreshold) {
+    return false; // No notificar por debajo del umbral mínimo
+  }
+
+  // 5. Verificar umbral según tipo de alerta configurado
+  const thresholds = {
+    'all': 1.0, // Notificar desde 1%
+    'moderate': 5,
+    'high': 10,
+    'extreme': 15,
+    'custom': settings.customThreshold || 5
+  };
+
+  const threshold = thresholds[settings.alertType] || 1.0;
+  if (arbitrage.profitPercent < threshold) {
+    return false;
+  }
+
+  // 6. Verificar si es un exchange preferido (si hay filtros)
+  if (settings.preferredExchanges && settings.preferredExchanges.length > 0) {
+    const exchangeName = arbitrage.broker.toLowerCase();
+    const isPreferred = settings.preferredExchanges.some(pref =>
+      exchangeName.includes(pref.toLowerCase())
+    );
+    if (!isPreferred) {
+      return false;
+    }
+  }
+
+  // 7. Verificar si ya notificamos este arbitraje recientemente
+  const arbKey = `${arbitrage.broker}_${arbitrage.profitPercent.toFixed(2)}`;
+  if (notifiedArbitrages.has(arbKey)) {
+    return false;
+  }
+
+  return true;
+}
+
+async function sendNotification(arbitrage, settings) {
+  try {
+    const notificationId = `arbitrage_${Date.now()}`;
+
+    // Determinar el ícono según la ganancia
+    const iconLevel = arbitrage.profitPercent >= 15 ? 'extreme' :
+                      arbitrage.profitPercent >= 10 ? 'high' :
+                      arbitrage.profitPercent >= 5 ? 'moderate' : 'normal';
+
+    const icons = {
+      extreme: '🚀',
+      high: '💎',
+      moderate: '💰',
+      normal: '📊'
+    };
+
+    const icon = icons[iconLevel];
+
+    await chrome.notifications.create(notificationId, {
+      type: 'basic',
+      iconUrl: 'icons/icon128.png',
+      title: `${icon} Oportunidad de Arbitraje: ${arbitrage.broker}`,
+      message: `Ganancia: ${arbitrage.profitPercent.toFixed(2)}% neto\nUSD→USDT: ${arbitrage.usdToUsdtRate}\nUSDT: $${arbitrage.usdtArsBid.toFixed(2)} ARS`,
+      priority: arbitrage.profitPercent >= 10 ? 2 : 1,
+      requireInteraction: arbitrage.profitPercent >= 15,
+      buttons: [
+        { title: '👀 Ver Detalles' },
+        { title: '⚙️ Configuración' }
+      ]
+    });
+
+    // Actualizar tiempo de última notificación
+    lastNotificationTime = Date.now();
+
+    // Agregar a notificados (limpiar después de 1 hora)
+    const arbKey = `${arbitrage.broker}_${arbitrage.profitPercent.toFixed(2)}`;
+    notifiedArbitrages.add(arbKey);
+    setTimeout(() => {
+      notifiedArbitrages.delete(arbKey);
+    }, 60 * 60 * 1000); // 1 hora
+
+    // Reproducir sonido si está habilitado
+    if (settings.soundEnabled) {
+      // Chrome no permite reproducir audio desde background,
+      // pero podemos usar la API de notificaciones que tiene sonido por defecto
+      console.log('🔔 Notificación con sonido enviada');
+    }
+
+  } catch (error) {
+    console.error('Error enviando notificación:', error);
+  }
+}
+
+// Verificar y enviar notificaciones después de actualizar datos
+async function checkAndNotify(arbitrages) {
+  try {
+    const result = await chrome.storage.local.get('notificationSettings');
+    const settings = result.notificationSettings || {
+      notificationsEnabled: true,
+      alertType: 'all',
+      customThreshold: 5, // Umbral personalizado (ahora permite desde 0.1%)
+      notificationFrequency: '15min',
+      soundEnabled: true,
+      preferredExchanges: [],
+      quietHoursEnabled: false,
+      quietStart: '22:00',
+      quietEnd: '08:00'
+    };
+
+    if (!arbitrages || arbitrages.length === 0) {
+      return;
+    }
+
+    // Tomar la mejor oportunidad
+    const bestArbitrage = arbitrages[0];
+
+    // Verificar si debe notificar
+    if (await shouldSendNotification(settings, bestArbitrage)) {
+      await sendNotification(bestArbitrage, settings);
+    }
+
+  } catch (error) {
+    console.error('Error en checkAndNotify:', error);
+  }
+}
+
+// ============================================
 // ESTADO GLOBAL
 // ============================================
 
@@ -656,28 +1003,85 @@ async function updateData() {
     const settingsResult = await chrome.storage.local.get('notificationSettings');
     const userSettings = settingsResult.notificationSettings || {};
     
-    log('⚙️ Configuración del usuario:', {
+    log('⚙️ [BACKGROUND] Configuración LEÍDA desde storage:', {
       dollarPriceSource: userSettings.dollarPriceSource,
       manualDollarPrice: userSettings.manualDollarPrice,
-      preferredBank: userSettings.preferredBank
+      preferredBank: userSettings.preferredBank,
+      selectedBanks: userSettings.selectedBanks,
+      timestamp: new Date().toISOString()
     });
     
     // Decidir cómo obtener el precio del dólar oficial
     let oficial;
     if (userSettings.dollarPriceSource === 'manual') {
       // Usar precio manual configurado por el usuario
-      const manualPrice = userSettings.manualDollarPrice || 950;
-      log(`💵 Usando precio manual: $${manualPrice}`);
+      const manualPrice = userSettings.manualDollarPrice || 1400;
+      log(`💵 [BACKGROUND] MODO MANUAL: Usando precio manual: $${manualPrice}`);
       oficial = {
         compra: manualPrice,
         venta: manualPrice,
         source: 'manual',
         timestamp: Date.now()
       };
+      log('✅ [BACKGROUND] Oficial MANUAL creado:', oficial);
     } else {
-      // Usar API automática
-      log('🌐 Obteniendo precio desde DolarAPI...');
-      oficial = await fetchDolarOficial(userSettings);
+      // Usar API automática - verificar si usar método de bancos
+      const bankMethod = userSettings.preferredBank;
+      
+      if (bankMethod && bankMethod !== 'oficial') {
+        // Usar método estadístico de bancos
+        log(`🏦 Obteniendo precio usando método: ${bankMethod}`);
+        
+        // Obtener datos de bancos y calcular precio según método
+        const bankData = await fetchBankDollarRates(userSettings);
+        const selectedBanks = userSettings.selectedBanks && userSettings.selectedBanks.length > 0 
+          ? userSettings.selectedBanks 
+          : ['bna', 'galicia', 'santander', 'bbva', 'icbc']; // Bancos principales por defecto
+        
+        log(`🏦 Usando ${selectedBanks.length} bancos para cálculo:`, selectedBanks);
+        
+        if (bankData) {
+          const calculatedPrice = BANK_CALCULATIONS.calculateDollarPrice(bankData, bankMethod, selectedBanks);
+          
+          if (calculatedPrice) {
+            log(`💵 Precio calculado (${calculatedPrice.method}): $${calculatedPrice.price} (${calculatedPrice.banksCount} bancos)`);
+            oficial = {
+              compra: calculatedPrice.price,
+              venta: calculatedPrice.price,
+              source: calculatedPrice.source,
+              method: calculatedPrice.method,
+              banksCount: calculatedPrice.banksCount,
+              timestamp: Date.now()
+            };
+          } else {
+            log('⚠️ [BACKGROUND] No se pudo calcular precio de bancos, usando precio manual como fallback');
+            log('   selectedBanks:', selectedBanks);
+            log('   bankData keys:', bankData ? Object.keys(bankData) : 'null');
+            const manualPrice = userSettings.manualDollarPrice || 1400;
+            oficial = {
+              compra: manualPrice,
+              venta: manualPrice,
+              source: 'manual_fallback',
+              timestamp: Date.now()
+            };
+            log('⚠️ [BACKGROUND] Oficial MANUAL_FALLBACK creado:', oficial);
+          }
+        } else {
+          log('⚠️ [BACKGROUND] No se pudieron obtener datos de bancos, usando precio manual como fallback');
+          const manualPrice = userSettings.manualDollarPrice || 1400;
+          oficial = {
+            compra: manualPrice,
+            venta: manualPrice,
+            source: 'manual_fallback',
+            timestamp: Date.now()
+          };
+          log('⚠️ [BACKGROUND] Oficial MANUAL_FALLBACK creado:', oficial);
+        }
+      } else {
+        // Usar precio oficial estándar
+        log('🌐 Obteniendo precio oficial desde DolarAPI...');
+        oficial = await fetchDolarOficial(userSettings);
+      }
     }
     
     // Obtener precios de USDT en paralelo
@@ -697,7 +1101,7 @@ async function updateData() {
     // MEJORADO v5.0.75: Calcular todos los tipos de rutas según configuración
     const routeType = userSettings.routeType || 'arbitrage'; // 'arbitrage', 'direct_usdt_ars', 'usd_to_usdt', 'all'
     const optimizedRoutes = await calculateAllRoutes(oficial, usdt, usdtUsd, { ...userSettings, routeType });
-    
+
     log(`✅ Datos actualizados: ${optimizedRoutes.length} rutas`);
     
     const data = {
@@ -713,7 +1117,15 @@ async function updateData() {
     
     currentData = data;
     lastUpdate = data.lastUpdate;
-    
+
+    // NUEVO: Verificar y enviar notificaciones si hay oportunidades rentables
+    if (routeType === 'arbitrage' || routeType === 'all') {
+      const arbitrageRoutes = routeType === 'all'
+        ? optimizedRoutes.filter(r => r.routeCategory === 'arbitrage')
+        : optimizedRoutes;
+      await checkAndNotify(arbitrageRoutes);
+    }
+
     return data;
     
   } catch (error) {
@@ -737,17 +1149,27 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   log('[BACKGROUND] Mensaje recibido:', request.action);
   
   if (request.action === 'getArbitrages') {
-    log('[BACKGROUND] Procesando getArbitrages...');
+    log('[BACKGROUND] 📥 Mensaje getArbitrages recibido');
     
     // Si hay datos en cache, devolverlos inmediatamente
     if (currentData) {
-      log('[BACKGROUND] Enviando datos cacheados:', currentData.optimizedRoutes?.length || 0, 'rutas');
+      log('[BACKGROUND] 📤 Enviando datos CACHEADOS al popup:', {
+        oficialCompra: currentData.oficial?.compra,
+        oficialSource: currentData.oficial?.source,
+        rutasCount: currentData.optimizedRoutes?.length || 0,
+        lastUpdate: new Date(currentData.lastUpdate).toLocaleString()
+      });
       sendResponse(currentData);
       return false; // CORREGIDO: Respuesta síncrona, no mantener canal
     } else {
       // Actualizar datos de forma asíncrona
       updateData().then(data => {
-        log('[BACKGROUND] Enviando datos frescos:', data?.optimizedRoutes?.length || 0, 'rutas');
+        log('[BACKGROUND] 📤 Enviando datos FRESCOS al popup:', {
+          oficialCompra: data?.oficial?.compra,
+          oficialSource: data?.oficial?.source,
+          rutasCount: data?.optimizedRoutes?.length || 0,
+          lastUpdate: new Date(data?.lastUpdate).toLocaleString()
+        });
         sendResponse(data || {
           error: 'Error obteniendo datos',
           optimizedRoutes: [],
@@ -770,6 +1192,39 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendResponse(data || { optimizedRoutes: [], arbitrages: [] });
     });
     return true; // CORRECTO: Respuesta asíncrona
+  }
+  
+  // NUEVO: Manejar actualización de configuración
+  if (request.action === 'settingsUpdated') {
+    log('[BACKGROUND] 📥 Recibido mensaje settingsUpdated');
+    log('[BACKGROUND] Configuración NUEVA recibida:', {
+      dollarPriceSource: request.settings?.dollarPriceSource,
+      manualDollarPrice: request.settings?.manualDollarPrice,
+      timestamp: new Date().toISOString()
+    });
+
+    // Limpiar cache para forzar recálculo con nueva configuración
+    currentData = null;
+    log('[BACKGROUND] 🗑️ Cache limpiada (currentData = null)');
+
+    // Actualizar configuración del usuario
+    userSettings = request.settings;
+    log('[BACKGROUND] 👤 userSettings actualizada con nueva configuración');
+
+    // Forzar recálculo de datos con nueva configuración
+    updateData().then(data => {
+      log('[BACKGROUND] ✅ Datos recalculados exitosamente');
+      log('[BACKGROUND] 📊 Nuevo oficial generado:', {
+        compra: data?.oficial?.compra,
+        source: data?.oficial?.source,
+        timestamp: new Date(data?.oficial?.timestamp).toISOString()
+      });
+      sendResponse({ success: true, data: data });
+    }).catch(error => {
+      console.error('[BACKGROUND] ❌ Error recalculando datos:', error);
+      sendResponse({ success: false, error: error.message });
+    });
+    return true; // Respuesta asíncrona
   }
   
   // NUEVO v5.0.46: Manejar mensajes no implementados
@@ -897,3 +1352,25 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
 });
 
 log('[BACKGROUND] Background completamente inicializado');
+
+// ============================================
+// LISTENERS DE NOTIFICACIONES
+// ============================================
+
+// Manejar clicks en notificaciones
+chrome.notifications.onButtonClicked.addListener((notificationId, buttonIndex) => {
+  if (buttonIndex === 0) {
+    // Ver detalles - abrir popup
+    chrome.action.openPopup();
+  } else if (buttonIndex === 1) {
+    // Configuración - abrir página de opciones
+    chrome.runtime.openOptionsPage();
+  }
+  chrome.notifications.clear(notificationId);
+});
+
+chrome.notifications.onClicked.addListener((notificationId) => {
+  // Click en la notificación - abrir popup
+  chrome.action.openPopup();
+  chrome.notifications.clear(notificationId);
+});

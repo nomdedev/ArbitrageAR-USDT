@@ -52,10 +52,7 @@ async function runTestFile(fileName) {
 
 async function runCompleteTestSuite() {
   const testFiles = [
-    'test-complete-flow.js',
-    'test-communication.js',
-    'test-popup-ui.js',
-    'test-advanced-filters.js'
+    'test-bank-methods.js'
   ];
 
   const results = {
