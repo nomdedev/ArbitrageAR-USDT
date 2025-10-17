@@ -3665,6 +3665,88 @@ async function checkForUpdates() {
   }
 }
 
+// Verificar actualizaciones desde GitHub
+async function checkGitHubForUpdates() {
+  try {
+    console.log('🔍 Verificando actualizaciones desde GitHub...');
+
+    // Obtener el último commit del repositorio
+    const response = await fetch('https://api.github.com/repos/nomdedev/ArbitrageAR-USDT/commits/main', {
+      headers: {
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'ArbitrageAR-USDT-Extension'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.status}`);
+    }
+
+    const commitData = await response.json();
+    const latestCommitSha = commitData.sha;
+    const latestCommitDate = new Date(commitData.commit.committer.date);
+    const commitMessage = commitData.commit.message;
+    const commitUrl = commitData.html_url;
+
+    // Obtener versión actual del manifest
+    const currentVersion = chrome.runtime.getManifest().version;
+
+    // Obtener información guardada anteriormente
+    const result = await chrome.storage.local.get(['lastCommitSha', 'dismissedVersion']);
+    const lastCommitSha = result.lastCommitSha;
+    const dismissedVersion = result.dismissedVersion;
+
+    console.log('📊 Info de versiones:', {
+      currentVersion,
+      latestCommitSha: latestCommitSha.substring(0, 7),
+      lastCommitSha: lastCommitSha ? lastCommitSha.substring(0, 7) : 'none',
+      dismissedVersion: dismissedVersion ? dismissedVersion.substring(0, 7) : 'none'
+    });
+
+    // Verificar si hay una nueva versión disponible
+    const hasNewVersion = !lastCommitSha || latestCommitSha !== lastCommitSha;
+    const isNotDismissed = !dismissedVersion || dismissedVersion !== latestCommitSha;
+
+    if (hasNewVersion && isNotDismissed) {
+      console.log('✨ Nueva versión disponible:', latestCommitSha.substring(0, 7));
+
+      // Preparar información de la actualización
+      const updateInfo = {
+        available: true,
+        version: latestCommitSha,
+        date: latestCommitDate.toISOString(),
+        message: commitMessage,
+        url: commitUrl,
+        lastCheck: Date.now()
+      };
+
+      // Guardar información de actualización
+      await chrome.storage.local.set({
+        updateAvailable: updateInfo,
+        updateInfo: { lastCheck: Date.now() }
+      });
+
+      // Mostrar banner inmediatamente
+      showUpdateBanner(updateInfo);
+    } else {
+      console.log('✅ Versión actualizada o ya notificada');
+
+      // Actualizar timestamp de última verificación
+      await chrome.storage.local.set({
+        updateInfo: { lastCheck: Date.now() }
+      });
+    }
+
+  } catch (error) {
+    console.error('❌ Error verificando GitHub:', error);
+
+    // En caso de error, actualizar timestamp para no verificar tan seguido
+    await chrome.storage.local.set({
+      updateInfo: { lastCheck: Date.now() }
+    });
+  }
+}
+
 // Mostrar banner de actualización
 function showUpdateBanner(updateInfo) {
   const banner = document.getElementById('update-banner');
