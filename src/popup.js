@@ -1781,6 +1781,8 @@ function displayOptimizedRoutes(routes, official) {
               ${typeBadge}
               ${p2pBadge}
             </div>
+          </div>
+          <div class="route-profit-section">
             <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${formatNumber(displayMetrics.percentage)}%</div>
           </div>
         </div>
@@ -4008,15 +4010,15 @@ function displayFilteredRoutes(routes) {
     html += `
       <div class="route-card ${profitClass}" data-route-id="${route.buyExchange}_${route.sellExchange}_${index}">
         <div class="route-header">
-          <div class="route-info">
+          <div class="route-exchange-section">
             <span class="route-exchange">${route.buyExchange} → ${route.sellExchange}</span>
-            <span class="route-profit ${profitBadgeClass}">${profitSymbol}${formatNumber(displayProfitPercentage)}%</span>
+            <div class="route-badges">
+              ${singleExchangeBadge}
+              ${p2pBadge}
+              ${negativeIndicator}
+            </div>
           </div>
-          <div class="route-badges">
-            ${singleExchangeBadge}
-            ${p2pBadge}
-            ${negativeIndicator}
-          </div>
+          <div class="route-profit ${profitBadgeClass}">${profitSymbol}${formatNumber(displayProfitPercentage)}%</div>
         </div>
 
         <div class="route-details">

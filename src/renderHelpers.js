@@ -38,6 +38,8 @@ function renderRouteCard(route, index, displayMetrics) {
           <h3>🔀 Ruta ${index + 1}</h3>
           ${negativeIndicator ? `<div class="route-loss-indicator">${negativeIndicator}</div>` : ''}
           <div class="route-badges"></div>
+        </div>
+        <div class="route-profit-section">
           <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${formatNumber(displayMetrics.percentage)}%</div>
         </div>
       </div>

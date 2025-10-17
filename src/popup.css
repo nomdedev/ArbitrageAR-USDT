@@ -789,8 +789,8 @@ main::-webkit-scrollbar-thumb {
   background: var(--card-bg);
   backdrop-filter: var(--backdrop-blur);
   border-radius: var(--border-radius);
-  padding: var(--spacing-md);
-  margin-bottom: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
   box-shadow: var(--shadow-card);
   border: var(--border-card);
   transition: var(--transition-fast);
@@ -841,38 +841,41 @@ main::-webkit-scrollbar-thumb {
 .route-compact {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
 }
 
 /* Fila superior: Exchange + Ganancia */
 .route-header {
-  display: contents;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+  margin-bottom: 12px;
 }
 
-.route-title {
-  grid-column: 1 / -1;
+.route-exchange-section {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .route-title h3 {
   margin: 0;
-  font-size: 0.9em;
+  font-size: 0.85em;
   font-weight: 600;
   color: #e2e8f0;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
-/* Badges compactos */
+/* Badges debajo del exchange, lado izquierdo */
 .route-badges {
   display: flex;
-  gap: 4px;
+  gap: 3px;
   align-items: center;
+  margin-top: 4px;
 }
 
 .single-exchange-badge,
@@ -880,7 +883,7 @@ main::-webkit-scrollbar-thumb {
 .no-p2p-badge {
   padding: 2px 6px;
   border-radius: 4px;
-  font-size: 0.65em;
+  font-size: 0.85em;
   font-weight: 600;
   letter-spacing: 0.3px;
   text-transform: uppercase;
@@ -904,13 +907,15 @@ main::-webkit-scrollbar-thumb {
   border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
-/* Profit badge más prominente */
+/* Profit badge más compacto y ajustado */
 .profit-badge {
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 0.85em;
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 1em;
   font-weight: 700;
   letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 
 .profit-badge.profit-positive {
@@ -932,7 +937,7 @@ main::-webkit-scrollbar-thumb {
   grid-column: 1;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .route-exchanges {
@@ -951,13 +956,13 @@ main::-webkit-scrollbar-thumb {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 8px;
-  padding-top: 4px;
+  gap: 6px;
+  padding-top: 2px;
   border-top: 1px solid rgba(59, 130, 246, 0.1);
 }
 
 .profit-amount {
-  font-size: 1em;
+  font-size: 0.85em;
   font-weight: 700;
   color: #10b981;
   text-shadow: 0 0 6px rgba(16, 185, 129, 0.3);
@@ -969,7 +974,7 @@ main::-webkit-scrollbar-thumb {
 }
 
 .investment-info {
-  font-size: 0.75em;
+  font-size: 0.85em;
   color: #94a3b8;
   font-weight: 500;
 }
@@ -978,19 +983,19 @@ main::-webkit-scrollbar-thumb {
 .route-action {
   grid-column: 1 / -1;
   text-align: center;
-  padding-top: 6px;
+  padding-top: 4px;
   margin-top: 4px;
   border-top: 1px dashed rgba(59, 130, 246, 0.15);
 }
 
 .click-to-expand {
-  font-size: 0.7em;
+  font-size: 0.85em;
   color: #60a5fa;
   font-weight: 500;
   opacity: 0.7;
   transition: all 0.3s ease;
   display: inline-block;
-  padding: 4px 8px;
+  padding: 3px 6px;
   border-radius: 4px;
   background: rgba(59, 130, 246, 0.1);
 }
@@ -4541,10 +4546,17 @@ p.error {
    ============================================ */
 
 .route-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  display: block;
+  position: relative;
   margin-bottom: 12px;
+}
+
+.route-info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  margin-top: 4px;
 }
 
 .route-info {
@@ -4554,17 +4566,21 @@ p.error {
 }
 
 .route-exchange {
-  font-size: 16px;
+  font-size: 0.85em;
   font-weight: 600;
   color: #e1e8ed;
 }
 
 .route-profit {
-  font-size: 18px;
+  font-size: 1em;
   font-weight: 700;
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 2px 6px;
+  border-radius: 4px;
   display: inline-block;
+  white-space: nowrap;
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
 .route-profit.high {
