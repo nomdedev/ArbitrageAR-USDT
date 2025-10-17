@@ -114,7 +114,7 @@
         
         <div class="simulator-input">
           <label for="sim-amount">Monto de referencia (ARS):</label>
-          <input type="number" id="sim-amount" value="1000000" min="1000" max="10000000" step="1000">
+          <input type="number" id="sim-amount" class="input-base" value="1000000" min="1000" max="10000000" step="1000">
         </div>
 
         <!-- Configuración de Parámetros -->
@@ -128,11 +128,11 @@
             <div class="config-row">
               <div class="config-input">
                 <label for="sim-usd-buy-price">Precio compra USD (ARS):</label>
-                <input type="number" id="sim-usd-buy-price" step="0.01" placeholder="950.00">
+                <input type="number" id="sim-usd-buy-price" class="input-base" step="0.01" placeholder="950.00">
               </div>
               <div class="config-input">
                 <label for="sim-usd-sell-price">Precio venta USD (ARS):</label>
-                <input type="number" id="sim-usd-sell-price" step="0.01" placeholder="970.00">
+                <input type="number" id="sim-usd-sell-price" class="input-base" step="0.01" placeholder="970.00">
               </div>
             </div>
           </div>
@@ -142,21 +142,21 @@
             <div class="config-row">
               <div class="config-input">
                 <label for="sim-buy-fee">Fee compra USDT (%):</label>
-                <input type="number" id="sim-buy-fee" step="0.01" value="1.0" min="0" max="10">
+                <input type="number" id="sim-buy-fee" class="input-base" step="0.01" value="1.0" min="0" max="10">
               </div>
               <div class="config-input">
                 <label for="sim-sell-fee">Fee venta USDT (%):</label>
-                <input type="number" id="sim-sell-fee" step="0.01" value="1.0" min="0" max="10">
+                <input type="number" id="sim-sell-fee" class="input-base" step="0.01" value="1.0" min="0" max="10">
               </div>
             </div>
             <div class="config-row">
               <div class="config-input">
                 <label for="sim-transfer-fee-usd">Fee transferencia (USD):</label>
-                <input type="number" id="sim-transfer-fee-usd" step="0.01" value="0" min="0">
+                <input type="number" id="sim-transfer-fee-usd" class="input-base" step="0.01" value="0" min="0">
               </div>
               <div class="config-input">
                 <label for="sim-bank-commission">Comisión bancaria (%):</label>
-                <input type="number" id="sim-bank-commission" step="0.01" value="0" min="0" max="5">
+                <input type="number" id="sim-bank-commission" class="input-base" step="0.01" value="0" min="0" max="5">
               </div>
             </div>
           </div>
