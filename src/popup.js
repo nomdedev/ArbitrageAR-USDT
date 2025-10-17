@@ -49,9 +49,39 @@ document.addEventListener('DOMContentLoaded', () => {
   loadUserSettings(); // NUEVO v5.0.28: Cargar configuración del usuario
   fetchAndDisplay();
   setupStorageListener(); // NUEVO: Escuchar cambios en configuración
-  // CORREGIDO v5.0.46: No cargar bancos automáticamente ya que no está soportado en versión simplificada
-  // loadBanksData(); // Deshabilitado - funcionalidad no disponible
+  // loadBanksData(); // Ahora se carga solo cuando se activa la pestaña de bancos
 });
+
+/**
+ * Configurar navegación de tabs principales
+ */
+function setupTabNavigation() {
+  const tabButtons = document.querySelectorAll('.tab');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // Remover clase active de todos los botones y contenidos
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      tabContents.forEach(content => content.classList.remove('active'));
+
+      // Agregar clase active al botón clickeado
+      button.classList.add('active');
+
+      // Mostrar contenido correspondiente
+      const tabId = button.dataset.tab;
+      const targetContent = document.getElementById(`tab-${tabId}`);
+      if (targetContent) {
+        targetContent.classList.add('active');
+      }
+
+      // Si es la pestaña de bancos, cargar los datos
+      if (tabId === 'banks') {
+        loadBanksData();
+      }
+    });
+  });
+}
 
 // Formateo de números
 function formatNumber(num) {
@@ -801,6 +831,364 @@ function setupRefreshButton() {
       chrome.runtime.openOptionsPage();
     }
   });
+}
+
+// ============================================
+// CARGA DE DATOS DE BANCOS Y DÓLARES
+// ============================================
+
+async function loadBanksData() {
+  const banksList = document.getElementById('banks-list');
+
+  if (!banksList) {
+    console.warn('Elemento banks-list no encontrado');
+    return;
+  }
+
+  try {
+    // Mostrar loading
+    banksList.innerHTML = `
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Cargando cotizaciones...</p>
+      </div>
+    `;
+
+    // Obtener datos desde el background
+    const response = await chrome.runtime.sendMessage({ action: 'getBanksData' });
+
+    if (!response || !response.success) {
+      throw new Error(response?.error || 'Error al obtener datos de bancos');
+    }
+
+    const { banksData, dollarTypes, usdtData, usdtUsdData, usdtUsdBrokers, binanceP2PArs, binanceP2PUsd } = response.data;
+    console.log('📊 Datos procesados:', {
+      banksData: banksData ? Object.keys(banksData).length + ' items' : 'null',
+      dollarTypes: dollarTypes ? Object.keys(dollarTypes).length + ' bancos' : 'null',
+      usdtData: usdtData ? Object.keys(usdtData).length + ' exchanges USDT/ARS' : 'null',
+      usdtUsdData: usdtUsdData ? Object.keys(usdtUsdData).length + ' exchanges USDT/USD' : 'null',
+      usdtUsdBrokers: usdtUsdBrokers ? Object.keys(usdtUsdBrokers).length + ' brokers' : 'null'
+    });
+
+    // Debug: Mostrar ejemplos de datos
+    if (dollarTypes && Object.keys(dollarTypes).length > 0) {
+      console.log('🔍 Ejemplos de dollarTypes:', Object.keys(dollarTypes).slice(0, 3));
+      const firstKey = Object.keys(dollarTypes)[0];
+      console.log('🔍 Primer elemento de dollarTypes:', firstKey, dollarTypes[firstKey]);
+    }
+
+    // Obtener preferencias de ordenamiento
+    const sortPreference = localStorage.getItem('banksSortPreference') || 'sell-asc';
+
+    // Crear HTML con todos los tipos de dólar
+    let html = '';
+
+    // Agregar pestañas de navegación
+    html += `
+      <div class="banks-tabs">
+        <button class="tab-button active" data-tab="usd-oficial">
+          💵 USD Oficial
+        </button>
+        <button class="tab-button" data-tab="usd-usdt">
+          � USD/USDT
+        </button>
+        <button class="tab-button" data-tab="usdt-ars">
+          💰 USDT/ARS
+        </button>
+      </div>
+
+      <div class="tab-controls">
+        <div class="sort-controls">
+          <label>Ordenar por:</label>
+          <select class="sort-select">
+            <option value="sell-asc">Menor precio de venta</option>
+            <option value="buy-desc">Mayor precio de compra</option>
+          </select>
+        </div>
+      </div>
+    `;
+
+    // 1. Tipos de dólar (Oficial, Blue, Bolsa, etc.)
+    if (dollarTypes && Object.keys(dollarTypes).length > 0) {
+      html += `
+        <div class="tab-content usd-oficial-content active">
+        <div class="dollar-types-section">
+          <h3>💵 Tipos de Dólar</h3>
+          <div class="dollar-types-grid">
+      `;
+
+      // Convertir tipos de dólar a array y ordenar según preferencia
+      const dollarArray = Object.values(dollarTypes);
+      const sortedDollarTypes = applySortingToData(dollarArray, sortPreference);
+
+      sortedDollarTypes.forEach(dolar => {
+        const spread = (dolar.venta - dolar.compra).toFixed(2);
+        html += `
+          <div class="dollar-type-card">
+            <div class="dollar-type-name">${dolar.nombre}</div>
+            <div class="dollar-type-prices">
+              <div class="price-buy">Compra: $${dolar.compra.toLocaleString()}</div>
+              <div class="price-sell">Venta: $${dolar.venta.toLocaleString()}</div>
+              <div class="price-spread">Spread: $${spread}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `
+          </div>
+        </div>
+        </div>
+      `;
+    }
+
+    // 2. Precios de bancos individuales
+    if (banksData && Object.keys(banksData).length > 0) {
+      html += `
+        <div class="tab-content banks-content">
+        <div class="banks-section">
+          <h3>🏦 Cotizaciones Bancarias</h3>
+          <div class="banks-grid">
+      `;
+
+      // Ordenar bancos según preferencia
+      const sortedBanks = applySortingToData(Object.entries(banksData), sortPreference)
+        .slice(0, 12); // Mostrar solo los primeros 12 bancos
+
+      sortedBanks.forEach(([bankName, bankData]) => {
+        const spread = (bankData.ask - bankData.bid).toFixed(2);
+        html += `
+          <div class="bank-row">
+            <div class="bank-name">${bankName.toUpperCase()}</div>
+            <div class="bank-prices">
+              <span class="price-label">Bid:</span>
+              <span class="price-buy">$${bankData.bid.toLocaleString()}</span>
+              <span class="price-separator">|</span>
+              <span class="price-label">Ask:</span>
+              <span class="price-sell">$${bankData.ask.toLocaleString()}</span>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `
+          </div>
+        </div>
+        </div>
+      `;
+    }
+
+    // 3. USDT por exchange
+    if (usdtUsdData && Object.keys(usdtUsdData).length > 0) {
+      html += `
+        <div class="tab-content usd-usdt-content">
+        <div class="usdt-section">
+          <div class="usdt-grid">
+      `;
+
+      // Ordenar exchanges según preferencia
+      const sortedUsdt = applySortingToData(Object.entries(usdtUsdData), sortPreference)
+        .slice(0, 8); // Mostrar solo los primeros 8 exchanges
+
+      sortedUsdt.forEach(([exchangeName, exchangeData]) => {
+        html += `
+          <div class="usdt-card">
+            <div class="usdt-name">${exchangeName.toUpperCase()}</div>
+            <div class="usdt-prices">
+              <div class="price-bid">$${exchangeData.bid.toLocaleString()}</div>
+              <div class="price-ask">$${exchangeData.ask.toLocaleString()}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `
+          </div>
+        </div>
+        </div>
+      `;
+    }
+
+    // 3.5. Brokers USDT/USD
+    if (usdtUsdBrokers && Object.keys(usdtUsdBrokers).length > 0) {
+      html += `
+        <div class="tab-content usdt-ars-content">
+        <div class="brokers-section">
+          <div class="brokers-grid">
+      `;
+
+      // Ordenar brokers según preferencia
+      const sortedBrokers = applySortingToData(
+        Object.entries(usdtUsdBrokers)
+          .filter(([key]) => key !== 'source' && key !== 'timestamp'),
+        sortPreference
+      ).slice(0, 6); // Mostrar solo los primeros 6 brokers
+
+      sortedBrokers.forEach(([brokerName, brokerData]) => {
+        html += `
+          <div class="broker-card">
+            <div class="broker-name">${brokerName.toUpperCase()}</div>
+            <div class="broker-prices">
+              <div class="price-bid">${brokerData.bid}</div>
+              <div class="price-ask">${brokerData.ask}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `
+          </div>
+        </div>
+        </div>
+      `;
+    }
+
+    // Si no hay datos
+    if ((!dollarTypes || Object.keys(dollarTypes).length === 0) &&
+        (!banksData || Object.keys(banksData).length === 0) &&
+        (!usdtData || Object.keys(usdtData).length === 0) &&
+        (!usdtUsdBrokers || Object.keys(usdtUsdBrokers).length === 0)) {
+      html = `
+        <div class="no-data">
+          <p>⚠️ No se pudieron cargar los datos de cotizaciones</p>
+          <p>Intenta actualizar la página o verifica tu conexión</p>
+        </div>
+      `;
+    }
+
+    banksList.innerHTML = html;
+
+    // Agregar funcionalidad de pestañas
+    initializeTabs();
+
+  } catch (error) {
+    console.error('Error cargando datos de bancos:', error);
+    banksList.innerHTML = `
+      <div class="error">
+        <p>❌ Error al cargar cotizaciones</p>
+        <p>${error.message}</p>
+        <button onclick="loadBanksData()" class="btn-retry">Reintentar</button>
+      </div>
+    `;
+  }
+}
+
+// Función helper para aplicar ordenamiento a arrays de datos
+function applySortingToData(dataArray, sortPreference = 'sell-asc') {
+  if (!Array.isArray(dataArray) || dataArray.length === 0) {
+    return dataArray;
+  }
+
+  return [...dataArray].sort((a, b) => {
+    // Determinar qué campos usar para comparación
+    let aValue, bValue;
+
+    // Si es un array de [key, value] (como Object.entries), usar el value
+    const aData = Array.isArray(a) ? a[1] : a;
+    const bData = Array.isArray(b) ? b[1] : b;
+
+    if (sortPreference === 'sell-asc') {
+      // Menor precio de venta (ask)
+      aValue = aData.ask || aData.venta || 0;
+      bValue = bData.ask || bData.venta || 0;
+      return aValue - bValue;
+    } else if (sortPreference === 'buy-desc') {
+      // Mayor precio de compra (bid)
+      aValue = aData.bid || aData.compra || 0;
+      bValue = bData.bid || bData.compra || 0;
+      return bValue - aValue;
+    }
+
+    return 0;
+  });
+}
+
+// Función para inicializar las pestañas
+function initializeTabs() {
+  const banksList = document.getElementById('banks-list');
+  if (!banksList) {
+    console.error('banks-list no encontrado');
+    return;
+  }
+
+  const tabButtons = banksList.querySelectorAll('.tab-button');
+  const tabContents = banksList.querySelectorAll('.tab-content');
+  const sortSelect = banksList.querySelector('.sort-select');
+
+  console.log('Inicializando pestañas...');
+  console.log('Botones encontrados:', tabButtons.length);
+  console.log('Contenidos encontrados:', tabContents.length);
+
+  // Función para cambiar de pestaña
+  function switchTab(tabName) {
+    // Verificar que la pestaña existe
+    const activeButton = banksList.querySelector(`[data-tab="${tabName}"]`);
+    const activeContent = banksList.querySelector(`.${tabName}-content`);
+
+    if (!activeButton || !activeContent) {
+      console.warn(`Pestaña "${tabName}" no encontrada, usando usd-oficial por defecto`);
+      tabName = 'usd-oficial';
+    }
+
+    // Remover clase active de todos los botones y contenidos
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+    tabContents.forEach(content => content.classList.remove('active'));
+
+    // Agregar clase active al botón y contenido seleccionado
+    const finalActiveButton = banksList.querySelector(`[data-tab="${tabName}"]`);
+    const finalActiveContent = banksList.querySelector(`.${tabName}-content`);
+
+    if (finalActiveButton) {
+      finalActiveButton.classList.add('active');
+    }
+    if (finalActiveContent) {
+      finalActiveContent.classList.add('active');
+    }
+
+    // Guardar la pestaña activa en localStorage
+    localStorage.setItem('activeBanksTab', tabName);
+  }  // Función para aplicar ordenamiento
+  function applySorting() {
+    const sortPreference = localStorage.getItem('banksSortPreference') || 'sell-asc';
+    // Recargar los datos con el nuevo ordenamiento
+    loadBanksData();
+  }
+
+  // Event listeners para botones de pestaña
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const tabName = button.dataset.tab;
+      switchTab(tabName);
+    });
+  });
+
+  // Event listener para el selector de ordenamiento
+  if (sortSelect) {
+    sortSelect.addEventListener('change', () => {
+      const sortValue = sortSelect.value;
+      // Guardar la preferencia de ordenamiento
+      localStorage.setItem('banksSortPreference', sortValue);
+      // Aplicar el ordenamiento
+      applySorting();
+    });
+  }
+
+  // Cargar pestaña activa guardada o usar la primera por defecto
+  const savedTab = localStorage.getItem('activeBanksTab') || 'usd-oficial';
+  switchTab(savedTab);
+
+  // Verificar que al menos una pestaña esté visible
+  const visibleContents = document.querySelectorAll('.tab-content.active');
+  if (visibleContents.length === 0) {
+    console.warn('Ninguna pestaña visible, activando usd-oficial por defecto');
+    switchTab('usd-oficial');
+  }
+
+  // Cargar preferencia de ordenamiento guardada
+  const savedSort = localStorage.getItem('banksSortPreference') || 'sell-asc';
+  if (sortSelect) {
+    sortSelect.value = savedSort;
+  }
 }
 
 // ============================================
@@ -2162,17 +2550,17 @@ function displayStepByStepGuide(arb) {
   console.log('✅ [POPUP] Guía paso a paso mostrada correctamente');
 }
 
-// Cargar datos de bancos
-function loadBanksData() {
-  // Configurar event listener para el botón de refresh
-  const refreshBtn = document.getElementById('refresh-banks');
-  if (refreshBtn) {
-    refreshBtn.addEventListener('click', loadBankRates);
-  }
-  
-  // Cargar datos iniciales automáticamente cuando se abre la pestaña
-  loadBankRates();
-}
+// Cargar datos de bancos (FUNCIÓN ANTIGUA ELIMINADA - botón refresh-banks removido)
+// function loadBanksDataOld() {
+//   // Configurar event listener para el botón de refresh
+//   const refreshBtn = document.getElementById('refresh-banks');
+//   if (refreshBtn) {
+//     refreshBtn.addEventListener('click', loadBankRates);
+//   }
+//
+//   // Cargar datos iniciales automáticamente cuando se abre la pestaña
+//   loadBankRates();
+// }
 
 // Obtener datos de exchanges desde las APIs configuradas
 async function fetchExchangeRatesFromAPIs() {
@@ -2422,8 +2810,6 @@ async function displayExchangeRates(exchangeRates) {
   // Configurar event listeners para filtros
   setupExchangeFilters(exchanges);
 
-  // Actualizar timestamp
-  updateBanksTimestamp();
 }
 
 // Configurar filtros de exchanges
@@ -2612,20 +2998,10 @@ function getBankDisplayName(bankCode) {
   return bankNames[bankCode] || bankCode.charAt(0).toUpperCase() + bankCode.slice(1);
 }
 
-// Actualizar timestamp de bancos
-function updateBanksTimestamp() {
-  const timestampEl = document.getElementById('banks-last-update');
-  if (timestampEl) {
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString('es-AR');
-    timestampEl.textContent = `Actualizado: ${timeStr}`;
-  }
-}
-
 // CORREGIDO v5.0.69: Función para cargar cotizaciones bancarias reales
 async function loadBankRates() {
   const container = document.getElementById('banks-list');
-  const refreshBtn = document.getElementById('refresh-banks');
+  // Botón de refresh eliminado - funcionalidad ahora en botón principal del popup
 
   // Mostrar loading
   container.innerHTML = `
@@ -2635,11 +3011,11 @@ async function loadBankRates() {
     </div>
   `;
 
-  // Deshabilitar botón mientras carga
-  if (refreshBtn) {
-    refreshBtn.disabled = true;
-    refreshBtn.textContent = '⏳ Cargando...';
-  }
+  // Deshabilitar botón mientras carga (comentado - botón eliminado)
+  // if (refreshBtn) {
+  //   refreshBtn.disabled = true;
+  //   refreshBtn.textContent = '⏳ Cargando...';
+  // }
 
   try {
     // Obtener datos directamente de las APIs configuradas
@@ -2676,11 +3052,11 @@ async function loadBankRates() {
       </div>
     `;
   } finally {
-    // Rehabilitar botón
-    if (refreshBtn) {
-      refreshBtn.disabled = false;
-      refreshBtn.textContent = '🔄 Actualizar';
-    }
+    // Rehabilitar botón (comentado - botón eliminado)
+    // if (refreshBtn) {
+    //   refreshBtn.disabled = false;
+    //   refreshBtn.textContent = '🔄 Actualizar';
+    // }
   }
 }
 
@@ -3149,12 +3525,7 @@ function resetMatrixFilter() {
 
 // NUEVO: Configurar controles del precio del dólar
 function setupDollarPriceControls() {
-  const recalculateBtn = document.getElementById('recalculate-with-custom');
   const configureBtn = document.getElementById('configure-dollar');
-
-  if (recalculateBtn) {
-    recalculateBtn.addEventListener('click', showRecalculateDialog);
-  }
 
   if (configureBtn) {
     configureBtn.addEventListener('click', openDollarConfiguration);
@@ -3784,3 +4155,528 @@ document.addEventListener('click', function(event) {
     location.reload();
   }
 });
+
+/**
+ * Cargar datos de bancos con sistema de tabs
+ */
+async function loadBanksData() {
+  const banksList = document.getElementById('banks-list');
+  if (!banksList) {
+    console.error('❌ ERROR: No se encontró el elemento banks-list');
+    return;
+  }
+
+  console.log('🚀 Iniciando loadBanksData...');
+
+  try {
+    // Mostrar loading
+    banksList.innerHTML = `
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Cargando cotizaciones de exchanges...</p>
+      </div>
+    `;
+
+    console.log('📡 Enviando mensaje getBanksData al background...');
+
+    // Obtener datos de background
+    const response = await chrome.runtime.sendMessage({ action: 'getBanksData' });
+    console.log('📨 Respuesta del background:', response);
+
+    if (!response) {
+      throw new Error('No se recibió respuesta del background');
+    }
+
+    if (!response.success) {
+      throw new Error(response?.error || 'No se pudieron obtener los datos de bancos');
+    }
+
+    const { dollarTypes, usdtUsdData, usdtData } = response.data;
+    console.log('📊 Datos procesados:', {
+      dollarTypes: dollarTypes ? Object.keys(dollarTypes).length + ' bancos' : 'null/undefined',
+      usdtUsdData: usdtUsdData ? Object.keys(usdtUsdData).length + ' exchanges USD/USDT' : 'null/undefined',
+      usdtData: usdtData ? Object.keys(usdtData).length + ' exchanges USDT/ARS' : 'null/undefined'
+    });
+
+    // Verificar que tenemos datos
+    if (!dollarTypes || Object.keys(dollarTypes).length === 0) {
+      console.warn('⚠️ WARNING: dollarTypes está vacío o undefined');
+    }
+    if (!usdtUsdData || Object.keys(usdtUsdData).length === 0) {
+      console.warn('⚠️ WARNING: usdtUsdData está vacío o undefined');
+    }
+    if (!usdtData || Object.keys(usdtData).length === 0) {
+      console.warn('⚠️ WARNING: usdtData está vacío o undefined');
+    }
+
+    // Obtener configuraciones del usuario
+    const userSettings = await getUserSettings();
+    console.log('🔍 User settings:', userSettings);
+
+    // Almacenar datos globalmente para actualizaciones de ordenamiento
+    window.currentBanksData = { dollarTypes, usdtUsdData, usdtData, userSettings };
+    console.log('💾 Datos almacenados en window.currentBanksData');
+
+    // Generar HTML con tabs
+    const html = generateBanksTabsHTML(dollarTypes, usdtUsdData, usdtData, userSettings);
+    console.log('📄 HTML generado, longitud:', html.length);
+
+    if (!html || html.length < 100) {
+      console.error('❌ ERROR: HTML generado es demasiado corto o vacío');
+      throw new Error('Error generando HTML de pestañas');
+    }
+
+    banksList.innerHTML = html;
+    console.log('✅ HTML asignado al DOM');
+
+    // Inicializar funcionalidad de tabs
+    initializeBanksTabs();
+    console.log('✅ Pestañas inicializadas');
+
+  } catch (error) {
+    console.error('❌ Error cargando datos de bancos:', error);
+    banksList.innerHTML = `
+      <div class="error-message">
+        <p>❌ Error al cargar cotizaciones</p>
+        <p>${error.message}</p>
+        <button onclick="loadBanksData()" class="retry-btn">Reintentar</button>
+      </div>
+    `;
+  }
+}
+
+/**
+ * Generar HTML para los tabs de bancos
+ */
+function generateBanksTabsHTML(dollarTypes, usdtUsdData, usdtData, userSettings = null) {
+  let html = `
+    <div class="banks-tabs">
+      <button class="banks-tab-btn active" data-tab="usd-oficial">USD Oficial</button>
+      <button class="banks-tab-btn" data-tab="usd-usdt">USD/USDT</button>
+      <button class="banks-tab-btn" data-tab="usdt-ars">USDT/ARS</button>
+    </div>
+
+    <div class="banks-sort-controls">
+      <button class="sort-btn active" data-sort="name" data-direction="asc" title="Ordenar por empresa">
+        🏢 Empresa ↑
+      </button>
+      <button class="sort-btn" data-sort="buy" data-direction="desc" title="Ordenar por precio de compra">
+        💰 Compra ↓
+      </button>
+      <button class="sort-btn" data-sort="sell" data-direction="desc" title="Ordenar por precio de venta">
+        💸 Venta ↓
+      </button>
+    </div>
+
+    <div class="banks-column-headers">
+      <div class="column-header">Empresa</div>
+      <div class="column-header">Compra</div>
+      <div class="column-header">Venta</div>
+    </div>
+  `;
+
+  // Obtener preferencia de ordenamiento
+  const activeSort = localStorage.getItem('banksActiveSort') || 'sell';
+  const sortDirection = localStorage.getItem(`banksSort${activeSort}Direction`) || 'desc';
+  const sortPreference = `${activeSort}-${sortDirection}`;
+
+  // 1. USD Oficial (bancos tradicionales)
+  html += `
+    <div class="banks-tab-content usd-oficial-content active">
+  `;
+  html += generateUSDOfficialTab(dollarTypes, sortPreference, userSettings);
+  html += `
+    </div>
+  `;
+
+  // 2. USD/USDT por exchange
+  html += `
+    <div class="banks-tab-content usd-usdt-content">
+  `;
+  html += generateUSDTUSDTTab(usdtUsdData, sortPreference, userSettings);
+  html += `
+    </div>
+  `;
+
+  // 3. USDT/ARS por exchange
+  html += `
+    <div class="banks-tab-content usdt-ars-content">
+  `;
+  html += generateUSDTARSTab(usdtData, sortPreference, userSettings);
+  html += `
+    </div>
+  `;
+
+  return html;
+}
+
+/**
+ * Generar HTML para la pestaña USD Oficial
+ */
+function generateUSDOfficialTab(dollarTypes, sortPreference, userSettings = null) {
+  // Filtrar bancos según selección del usuario
+  if (userSettings && dollarTypes) {
+    dollarTypes = filterBanksBySelection(dollarTypes, userSettings.selectedBanks);
+  }
+
+  if (!dollarTypes || Object.keys(dollarTypes).length === 0) {
+    return `
+      <div class="banks-section">
+        <div class="no-data">
+          <p>No hay datos disponibles para bancos oficiales</p>
+        </div>
+      </div>
+    `;
+  }
+
+  let html = `
+    <div class="banks-section">
+  `;
+
+  // Ordenar bancos según preferencia
+  const sortedBanks = applySortingToData(Object.entries(dollarTypes), sortPreference)
+    .slice(0, 12); // Mostrar hasta 12 bancos
+
+  sortedBanks.forEach(([bankName, bankData]) => {
+    const buyPrice = bankData.compra || bankData.bid || bankData.price || 0;
+    const sellPrice = bankData.venta || bankData.ask || bankData.price || 0;
+
+    html += `
+      <div class="bank-row">
+        <div class="bank-name">${bankName.toUpperCase()}</div>
+        <div class="bank-buy">$${formatNumber(buyPrice)}</div>
+        <div class="bank-sell">$${formatNumber(sellPrice)}</div>
+      </div>
+    `;
+  });
+
+  html += `
+      </div>
+  `;
+
+  return html;
+}
+
+/**
+ * Generar HTML para la pestaña USD/USDT
+ */
+function generateUSDTUSDTTab(usdtUsdData, sortPreference, userSettings = null) {
+  // Filtrar exchanges según selección del usuario
+  if (userSettings && usdtUsdData) {
+    usdtUsdData = filterExchangesBySelection(usdtUsdData, userSettings.notificationExchanges);
+  }
+
+  if (!usdtUsdData || Object.keys(usdtUsdData).length === 0) {
+    return `
+      <div class="banks-section">
+        <div class="no-data">
+          <p>No hay datos disponibles para exchanges USD/USDT</p>
+        </div>
+      </div>
+    `;
+  }
+
+  console.log('✅ Generando sección USD/USDT con', Object.keys(usdtUsdData).length, 'exchanges');
+
+  let html = `
+    <div class="banks-section">
+  `;
+
+  // Ordenar exchanges según preferencia
+  const sortedExchanges = applySortingToData(Object.entries(usdtUsdData), sortPreference)
+    .slice(0, 12); // Mostrar hasta 12 exchanges
+
+  sortedExchanges.forEach(([exchangeName, exchangeData]) => {
+    const bidPrice = exchangeData.bid || exchangeData.price || 0;
+    const askPrice = exchangeData.ask || exchangeData.price || 0;
+
+    html += `
+      <div class="bank-row">
+        <div class="bank-name">${exchangeName}</div>
+        <div class="bank-buy">$${formatNumber(bidPrice)}</div>
+        <div class="bank-sell">$${formatNumber(askPrice)}</div>
+      </div>
+    `;
+  });
+
+  html += `
+      </div>
+  `;
+
+  return html;
+}
+
+/**
+ * Generar HTML para la pestaña USDT/ARS
+ */
+function generateUSDTARSTab(usdtData, sortPreference, userSettings = null) {
+  // Filtrar exchanges según selección del usuario
+  if (userSettings && usdtData) {
+    usdtData = filterExchangesBySelection(usdtData, userSettings.notificationExchanges);
+  }
+
+  if (!usdtData || Object.keys(usdtData).length === 0) {
+    return `
+      <div class="banks-section">
+        <div class="no-data">
+          <p>No hay datos disponibles para exchanges USDT/ARS</p>
+        </div>
+      </div>
+    `;
+  }
+
+  let html = `
+    <div class="banks-section">
+  `;
+
+  // Ordenar exchanges según preferencia
+  const sortedExchanges = applySortingToData(Object.entries(usdtData), sortPreference)
+    .slice(0, 12); // Mostrar hasta 12 exchanges
+
+  sortedExchanges.forEach(([exchangeName, exchangeData]) => {
+    const bidPrice = exchangeData.bid || exchangeData.price || 0;
+    const askPrice = exchangeData.ask || exchangeData.price || 0;
+
+    html += `
+      <div class="bank-row">
+        <div class="bank-name">${exchangeName}</div>
+        <div class="bank-buy">$${formatNumber(bidPrice)}</div>
+        <div class="bank-sell">$${formatNumber(askPrice)}</div>
+      </div>
+    `;
+  });
+
+  html += `
+      </div>
+  `;
+
+  return html;
+}
+
+/**
+ * Inicializar funcionalidad de tabs para bancos
+ */
+function initializeBanksTabs() {
+  const tabButtons = document.querySelectorAll('.banks-tab-btn');
+  const tabContents = document.querySelectorAll('.banks-tab-content');
+  const sortSelect = document.getElementById('banks-sort-select');
+
+  // Configurar botones de tabs
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // Remover clase active de todos los botones
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      // Agregar clase active al botón clickeado
+      button.classList.add('active');
+
+      // Ocultar todos los contenidos
+      tabContents.forEach(content => content.classList.remove('active'));
+      // Mostrar contenido correspondiente
+      const tabId = button.dataset.tab;
+      const targetContent = document.querySelector(`.${tabId}-content`);
+      if (targetContent) {
+        targetContent.classList.add('active');
+      }
+    });
+  });
+
+  // Configurar botones de ordenamiento
+  const sortButtons = document.querySelectorAll('.sort-btn');
+  sortButtons.forEach(button => {
+    const sortType = button.dataset.sort;
+    const currentDirection = localStorage.getItem(`banksSort${sortType}Direction`) || button.dataset.direction;
+
+    // Establecer estado inicial
+    button.dataset.direction = currentDirection;
+    button.textContent = getSortButtonText(sortType, currentDirection);
+
+    // Si es el botón activo guardado, marcarlo como active
+    const activeSort = localStorage.getItem('banksActiveSort') || 'sell';
+    if (sortType === activeSort) {
+      button.classList.add('active');
+    }
+
+    button.addEventListener('click', () => {
+      // Remover clase active de todos los botones
+      sortButtons.forEach(btn => btn.classList.remove('active'));
+      // Agregar clase active al botón clickeado
+      button.classList.add('active');
+
+      // Cambiar dirección
+      const currentDirection = button.dataset.direction;
+      const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
+      button.dataset.direction = newDirection;
+
+      // Actualizar texto del botón
+      button.textContent = getSortButtonText(sortType, newDirection);
+
+      // Guardar preferencias
+      localStorage.setItem(`banksSort${sortType}Direction`, newDirection);
+      localStorage.setItem('banksActiveSort', sortType);
+
+      // Actualizar solo la pestaña activa con nueva ordenación
+      updateActiveTabSorting();
+    });
+  });
+}
+
+/**
+ * Obtener texto para botón de ordenamiento
+ */
+function getSortButtonText(sortType, direction) {
+  const icons = {
+    name: '🏢',
+    buy: '💰',
+    sell: '💸'
+  };
+
+  const labels = {
+    name: 'Empresa',
+    buy: 'Compra',
+    sell: 'Venta'
+  };
+
+  const arrows = {
+    asc: '↑',
+    desc: '↓'
+  };
+
+  return `${icons[sortType]} ${labels[sortType]} ${arrows[direction]}`;
+}
+
+/**
+ * Obtener configuraciones de usuario desde chrome.storage
+ */
+async function getUserSettings() {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get({
+      selectedBanks: undefined,
+      preferredExchanges: [],
+      notificationExchanges: ['binance', 'buenbit', 'lemoncash', 'ripio', 'fiwind', 'letsbit']
+    }, (settings) => {
+      resolve(settings);
+    });
+  });
+}
+
+/**
+ * Filtrar bancos según selección del usuario
+ */
+function filterBanksBySelection(dollarTypes, selectedBanks) {
+  if (!selectedBanks || selectedBanks.length === 0) {
+    // Si no hay selección, usar bancos por defecto
+    const defaultBanks = ['bna', 'galicia', 'santander', 'bbva', 'icbc'];
+    selectedBanks = defaultBanks;
+  }
+
+  const filtered = {};
+  selectedBanks.forEach(bankKey => {
+    if (dollarTypes[bankKey]) {
+      filtered[bankKey] = dollarTypes[bankKey];
+    }
+  });
+
+  return filtered;
+}
+
+/**
+ * Filtrar exchanges según selección del usuario
+ */
+function filterExchangesBySelection(exchangeData, notificationExchanges) {
+  if (!notificationExchanges || notificationExchanges.length === 0) {
+    // Si no hay exchanges de notificación, mostrar todos
+    return exchangeData;
+  }
+
+  const filtered = {};
+  notificationExchanges.forEach(exchangeKey => {
+    if (exchangeData[exchangeKey]) {
+      filtered[exchangeKey] = exchangeData[exchangeKey];
+    }
+  });
+
+  return filtered;
+}
+
+/**
+ * Actualizar ordenamiento de todas las pestañas manteniendo la activa
+ */
+function updateActiveTabSorting() {
+  // Obtener la pestaña actualmente activa
+  const activeTabButton = document.querySelector('.banks-tab-btn.active');
+  const activeTab = activeTabButton ? activeTabButton.dataset.tab : 'usd-oficial';
+
+  console.log('🔄 Actualizando ordenamiento para todas las pestañas, manteniendo activa:', activeTab);
+
+  // Obtener preferencia de ordenamiento actual
+  const activeSort = localStorage.getItem('banksActiveSort') || 'sell';
+  const sortDirection = localStorage.getItem(`banksSort${activeSort}Direction`) || 'desc';
+  const sortPreference = `${activeSort}-${sortDirection}`;
+
+  // Si no tenemos datos almacenados, recargar todo
+  if (!window.currentBanksData) {
+    loadBanksData();
+    return;
+  }
+
+  const { dollarTypes, usdtUsdData, usdtData, userSettings } = window.currentBanksData;
+
+  // Regenerar todo el HTML del contenedor de bancos
+  const banksList = document.getElementById('banks-list');
+  if (banksList) {
+    const html = generateBanksTabsHTML(dollarTypes, usdtUsdData, usdtData, userSettings);
+    banksList.innerHTML = html;
+
+    // Re-inicializar los event listeners después de regenerar el HTML
+    initializeBanksTabs();
+
+    // Asegurar que la pestaña correcta esté activa (tanto botones como contenido)
+    const activeTabButton = document.querySelector(`.banks-tab-btn[data-tab="${activeTab}"]`);
+    const activeTabContent = document.querySelector(`.${activeTab}-content`);
+
+    if (activeTabButton && activeTabContent) {
+      // Remover clase active de todos los botones y contenidos
+      document.querySelectorAll('.banks-tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.banks-tab-content').forEach(content => content.classList.remove('active'));
+
+      // Agregar clase active al botón y contenido correctos
+      activeTabButton.classList.add('active');
+      activeTabContent.classList.add('active');
+    }
+  }
+
+  console.log('✅ Todas las pestañas actualizadas con nuevo ordenamiento, navegación intacta');
+}
+
+/**
+ * Aplicar ordenamiento a datos de bancos
+ */
+function applySortingToData(dataArray, sortPreference) {
+  const [sortType, direction] = sortPreference.split('-');
+
+  return dataArray.sort((a, b) => {
+    const [nameA, dataA] = a;
+    const [nameB, dataB] = b;
+
+    let valueA, valueB;
+
+    if (sortType === 'name') {
+      // Ordenar alfabéticamente por nombre
+      valueA = nameA.toLowerCase();
+      valueB = nameB.toLowerCase();
+      return direction === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+    } else if (sortType === 'buy') {
+      // Ordenar por precio de compra
+      valueA = dataA.compra || dataA.bid || dataA.price || 0;
+      valueB = dataB.compra || dataB.bid || dataB.price || 0;
+      return direction === 'asc' ? valueA - valueB : valueB - valueA;
+    } else if (sortType === 'sell') {
+      // Ordenar por precio de venta
+      valueA = dataA.venta || dataA.ask || dataA.price || 0;
+      valueB = dataB.venta || dataB.ask || dataB.price || 0;
+      return direction === 'asc' ? valueA - valueB : valueB - valueA;
+    }
+
+    return 0;
+  });
+}

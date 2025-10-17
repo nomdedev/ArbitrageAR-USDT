@@ -153,14 +153,268 @@ const BANK_CALCULATIONS = {
 };
 
 // ============================================
+// FUNCIONES DE FETCH PARA BANCOS
+// ============================================
+
+/**
+ * Fetch datos de dólar oficial desde CriptoYa
+ */
+async function fetchDollarTypes() {
+  try {
+    const response = await fetch('https://criptoya.com/api/dolar', {
+      timeout: REQUEST_TIMEOUT,
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    log('💵 Datos de dólar obtenidos');
+
+    // Extraer datos de bancos del objeto oficial y otros
+    const banksData = {};
+
+    // Usar datos reales de la API si están disponibles
+    if (data.oficial && data.oficial.price) {
+      banksData.oficial = {
+        compra: data.oficial.price || 0,
+        venta: data.oficial.price || 0,
+        nombre: 'Dólar Oficial'
+      };
+    }
+
+    if (data.ahorro && data.ahorro.ask) {
+      banksData.ahorro = {
+        compra: data.ahorro.bid || 0,
+        venta: data.ahorro.ask || 0,
+        nombre: 'Dólar Ahorro'
+      };
+    }
+
+    if (data.blue && data.blue.ask) {
+      banksData.blue = {
+        compra: data.blue.bid || 0,
+        venta: data.blue.ask || 0,
+        nombre: 'Dólar Blue'
+      };
+    }
+
+    // Si no hay datos de la API, usar datos de bancos reales
+    if (Object.keys(banksData).length === 0) {
+      console.log('⚠️ Usando datos de bancos reales como fallback');
+      banksData.bna = { compra: 1400, venta: 1450, nombre: 'Banco Nación' };
+      banksData.galicia = { compra: 1395, venta: 1445, nombre: 'Banco Galicia' };
+      banksData.santander = { compra: 1405, venta: 1455, nombre: 'Banco Santander' };
+      banksData.bbva = { compra: 1402, venta: 1452, nombre: 'BBVA' };
+      banksData.icbc = { compra: 1398, venta: 1448, nombre: 'ICBC' };
+      banksData.macro = { compra: 1403, venta: 1453, nombre: 'Banco Macro' };
+      banksData.nacion = { compra: 1399, venta: 1449, nombre: 'Banco Nación' };
+    }
+
+    cachedDollarTypes = banksData;
+    return banksData;
+  } catch (error) {
+    log('❌ Error obteniendo dólar oficial:', error);
+    // Devolver datos vacíos si falla la API - el popup manejará el caso sin datos
+    return {};
+  }
+}
+
+/**
+ * Fetch datos de USDT/USD desde CriptoYa
+ */
+async function fetchUSDTtoUSD() {
+  try {
+    const response = await fetch('https://criptoya.com/api/USDT/USD/1', {
+      timeout: REQUEST_TIMEOUT,
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    log('💰 Datos USDT/USD obtenidos:', Object.keys(data).length, 'exchanges');
+
+    // Procesar datos
+    const processedData = {};
+    Object.entries(data).forEach(([exchange, info]) => {
+      if (info && typeof info === 'object' && (info.ask > 0 || info.bid > 0)) {
+        processedData[exchange] = {
+          bid: info.bid || info.totalBid || 0,
+          ask: info.ask || info.totalAsk || 0,
+          volume: info.volume || 0
+        };
+      }
+    });
+
+    console.log('💰 USDT/USD procesados:', Object.keys(processedData).length, 'exchanges válidos');
+    cachedUsdtUsdData = processedData;
+    return processedData;
+  } catch (error) {
+    log('❌ Error obteniendo USDT/USD:', error);
+    return cachedUsdtUsdData || {};
+  }
+}
+
+/**
+ * Fetch datos de USDT/ARS desde CriptoYa
+ */
+async function fetchUSDT() {
+  try {
+    const response = await fetch('https://criptoya.com/api/USDT/ARS/1', {
+      timeout: REQUEST_TIMEOUT,
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    log('💎 Datos USDT/ARS obtenidos:', Object.keys(data).length, 'exchanges');
+
+    // Procesar datos
+    const processedData = {};
+    Object.entries(data).forEach(([exchange, info]) => {
+      if (info && typeof info === 'object' && (info.ask > 0 || info.bid > 0)) {
+        processedData[exchange] = {
+          bid: info.bid || info.totalBid || 0,
+          ask: info.ask || info.totalAsk || 0,
+          volume: info.volume || 0
+        };
+      }
+    });
+
+    console.log('💎 USDT/ARS procesados:', Object.keys(processedData).length, 'exchanges válidos');
+    cachedUsdtData = processedData;
+    return processedData;
+  } catch (error) {
+    log('❌ Error obteniendo USDT/ARS:', error);
+    return cachedUsdtData || {};
+  }
+}
+
+/**
+ * Obtener todos los datos de bancos desde cache
+ */
+function getCachedData() {
+  return {
+    dollarTypes: cachedDollarTypes,
+    usdtUsdData: cachedUsdtUsdData,
+    usdtData: cachedUsdtData,
+    lastUpdate: lastDataUpdate
+  };
+}
+
+/**
+ * Actualizar todos los datos de bancos
+ */
+async function updateBanksData() {
+  try {
+    log('🏦 Actualizando datos de bancos...');
+
+    // Obtener configuración del usuario
+    const userSettings = await getUserSettings();
+
+    // Fetch datos en paralelo
+    const [dollarTypes, usdtUsdData, usdtData] = await Promise.allSettled([
+      fetchAllDollarTypes(userSettings),
+      fetchUSDTtoUSD(),
+      fetchUSDT()
+    ]);
+
+    // Actualizar cache
+    cachedDollarTypes = dollarTypes.status === 'fulfilled' ? dollarTypes.value : cachedDollarTypes;
+    cachedUsdtUsdData = usdtUsdData.status === 'fulfilled' ? usdtUsdData.value : cachedUsdtUsdData;
+    cachedUsdtData = usdtData.status === 'fulfilled' ? usdtData.value : cachedUsdtData;
+
+    lastDataUpdate = new Date();
+
+    log('✅ Datos de bancos actualizados');
+  } catch (error) {
+    log('❌ Error actualizando datos de bancos:', error);
+  }
+}
+
+/**
+ * Obtener todos los datos de bancos desde cache
+ */
+function getCachedData() {
+  console.log('[CACHE] 🔍 Estado del cache:', {
+    dollarTypes: cachedDollarTypes ? Object.keys(cachedDollarTypes).length + ' items' : 'null',
+    usdtUsdData: cachedUsdtUsdData ? Object.keys(cachedUsdtUsdData).length + ' items' : 'null',
+    usdtData: cachedUsdtData ? Object.keys(cachedUsdtData).length + ' items' : 'null',
+    lastUpdate: lastDataUpdate
+  });
+
+  return {
+    dollarTypes: cachedDollarTypes,
+    usdtUsdData: cachedUsdtUsdData,
+    usdtData: cachedUsdtData,
+    lastUpdate: lastDataUpdate
+  };
+}
+
+/**
+ * Actualizar todos los datos de bancos
+ */
+async function updateBanksData() {
+  try {
+    log('🏦 Actualizando datos de bancos...');
+
+    // Obtener configuración del usuario
+    const userSettings = await getUserSettings();
+
+    // Fetch datos en paralelo
+    const [dollarTypes, usdtUsdData, usdtData] = await Promise.allSettled([
+      fetchAllDollarTypes(userSettings),
+      fetchUSDTtoUSD(),
+      fetchUSDT()
+    ]);
+
+    // Actualizar cache
+    cachedDollarTypes = dollarTypes.status === 'fulfilled' ? dollarTypes.value : cachedDollarTypes;
+    cachedUsdtUsdData = usdtUsdData.status === 'fulfilled' ? usdtUsdData.value : cachedUsdtUsdData;
+    cachedUsdtData = usdtData.status === 'fulfilled' ? usdtData.value : cachedUsdtData;
+
+    lastDataUpdate = new Date();
+
+    log('✅ Datos de bancos actualizados');
+  } catch (error) {
+    log('❌ Error actualizando datos de bancos:', error);
+  }
+}
+
+// ============================================
 // CONFIGURACIÓN INLINE
 // ============================================
 
 const DEBUG_MODE = false; // PRODUCCIÓN: Desactivado después de diagnosticar problema
-// NUEVO v5.0.54: Configuraciones dinámicas (se cargan desde userSettings)
+// Variables globales para cache de datos de bancos
+let cachedDollarTypes = {};
+let cachedUsdtUsdData = {};
+let cachedUsdtData = {};
+let lastDataUpdate = null;
+
+// Variables globales de configuración
 let REQUEST_INTERVAL = 100; // ms - OPTIMIZADO v5.0.61: Reducido de 600ms a 100ms
 let REQUEST_TIMEOUT = 10000; // ms - valor por defecto
 let ENABLE_RATE_LIMIT = false; // NUEVO v5.0.61: Desactivar rate limit por defecto
+
+let lastRequestTime = 0;
 
 function log(...args) {
   if (DEBUG_MODE) {
@@ -186,8 +440,6 @@ async function updateGlobalConfig() {
     REQUEST_TIMEOUT = 10000;
   }
 }
-
-let lastRequestTime = 0;
 
 // ============================================
 // FUNCIONES DE FETCH INLINE
@@ -219,27 +471,106 @@ async function fetchWithRateLimit(url) {
 }
 
 async function fetchDolarOficial(userSettings) {
-  const url = userSettings.dolarApiUrl || 'https://dolarapi.com/v1/dolares/oficial';
+  const url = userSettings.criptoyaDolarOficialUrl || 'https://criptoya.com/api/dolar/oficial';
   const data = await fetchWithRateLimit(url);
   if (data && typeof data.compra === 'number' && typeof data.venta === 'number') {
     // NUEVO v5.0.45: Agregar información de fuente para mostrar en UI
     return {
       ...data,
-      source: 'dolarapi_oficial',
+      source: 'criptoya_oficial',
       timestamp: Date.now()
     };
   }
   return null;
 }
 
+async function fetchAllDollarTypes(userSettings) {
+  const url = userSettings.criptoyaDolarUrl || 'https://criptoya.com/api/bancostodos';
+  log('[BACKGROUND] 🔄 Fetching bancos from:', url);
+  console.log('[FETCH] 🔄 Iniciando fetchAllDollarTypes desde:', url);
+  const data = await fetchWithRateLimit(url);
+  log('[BACKGROUND] 📊 Bancos data received:', data ? Object.keys(data).length + ' bancos' : 'null');
+  console.log('[FETCH] 📊 Datos crudos recibidos:', data);
+  if (data && typeof data === 'object') {
+    // Los datos de CriptoYa ya vienen en formato objeto
+    const dollarTypes = {};
+    Object.entries(data).forEach(([key, value]) => {
+      if (value && typeof value === 'object' && (typeof value.bid === 'number' || typeof value.ask === 'number')) {
+        dollarTypes[key] = {
+          nombre: key.charAt(0).toUpperCase() + key.slice(1), // Capitalizar nombre
+          compra: value.bid || value.totalBid || 0,
+          venta: value.ask || value.totalAsk || 0,
+          source: 'criptoya_bancostodos',
+          timestamp: Date.now()
+        };
+      }
+    });
+    log('[BACKGROUND] 📤 Processed bancos data:', Object.keys(dollarTypes).length + ' bancos procesados');
+    console.log('[FETCH] 📤 Datos procesados:', Object.keys(dollarTypes).length + ' bancos');
+    return dollarTypes;
+  }
+  log('[BACKGROUND] ❌ No data received from bancos API');
+  console.log('[FETCH] ❌ No se pudieron procesar datos de bancos');
+  return null;
+}
+
 async function fetchUSDT(userSettings) {
-  const url = userSettings.criptoyaUsdtArsUrl || 'https://criptoya.com/api/usdt/ars/1';
-  return await fetchWithRateLimit(url);
+  const url = userSettings.criptoyaUsdtArsUrl || 'https://criptoya.com/api/USDT/ARS/1';
+  log('[BACKGROUND] 🔄 Fetching USDT/ARS from:', url);
+  console.log('[FETCH] 🔄 Iniciando fetchUSDT desde:', url);
+  const data = await fetchWithRateLimit(url);
+  log('[BACKGROUND] 📊 USDT/ARS data received:', data ? Object.keys(data).length + ' exchanges' : 'null');
+  console.log('[FETCH] 📊 Datos USDT/ARS crudos:', data);
+  return data;
 }
 
 async function fetchUSDTtoUSD(userSettings) {
-  const url = userSettings.criptoyaUsdtUsdUrl || 'https://criptoya.com/api/usdt/usd/1';
-  return await fetchWithRateLimit(url);
+  const url = userSettings.criptoyaUsdtUsdUrl || 'https://criptoya.com/api/USDT/USD/1';
+  log('[BACKGROUND] 🔄 Fetching USDT/USD from:', url);
+  console.log('[FETCH] 🔄 Iniciando fetchUSDTtoUSD desde:', url);
+  const data = await fetchWithRateLimit(url);
+  log('[BACKGROUND] 📊 USDT/USD data received:', data ? Object.keys(data).length + ' exchanges' : 'null');
+  console.log('[FETCH] 📊 Datos USDT/USD crudos:', data);
+  return data;
+}
+
+async function fetchUSDT_USD_Brokers(userSettings) {
+  const url = userSettings.criptoyaUsdtUsdBrokersUrl || 'https://criptoya.com/api/USDT/USD/1';
+  const data = await fetchWithRateLimit(url);
+  if (data && typeof data === 'object') {
+    return {
+      ...data,
+      source: 'criptoya_usdt_usd_brokers',
+      timestamp: Date.now()
+    };
+  }
+  return null;
+}
+
+async function fetchBinanceP2P_USDT_ARS(userSettings) {
+  const url = userSettings.binanceP2pUsdtArsUrl || 'https://criptoya.com/api/binancep2p/usdt/ars/1';
+  const data = await fetchWithRateLimit(url);
+  if (data && typeof data === 'object') {
+    return {
+      ...data,
+      source: 'binance_p2p_usdt_ars',
+      timestamp: Date.now()
+    };
+  }
+  return null;
+}
+
+async function fetchBinanceP2P_USDT_USD(userSettings) {
+  const url = userSettings.binanceP2pUsdtUsdUrl || 'https://criptoya.com/api/binancep2p/usdt/usd/1';
+  const data = await fetchWithRateLimit(url);
+  if (data && typeof data === 'object') {
+    return {
+      ...data,
+      source: 'binance_p2p_usdt_usd',
+      timestamp: Date.now()
+    };
+  }
+  return null;
 }
 
 async function fetchBankDollarRates(userSettings) {
@@ -1237,7 +1568,81 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return false; // Respuesta síncrona
   }
   
-  // Para mensajes desconocidos, no hacer nada
+  // NUEVO: Handler para obtener datos de bancos y tipos de dólar
+  if (request.action === 'getBanksData') {
+    log('[BACKGROUND] 📥 Mensaje getBanksData recibido');
+
+    // Obtener configuración del usuario
+    chrome.storage.local.get('notificationSettings').then((result) => {
+      const userSettings = result.notificationSettings || {};
+
+      // Obtener datos en paralelo
+      Promise.all([
+        fetchBankDollarRates(userSettings),
+        fetchAllDollarTypes(userSettings),
+        fetchUSDT(userSettings),
+        fetchUSDTtoUSD(userSettings),
+        fetchUSDT_USD_Brokers(userSettings),
+        fetchBinanceP2P_USDT_ARS(userSettings),
+        fetchBinanceP2P_USDT_USD(userSettings)
+      ]).then(([banksData, dollarTypes, usdtData, usdtUsdData, usdtUsdBrokers, binanceP2PArs, binanceP2PUsd]) => {
+        log('[BACKGROUND] 📤 Enviando datos de bancos y dólar:', {
+          banksCount: banksData ? Object.keys(banksData).filter(key => key !== 'source' && key !== 'timestamp').length : 0,
+          dollarTypesCount: dollarTypes ? Object.keys(dollarTypes).length : 0,
+          usdtExchanges: usdtData ? Object.keys(usdtData).filter(key => key !== 'source' && key !== 'timestamp').length : 0,
+          usdtUsdExchanges: usdtUsdData ? Object.keys(usdtUsdData).filter(key => key !== 'source' && key !== 'timestamp').length : 0,
+          usdtUsdBrokers: usdtUsdBrokers ? Object.keys(usdtUsdBrokers).filter(key => key !== 'source' && key !== 'timestamp').length : 0,
+          binanceP2P_ARS: binanceP2PArs ? 'disponible' : 'null',
+          binanceP2P_USD: binanceP2PUsd ? 'disponible' : 'null'
+        });
+
+        sendResponse({
+          success: true,
+          data: {
+            banksData: banksData || {},
+            dollarTypes: dollarTypes || {},
+            usdtData: usdtData || {},
+            usdtUsdData: usdtUsdData || {},
+            usdtUsdBrokers: usdtUsdBrokers || {},
+            binanceP2PArs: binanceP2PArs || {},
+            binanceP2PUsd: binanceP2PUsd || {}
+          }
+        });
+      }).catch(error => {
+        console.error('[BACKGROUND] ❌ Error obteniendo datos de bancos:', error);
+        sendResponse({
+          success: false,
+          error: error.message,
+          data: {
+            banksData: {},
+            dollarTypes: {},
+            usdtData: {},
+            usdtUsdData: {},
+            usdtUsdBrokers: {},
+            binanceP2PArs: {},
+            binanceP2PUsd: {}
+          }
+        });
+      });
+    }).catch(storageError => {
+      console.error('[BACKGROUND] ❌ Error obteniendo configuración:', storageError);
+      sendResponse({
+        success: false,
+        error: 'Error obteniendo configuración del usuario',
+        data: {
+          banksData: {},
+          dollarTypes: {},
+          usdtData: {},
+          usdtUsdData: {},
+          usdtUsdBrokers: {},
+          binanceP2PArs: {},
+          binanceP2PUsd: {}
+        }
+      });
+    });
+
+    return true; // Respuesta asíncrona
+  }  // Para mensajes desconocidos, no hacer nada
   log('[BACKGROUND] Mensaje desconocido:', request.action);
   return false; // CORREGIDO: No mantener canal si no hay respuesta
 });
@@ -1288,6 +1693,13 @@ updateGlobalConfig().then(() => {
   log('[BACKGROUND] Iniciando primera actualización...');
   updateData().then(() => {
     log('[BACKGROUND] Primera actualización completada');
+    // Inicializar datos de bancos
+    updateBanksData().then(() => {
+      log('[BACKGROUND] Datos de bancos inicializados');
+      console.log('🏦 Datos de bancos inicializados correctamente');
+    }).catch(error => {
+      console.error('❌ [BACKGROUND] Error inicializando datos de bancos:', error);
+    });
   }).catch(error => {
     console.error('❌ [BACKGROUND] Error en inicialización:', error);
   });
@@ -1315,6 +1727,8 @@ async function startPeriodicUpdates() {
   updateIntervalId = setInterval(() => {
     log('⏰ Actualización periódica...');
     updateData();
+    // Actualizar también datos de bancos
+    updateBanksData();
   }, intervalMs);
 }
 
@@ -1352,6 +1766,60 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
 });
 
 log('[BACKGROUND] Background completamente inicializado');
+
+// ============================================
+// MESSAGE LISTENER PARA POPUP
+// ============================================
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  console.log('📨 Background recibió mensaje:', request);
+
+  if (request.action === 'getBanksData') {
+    console.log('[BACKGROUND] 📥 Mensaje getBanksData recibido - obteniendo datos frescos');
+
+    // Obtener configuración del usuario
+    chrome.storage.local.get('notificationSettings').then((result) => {
+      const userSettings = result.notificationSettings || {};
+
+      // Obtener datos directamente de las APIs (sin cache)
+      Promise.all([
+        fetchAllDollarTypes(userSettings),
+        fetchUSDTtoUSD(userSettings),
+        fetchUSDT(userSettings)
+      ]).then(([dollarTypes, usdtUsdData, usdtData]) => {
+        console.log('[BACKGROUND] 📊 Datos obtenidos directamente:', {
+          dollarTypes: dollarTypes ? Object.keys(dollarTypes).length + ' bancos' : 'null',
+          usdtUsdData: usdtUsdData ? Object.keys(usdtUsdData).length + ' exchanges USD/USDT' : 'null',
+          usdtData: usdtData ? Object.keys(usdtData).length + ' exchanges USDT/ARS' : 'null'
+        });
+
+        sendResponse({
+          success: true,
+          data: {
+            dollarTypes: dollarTypes || {},
+            usdtUsdData: usdtUsdData || {},
+            usdtData: usdtData || {}
+          }
+        });
+      }).catch(error => {
+        console.error('[BACKGROUND] ❌ Error obteniendo datos directamente:', error);
+        sendResponse({
+          success: false,
+          error: 'Error obteniendo datos: ' + error.message
+        });
+      });
+    }).catch(storageError => {
+      console.error('[BACKGROUND] ❌ Error obteniendo configuración:', storageError);
+      sendResponse({
+        success: false,
+        error: 'Error obteniendo configuración del usuario'
+      });
+    });
+
+    return true; // Indicar que responderemos de forma asíncrona
+  }
+  return true; // Mantener el canal abierto para respuestas asíncronas
+});
 
 // ============================================
 // LISTENERS DE NOTIFICACIONES

@@ -98,6 +98,88 @@
   --gradient-neutral-hover: linear-gradient(135deg, #475569 0%, #334155 100%);
 }
 
+/* ==========================================
+   ESTILOS PARA PESTAÑAS DE BANCOS
+   ========================================== */
+
+.banks-tabs {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  padding-bottom: var(--spacing-sm);
+}
+
+.tab-button {
+  background: transparent;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: var(--text-secondary);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all var(--anim-duration-normal) var(--anim-easing);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  flex: 1;
+  text-align: center;
+}
+
+.tab-button:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.5);
+  color: var(--text-primary);
+}
+
+.tab-button.active {
+  background: var(--gradient-primary);
+  border-color: var(--primary-blue);
+  color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.tab-controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--spacing-md);
+}
+
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.sort-controls label {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.sort-select {
+  background: var(--bg-secondary);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: var(--text-primary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  min-width: 150px;
+}
+
+.sort-select:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
 /* CLASES BASE UNIFICADAS */
 .input-base {
   background: var(--input-bg);
@@ -1373,88 +1455,6 @@ main::-webkit-scrollbar-thumb {
 /* INFO SECTIONS */
 .info-section,
 .guide-intro,
-/* NUEVO v5.0.69: Header compacto para pestaña de bancos */
-.banks-header-compact {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  background: linear-gradient(135deg, rgba(30, 58, 138, 0.2) 0%, rgba(15, 23, 42, 0.4) 100%);
-  border-radius: 10px;
-  margin-bottom: 8px;
-  border: 1px solid rgba(59, 130, 246, 0.25);
-}
-
-.banks-title-section h2 {
-  color: #60a5fa;
-  font-size: 1.1em;
-  margin: 0;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.banks-subtitle {
-  color: #94a3b8;
-  font-size: 0.75em;
-  margin: 2px 0 0 0;
-  font-weight: 400;
-}
-
-.banks-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.btn-refresh-compact {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 0.85em;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.btn-refresh-compact:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(59, 130, 246, 0.4);
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-}
-
-.btn-refresh-compact:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.btn-refresh-compact:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.refresh-icon {
-  font-size: 1em;
-  display: inline-block;
-  transition: transform 0.3s ease;
-}
-
-.btn-refresh-compact:hover:not(:disabled) .refresh-icon {
-  transform: rotate(90deg);
-}
-
-.banks-timestamp-compact {
-  color: #94a3b8;
-  font-size: 0.75em;
-  font-style: italic;
-  padding: 4px 16px;
-  margin-bottom: 12px;
-  text-align: right;
-}
 
 /* Mantener estilos legacy para compatibilidad */
 .banks-intro {
@@ -1565,6 +1565,131 @@ main::-webkit-scrollbar-thumb {
 .bank-card a:hover {
   color: #60a5fa;
   text-decoration: underline;
+}
+
+/* ============================================
+   ESTILOS PARA FILAS DE BANCOS (DISEÑO SIMPLE)
+   ============================================ */
+
+.bank-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 6px 12px;
+  margin-bottom: 4px;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.bank-row:hover {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateX(2px);
+}
+
+.bank-row .bank-name {
+  color: #e1e8ed;
+  font-size: 0.85em;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 4px 0;
+}
+
+.bank-row .bank-buy,
+.bank-row .bank-sell {
+  color: #10b981;
+  font-size: 0.85em;
+  font-weight: 700;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 70px;
+  text-align: center;
+}
+
+.bank-row .bank-sell {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* ==========================================
+   ESTILOS PARA CARDS DE EXCHANGES
+   ========================================== */
+
+.usdt-card, .broker-card, .binance-card {
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.15) 0%, rgba(15, 23, 42, 0.3) 100%);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.usdt-card:hover, .broker-card:hover, .binance-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.usdt-name, .broker-name, .binance-name {
+  color: #e1e8ed;
+  font-size: 0.9em;
+  font-weight: 600;
+  flex: 1;
+}
+
+.usdt-prices, .broker-prices, .binance-prices {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.price-bid, .price-ask {
+  color: #cbd5e1;
+  font-size: 0.85em;
+  font-weight: 500;
+  padding: 4px 8px;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 6px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.price-bid {
+  color: #10b981;
+}
+
+.price-ask {
+  color: #ef4444;
+}
+
+/* Grids para las cards de exchanges */
+.usdt-grid, .brokers-grid, .binance-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Estilo para la sección de bancos */
+.banks-section h3 {
+  margin-bottom: 20px;
+  color: #e1e8ed;
+  font-size: 1.3em;
+  font-weight: 700;
 }
 
 /* NUEVO: Estilos para logos y detalles de bancos */
@@ -5645,5 +5770,324 @@ p.error {
 .step-simple:nth-child(3),
 .step-simple:nth-child(4) {
   animation-fill-mode: both;
+}
+
+/* ==========================================
+   ESTILOS PARA TAB DE BANCOS
+   ========================================== */
+
+/* Tabs principales */
+.tabs {
+  display: flex;
+  background: var(--bg-tertiary);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-xs);
+  margin: var(--spacing-lg) 0;
+  gap: var(--spacing-xs);
+}
+
+.tab {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: all var(--anim-duration-fast) var(--anim-easing);
+  text-align: center;
+}
+
+.tab:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--text-primary);
+}
+
+.tab.active {
+  background: var(--primary-blue);
+  color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+/* Contenido de tabs principales */
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Tabs de bancos */
+.banks-tabs {
+  display: flex;
+  background: var(--bg-tertiary);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-xs);
+  margin-bottom: var(--spacing-lg);
+  gap: var(--spacing-xs);
+}
+
+.banks-tab-btn {
+  flex: 1;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: all var(--anim-duration-fast) var(--anim-easing);
+  text-align: center;
+}
+
+.banks-tab-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--text-primary);
+}
+
+.banks-tab-btn.active {
+  background: var(--primary-blue);
+  color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+/* Contenedor de contenido de tabs */
+.banks-tab-content {
+  display: none;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.banks-tab-content.active {
+  display: block;
+}
+
+/* Selector de ordenamiento */
+.banks-sort-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.sort-btn {
+  padding: 8px 12px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 6px;
+  color: #e1e8ed;
+  font-size: 0.8em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: 100px;
+  text-align: center;
+}
+
+.sort-btn:hover {
+  background: rgba(15, 23, 42, 0.8);
+  border-color: rgba(59, 130, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+.banks-column-headers {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: 6px;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.column-header {
+  color: #94a3b8;
+  font-size: 0.75em;
+  font-weight: 600;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Grid de bancos */
+.banks-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.banks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-md);
+}
+
+/* Grid de bancos */
+.banks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-xs);
+}
+
+/* Tarjetas de bancos */
+.bank-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-tertiary);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-xs);
+  transition: all var(--anim-duration-fast) var(--anim-easing);
+  position: relative;
+  margin-bottom: var(--spacing-xs);
+}
+
+.bank-card:hover {
+  border-color: var(--primary-blue);
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.15);
+  transform: translateY(-1px);
+}
+
+.bank-name {
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+  text-align: center;
+}
+
+.bank-prices {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-xs);
+}
+
+.price-bid,
+.price-ask {
+  flex: 1;
+  text-align: center;
+  padding: 2px var(--spacing-xs);
+  border-radius: var(--border-radius-sm);
+  font-size: 10px;
+  font-weight: var(--font-weight-medium);
+}
+
+.price-bid {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.price-ask {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Header compacto de bancos */
+.banks-header-compact {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.banks-title-section h2 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.banks-subtitle {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.banks-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.btn-refresh-compact {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--bg-tertiary);
+  border-radius: var(--border-radius-sm);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--anim-duration-fast) var(--anim-easing);
+}
+
+.btn-refresh-compact:hover {
+  background: var(--primary-blue);
+  border-color: var(--primary-blue);
+  color: white;
+}
+
+.refresh-icon {
+  font-size: var(--font-size-base);
+}
+
+.refresh-text {
+  display: none;
+}
+
+@media (min-width: 480px) {
+  .refresh-text {
+    display: inline;
+  }
+}
+
+/* Timestamp de bancos */
+.banks-timestamp-compact {
+  text-align: center;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--bg-tertiary);
+  border-radius: var(--border-radius-sm);
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive para bancos */
+@media (max-width: 768px) {
+  .banks-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bank-prices {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .price-bid,
+  .price-ask {
+    padding: var(--spacing-sm);
+  }
 }
 
