@@ -835,10 +835,218 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
     });
   }
   
-  // Ordenar por rentabilidad neta
+  // ============================================
+  // NUEVO: CALCULAR RUTAS INTER-BROKER (entre diferentes exchanges)
+  // ============================================
+  
+  log(`🔄 [CALC] Calculando rutas INTER-BROKER...`);
+  const exchanges = Object.keys(usdt).filter(ex => 
+    ex !== 'time' && 
+    ex !== 'timestamp' && 
+    usdt[ex] && 
+    typeof usdt[ex] === 'object' && 
+    usdt[ex].totalAsk && 
+    usdt[ex].totalBid
+  );
+  
+  log(`🔄 [CALC] Exchanges válidos para inter-broker: ${exchanges.length} (${exchanges.join(', ')})`);
+  
+  let interBrokerProcessed = 0;
+  let interBrokerSkipped = 0;
+  
+  // Calcular todas las combinaciones posibles entre exchanges diferentes
+  for (const buyExchange of exchanges) {
+    for (const sellExchange of exchanges) {
+      if (buyExchange === sellExchange) continue; // Saltar rutas intra-broker (ya calculadas arriba)
+      
+      interBrokerProcessed++;
+      
+      const buyData = usdt[buyExchange];
+      const sellData = usdt[sellExchange];
+      
+      // Validar que ambos exchanges tengan datos válidos
+      if (!buyData?.totalAsk || !sellData?.totalBid) {
+        interBrokerSkipped++;
+        continue;
+      }
+      
+      // NUEVO v5.0.58: Buscar configuración de fees del broker de COMPRA
+      const buyBrokerFeeConfig = userSettings.brokerFees?.find(fee => 
+        fee.broker.toLowerCase() === buyExchange.toLowerCase()
+      );
+      
+      // ============================================
+      // CÁLCULO CORRECTO PASO A PASO PARA INTER-BROKER
+      // ============================================
+      
+      // PASO 1: Comprar USD con ARS (oficial) - IGUAL para todas las rutas
+      const usdPurchased = initialAmount / officialPrice;
+      log(`💵 [${buyExchange}→${sellExchange}] PASO 1: $${initialAmount} ARS / ${officialPrice} = ${usdPurchased.toFixed(4)} USD`);
+      
+      // PASO 2: Obtener cotización USDT/USD del exchange de COMPRA
+      let usdToUsdtRate;
+      let usingFallback = false;
+      
+      if (usdtUsd?.[buyExchange]?.totalAsk) {
+        // Caso 1: Tenemos cotización directa de USDT/USD del exchange de compra ✅
+        usdToUsdtRate = usdtUsd[buyExchange].totalAsk;
+        log(`💱 [${buyExchange}→${sellExchange}] PASO 2: Cotización USDT/USD (${buyExchange}) = ${usdToUsdtRate} (desde API CriptoYa)`);
+      } else if (buyData.totalAsk && officialPrice) {
+        // Caso 2: Calculamos USDT/USD de forma indirecta usando precios en ARS del exchange de compra
+        const usdtArsPrice = buyData.totalAsk;
+        const calculatedRate = usdtArsPrice / officialPrice;
+        
+        // Validar que el cálculo sea razonable
+        if (calculatedRate >= 0.95 && calculatedRate <= 1.15) {
+          usdToUsdtRate = calculatedRate;
+          usingFallback = true;
+          log(`⚠️ [${buyExchange}→${sellExchange}] No hay cotización USDT/USD directa para ${buyExchange}`);
+          log(`🧮 [${buyExchange}→${sellExchange}] PASO 2: Calculando USDT/USD = ${usdtArsPrice} ARS / ${officialPrice} ARS = ${usdToUsdtRate.toFixed(4)}`);
+        } else {
+          log(`❌ [${buyExchange}→${sellExchange}] SALTANDO: Tasa calculada ${calculatedRate.toFixed(4)} fuera de rango válido`);
+          interBrokerSkipped++;
+          continue;
+        }
+      } else {
+        log(`❌ [${buyExchange}→${sellExchange}] SALTANDO: Sin datos para calcular USDT/USD en ${buyExchange}`);
+        interBrokerSkipped++;
+        continue;
+      }
+      
+      // PASO 3: Convertir USD → USDT en el exchange de COMPRA
+      const usdtPurchased = usdPurchased / usdToUsdtRate;
+      log(`💎 [${buyExchange}→${sellExchange}] PASO 3: ${usdPurchased.toFixed(4)} USD / ${usdToUsdtRate.toFixed(4)} = ${usdtPurchased.toFixed(4)} USDT en ${buyExchange}`);
+      
+      // PASO 4: Aplicar fee de trading en el exchange de COMPRA
+      let usdtAfterFees = usdtPurchased;
+      let tradingFeeAmount = 0;
+      
+      if (applyFees) {
+        let tradingFeePercent = userSettings.extraTradingFee || 0;
+        
+        if (buyBrokerFeeConfig) {
+          tradingFeePercent = buyBrokerFeeConfig.buyFee || 0;
+          log(`💸 [${buyExchange}→${sellExchange}] PASO 4: Usando fee específico de ${buyExchange}: ${tradingFeePercent}% (buy)`);
+        } else if (userSettings.extraTradingFee) {
+          log(`💸 [${buyExchange}→${sellExchange}] PASO 4: Usando fee general: ${tradingFeePercent}%`);
+        }
+        
+        if (tradingFeePercent > 0) {
+          tradingFeeAmount = usdtPurchased * (tradingFeePercent / 100);
+          usdtAfterFees = usdtPurchased - tradingFeeAmount;
+          log(`💸 [${buyExchange}→${sellExchange}] PASO 4: Fee trading ${tradingFeePercent}% = ${tradingFeeAmount.toFixed(4)} USDT`);
+          log(`💎 [${buyExchange}→${sellExchange}] PASO 4: USDT después de fee = ${usdtAfterFees.toFixed(4)} USDT`);
+        }
+      }
+      
+      // PASO 5: Transferir USDT del exchange de COMPRA al de VENTA
+      // NOTA: En la realidad esto tendría un fee de red, pero por simplicidad lo ignoramos inicialmente
+      log(`🚀 [${buyExchange}→${sellExchange}] PASO 5: Transfiriendo ${usdtAfterFees.toFixed(4)} USDT de ${buyExchange} a ${sellExchange}`);
+      
+      // PASO 6: Vender USDT por ARS en el exchange de VENTA
+      const sellPrice = sellData.totalBid;
+      const arsFromSale = usdtAfterFees * sellPrice;
+      log(`💰 [${buyExchange}→${sellExchange}] PASO 6: Vender ${usdtAfterFees.toFixed(4)} USDT × ${sellPrice} = $${arsFromSale.toFixed(2)} ARS en ${sellExchange}`);
+      
+      // PASO 7: Aplicar fee de venta en el exchange de VENTA
+      let arsAfterSellFee = arsFromSale;
+      let sellFeeAmount = 0;
+      
+      if (applyFees) {
+        // Buscar configuración de fees del broker de VENTA
+        const sellBrokerFeeConfig = userSettings.brokerFees?.find(fee => 
+          fee.broker.toLowerCase() === sellExchange.toLowerCase()
+        );
+        
+        if (sellBrokerFeeConfig && sellBrokerFeeConfig.sellFee > 0) {
+          const sellFeePercent = sellBrokerFeeConfig.sellFee / 100;
+          sellFeeAmount = arsFromSale * sellFeePercent;
+          arsAfterSellFee = arsFromSale - sellFeeAmount;
+          log(`💸 [${buyExchange}→${sellExchange}] PASO 7: Fee venta específico de ${sellExchange} ${sellBrokerFeeConfig.sellFee}% = $${sellFeeAmount.toFixed(2)} ARS`);
+          log(`💰 [${buyExchange}→${sellExchange}] PASO 7: ARS después de fee venta = $${arsAfterSellFee.toFixed(2)} ARS`);
+        }
+      }
+      
+      // PASO 8: Aplicar fees fijos (retiro, transferencia, banco)
+      let finalAmount = arsAfterSellFee;
+      let withdrawalFee = 0;
+      let transferFee = 0;
+      let bankFee = 0;
+      
+      if (applyFees) {
+        withdrawalFee = userSettings.extraWithdrawalFee || 0;
+        transferFee = userSettings.extraTransferFee || 0;
+        bankFee = userSettings.bankCommissionFee || 0;
+        const totalFixedFees = withdrawalFee + transferFee + bankFee;
+        finalAmount = arsAfterSellFee - totalFixedFees;
+        
+        if (totalFixedFees > 0) {
+          log(`💸 [${buyExchange}→${sellExchange}] PASO 8: Fees fijos = $${totalFixedFees} ARS (retiro: $${withdrawalFee}, transfer: $${transferFee}, banco: $${bankFee})`);
+          log(`💰 [${buyExchange}→${sellExchange}] PASO 8: Final = $${finalAmount.toFixed(2)} ARS`);
+        }
+      }
+      
+      // PASO 9: Calcular ganancia
+      const grossProfit = arsFromSale - initialAmount;
+      const netProfit = finalAmount - initialAmount;
+      const grossPercent = (grossProfit / initialAmount) * 100;
+      const netPercent = (netProfit / initialAmount) * 100;
+      
+      log(`📊 [${buyExchange}→${sellExchange}] RESULTADO: Ganancia neta = $${netProfit.toFixed(2)} (${netPercent.toFixed(4)}%)`);
+      
+      // Calcular total de fees
+      const totalFees = tradingFeeAmount * sellPrice + sellFeeAmount + withdrawalFee + transferFee + bankFee;
+      
+      // Crear objeto de ruta INTER-BROKER
+      routes.push({
+        broker: `${buyExchange}→${sellExchange}`, // Identificador único
+        buyExchange: buyExchange,
+        sellExchange: sellExchange,
+        isSingleExchange: false, // IMPORTANTE: Marcar como ruta inter-broker
+        requiresP2P: buyExchange.toLowerCase().includes('p2p') || sellExchange.toLowerCase().includes('p2p'),
+        profitPercent: netPercent,
+        profitPercentage: netPercent,
+        grossProfitPercent: grossPercent,
+        grossProfit: grossProfit,
+        officialPrice,
+        usdToUsdtRate,
+        usdtArsBid: sellPrice,
+        calculation: {
+          initialAmount: initialAmount,
+          usdPurchased,
+          usdtPurchased,
+          usdtAfterFees,
+          arsFromSale,
+          arsAfterSellFee,
+          finalAmount,
+          netProfit,
+          grossProfit
+        },
+        fees: {
+          trading: tradingFeeAmount * sellPrice, // Convertido a ARS
+          sell: sellFeeAmount, // Fee de venta específico del broker de venta
+          withdrawal: withdrawalFee,
+          transfer: transferFee,
+          bank: bankFee,
+          total: totalFees
+        },
+        config: {
+          applyFees,
+          tradingFeePercent: userSettings.extraTradingFee || 0,
+          brokerSpecificFees: !!(buyBrokerFeeConfig || sellBrokerFeeConfig),
+          usdtUsdSource: usdtUsd?.[buyExchange]?.totalAsk ? 'api' : 'calculated',
+          usdtUsdWarning: usingFallback ? `Tasa USDT/USD calculada indirectamente para ${buyExchange}. Verificar en CriptoYa.` : null
+        }
+      });
+    }
+  }
+  
+  log(`✅ [CALC] Rutas inter-broker: Procesadas ${interBrokerProcessed}, Saltadas ${interBrokerSkipped}, Generadas ${routes.length - processedCount}`);
+  
+  // Ordenar por rentabilidad neta (todas las rutas juntas: intra + inter)
   routes.sort((a, b) => b.profitPercent - a.profitPercent);
   
-  log(`✅ [CALC] Procesados: ${processedCount}, Saltados: ${skippedCount}, Rutas generadas: ${routes.length}`);
+  log(`✅ [CALC] Procesados: ${processedCount}, Inter-broker: ${interBrokerProcessed}, Saltados: ${skippedCount + interBrokerSkipped}, Rutas totales generadas: ${routes.length}`);
   log(`✅ Calculadas ${routes.length} rutas con monto base $${initialAmount.toLocaleString()}`);
   return routes.slice(0, 50);
 }
