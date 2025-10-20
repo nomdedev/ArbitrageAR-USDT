@@ -63,24 +63,8 @@ function escapeHtml(text) {
 }
 
 function getRouteDescription(route) {
-  if (!route) return '---';
-
-  // NUEVO: Manejar rutas inter-broker (buyExchange !== sellExchange)
-  if (route.buyExchange && route.sellExchange && route.buyExchange !== route.sellExchange) {
-    return `${route.buyExchange} → ${route.sellExchange}`;
-  }
-
-  // Ruta intra-broker (buyExchange === sellExchange) o rutas antiguas con steps
-  if (route.steps) {
-    return route.steps.map(s => `${s.exchange || s.from}->${s.to}`).join(' → ');
-  }
-
-  // Fallback: usar el campo broker si existe
-  if (route.broker && !route.broker.includes('→')) {
-    return route.broker;
-  }
-
-  return '---';
+  if (!route || !route.steps) return '---';
+  return route.steps.map(s => `${s.exchange || s.from}->${s.to}`).join(' → ');
 }
 
 module.exports = { renderArbitrageCard, renderRouteCard, formatNumber, escapeHtml, getRouteDescription };
