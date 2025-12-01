@@ -2,6 +2,33 @@
 
 Todos los cambios notables de este proyecto serán documentados en este archivo.
 
+## [5.0.75] - 2025-10-12 - HOTFIX CRÍTICO
+
+### 🐛 BUG FIX CRÍTICO
+- **SOLUCIONADO:** Error "Error al obtener datos de bancos" causado por función duplicada
+- **Eliminada función duplicada:** `loadBanksData` en popup.js (líneas 840-1070)
+- **Impacto:** Sin este fix, la extensión no podía cargar datos de bancos
+- **Estado:** ✅ Extensión ahora carga correctamente todos los datos
+
+### 📝 Detalles Técnicos
+- La función `loadBanksData` estaba duplicada en popup.js causando conflictos
+- La versión duplicada era obsoleta y no manejaba correctamente los mensajes
+- Eliminación de código duplicado resolvió el problema de carga de datos
+- Verificación completa: sintaxis correcta, APIs funcionando (22 bancos disponibles)
+
+### 🧪 Testing
+- **Verificación sintáxis:** ✅ Pasó validación Node.js
+- **Tests de funcionalidad:** ✅ Todos los tests pasan
+- **APIs externas:** ✅ CriptoYa y DolarAPI responden correctamente
+- **Componentes:** ✅ Popup, background, DataService, ValidationService funcionando
+
+### 📚 Documentación
+- Actualizado CHANGELOG en docs/changelog/CHANGELOG.md
+- Agregada entrada de hotfix v5.0.75
+- Documentado proceso de debugging y resolución
+
+---
+
 ## 🔧 HOTFIX RECIENTE - Configuración por Defecto Más Permisiva
 
 **Fecha**: 12 de octubre de 2025  

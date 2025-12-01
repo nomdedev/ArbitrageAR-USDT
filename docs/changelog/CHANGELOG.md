@@ -21,7 +21,13 @@ Esta carpeta contiene toda la documentación histórica organizada por versiones
 
 ## 🔄 Versiones Recientes
 
-### v5.0.41 (Actual)
+### v5.0.75 (Actual)
+- 🐛 **HOTFIX**: Eliminación de función duplicada `loadBanksData` en popup.js
+- ✅ **Corrección crítica**: Resuelto error "Error al obtener datos de bancos"
+- 🔧 **Limpieza de código**: Eliminadas funciones duplicadas que causaban conflictos
+- ✅ **Testing**: Verificación completa de sintaxis y funcionalidad
+
+### v5.0.41
 - ✅ **Corrección crítica**: Matriz de riesgo mejorada
 - ✅ **Limpieza**: Eliminación de archivos de debug
 - ✅ **Profesionalización**: Branding y documentación
