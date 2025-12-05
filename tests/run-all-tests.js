@@ -52,7 +52,9 @@ async function runTestFile(fileName) {
 
 async function runCompleteTestSuite() {
   const testFiles = [
-    'test-bank-methods.js'
+    'test-bank-methods.js',
+    'test_utils.js',
+    'test-e2e-complete.js'
   ];
 
   const results = {

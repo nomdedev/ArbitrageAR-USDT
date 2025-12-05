@@ -696,7 +696,8 @@ async function calculateInterBrokerRoutes(oficial, usdt, usdtUsd, userSettings, 
             arsAfterSellFee,
             finalAmount,
             netProfit,
-            grossProfit
+            grossProfit,
+            profitPercentage: netPercent  // NUEVO: Incluir % en calculation para consistencia
           },
           fees: {
             trading: tradingFeeAmount * sellPrice,
@@ -956,7 +957,8 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
         arsAfterSellFee,
         finalAmount,
         netProfit,
-        grossProfit
+        grossProfit,
+        profitPercentage: netPercent  // NUEVO: Incluir % en calculation para consistencia
       },
       fees: {
         trading: tradingFeeAmount * sellPrice, // Convertido a ARS
@@ -1414,7 +1416,8 @@ async function calculateCryptoArbitrageRoutes(cryptoData, fiatRef, userSettings 
               arsAfterSellFee: arsAfterSellFee,
               finalAmount: finalAmount,
               netProfit: netProfit,
-              grossProfit: grossProfit
+              grossProfit: grossProfit,
+              profitPercentage: netProfitPercent  // NUEVO: Incluir % en calculation para consistencia
             },
             fees: {
               buy: buyFeeARS,
@@ -1638,9 +1641,12 @@ async function sendNotification(arbitrage, settings) {
 
     const icon = icons[iconLevel];
 
+    // Usar chrome.runtime.getURL para obtener la URL correcta del icono
+    const iconUrl = chrome.runtime.getURL('icons/icon128.png');
+
     await chrome.notifications.create(notificationId, {
       type: 'basic',
-      iconUrl: 'icons/icon128.png',
+      iconUrl: iconUrl,
       title: `${icon} Oportunidad de Arbitraje: ${arbitrage.broker}`,
       message: `Ganancia: ${arbitrage.profitPercent.toFixed(2)}% neto\nUSD→USDT: ${arbitrage.usdToUsdtRate}\nUSDT: $${arbitrage.usdtArsBid.toFixed(2)} ARS`,
       priority: arbitrage.profitPercent >= 10 ? 2 : 1,
@@ -2033,7 +2039,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
 
     return true; // Respuesta asíncrona
-    return true; // Respuesta asíncrona
   }
 
   // NUEVO v6.0: Handler para crypto arbitrage
@@ -2047,15 +2052,32 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       return false;
     }
 
-    // Obtener lista de criptos activas
-    dataService.getActiveCryptos().then(async (activeCryptos) => {
+    // Obtener lista de criptos activas desde storage
+    chrome.storage.local.get('activeCryptos').then(async (result) => {
       try {
+        const activeCryptos = result.activeCryptos && Array.isArray(result.activeCryptos) 
+          ? result.activeCryptos 
+          : ['BTC', 'ETH', 'USDC', 'DAI', 'USDT'];
+        
         log(`[CRYPTO-ARB] Obteniendo datos para ${activeCryptos.length} criptos activas`);
 
-        // Obtener datos de todas las criptos activas
-        const cryptoData = await dataService.fetchAllCryptos(activeCryptos, 'ARS');
+        // Obtener datos de todas las criptos activas usando fetch directo
+        const cryptoData = {};
+        for (const symbol of activeCryptos) {
+          try {
+            const response = await fetch(`https://criptoya.com/api/${symbol}/ars/1`);
+            if (response.ok) {
+              const data = await response.json();
+              if (data && typeof data === 'object') {
+                cryptoData[symbol] = { ...data, symbol, timestamp: Date.now() };
+              }
+            }
+          } catch (e) {
+            log(`[CRYPTO-ARB] ⚠️ Error obteniendo ${symbol}: ${e.message}`);
+          }
+        }
 
-        if (!cryptoData || Object.keys(cryptoData).length === 0) {
+        if (Object.keys(cryptoData).length === 0) {
           log('[CRYPTO-ARB] ⚠️ No se obtuvieron datos de criptos');
           sendResponse({ routes: [] });
           return;

@@ -1,102 +1,51 @@
 /* ============================================
-   OPTIONS PAGE STYLES - ArbitrageAR (Simplified)
+   OPTIONS PAGE - ArbitrARS v6.0.0
+   GitHub Dark Theme - Sincronizado con popup.css
    ============================================ */
 
+/* ===== VARIABLES DEL SISTEMA DE DISENO ===== */
 :root {
-  /* 🎨 PALETA DE COLORES - UNIFICADA CON POPUP */
-  --primary-blue: #3b82f6;
-  --primary-blue-dark: #1e3a8a;
-  --primary-blue-light: #60a5fa;
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-tertiary: #334155;
-  --text-primary: #e1e8ed;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --error: #ef4444;
-
-  /* 📏 ESPACIADO UNIFICADO */
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 12px;
-  --spacing-lg: 16px;
-  --spacing-xl: 20px;
-  --spacing-2xl: 24px;
-  --spacing-3xl: 32px;
-
-  /* 📖 TIPOGRAFÍA UNIFICADA */
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
-  --font-size-base: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.25rem;
-  --font-size-2xl: 1.5rem;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
-
-  /* 🎭 ANIMACIONES UNIFICADAS */
-  --anim-duration-fast: 0.15s;
-  --anim-duration-normal: 0.3s;
-  --anim-duration-slow: 0.5s;
-  --anim-easing: cubic-bezier(0.4, 0.0, 0.2, 1);
-  --anim-easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-
-  /* 🔧 BORDES Y SOMBRAS */
-  --border-radius-sm: 6px;
-  --border-radius-md: 8px;
-  --border-radius-lg: 12px;
-  --border-radius-xl: 16px;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-
-  /* 📝 INPUTS UNIFICADOS */
-  --input-bg: rgba(15, 23, 42, 0.6);
-  --input-border: rgba(59, 130, 246, 0.3);
-  --input-border-focus: #3b82f6;
-  --input-shadow-focus: 0 0 0 3px rgba(59, 130, 246, 0.2);
-  --input-radius: 8px;
-  --input-padding: 8px 12px;
-  --input-transition: all 0.3s ease;
-
-  /* 🃏 CARDS UNIFICADAS */
-  --card-bg: linear-gradient(135deg, rgba(30, 58, 138, 0.15) 0%, rgba(15, 23, 42, 0.3) 100%);
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-card-hover: 0 6px 16px rgba(59, 130, 246, 0.25);
-  --border-card: 1px solid rgba(59, 130, 246, 0.2);
-  --border-hover: rgba(59, 130, 246, 0.4);
-  --backdrop-blur: blur(15px);
-  --border-radius: 10px;
-  --transition-fast: all 0.2s ease;
-  --hover-lift: translateY(-2px);
-
-  /* 🎨 GRADIENTES UNIFICADOS */
-  --gradient-primary: linear-gradient(135deg, var(--primary-blue-dark) 0%, var(--primary-blue) 100%);
-  --gradient-primary-hover: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
-  --gradient-success: linear-gradient(135deg, var(--success) 0%, #059669 100%);
-  --gradient-success-hover: linear-gradient(135deg, #059669 0%, #047857 100%);
-  --gradient-warning: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
-  --gradient-error: linear-gradient(135deg, var(--error) 0%, #dc2626 100%);
-  --gradient-info: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
-  --gradient-info-hover: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
-  --gradient-neutral: linear-gradient(135deg, #64748b 0%, #475569 100%);
-  --gradient-neutral-hover: linear-gradient(135deg, #475569 0%, #334155 100%);
-
-  /* LEGACY - Para compatibilidad */
-  --primary: var(--primary-blue);
-  --secondary: var(--primary-blue-dark);
-  --danger: var(--error);
-  --border: rgba(59, 130, 246, 0.2);
-  --shadow: var(--shadow-card);
-  --shadow-hover: var(--shadow-card-hover);
-  --transition: var(--transition-fast);
+  /* Colores Base (GitHub Dark) */
+  --color-bg-primary: #0d1117;
+  --color-bg-secondary: #161b22;
+  --color-bg-tertiary: #21262d;
+  --color-bg-elevated: #30363d;
+  
+  /* Texto */
+  --color-text-primary: #e6edf3;
+  --color-text-secondary: #8b949e;
+  --color-text-muted: #6e7681;
+  
+  /* Bordes */
+  --color-border-default: #30363d;
+  --color-border-muted: #21262d;
+  --color-border-emphasis: #58a6ff;
+  
+  /* Colores Semanticos */
+  --color-brand-primary: #58a6ff;
+  --color-brand-hover: #79c0ff;
+  --color-success: #3fb950;
+  --color-warning: #d29922;
+  --color-danger: #f85149;
+  
+  /* Espaciado */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  
+  /* Bordes */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  
+  /* Transiciones */
+  --transition: all 0.15s ease;
 }
 
+/* ===== RESET & BASE ===== */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -105,136 +54,209 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: var(--bg-primary);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: 13px;
+  line-height: 1.5;
   min-height: 100vh;
-  color: var(--text-primary);
-  font-size: 12px;
-  line-height: 1.4;
 }
 
-/* Layout */
+/* ===== LAYOUT ===== */
 .container {
-  width: 100%;
+  max-width: 900px;
   margin: 0 auto;
-  padding: var(--spacing-lg);
+  padding: var(--space-5);
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
 }
 
-/* Cards */
+/* ===== CARDS ===== */
 .card {
-  background: var(--card-bg);
-  border: var(--border-card);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-card);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: var(--transition-fast);
-  backdrop-filter: var(--backdrop-blur);
-}
-
-.card:hover {
-  box-shadow: var(--shadow-card-hover);
-  border-color: var(--border-hover);
-  transform: var(--hover-lift);
 }
 
 .card h2 {
-  background: var(--gradient-primary);
-  color: white;
-  padding: var(--spacing-md);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  padding: var(--space-3) var(--space-4);
   margin: 0;
-  font-size: 1rem;
+  font-size: 14px;
   font-weight: 600;
+  border-bottom: 1px solid var(--color-border-default);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .content {
-  padding: var(--spacing-md);
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--space-3);
 }
 
-/* Fields */
+/* ===== CAMPOS DE FORMULARIO ===== */
 .field {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--space-1);
 }
 
 .field.full {
   grid-column: 1 / -1;
 }
 
-.field label {
+.field > label:first-child {
   font-weight: 500;
-  color: var(--text-primary);
-  cursor: pointer;
+  color: var(--color-text-primary);
   font-size: 12px;
 }
 
-.field input,
-.field select {
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border: 1px solid var(--border);
-  border-radius: var(--border-radius);
+.field-help {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+/* ===== INPUTS ===== */
+input[type="text"],
+input[type="number"],
+input[type="url"],
+input[type="time"],
+select {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-text-primary);
   font-size: 12px;
   transition: var(--transition);
-  max-width: 200px;
 }
 
-.field input:focus,
-.field select:focus {
+input:focus,
+select:focus {
   outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.15);
 }
 
-/* Input groups */
+/* Tamanos especificos para inputs numericos */
+input[type="number"] {
+  width: 70px;
+  text-align: center;
+}
+
+/* Inputs mas anchos para cantidades grandes */
+#simulator-amount,
+#high-threshold,
+#manual-dollar-price {
+  width: 100px;
+  text-align: right;
+}
+
+/* Inputs URL ocupan todo el ancho */
+input[type="url"] {
+  width: 100%;
+}
+
+select {
+  width: auto;
+  min-width: 120px;
+  cursor: pointer;
+}
+
+/* Input disabled */
+input:disabled,
+select:disabled {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ===== INPUT GROUPS ===== */
 .input-group {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
-}
-
-.input-group input {
-  flex: 1;
+  gap: var(--space-2);
 }
 
 .input-group span {
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   font-size: 12px;
   white-space: nowrap;
 }
 
-/* Radio groups */
+/* ===== RADIO GROUPS ===== */
 .radio-group {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-sm);
+  gap: var(--space-3);
 }
 
 .radio-group label {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--space-1);
   cursor: pointer;
   font-weight: normal;
   font-size: 12px;
+  color: var(--color-text-secondary);
 }
 
-/* Switches */
+.radio-group label:hover {
+  color: var(--color-text-primary);
+}
+
+.radio-group input[type="radio"] {
+  accent-color: var(--color-brand-primary);
+}
+
+/* ===== CHECKBOX GRIDS ===== */
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: var(--space-2);
+}
+
+.checkbox-grid label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  cursor: pointer;
+  font-weight: normal;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+.checkbox-grid label:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.checkbox-grid input[type="checkbox"] {
+  accent-color: var(--color-brand-primary);
+}
+
+/* ===== SWITCHES (TOGGLES) ===== */
 .switch {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--space-2);
   cursor: pointer;
   font-weight: normal;
   font-size: 12px;
+  color: var(--color-text-primary);
 }
 
 .switch input[type="checkbox"] {
@@ -245,9 +267,10 @@ body {
   position: relative;
   width: 36px;
   height: 20px;
-  background: var(--border);
+  background: var(--color-bg-elevated);
   border-radius: 10px;
   transition: var(--transition);
+  flex-shrink: 0;
 }
 
 .slider::before {
@@ -257,436 +280,200 @@ body {
   left: 2px;
   width: 16px;
   height: 16px;
-  background: var(--bg-primary);
-  border: 1px solid var(--input-border);
+  background: var(--color-text-muted);
   border-radius: 50%;
   transition: var(--transition);
 }
 
 input:checked + .slider {
-  background: var(--primary);
+  background: var(--color-brand-primary);
 }
 
 input:checked + .slider::before {
   transform: translateX(16px);
+  background: white;
 }
 
-/* Checkbox grids */
-.checkbox-grid {
+/* ===== EXCHANGE GROUPS ===== */
+.exchange-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: var(--spacing-sm);
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
 }
 
-.checkbox-grid label {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  cursor: pointer;
-  font-weight: normal;
-  font-size: 12px;
+.exchange-group {
+  background: var(--color-bg-tertiary);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-muted);
 }
 
-/* Range slider */
-.field input[type="range"] {
-  -webkit-appearance: none;
-  appearance: none;
-  height: 6px;
-  background: var(--input-border);
-  border-radius: 3px;
-  outline: none;
-}
-
-.field input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  background: var(--primary-blue);
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: var(--shadow-sm);
-}
-
-/* Range value display */
-#threshold-value {
+.exchange-group h4 {
+  margin: 0 0 var(--space-2) 0;
   font-size: 12px;
   font-weight: 600;
-  color: var(--primary-blue-light);
-  margin-left: var(--spacing-xs);
+  color: var(--color-text-secondary);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border-muted);
 }
 
-/* Hidden elements */
-.hidden {
-  display: none !important;
+.exchange-group .checkbox-grid {
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--space-1);
 }
 
-/* Quiet hours config */
-.quiet-config {
-  margin-top: var(--spacing-sm);
-  padding: var(--spacing-sm);
-  background: var(--bg-secondary);
-  border-radius: var(--border-radius);
-}
-
-.time-inputs {
-  display: flex;
-  gap: var(--spacing-sm);
-}
-
-.time-inputs label {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  font-weight: normal;
-  font-size: 12px;
-}
-
-.time-inputs input {
-  padding: var(--spacing-xs);
-  border: 1px solid var(--border);
-  border-radius: var(--border-radius);
-}
-
-/* Info messages */
-.info {
-  padding: var(--spacing-sm);
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: var(--border-radius-md);
-  color: var(--primary-blue-light);
+.exchange-group .checkbox-grid label {
+  padding: 2px var(--space-1);
   font-size: 11px;
 }
 
-/* Broker fees table */
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: var(--spacing-sm);
-}
-
-.table th,
-.table td {
-  padding: var(--spacing-sm);
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-  font-size: 12px;
-}
-
-.table th {
-  background: var(--bg-secondary);
-  font-weight: 600;
-  color: var(--text-primary);
-  font-size: 12px;
-}
-
-.table input {
-  width: 100%;
-  padding: var(--spacing-xs);
-  border: 1px solid var(--border);
-  border-radius: var(--border-radius);
-  font-size: 12px;
-}
-
-/* Inputs específicos de fees en tabla de brokers */
-.broker-fees .buy-fee,
-.broker-fees .sell-fee {
-  width: 30px !important;
-  text-align: center;
-}
-
-/* Banks grid */
+/* ===== BANKS GRID ===== */
 .banks-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-sm);
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  margin-top: var(--space-2);
 }
 
 .bank-group {
-  background: var(--bg-secondary);
-  padding: var(--spacing-md);
-  border-radius: var(--border-radius);
+  background: var(--color-bg-tertiary);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-muted);
 }
 
 .bank-group h4 {
-  margin-bottom: var(--spacing-sm);
-  color: var(--text-primary);
-  font-size: 1rem;
+  margin: 0 0 var(--space-2) 0;
+  font-size: 11px;
   font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .bank-group label {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-xs);
+  gap: var(--space-1);
+  margin-bottom: var(--space-1);
   cursor: pointer;
-  font-weight: normal;
+  font-size: 12px;
+  color: var(--color-text-secondary);
 }
 
-/* Buttons */
+.bank-group label:hover {
+  color: var(--color-text-primary);
+}
+
+/* ===== BUTTONS ===== */
 .btn {
-  padding: var(--spacing-xs) var(--spacing-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
   border: none;
-  border-radius: var(--border-radius-md);
+  border-radius: var(--radius-md);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: var(--transition-fast);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-xs);
+  transition: var(--transition);
 }
 
 .btn:hover {
-  transform: var(--hover-lift);
-  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-1px);
 }
 
-.btn.primary {
-  background: var(--gradient-primary);
+.btn.primary,
+.btn-primary {
+  background: var(--color-brand-primary);
   color: white;
 }
 
+.btn.primary:hover,
+.btn-primary:hover {
+  background: var(--color-brand-hover);
+}
+
 .btn.secondary {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  border: var(--border-card);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-default);
 }
 
-/* Footer */
-.footer {
+.btn.secondary:hover {
+  background: var(--color-bg-elevated);
+  border-color: var(--color-border-emphasis);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== INFO BOX ===== */
+.info {
+  padding: var(--space-3);
+  background: rgba(88, 166, 255, 0.1);
+  border: 1px solid rgba(88, 166, 255, 0.2);
+  border-radius: var(--radius-md);
+  color: var(--color-brand-primary);
+  font-size: 11px;
+}
+
+/* ===== QUIET HOURS CONFIG ===== */
+.quiet-config {
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-muted);
+}
+
+.time-inputs {
   display: flex;
-  justify-content: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-lg);
-  background: var(--bg-primary);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
+  gap: var(--space-4);
 }
 
-#save-status {
+.time-inputs label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .container {
-    padding: var(--spacing-sm);
-  }
-
-  .grid {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-md);
-  }
-
-  .header h1 {
-    font-size: 1.5rem;
-  }
-
-  .footer {
-    flex-direction: column;
-    align-items: center;
-  }
+.time-inputs input[type="time"] {
+  width: auto;
 }
 
-/* Exchange Groups */
-.exchange-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-top: 8px;
+/* ===== HIDDEN ===== */
+.hidden {
+  display: none !important;
 }
 
-.exchange-group h4 {
-  margin: 0 0 8px 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 4px;
-}
-
-.exchange-group .checkbox-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 6px;
-}
-
-.exchange-group .checkbox-grid label {
-  font-size: 12px;
-  padding: 4px 8px;
-  margin: 0;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.exchange-group .checkbox-grid label:hover {
-  background: var(--bg-secondary);
-}
-
-.exchange-group .checkbox-grid input[type="checkbox"] {
-  margin-right: 6px;
-}
-
-/* Fee Inputs - Compact Width */
-.fee-input,
-.buy-fee,
-.sell-fee,
-#trading-fee,
-#withdrawal-fee,
-#transfer-fee,
-#bank-fee,
-#alert-threshold {
-  width: 35px !important;
-  min-width: 35px !important;
-  max-width: 35px !important;
-  padding: 4px 6px !important;
-  text-align: center !important;
-  font-size: 12px !important;
-}
-
-/* Small number inputs (1-50 range) */
-#max-routes,
-#update-interval,
-#request-timeout,
-#bank-interval {
-  width: 35px !important;
-  min-width: 35px !important;
-  max-width: 35px !important;
-  padding: 4px 6px !important;
-  text-align: center !important;
-  font-size: 12px !important;
-}
-
-/* Percentage inputs with decimals */
-#min-profit {
-  width: 45px !important;
-  min-width: 45px !important;
-  max-width: 45px !important;
-  padding: 4px 6px !important;
-  text-align: center !important;
-  font-size: 12px !important;
-}
-
-/* Large number inputs (thousands-millions) */
-#simulator-amount,
-#high-threshold,
-#manual-dollar-price {
-  width: 80px !important;
-  min-width: 80px !important;
-  max-width: 80px !important;
-  padding: 4px 6px !important;
-  text-align: right !important;
-  font-size: 12px !important;
-}
-
-/* Select elements - auto width for better text display */
-select {
-  width: auto !important;
-  min-width: 80px !important;
-  max-width: 120px !important;
-  padding: 4px 8px !important;
-  font-size: 12px !important;
-}
-
-/* URL inputs - auto width */
-input[type="url"] {
-  width: 100% !important;
-  min-width: 200px !important;
-  padding: 4px 8px !important;
-  font-size: 12px !important;
-}
-
-/* Time inputs - auto width for proper time display */
-input[type="time"] {
-  width: auto !important;
-  min-width: 80px !important;
-  padding: 4px 6px !important;
-  font-size: 12px !important;
-}
-
-/* Disabled inputs styling */
-input:disabled {
-  background-color: #f5f5f5 !important;
-  color: #999 !important;
-  cursor: not-allowed !important;
-  opacity: 0.6 !important;
-}
-
-/* Text inputs - auto width */
-input[type="text"] {
-  width: auto !important;
-  min-width: 150px !important;
-  padding: 4px 8px !important;
-  font-size: 12px !important;
-}
-
-/* Compact input groups for fee fields */
-.input-group:has(.fee-input),
-.input-group:has(.buy-fee),
-.input-group:has(.sell-fee),
-.input-group:has(#trading-fee),
-.input-group:has(#withdrawal-fee),
-.input-group:has(#transfer-fee),
-.input-group:has(#bank-fee),
-.input-group:has(#all-threshold),
-.input-group:has(#moderate-threshold),
-.input-group:has(#high-threshold),
-.input-group:has(#extreme-threshold),
-.input-group:has(#max-routes),
-.input-group:has(#min-profit),
-.input-group:has(#simulator-amount),
-.input-group:has(#update-interval),
-.input-group:has(#request-timeout) {
-  gap: 4px !important;
-}
-
-/* Broker fees table specific styling */
-.broker-fees .buy-fee,
-.broker-fees .sell-fee {
-  width: 25px !important;
-  min-width: 25px !important;
-  max-width: 25px !important;
-  padding: 2px 4px !important;
-  text-align: center !important;
-  font-size: 11px !important;
-  border: 1px solid var(--border-color) !important;
-  border-radius: 4px !important;
-  background: var(--bg-primary) !important;
-  color: var(--text-primary) !important;
-}
-
-.broker-fees .buy-fee:focus,
-.broker-fees .sell-fee:focus {
-  outline: none !important;
-  border-color: var(--accent-color) !important;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
-}
-
-/* ==========================================
-   NUEVA INTERFAZ MEJORADA PARA FEES DE BROKERS
-   ========================================== */
-
+/* ===== BROKER FEES - NUEVA INTERFAZ ===== */
 .broker-fees-improved {
-  margin-top: var(--spacing-lg);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-muted);
 }
 
 .add-broker-form {
-  background: var(--bg-secondary);
-  border-radius: var(--border-radius);
-  padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
-  border: 1px solid var(--border-color);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  border: 1px solid var(--color-border-muted);
 }
 
 .form-row {
   display: flex;
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-lg);
-  align-items: end;
+  gap: var(--space-4);
+  margin-bottom: var(--space-3);
+  align-items: flex-end;
 }
 
 .form-row:last-child {
@@ -695,176 +482,189 @@ input[type="text"] {
 
 .broker-dropdown {
   width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-sm);
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  transition: all 0.2s ease;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-text-primary);
+  font-size: 12px;
 }
 
 .broker-dropdown:focus {
   outline: none;
-  border-color: var(--accent-color);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  border-color: var(--color-brand-primary);
 }
 
+/* Lista de Brokers Configurados */
 .broker-fees-list h4 {
-  margin: 0 0 var(--spacing-md) 0;
-  color: var(--text-primary);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--space-3) 0;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .fees-list {
-  min-height: 120px;
+  min-height: 80px;
 }
 
 .empty-state {
   text-align: center;
-  padding: var(--spacing-xl);
-  color: var(--text-secondary);
+  padding: var(--space-5);
+  color: var(--color-text-muted);
 }
 
 .empty-state p:first-child {
-  font-size: var(--font-size-lg);
-  margin-bottom: var(--spacing-sm);
+  font-size: 14px;
+  margin-bottom: var(--space-1);
 }
 
 .empty-state .text-muted {
-  font-size: var(--font-size-sm);
-  color: var(--text-muted);
+  font-size: 11px;
 }
 
 .broker-fee-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-md);
-  background: var(--bg-secondary);
-  border-radius: var(--border-radius-sm);
-  margin-bottom: var(--spacing-sm);
-  border: 1px solid var(--border-color);
-  transition: all 0.2s ease;
+  padding: var(--space-3);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-2);
+  border: 1px solid var(--color-border-muted);
+  transition: var(--transition);
 }
 
 .broker-fee-item:hover {
-  background: var(--bg-tertiary);
-  border-color: var(--accent-color-light);
+  border-color: var(--color-border-emphasis);
 }
 
 .broker-fee-info {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--space-4);
   flex: 1;
 }
 
 .broker-fee-name {
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-  min-width: 120px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  min-width: 100px;
+  font-size: 12px;
 }
 
 .broker-fee-values {
   display: flex;
-  gap: var(--spacing-lg);
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
+  gap: var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: 11px;
 }
 
 .fee-value {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--space-1);
 }
 
 .fee-label {
-  font-weight: var(--font-weight-medium);
+  font-weight: 500;
 }
 
 .fee-number {
-  color: var(--accent-color);
-  font-weight: var(--font-weight-semibold);
+  color: var(--color-brand-primary);
+  font-weight: 600;
 }
 
 .broker-fee-actions {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--space-2);
 }
 
-.btn-edit, .btn-remove {
-  padding: var(--spacing-xs) var(--spacing-sm);
+.btn-edit,
+.btn-remove {
+  padding: var(--space-1) var(--space-2);
   border: none;
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: var(--font-size-sm);
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
+  font-size: 11px;
+  transition: var(--transition);
 }
 
 .btn-edit {
-  background: var(--warning);
+  background: var(--color-warning);
   color: white;
 }
 
 .btn-edit:hover {
-  background: #d97706;
-  transform: translateY(-1px);
+  filter: brightness(1.1);
 }
 
 .btn-remove {
-  background: var(--error);
+  background: var(--color-danger);
   color: white;
 }
 
 .btn-remove:hover {
-  background: #dc2626;
-  transform: translateY(-1px);
+  filter: brightness(1.1);
 }
 
-.btn-primary {
-  background: var(--gradient-primary);
-  color: white;
-  border: none;
-  padding: var(--spacing-sm) var(--spacing-lg);
-  border-radius: var(--border-radius-sm);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition: all 0.2s ease;
+/* ===== FOOTER ===== */
+.footer {
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  margin-top: var(--space-4);
 }
 
-.btn-primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-card-hover);
+#save-status {
+  font-size: 12px;
+  color: var(--color-text-secondary);
 }
 
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
+/* ===== RESPONSIVE ===== */
+@media (max-width: 800px) {
+  .container {
+    padding: var(--space-3);
+  }
 
-/* Responsive */
-@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .exchange-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .banks-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .form-row {
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: var(--space-3);
   }
 
   .broker-fee-item {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--spacing-md);
+    gap: var(--space-2);
   }
 
   .broker-fee-actions {
     align-self: flex-end;
+  }
+}
+
+@media (max-width: 500px) {
+  .banks-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer {
+    flex-direction: column;
   }
 }

@@ -1248,58 +1248,8 @@ function displayArbitrages(arbitrages, official) {
   let html = '';
 
   arbitrages.forEach((arb, index) => {
-    // Determinar si es ganancia o pérdida
-    const { isNegative, profitClass, profitBadgeClass } = getProfitClasses(arb.profitPercentage);
-
-    // Indicadores especiales
-    const lowProfitIndicator = arb.profitPercentage >= 0 && arb.profitPercentage < 1 ? '<span class="low-profit-tag">👁️ Solo vista</span>' : '';
-    const negativeIndicator = isNegative ? '<span class="negative-tag">⚠️ Pérdida</span>' : '';
-
-    // Símbolo según ganancia/pérdida
-    const profitSymbol = isNegative ? '' : '+';
-
-    // Verificar si hay diferencia entre ganancia bruta y neta
-    const hasFees = arb.fees && arb.fees.total > 0;
-
-    html += `
-      <div class="arbitrage-card ${profitClass}" data-index="${index}">
-        <div class="card-header">
-          <h3>🏦 ${arb.broker}</h3>
-          ${negativeIndicator ? `<div class="broker-loss-indicator">${negativeIndicator}</div>` : ''}
-          <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${formatNumber(arb.profitPercentage)}% ${lowProfitIndicator}</div>
-        </div>
-        <div class="card-body">
-          <div class="price-row">
-            <span class="price-label">💵 Dólar Oficial</span>
-            <span class="price-value">$${formatNumber(arb.officialPrice)}</span>
-          </div>
-          ${official?.source ? `
-          <div class="price-row source-row">
-            <span class="price-label">📍 Fuente</span>
-            <span class="price-value source-value">${getDollarSourceDisplay(official)}</span>
-          </div>
-          ` : ''}
-          <div class="price-row">
-            <span class="price-label">💱 USD → USDT</span>
-            <span class="price-value">${formatUsdUsdtRatio(arb.usdToUsdtRate)} USD/USDT</span>
-          </div>
-          <div class="price-row">
-            <span class="price-label">💸 USDT → ARS</span>
-            <span class="price-value highlight">$${formatNumber(arb.usdtArsBid)}</span>
-          </div>
-          ${hasFees ? `
-          <div class="price-row fees-row">
-            <span class="price-label">📊 Comisiones</span>
-            <span class="price-value fee-value">${formatNumber(arb.fees.total)}%</span>
-          </div>
-          <div class="price-row">
-            <span class="price-label">✅ Ganancia Neta</span>
-            <span class="price-value net-profit">+${formatNumber(arb.profitPercentage)}%</span>
-          </div>
-          ` : ''}
-        </div>
-      </div>
-    `;
+    // Usar renderArbitrageCard de renderHelpers.js
+    html += renderArbitrageCard(arb, index);
   });
 
   container.innerHTML = html;
@@ -1389,66 +1339,18 @@ function displayOptimizedRoutes(routes, official) {
     const routeType = getRouteType(route);
     const displayMetrics = getRouteDisplayMetrics(route, routeType);
 
-    const { isNegative, profitClass, profitBadgeClass } = showProfitColors ? getProfitClasses(displayMetrics.percentage) : { isNegative: false, profitClass: '', profitBadgeClass: '' };
-
-    // Indicadores
-    const negativeIndicator = isNegative ? '<span class="negative-tag">⚠️ Pérdida</span>' : '';
-    const profitSymbol = isNegative ? '' : '+';
-
-    // Badges según tipo de ruta
-    const typeBadge = getRouteTypeBadge(routeType);
-    const p2pBadge = getP2PBadge(route);
-
-    // Aplicar vista compacta si está configurada
-    const compactClass = compactView ? 'compact-view' : '';
-
-    // Aplicar íconos de exchanges si está configurado
-    const exchangeIcon = showExchangeIcons ? getExchangeIcon(route.buyExchange) : '';
-
-    // Timestamps si está configurado
-    const timestampInfo = showTimestamps && route.timestamp ? `<div class="route-timestamp">🕐 ${new Date(route.timestamp).toLocaleTimeString()}</div>` : '';
-
     // Descripción de la ruta según el tipo
     const routeDescription = getRouteDescription(route, routeType);
 
-    // CORREGIDO v5.0.72: Guardar la ruta completa como JSON en data-route
-    const routeData = JSON.stringify({
+    // Preparar objeto route para renderHelpers
+    const routeForRender = {
       ...route,
-      routeType: routeType,
-      displayMetrics: displayMetrics
-    });
+      broker: routeDescription,
+      routeType: routeType
+    };
 
-    html += `
-      <div class="route-card ${profitClass} ${routeType} ${compactClass}" data-index="${index}" data-route='${routeData.replace(/'/g, "&apos;")}'>
-        <div class="route-header">
-          <div class="route-title">
-            <h3>${getRouteIcon(routeType)} Ruta ${index + 1} ${exchangeIcon}</h3>
-            ${negativeIndicator ? `<div class="route-loss-indicator">${negativeIndicator}</div>` : ''}
-            <div class="route-badges">
-              ${typeBadge}
-              ${p2pBadge}
-            </div>
-          </div>
-          <div class="route-profit-section">
-            <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${formatNumber(displayMetrics.percentage)}%</div>
-          </div>
-        </div>
-
-        <div class="route-compact">
-          <div class="route-summary-line">
-            <span class="route-exchanges">🏦 ${routeDescription}</span>
-          </div>
-          <div class="route-profit-line">
-            <span class="profit-amount">${displayMetrics.mainValue}</span>
-            <span class="investment-info">${displayMetrics.secondaryInfo}</span>
-          </div>
-          ${timestampInfo}
-          <div class="route-action">
-            <span class="click-to-expand">👆 Click para ver detalles</span>
-          </div>
-        </div>
-      </div>
-    `;
+    // Usar renderRouteCard de renderHelpers.js
+    html += renderRouteCard(routeForRender, index, displayMetrics);
   });
 
   container.innerHTML = html;
@@ -1463,15 +1365,16 @@ function displayOptimizedRoutes(routes, official) {
       e.preventDefault();
       e.stopPropagation();
 
-      // CORREGIDO v5.0.72: Usar data-route en lugar de índice para obtener la ruta exacta
-      const routeData = this.dataset.route;
-      if (!routeData) {
+      // Obtener data-route del atributo
+      const routeDataStr = this.dataset.route;
+      if (!routeDataStr) {
         console.error('❌ [POPUP] No se encontró data-route en la tarjeta');
         return;
       }
 
       try {
-        const route = JSON.parse(routeData);
+        // Decodificar entidades HTML si es necesario (aunque JSON.parse suele manejarlo si está bien escapado)
+        const route = JSON.parse(routeDataStr.replace(/&apos;/g, "'"));
         console.log(`🖱️ [POPUP] Click en route-card tipo ${route.routeType}:`, route.broker || route.buyExchange);
 
         // Remover selección previa
@@ -1537,13 +1440,14 @@ function getRouteDisplayMetrics(route, routeType) {
 
     default: // arbitrage
       const profitPercentage = route.profitPercentage || route.calculation?.profitPercentage || 0;
-      const netProfit = Math.abs(route.calculation?.netProfit || 0);
+      const netProfit = route.calculation?.netProfit || 0;
       const initial = route.calculation?.initialAmount || route.calculation?.initial || 100000;
+      const isNegative = profitPercentage < 0;
 
       return {
         percentage: profitPercentage,
-        mainValue: `${profitPercentage >= 0 ? '+' : ''}$${formatNumber(netProfit)} ARS`,
-        secondaryInfo: `sobre $${formatNumber(initial)} ARS`
+        mainValue: `${isNegative ? '' : '+'}$${formatNumber(netProfit)}`,
+        secondaryInfo: `sobre $${formatNumber(initial)}`
       };
   }
 }
@@ -1831,6 +1735,7 @@ function showRouteGuideFromData(route) {
   const guideTab = document.querySelector('[data-tab="guide"]');
   if (guideTab) {
     console.log('✅ [POPUP] Cambiando a pestaña de guía');
+    guideTab.style.display = 'block'; // Hacer visible la pestaña
     guideTab.click();
   } else {
     console.error('❌ [POPUP] No se encontró el botón de la pestaña guía');
@@ -1966,15 +1871,18 @@ function calculateGuideValues(arb) {
     ? calc.profitPercentage
     : arb.profitPercentage || 0;
 
+  // CORREGIDO v6.0.1: Usar initialAmount en lugar de initial para consistencia
+  const initialAmount = calc.initialAmount || calc.initial || 100000;
+
   return {
-    estimatedInvestment: calc.initial || 100000,
+    estimatedInvestment: initialAmount,
     officialPrice: arb.officialPrice || 1000,
-    usdAmount: calc.usdPurchased || ((calc.initial || 100000) / (arb.officialPrice || 1000)),
-    usdtAfterFees: calc.usdtAfterFees || (calc.usdPurchased || ((calc.initial || 100000) / (arb.officialPrice || 1000))),
+    usdAmount: calc.usdPurchased || (initialAmount / (arb.officialPrice || 1000)),
+    usdtAfterFees: calc.usdtAfterFees || (calc.usdPurchased || (initialAmount / (arb.officialPrice || 1000))),
     sellPrice: arb.sellPrice || arb.usdtArsBid || 1000,
-    arsFromSale: calc.arsFromSale || ((calc.usdtAfterFees || calc.usdPurchased || ((calc.initial || 100000) / (arb.officialPrice || 1000))) * (arb.sellPrice || arb.usdtArsBid || 1000)),
-    finalAmount: calc.finalAmount || (calc.arsFromSale || ((calc.usdtAfterFees || calc.usdPurchased || ((calc.initial || 100000) / (arb.officialPrice || 1000))) * (arb.sellPrice || arb.usdtArsBid || 1000))),
-    profit: calc.netProfit || ((calc.finalAmount || calc.arsFromSale || ((calc.usdtAfterFees || calc.usdPurchased || ((calc.initial || 100000) / (arb.officialPrice || 1000))) * (arb.sellPrice || arb.usdtArsBid || 1000))) - (calc.initial || 100000)),
+    arsFromSale: calc.arsFromSale || ((calc.usdtAfterFees || calc.usdPurchased || (initialAmount / (arb.officialPrice || 1000))) * (arb.sellPrice || arb.usdtArsBid || 1000)),
+    finalAmount: calc.finalAmount || (calc.arsFromSale || ((calc.usdtAfterFees || calc.usdPurchased || (initialAmount / (arb.officialPrice || 1000))) * (arb.sellPrice || arb.usdtArsBid || 1000))),
+    profit: calc.netProfit || ((calc.finalAmount || calc.arsFromSale || ((calc.usdtAfterFees || calc.usdPurchased || (initialAmount / (arb.officialPrice || 1000))) * (arb.sellPrice || arb.usdtArsBid || 1000))) - initialAmount),
     profitPercentage: correctProfitPercentage,  // USAR EL VALOR CORRECTO
     usdToUsdtRate: (typeof arb.usdToUsdtRate === 'number' && isFinite(arb.usdToUsdtRate)) ? arb.usdToUsdtRate : null,
     usdtArsBid: arb.usdtArsBid || (arb.sellPrice || 1000),
@@ -3616,7 +3524,7 @@ function displayFilteredRoutes(routes) {
     return;
   }
 
-  // Generar HTML para las rutas usando el formato original
+  // Generar HTML para las rutas usando renderHelpers
   let html = '';
 
   routes.forEach((route, index) => {
@@ -3624,21 +3532,6 @@ function displayFilteredRoutes(routes) {
     const displayProfitPercentage = route.calculation?.profitPercentage !== undefined
       ? route.calculation.profitPercentage
       : route.profitPercentage || 0;
-
-    const { isNegative, profitClass, profitBadgeClass } = getProfitClasses(displayProfitPercentage);
-
-    // Indicadores
-    const negativeIndicator = isNegative ? '<span class="negative-tag">⚠️ Pérdida</span>' : '';
-    const profitSymbol = isNegative ? '' : '+';
-
-    // Badge especial para single-exchange
-    const singleExchangeBadge = route.isSingleExchange
-      ? '<span class="single-exchange-badge">🎯 Mismo Broker</span>'
-      : '';
-
-    // NUEVO: Badge P2P
-    const isP2P = isP2PRoute(route);
-    const p2pBadge = isP2P ? '<span class="p2p-badge">🤝 P2P</span>' : '';
 
     // Calcular valores para mostrar usando el monto configurado por el usuario
     const calc = route.calculation || {};
@@ -3654,48 +3547,32 @@ function displayFilteredRoutes(routes) {
     const finalAmount = shouldAdjust && calc.finalAmount ? calc.finalAmount * ratio : (calc.finalAmount || initialAmount);
     const netProfit = shouldAdjust && calc.netProfit ? calc.netProfit * ratio : (calc.netProfit || 0);
 
-    html += `
-      <div class="route-card ${profitClass}" data-route-id="${route.buyExchange}_${route.sellExchange}_${index}">
-        <div class="route-header">
-          <div class="route-exchange-section">
-            <span class="route-exchange">${route.buyExchange} → ${route.sellExchange}</span>
-            <div class="route-badges">
-              ${singleExchangeBadge}
-              ${p2pBadge}
-              ${negativeIndicator}
-            </div>
-          </div>
-          <div class="route-profit ${profitBadgeClass}">${profitSymbol}${formatNumber(displayProfitPercentage)}%</div>
-        </div>
+    // Preparar objeto displayMetrics para renderHelpers
+    const displayMetrics = {
+      percentage: displayProfitPercentage,
+      mainValue: `${netProfit >= 0 ? '+' : ''}$${formatNumber(netProfit)}`,
+      secondaryInfo: `sobre $${formatNumber(initialAmount)}`,
+      initialAmount: initialAmount,
+      finalAmount: finalAmount,
+      netProfit: netProfit
+    };
 
-        <div class="route-details">
-          <div class="route-row">
-            <span class="route-label">Inversión inicial:</span>
-            <span class="route-value">$${formatNumber(initialAmount)}</span>
-          </div>
-          <div class="route-row">
-            <span class="route-label">Resultado final:</span>
-            <span class="route-value ${netProfit >= 0 ? 'positive' : 'negative'}">$${formatNumber(finalAmount)}</span>
-          </div>
-          <div class="route-row">
-            <span class="route-label">Ganancia neta:</span>
-            <span class="route-value ${netProfit >= 0 ? 'positive' : 'negative'}">${netProfit >= 0 ? '+' : ''}$${formatNumber(netProfit)}</span>
-          </div>
-        </div>
+    // Usar renderRouteCard de renderHelpers.js
+    // Nota: renderRouteCard espera (route, index, displayMetrics)
+    // Aseguramos que route tenga la estructura esperada por renderHelpers
+    const routeForRender = {
+      ...route,
+      broker: `${route.buyExchange} → ${route.sellExchange}`,
+      volume: route.volume // Asegurar que volumen pase si existe
+    };
 
-        <div class="route-actions">
-          <div class="route-click-indicator" title="Click para ver detalles">
-            <span class="click-icon">👁️</span>
-          </div>
-        </div>
-      </div>
-    `;
+    html += renderRouteCard(routeForRender, index, displayMetrics);
   });
 
   container.innerHTML = html;
 
   // Agregar event listeners para expandir/contraer tarjetas
-  document.querySelectorAll('.route-card').forEach((card) => {
+  document.querySelectorAll('.route-card').forEach((card, index) => {
     card.addEventListener('click', (e) => {
       // Evitar que el click se propague si se hizo en un botón o link
       if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A') {
@@ -3750,11 +3627,18 @@ function selectArbitrage(index) {
   openRouteDetailsModal(arbitrage);
 }
 
+// Variable para guardar el elemento que tenía foco antes de abrir el modal
+let previouslyFocusedElement = null;
+
 /**
  * Abrir modal con detalles de la ruta
+ * Mejorado v6.0.0: Accesibilidad con focus management
  */
 function openRouteDetailsModal(arbitrage) {
   console.log('📱 [POPUP] Abriendo modal de detalles para:', arbitrage);
+
+  // Guardar elemento con foco actual para restaurarlo al cerrar
+  previouslyFocusedElement = document.activeElement;
 
   // Calcular valores usando función auxiliar
   const values = calculateGuideValues(arbitrage);
@@ -3790,7 +3674,17 @@ function openRouteDetailsModal(arbitrage) {
   const modal = document.getElementById('route-details-modal');
   if (modal) {
     modal.style.display = 'flex';
-    console.log('✅ [POPUP] Modal mostrado');
+    
+    // Focus al botón de cerrar para accesibilidad
+    const closeBtn = document.getElementById('modal-close');
+    if (closeBtn) {
+      setTimeout(() => closeBtn.focus(), 50);
+    }
+    
+    // Prevenir scroll del body mientras el modal está abierto
+    document.body.style.overflow = 'hidden';
+    
+    console.log('✅ [POPUP] Modal mostrado con focus management');
   } else {
     console.error('❌ [POPUP] No se encontró el modal');
   }
@@ -3798,6 +3692,7 @@ function openRouteDetailsModal(arbitrage) {
 
 /**
  * Cerrar modal de detalles de ruta
+ * Mejorado v6.0.0: Restauración de foco
  */
 function closeRouteDetailsModal() {
   console.log('📱 [POPUP] Cerrando modal de detalles');
@@ -3805,7 +3700,17 @@ function closeRouteDetailsModal() {
   const modal = document.getElementById('route-details-modal');
   if (modal) {
     modal.style.display = 'none';
-    console.log('✅ [POPUP] Modal cerrado');
+    
+    // Restaurar scroll del body
+    document.body.style.overflow = '';
+    
+    // Restaurar foco al elemento anterior
+    if (previouslyFocusedElement && previouslyFocusedElement.focus) {
+      previouslyFocusedElement.focus();
+      previouslyFocusedElement = null;
+    }
+    
+    console.log('✅ [POPUP] Modal cerrado con focus restaurado');
   }
 }
 

@@ -215,8 +215,213 @@ function setupMainEventListeners() {
 
 // Inicializar nueva interfaz mejorada de fees por broker
 function initializeBrokerFeesImproved() {
-  // Stub function
-  console.log('initializeBrokerFeesImproved called');
+  console.log('🔧 Inicializando Broker Fees UI...');
+
+  const brokerSelect = document.getElementById('broker-select');
+  const customBrokerField = document.getElementById('custom-broker-field');
+  const customBrokerName = document.getElementById('custom-broker-name');
+  const buyFeeInput = document.getElementById('broker-buy-fee');
+  const sellFeeInput = document.getElementById('broker-sell-fee');
+  const addButton = document.getElementById('add-broker-improved');
+  const feesList = document.getElementById('broker-fees-list');
+
+  if (!brokerSelect || !addButton || !feesList) {
+    console.warn('⚠️ Elementos de Broker Fees no encontrados');
+    return;
+  }
+
+  // Cargar fees guardados
+  loadBrokerFees();
+
+  // Mostrar/ocultar campo de broker personalizado
+  brokerSelect.addEventListener('change', () => {
+    if (brokerSelect.value === 'other') {
+      customBrokerField.style.display = 'block';
+    } else {
+      customBrokerField.style.display = 'none';
+    }
+    updateAddButtonState();
+  });
+
+  // Actualizar estado del botón cuando cambian los inputs
+  [buyFeeInput, sellFeeInput, customBrokerName].forEach(input => {
+    if (input) {
+      input.addEventListener('input', updateAddButtonState);
+    }
+  });
+
+  // Agregar broker
+  addButton.addEventListener('click', () => {
+    const brokerValue = brokerSelect.value;
+    let brokerName = '';
+    let brokerLabel = '';
+
+    if (brokerValue === 'other') {
+      brokerName = customBrokerName.value.trim().toLowerCase().replace(/\s+/g, '-');
+      brokerLabel = customBrokerName.value.trim();
+    } else {
+      brokerName = brokerValue;
+      brokerLabel = brokerSelect.options[brokerSelect.selectedIndex].text.replace(/^[^\s]+\s/, ''); // Quitar emoji
+    }
+
+    const buyFee = parseFloat(buyFeeInput.value) || 0;
+    const sellFee = parseFloat(sellFeeInput.value) || 0;
+
+    if (!brokerName) {
+      showNotification('Selecciona un broker', 'error');
+      return;
+    }
+
+    // Agregar o actualizar en la lista
+    addOrUpdateBrokerFee(brokerName, brokerLabel, buyFee, sellFee);
+
+    // Limpiar formulario
+    brokerSelect.value = '';
+    customBrokerField.style.display = 'none';
+    customBrokerName.value = '';
+    buyFeeInput.value = '';
+    sellFeeInput.value = '';
+    updateAddButtonState();
+
+    // Guardar en storage
+    saveBrokerFees();
+  });
+
+  function updateAddButtonState() {
+    const hasValidBroker = brokerSelect.value && (brokerSelect.value !== 'other' || customBrokerName.value.trim());
+    const hasValidFees = buyFeeInput.value || sellFeeInput.value;
+    addButton.disabled = !(hasValidBroker && hasValidFees);
+  }
+
+  function loadBrokerFees() {
+    chrome.storage.local.get('notificationSettings', (result) => {
+      const settings = result.notificationSettings || {};
+      const brokerFees = settings.brokerFees || [];
+
+      feesList.innerHTML = '';
+
+      if (brokerFees.length === 0) {
+        feesList.innerHTML = `
+          <div class="empty-state">
+            <p>🎯 No hay brokers configurados</p>
+            <p class="text-muted">Agrega brokers arriba para personalizar sus fees</p>
+          </div>
+        `;
+        return;
+      }
+
+      brokerFees.forEach(fee => {
+        addBrokerFeeToList(fee.broker, fee.label || fee.broker, fee.buyFee, fee.sellFee);
+      });
+    });
+  }
+
+  function addOrUpdateBrokerFee(broker, label, buyFee, sellFee) {
+    // Remover empty state si existe
+    const emptyState = feesList.querySelector('.empty-state');
+    if (emptyState) {
+      emptyState.remove();
+    }
+
+    // Verificar si ya existe
+    const existingItem = feesList.querySelector(`[data-broker="${broker}"]`);
+    if (existingItem) {
+      existingItem.querySelector('.fee-number.buy').textContent = `${buyFee}%`;
+      existingItem.querySelector('.fee-number.sell').textContent = `${sellFee}%`;
+      existingItem.dataset.buyFee = buyFee;
+      existingItem.dataset.sellFee = sellFee;
+      showNotification(`${label} actualizado`, 'success');
+    } else {
+      addBrokerFeeToList(broker, label, buyFee, sellFee);
+      showNotification(`${label} agregado`, 'success');
+    }
+  }
+
+  function addBrokerFeeToList(broker, label, buyFee, sellFee) {
+    const item = document.createElement('div');
+    item.className = 'broker-fee-item';
+    item.dataset.broker = broker;
+    item.dataset.buyFee = buyFee;
+    item.dataset.sellFee = sellFee;
+
+    item.innerHTML = `
+      <div class="broker-fee-info">
+        <span class="broker-fee-name">${escapeHtml(label)}</span>
+        <div class="broker-fee-values">
+          <div class="fee-value">
+            <span class="fee-label">Compra:</span>
+            <span class="fee-number buy">${buyFee}%</span>
+          </div>
+          <div class="fee-value">
+            <span class="fee-label">Venta:</span>
+            <span class="fee-number sell">${sellFee}%</span>
+          </div>
+        </div>
+      </div>
+      <div class="broker-fee-actions">
+        <button class="btn-edit" title="Editar">✏️</button>
+        <button class="btn-remove" title="Eliminar">🗑️</button>
+      </div>
+    `;
+
+    // Event listeners para editar y eliminar
+    item.querySelector('.btn-edit').addEventListener('click', () => {
+      brokerSelect.value = broker;
+      if (brokerSelect.value !== broker) {
+        // Es un broker personalizado
+        brokerSelect.value = 'other';
+        customBrokerField.style.display = 'block';
+        customBrokerName.value = label;
+      }
+      buyFeeInput.value = buyFee;
+      sellFeeInput.value = sellFee;
+      updateAddButtonState();
+    });
+
+    item.querySelector('.btn-remove').addEventListener('click', () => {
+      if (confirm(`¿Eliminar ${label}?`)) {
+        item.remove();
+        saveBrokerFees();
+        showNotification(`${label} eliminado`, 'success');
+
+        // Mostrar empty state si no quedan items
+        if (feesList.children.length === 0) {
+          feesList.innerHTML = `
+            <div class="empty-state">
+              <p>🎯 No hay brokers configurados</p>
+              <p class="text-muted">Agrega brokers arriba para personalizar sus fees</p>
+            </div>
+          `;
+        }
+      }
+    });
+
+    feesList.appendChild(item);
+  }
+
+  function saveBrokerFees() {
+    const items = feesList.querySelectorAll('.broker-fee-item');
+    const brokerFees = Array.from(items).map(item => ({
+      broker: item.dataset.broker,
+      label: item.querySelector('.broker-fee-name').textContent,
+      buyFee: parseFloat(item.dataset.buyFee) || 0,
+      sellFee: parseFloat(item.dataset.sellFee) || 0
+    }));
+
+    chrome.storage.local.get('notificationSettings', (result) => {
+      const settings = result.notificationSettings || DEFAULT_SETTINGS;
+      settings.brokerFees = brokerFees;
+      chrome.storage.local.set({ notificationSettings: settings }, () => {
+        console.log('✅ Broker fees guardados:', brokerFees);
+      });
+    });
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
 }
 
 // Guardar configuración

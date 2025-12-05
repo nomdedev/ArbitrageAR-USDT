@@ -25,4 +25,7 @@ function getProfitClasses(profitPercent) {
   return { isNegative, profitClass, profitBadgeClass };
 }
 
-module.exports = { getProfitClasses };
+// Exportar para Node.js (tests)
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { getProfitClasses };
+}

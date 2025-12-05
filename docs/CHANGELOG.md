@@ -2,6 +2,85 @@
 
 Todos los cambios notables de este proyecto serán documentados en este archivo.
 
+## [6.0.0] - 2025-01-XX - REDISEÑO VISUAL COMPLETO 🎨
+
+### ✨ Nuevo Sistema de Diseño v6.0.0
+Rediseño visual completo de la extensión con un sistema de variables CSS moderno inspirado en GitHub Dark Theme.
+
+### 🎨 Cambios Visuales Principales
+- **Sistema de Variables CSS:** Nuevo sistema unificado con nomenclatura semántica
+  - Colores: `--color-bg-*`, `--color-text-*`, `--color-brand-*`
+  - Espaciado: `--space-1` a `--space-8`
+  - Tipografía: `--font-size-*`, `--font-weight-*`
+  - Bordes: `--radius-sm` a `--radius-full`
+  - Sombras: `--shadow-sm`, `--shadow-md`, `--shadow-lg`
+  - Gradientes: `--gradient-primary`, `--gradient-success`, etc.
+  
+- **Header Modernizado:**
+  - Nuevo gradiente sutil en fondo
+  - Logo con animación hover
+  - Botones de acción con iconos mejorados
+  
+- **Sistema de Pestañas:**
+  - Indicador animado con underline
+  - Transiciones suaves al cambiar pestaña
+  - Estados hover y active mejorados
+  
+- **Tarjetas de Rutas v6.0.0:**
+  - Diseño con indicador lateral de ganancia
+  - Grid de precios compra/venta
+  - Badges de ganancia con colores semánticos
+  - Status indicators (🔥, ✓, 👁️, ⚠️)
+  - Función `formatVolume()` para mostrar volumen
+  - Animaciones de entrada (fade + slide)
+  
+- **Accesibilidad WCAG 2.1:**
+  - Focus states consistentes en toda la UI
+  - Soporte completo para navegación por teclado
+  - Atributos ARIA en modal (role, aria-modal, aria-labelledby)
+  - Focus trap en modal con restauración de foco
+  - Soporte `prefers-reduced-motion`
+  
+- **Modales Mejorados:**
+  - Overlay con backdrop-filter blur(8px)
+  - Animaciones fade + slide
+  - Escape para cerrar
+  - Click fuera para cerrar
+  - Focus management completo
+  
+- **Simulador:**
+  - Container modernizado
+  - Inputs y selects con nuevo estilo
+  - Resultados con mejor jerarquía visual
+  
+- **Página Options:**
+  - CSS completamente reescrito (896→671 líneas)
+  - Broker Fees con CRUD completo
+  - Diseño unificado con popup
+
+### 🔧 Archivos Modificados
+- `src/popup.css`: Refactorización completa (~6700 líneas, sistema unificado)
+- `src/popup.js`: Modal con focus management mejorado
+- `src/popup.html`: Atributos ARIA en modal
+- `src/options.css`: Reescrito con GitHub Dark theme
+- `src/options.js`: `initializeBrokerFeesImproved()` implementado
+- `src/renderHelpers.js`: Cards mejoradas con más información
+- `manifest.json`: Actualizado a versión 6.0.0
+
+### 📏 Mejoras Técnicas
+- Variables CSS con compatibilidad hacia atrás (aliases legacy)
+- Eliminación de estilos duplicados
+- Animaciones optimizadas con `will-change`
+- Transiciones consistentes en todo el proyecto
+- Focus states globales con :focus-visible
+
+### 🧪 Tests
+- Suite E2E completa con 10 categorías de tests
+- Tests de renderHelpers con formatVolume()
+- 100% tests pasando (3/3 archivos, 10/10 E2E)
+
+---
+
 ## [5.0.75] - 2025-10-12 - HOTFIX CRÍTICO
 
 ### 🐛 BUG FIX CRÍTICO

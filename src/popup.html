@@ -16,7 +16,7 @@
       <div id="dataStatus" class="data-status"></div>
     </div>
     <div class="header-buttons">
-      <span id="version-indicator" class="version-indicator" title="Versión instalada">v5.0.75</span>
+      <span id="version-indicator" class="version-indicator" title="Versión instalada">v6.0.0</span>
       <button id="settings" class="btn-settings" title="Configurar notificaciones">
         <span>⚙️</span>
       </button>
@@ -33,7 +33,7 @@
       <div class="update-text">
         <strong>Nueva actualización disponible</strong>
         <p class="update-version-info">
-          <span class="current-version">v5.0.75</span>
+          <span class="current-version">v6.0.0</span>
           <span class="version-arrow">→</span>
           <span class="new-version" id="new-version">Nueva versión</span>
         </p>
@@ -73,9 +73,19 @@
     <button class="tab" data-tab="crypto-arbitrage">🔄 Arbitraje Cripto</button>
     <button class="tab" data-tab="simulator">🧮 Simulador</button>
     <button class="tab" data-tab="banks">🏦 Exchanges</button>
+    <button class="tab" data-tab="guide" style="display: none;">📋 Guía</button>
   </div>
 
   <main>
+    <!-- TAB: Guía Paso a Paso -->
+    <section id="tab-guide" class="tab-content">
+      <div id="selected-arbitrage-guide">
+        <div class="placeholder-guide">
+          <p>Selecciona una oportunidad de arbitraje para ver los pasos detallados.</p>
+        </div>
+      </div>
+    </section>
+
     <!-- TAB: Todas las Rutas (Single + Multi-Exchange) -->
     <section id="tab-routes" class="tab-content active">
       <!-- Controles de filtro -->
@@ -320,12 +330,13 @@
     </div>
   </footer>
 
-  <!-- MODAL DE DETALLES DE RUTA -->
-  <div id="route-details-modal" class="modal-overlay" style="display: none;">
-    <div class="modal-content">
+  <!-- MODAL DE DETALLES DE RUTA - Accesibilidad mejorada v6.0.0 -->
+  <div id="route-details-modal" class="modal-overlay" style="display: none;" 
+       role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-body">
+    <div class="modal-content" role="document">
       <div class="modal-header">
         <h3 id="modal-title">Detalles de la Ruta</h3>
-        <button id="modal-close" class="modal-close-btn" title="Cerrar">✕</button>
+        <button id="modal-close" class="modal-close-btn" title="Cerrar (Esc)" aria-label="Cerrar modal">✕</button>
       </div>
       <div id="modal-body" class="modal-body">
         <!-- Contenido generado dinámicamente -->
@@ -333,6 +344,8 @@
     </div>
   </div>
 </div>
+<script src="utils.js"></script>
+<script src="renderHelpers.js"></script>
 <script src="ValidationService.js"></script>
 <script src="popup.js"></script>
 </body>
