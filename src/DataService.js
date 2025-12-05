@@ -26,7 +26,7 @@ class DataService {
 
       if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
       return await res.json();
-    } catch(e) {
+    } catch (e) {
       if (e.name === 'AbortError') {
         console.warn('⏱️ Timeout en fetch:', url);
       } else if (e instanceof SyntaxError) {
@@ -56,7 +56,7 @@ class DataService {
 
       if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
       return await res.text();
-    } catch(e) {
+    } catch (e) {
       if (e.name === 'AbortError') {
         console.warn('⏱️ Timeout en fetch HTML:', url);
       } else {
@@ -93,11 +93,319 @@ class DataService {
     return null;
   }
 
+  // ============================================
+  // NUEVO: MÉTODOS PARA MÚLTIPLES CRIPTOMONEDAS
+  // ============================================
+
+  /**
+   * Método genérico para obtener datos de cualquier criptomoneda
+   * @param {string} symbol - Símbolo de la cripto (BTC, ETH, etc.)
+   * @param {string} fiatCurrency - Moneda fiat (ARS, USD, etc.)
+   * @returns {Object|null} Datos de la criptomoneda
+   */
+  async fetchCryptoData(symbol, fiatCurrency = 'ARS') {
+    const url = `https://criptoya.com/api/${symbol}/${fiatCurrency}/1`;
+    const data = await this.fetchWithRateLimit(url);
+
+    if (data && typeof data === 'object') {
+      console.log(`💎 Datos ${symbol}/${fiatCurrency} obtenidos:`, Object.keys(data).length, 'exchanges');
+      return {
+        ...data,
+        symbol: symbol,
+        fiatCurrency: fiatCurrency,
+        timestamp: Date.now()
+      };
+    }
+
+    console.error(`Estructura inválida de CriptoYA ${symbol}/${fiatCurrency}:`, data);
+    return null;
+  }
+
+  /**
+   * Obtener datos de crypto-to-crypto (ej: BTC/ETH)
+   * @param {string} symbolFrom - Cripto origen
+   * @param {string} symbolTo - Cripto destino
+   * @returns {Object|null} Datos del par
+   */
+  async fetchCryptoToCrypto(symbolFrom, symbolTo) {
+    const url = `https://criptoya.com/api/${symbolFrom}/${symbolTo}/1`;
+    const data = await this.fetchWithRateLimit(url);
+
+    if (data && typeof data === 'object') {
+      console.log(`🔄 Datos ${symbolFrom}/${symbolTo} obtenidos:`, Object.keys(data).length, 'exchanges');
+      return {
+        ...data,
+        symbolFrom: symbolFrom,
+        symbolTo: symbolTo,
+        timestamp: Date.now()
+      };
+    }
+
+    console.warn(`⚠️ No hay datos para el par ${symbolFrom}/${symbolTo}`);
+    return null;
+  }
+
+  // Métodos específicos para cada criptomoneda (Top 10)
+
+  async fetchBTCData(fiatCurrency = 'ARS') {
+    return await this.fetchCryptoData('BTC', fiatCurrency);
+  }
+
+  async fetchETHData(fiatCurrency = 'ARS') {
+    return await this.fetchCryptoData('ETH', fiatCurrency);
+  }
+
+  async fetchUSDCData(fiatCurrency = 'ARS') {
+    return await this.fetchCryptoData('USDC', fiatCurrency);
+  }
+
+  async fetchDAIData(fiatCurrency = 'ARS') {
+    return await this.fetchCryptoData('DAI', fiatCurrency);
+  }
+
+  async fetchBNBData(fiatCurrency = 'ARS') {
+    return await this.fetchCryptoData('BNB', fiatCurrency);
+  }
+
+  async fetchSOLData(fiatCurrency = 'ARS') {
+    return await this.fetchCryptoData('SOL', fiatCurrency);
+  }
+
+  async fetchADAData(fiatCurrency = 'ARS') {
+    return await this.fetchCryptoData('ADA', fiatCurrency);
+  }
+
+  async fetchXRPData(fiatCurrency = 'ARS') {
+    return await this.fetchCryptoData('XRP', fiatCurrency);
+  }
+
+  async fetchMATICData(fiatCurrency = 'ARS') {
+    return await this.fetchCryptoData('MATIC', fiatCurrency);
+  }
+
+  async fetchDOGEData(fiatCurrency = 'ARS') {
+    return await this.fetchCryptoData('DOGE', fiatCurrency);
+  }
+
+  /**
+   * Obtener datos de todas las criptos configuradas
+   * @param {Array<string>} cryptoList - Lista de símbolos de criptos a obtener
+   * @param {string} fiatCurrency - Moneda fiat
+   * @returns {Object} Objeto con todos los datos indexados por símbolo
+   */
+  async fetchAllCryptos(cryptoList = null, fiatCurrency = 'ARS') {
+    // Default: Top 10 criptos
+    const defaultCryptos = ['BTC', 'ETH', 'USDC', 'DAI', 'BNB', 'SOL', 'ADA', 'XRP', 'MATIC', 'DOGE', 'USDT'];
+    const cryptos = cryptoList || defaultCryptos;
+
+    console.log(`🔄 Obteniendo datos para ${cryptos.length} criptomonedas...`);
+
+    const promises = cryptos.map(symbol =>
+      this.fetchCryptoData(symbol, fiatCurrency)
+        .then(data => ({ symbol, data }))
+        .catch(error => {
+          console.warn(`⚠️ Error obteniendo ${symbol}:`, error.message);
+          return { symbol, data: null };
+        })
+    );
+
+    const results = await Promise.allSettled(promises);
+    const cryptoData = {};
+
+    results.forEach(result => {
+      if (result.status === 'fulfilled' && result.value.data) {
+        cryptoData[result.value.symbol] = result.value.data;
+      }
+    });
+
+    console.log(`✅ Datos obtenidos para ${Object.keys(cryptoData).length}/${cryptos.length} criptomonedas`);
+    return cryptoData;
+  }
+
+  // ============================================
+  // NETWORK FEES (Comisiones de retiro de cripto)
+  // ============================================
+
+  /**
+   * Base de datos de network fees predeterminados
+   * Valores en unidades de la criptomoneda
+   */
+  getDefaultNetworkFees() {
+    return {
+      'BTC': {
+        'binance': 0.0005,
+        'binancep2p': 0.0005,
+        'lemon': 0.0001,
+        'ripio': 0.0002,
+        'buenbit': 0.0003,
+        'satoshitango': 0.0002,
+        'belo': 0.0003,
+        'default': 0.0002
+      },
+      'ETH': {
+        'binance': 0.005,
+        'binancep2p': 0.005,
+        'lemon': 0.003,
+        'ripio': 0.004,
+        'buenbit': 0.004,
+        'satoshitango': 0.003,
+        'belo': 0.004,
+        'default': 0.003
+      },
+      'USDC': {
+        'binance': 1.0,
+        'binancep2p': 1.0,
+        'lemon': 0.5,
+        'ripio': 1.5,
+        'buenbit': 1.0,
+        'satoshitango': 1.0,
+        'belo': 1.0,
+        'default': 1.0
+      },
+      'USDT': {
+        'binance': 1.0,
+        'binancep2p': 1.0,
+        'lemon': 0.5,
+        'ripio': 1.5,
+        'buenbit': 1.0,
+        'satoshitango': 1.0,
+        'belo': 1.0,
+        'default': 1.0
+      },
+      'DAI': {
+        'binance': 1.0,
+        'binancep2p': 1.0,
+        'lemon': 0.8,
+        'ripio': 1.2,
+        'buenbit': 1.0,
+        'satoshitango': 1.0,
+        'belo': 1.0,
+        'default': 1.0
+      },
+      'BNB': {
+        'binance': 0.0005,
+        'binancep2p': 0.0005,
+        'lemon': 0.001,
+        'ripio': 0.001,
+        'buenbit': 0.001,
+        'default': 0.001
+      },
+      'SOL': {
+        'binance': 0.01,
+        'binancep2p': 0.01,
+        'lemon': 0.008,
+        'ripio': 0.01,
+        'buenbit': 0.01,
+        'default': 0.01
+      },
+      'ADA': {
+        'binance': 1.0,
+        'binancep2p': 1.0,
+        'lemon': 0.8,
+        'ripio': 1.2,
+        'buenbit': 1.0,
+        'default': 1.0
+      },
+      'XRP': {
+        'binance': 0.25,
+        'binancep2p': 0.25,
+        'lemon': 0.2,
+        'ripio': 0.3,
+        'buenbit': 0.25,
+        'default': 0.25
+      },
+      'MATIC': {
+        'binance': 0.1,
+        'binancep2p': 0.1,
+        'lemon': 0.08,
+        'ripio': 0.12,
+        'buenbit': 0.1,
+        'default': 0.1
+      },
+      'DOGE': {
+        'binance': 5.0,
+        'binancep2p': 5.0,
+        'lemon': 4.0,
+        'ripio': 6.0,
+        'buenbit': 5.0,
+        'default': 5.0
+      }
+    };
+  }
+
+  /**
+   * Obtener network fee para un exchange y cripto específicos
+   * @param {string} exchange - Nombre del exchange (normalizado a lowercase)
+   * @param {string} symbol - Símbolo de la cripto
+   * @returns {number} Network fee en unidades de la cripto
+   */
+  getNetworkFee(exchange, symbol) {
+    const fees = this.getDefaultNetworkFees();
+    const exchangeLower = exchange.toLowerCase();
+
+    if (fees[symbol]) {
+      return fees[symbol][exchangeLower] || fees[symbol]['default'] || 0;
+    }
+
+    return 0;
+  }
+
+  /**
+   * Intentar obtener network fees dinámicos desde API (con fallback)
+   * Por ahora usa valores predeterminados, pero permite extensión futura
+   * @param {string} exchange - Nombre del exchange
+   * @param {string} symbol - Símbolo de la cripto
+   * @returns {Promise<number>} Network fee
+   */
+  async fetchNetworkFee(exchange, symbol) {
+    // TODO: Implementar fetch desde API si hay endpoint disponible
+    // Por ahora retornar valores predeterminados
+    return this.getNetworkFee(exchange, symbol);
+  }
+
+  /**
+   * Obtener configuración de criptos activas desde storage
+   * @returns {Promise<Array<string>>} Lista de símbolos de criptos activas
+   */
+  async getActiveCryptos() {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.storage) {
+        const result = await chrome.storage.local.get('activeCryptos');
+        if (result.activeCryptos && Array.isArray(result.activeCryptos)) {
+          return result.activeCryptos;
+        }
+      }
+    } catch (error) {
+      console.warn('⚠️ Error leyendo criptos activas desde storage:', error);
+    }
+
+    // Default: Top 10 + USDT
+    return ['BTC', 'ETH', 'USDC', 'DAI', 'BNB', 'SOL', 'ADA', 'XRP', 'MATIC', 'DOGE', 'USDT'];
+  }
+
+  /**
+   * Guardar configuración de criptos activas
+   * @param {Array<string>} cryptoList - Lista de símbolos de criptos
+   * @returns {Promise<boolean>} true si se guardó correctamente
+   */
+  async setActiveCryptos(cryptoList) {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.storage) {
+        await chrome.storage.local.set({ activeCryptos: cryptoList });
+        console.log('✅ Criptos activas guardadas:', cryptoList);
+        return true;
+      }
+    } catch (error) {
+      console.error('❌ Error guardando criptos activas:', error);
+    }
+    return false;
+  }
+
   // NUEVO: Obtener precios de dólar por banco desde dolarito.ar
   async fetchDolaritoBankRates() {
     try {
       const html = await this.fetchHTML('https://www.dolarito.ar/cotizacion/bancos');
-      
+
       if (!html) {
         console.warn('⚠️ No se pudo obtener HTML de Dolarito para precios bancarios');
         return null;
@@ -114,7 +422,7 @@ class DataService {
       const quotations = bankData.quotations || [];
 
       const bankRates = {};
-      
+
       for (const quote of quotations) {
         const bankName = quote.name?.trim();
         const buyPrice = parseFloat(quote.buy);
@@ -123,7 +431,7 @@ class DataService {
         if (bankName && !isNaN(buyPrice) && !isNaN(sellPrice) && buyPrice > 0 && sellPrice > 0) {
           // NUEVO v5.0.31: Usar código de banco como key para consistencia con selectedBanks
           const bankCode = this.getBankCode(bankName);
-          
+
           bankRates[bankCode] = {
             name: bankName,
             compra: sellPrice,  // FIX v5.0.35: Usar sellPrice (precio que pagamos al banco)
@@ -148,14 +456,14 @@ class DataService {
   async fetchCriptoYaBankRates() {
     try {
       const data = await this.fetchWithRateLimit('https://criptoya.com/api/bancostodos');
-      
+
       if (!data || typeof data !== 'object') {
         console.warn('⚠️ No se pudo obtener datos de CriptoYa bancos');
         return null;
       }
 
       const bankRates = {};
-      
+
       // La API retorna un objeto con bancos como claves
       for (const [bankCode, rates] of Object.entries(data)) {
         const compra = parseFloat(rates.ask);
@@ -203,7 +511,7 @@ class DataService {
       'provincia': 'Banco Provincia',
       'columbia': 'Banco Columbia'
     };
-    
+
     return bankNames[code] || code.charAt(0).toUpperCase() + code.slice(1);
   }
 
@@ -234,7 +542,7 @@ class DataService {
       'Banco Columbia': 'columbia',
       'Banco Macro': 'macro'
     };
-    
+
     return bankCodes[fullName] || fullName.toLowerCase().replace(/[^a-z]/g, '');
   }
 
@@ -279,10 +587,10 @@ class DataService {
       // Fallback: intentar cada fuente por separado
       const dolarito = await this.fetchDolaritoBankRates();
       if (dolarito) return dolarito;
-      
+
       const criptoya = await this.fetchCriptoYaBankRates();
       if (criptoya) return criptoya;
-      
+
       return null;
     }
   }

@@ -4,19 +4,41 @@
 
 /* VARIABLES DE DISEÑO - SISTEMA UNIFICADO */
 :root {
-  /* 🎨 PALETA DE COLORES */
+  /* 🎨 DARK GRADIENT THEME (TradingView Style) */
+  --bg-primary: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 100%);
+  --bg-secondary: linear-gradient(135deg, #1a1f2e 0%, #252b3d 100%);
+  --bg-tertiary: #252b3d;
+  --bg-dark: #0a0e1a;
+  --bg-darker: #050810;
+
+  /* Acentos principales */
   --primary-blue: #3b82f6;
   --primary-blue-dark: #1e3a8a;
   --primary-blue-light: #60a5fa;
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-tertiary: #334155;
+  --accent-cyan: #06b6d4;
+  --accent-purple: #a855f7;
+
+  /* Profit colors (TradingView style) */
+  --profit-green: #10b981;
+  --profit-green-dark: #059669;
+  --profit-green-light: #34d399;
+  --profit-green-glow: rgba(16, 185, 129, 0.4);
+
+  --loss-red: #ef4444;
+  --loss-red-dark: #dc2626;
+  --loss-red-glow: rgba(239, 68, 68, 0.4);
+
+  /* Text colors */
   --text-primary: #e1e8ed;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
+  --text-dim: #475569;
+
+  /* Status colors */
   --success: #10b981;
   --warning: #f59e0b;
   --error: #ef4444;
+  --info: #06b6d4;
 
   /* 📏 ESPACIADO UNIFICADO */
   --spacing-xs: 4px;
@@ -28,12 +50,12 @@
   --spacing-3xl: 32px;
 
   /* 📖 TIPOGRAFÍA UNIFICADA */
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
-  --font-size-base: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.25rem;
-  --font-size-2xl: 1.5rem;
+  --font-size-xs: 0.7rem;
+  --font-size-sm: 0.8rem;
+  --font-size-base: 0.9rem;
+  --font-size-lg: 1rem;
+  --font-size-xl: 1.1rem;
+  --font-size-2xl: 1.3rem;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
@@ -51,13 +73,16 @@
   --border-radius-md: 8px;
   --border-radius-lg: 12px;
   --border-radius-xl: 16px;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 20px -3px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 35px -5px rgba(0, 0, 0, 0.6);
+  --shadow-glow-green: 0 0 20px var(--profit-green-glow);
+  --shadow-glow-red: 0 0 20px var(--loss-red-glow);
 
   /* 📝 INPUTS UNIFICADOS */
-  --input-bg: rgba(15, 23, 42, 0.6);
+  --input-bg: rgba(10, 14, 26, 0.7);
   --input-border: rgba(59, 130, 246, 0.3);
   --input-border-focus: #3b82f6;
   --input-shadow-focus: 0 0 0 3px rgba(59, 130, 246, 0.2);
@@ -65,12 +90,13 @@
   --input-padding: 8px 12px;
   --input-transition: all 0.3s ease;
 
-  /* 🃏 CARDS UNIFICADAS */
-  --card-bg: linear-gradient(135deg, rgba(30, 58, 138, 0.15) 0%, rgba(15, 23, 42, 0.3) 100%);
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-card-hover: 0 6px 16px rgba(59, 130, 246, 0.25);
-  --border-card: 1px solid rgba(59, 130, 246, 0.2);
-  --border-hover: rgba(59, 130, 246, 0.4);
+  /* 🃏 CARDS DARK GRADIENT */
+  --card-bg: linear-gradient(135deg, rgba(26, 31, 46, 0.8) 0%, rgba(37, 43, 61, 0.6) 100%);
+  --card-bg-hover: linear-gradient(135deg, rgba(26, 31, 46, 0.95) 0%, rgba(37, 43, 61, 0.8) 100%);
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --border-card: 1px solid rgba(59, 130, 246, 0.15);
+  --border-card-hover: 1px solid rgba(59, 130, 246, 0.4);
   --backdrop-blur: blur(15px);
   --border-radius: 10px;
   --transition-fast: all 0.2s ease;
@@ -79,23 +105,34 @@
   /* 💰 INDICADORES DE GANANCIA */
   --indicator-width: 3px;
   --indicator-width-high: 4px;
-  --indicator-opacity: 0.8;
+  --indicator-opacity: 0.9;
   --indicator-opacity-hover: 1;
-  --profit-positive: linear-gradient(180deg, #10b981 0%, #059669 100%);
-  --profit-negative: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
-  --profit-high: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
 
-  /* 🎨 GRADIENTES UNIFICADOS */
-  --gradient-primary: linear-gradient(135deg, var(--primary-blue-dark) 0%, var(--primary-blue) 100%);
-  --gradient-primary-hover: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
-  --gradient-success: linear-gradient(135deg, var(--success) 0%, #059669 100%);
-  --gradient-success-hover: linear-gradient(135deg, #059669 0%, #047857 100%);
-  --gradient-warning: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
-  --gradient-error: linear-gradient(135deg, var(--error) 0%, #dc2626 100%);
+  /* Gradientes de profit */
+  --gradient-profit: linear-gradient(180deg, #10b981 0%, #059669 100%);
+  --gradient-profit-high: linear-gradient(180deg, #22c55e 0%, #10b981 100%);
+  --gradient-loss: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+  --gradient-neutral: linear-gradient(180deg, #64748b 0%, #475569 100%);
+
+  /* 🎨 GRADIENTES DINÁMICOS */
+  --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+
+  --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --gradient-success-hover: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+
+  --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  --gradient-error: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+
   --gradient-info: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
   --gradient-info-hover: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+
   --gradient-neutral: linear-gradient(135deg, #64748b 0%, #475569 100%);
   --gradient-neutral-hover: linear-gradient(135deg, #475569 0%, #334155 100%);
+
+  /* Gradientes de fondo */
+  --gradient-bg-dark: linear-gradient(180deg, #0a0e1a 0%, #1a1f2e 100%);
+  --gradient-bg-darker: linear-gradient(180deg, #050810 0%, #0a0e1a 100%);
 }
 
 /* ==========================================
@@ -203,11 +240,14 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-  width: 400px !important; /* ANCHO DE LA VENTANA DE LA EXTENSION */
-  height: 600px !important; /* FORZADO CON !IMPORTANT */
-  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  width: 400px !important;
+  /* ANCHO DE LA VENTANA DE LA EXTENSION */
+  height: 600px !important;
+  /* FORZADO CON !IMPORTANT */
+  background: var(--gradient-bg-dark);
   color: var(--text-primary);
   margin: 0;
   padding: 0;
@@ -219,9 +259,9 @@ html, body {
   flex-direction: column;
   width: 100%;
   height: 100%;
-  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  background: var(--gradient-bg-dark);
   overflow: hidden;
-  box-shadow: inset 0 0 100px rgba(59, 130, 246, 0.05);
+  box-shadow: inset 0 0 100px rgba(59, 130, 246, 0.03);
 }
 
 /* HEADER */
@@ -249,13 +289,22 @@ header::before {
   right: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
   animation: headerPulse 4s ease-in-out infinite;
 }
 
 @keyframes headerPulse {
-  0%, 100% { transform: scale(1); opacity: 0.3; }
-  50% { transform: scale(1.05); opacity: 0.5; }
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 0.5;
+  }
 }
 
 .header-content {
@@ -398,8 +447,17 @@ header::before {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(1.1); }
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
 }
 
 .update-text {
@@ -539,6 +597,7 @@ header::before {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -645,7 +704,8 @@ header::before {
   border-bottom: 1px solid rgba(59, 130, 246, 0.2);
   padding: 0;
   gap: 0;
-  min-width: 300px; /* ANCHO MÍNIMO FORZADO PARA CONTENEDOR */
+  min-width: 300px;
+  /* ANCHO MÍNIMO FORZADO PARA CONTENEDOR */
 }
 
 .tab {
@@ -660,7 +720,8 @@ header::before {
   transition: all 0.2s ease;
   border-radius: 0;
   position: relative;
-  min-width: 100px; /* ANCHO MÍNIMO FORZADO */
+  min-width: 100px;
+  /* ANCHO MÍNIMO FORZADO */
 }
 
 .tab::after {
@@ -684,7 +745,8 @@ header::before {
 .tab.active {
   color: #3b82f6;
   background: rgba(59, 130, 246, 0.12);
-  width: 300p;;
+  width: 300p;
+  ;
 
 }
 
@@ -724,8 +786,15 @@ main::-webkit-scrollbar-thumb {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* CARDS */
@@ -1023,6 +1092,7 @@ main::-webkit-scrollbar-thumb {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1272,9 +1342,12 @@ main::-webkit-scrollbar-thumb {
 }
 
 @keyframes pulseGlow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 4px 16px rgba(245, 158, 11, 0.5);
   }
+
   50% {
     box-shadow: 0 8px 24px rgba(245, 158, 11, 0.8);
     transform: scale(1.05);
@@ -1370,8 +1443,15 @@ main::-webkit-scrollbar-thumb {
 }
 
 @keyframes fadeInOut {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
+
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
 
 .spinner {
@@ -1385,7 +1465,9 @@ main::-webkit-scrollbar-thumb {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .error-message {
@@ -1632,7 +1714,9 @@ main::-webkit-scrollbar-thumb {
    ESTILOS PARA CARDS DE EXCHANGES
    ========================================== */
 
-.usdt-card, .broker-card, .binance-card {
+.usdt-card,
+.broker-card,
+.binance-card {
   background: linear-gradient(135deg, rgba(30, 58, 138, 0.15) 0%, rgba(15, 23, 42, 0.3) 100%);
   backdrop-filter: blur(10px);
   border-radius: 10px;
@@ -1645,26 +1729,33 @@ main::-webkit-scrollbar-thumb {
   align-items: center;
 }
 
-.usdt-card:hover, .broker-card:hover, .binance-card:hover {
+.usdt-card:hover,
+.broker-card:hover,
+.binance-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
   border-color: rgba(59, 130, 246, 0.3);
 }
 
-.usdt-name, .broker-name, .binance-name {
+.usdt-name,
+.broker-name,
+.binance-name {
   color: #e1e8ed;
   font-size: 0.9em;
   font-weight: 600;
   flex: 1;
 }
 
-.usdt-prices, .broker-prices, .binance-prices {
+.usdt-prices,
+.broker-prices,
+.binance-prices {
   display: flex;
   gap: 12px;
   align-items: center;
 }
 
-.price-bid, .price-ask {
+.price-bid,
+.price-ask {
   color: #cbd5e1;
   font-size: 0.85em;
   font-weight: 500;
@@ -1683,7 +1774,9 @@ main::-webkit-scrollbar-thumb {
 }
 
 /* Grids para las cards de exchanges */
-.usdt-grid, .brokers-grid, .binance-grid {
+.usdt-grid,
+.brokers-grid,
+.binance-grid {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -1874,8 +1967,13 @@ main::-webkit-scrollbar-thumb {
 }
 
 @keyframes bestBankGlow {
-  0% { box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3); }
-  100% { box-shadow: 0 8px 24px rgba(34, 197, 94, 0.5), 0 0 30px rgba(34, 197, 94, 0.2); }
+  0% {
+    box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
+  }
+
+  100% {
+    box-shadow: 0 8px 24px rgba(34, 197, 94, 0.5), 0 0 30px rgba(34, 197, 94, 0.2);
+  }
 }
 
 .best-bank-header {
@@ -2463,9 +2561,18 @@ footer {
 
 /* RESPONSIVE */
 @media (max-width: 500px) {
-  body { width: 100%; }
-  .header-content h1 { font-size: 1.5em; }
-  .tab { font-size: 0.85em; padding: 10px 12px; }
+  body {
+    width: 100%;
+  }
+
+  .header-content h1 {
+    font-size: 1.5em;
+  }
+
+  .tab {
+    font-size: 0.85em;
+    padding: 10px 12px;
+  }
 }
 
 /* ==========================================
@@ -2492,6 +2599,7 @@ footer {
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -2510,8 +2618,15 @@ footer {
 }
 
 @keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 .broker-info h3 {
@@ -2535,6 +2650,7 @@ footer {
 .profit-display-enhanced {
   text-align: right;
 }
+
 .profit-percentage {
   font-size: 2.2em;
   font-weight: 800;
@@ -2563,8 +2679,13 @@ footer {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .progress-step {
@@ -2606,9 +2727,12 @@ footer {
 }
 
 @keyframes dotPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
   }
+
   50% {
     box-shadow: 0 0 30px rgba(59, 130, 246, 0.9);
   }
@@ -2738,7 +2862,8 @@ footer {
 
 .step-details-grid {
   display: grid;
-  grid-template-columns: 1fr; /* Una columna para mejor adaptabilidad */
+  grid-template-columns: 1fr;
+  /* Una columna para mejor adaptabilidad */
   gap: 8px;
   margin-bottom: 12px;
 }
@@ -2899,6 +3024,7 @@ footer {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -3016,9 +3142,12 @@ footer {
 }
 
 @keyframes bounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-4px);
   }
@@ -3075,8 +3204,15 @@ footer {
 }
 
 @keyframes rotate {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(10deg); }
+
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  50% {
+    transform: rotate(10deg);
+  }
 }
 
 .result-content {
@@ -3211,8 +3347,10 @@ footer {
   background: linear-gradient(135deg, rgba(30, 58, 138, 0.2) 0%, rgba(15, 23, 42, 0.4) 100%);
   backdrop-filter: blur(20px);
   border-radius: 12px;
-  padding: 8px 12px; /* Reducido para diseño más compacto */
-  margin-bottom: 12px; /* Reducido para diseño más compacto */
+  padding: 8px 12px;
+  /* Reducido para diseño más compacto */
+  margin-bottom: 12px;
+  /* Reducido para diseño más compacto */
   border: 1px solid rgba(59, 130, 246, 0.25);
   animation: slideInDown 0.5s ease-out;
 }
@@ -3223,7 +3361,8 @@ footer {
 
 .filter-buttons {
   display: flex;
-  gap: 4px; /* Más compacto */
+  gap: 4px;
+  /* Más compacto */
   justify-content: flex-start;
   flex-wrap: wrap;
 }
@@ -3232,14 +3371,18 @@ footer {
   position: relative;
   background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.4) 100%);
   border: 2px solid rgba(71, 85, 105, 0.5);
-  border-radius: 20px; /* Más redondeado para estilo chip */
-  padding: 4px 8px; /* Aún más compacto */
+  border-radius: 20px;
+  /* Más redondeado para estilo chip */
+  padding: 4px 8px;
+  /* Aún más compacto */
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
-  gap: 2px; /* Muy compacto para botones pequeños */
-  min-height: 28px; /* Aún más pequeño */
+  gap: 2px;
+  /* Muy compacto para botones pequeños */
+  min-height: 28px;
+  /* Aún más pequeño */
   font-size: 0.85em;
   font-weight: 500;
   color: #e1e8ed;
@@ -3267,13 +3410,22 @@ footer {
 }
 
 @keyframes bounceIn {
-  0% { transform: scale(0.3); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(0.3);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 .filter-btn .btn-icon {
-  font-size: 1.2em; /* Reducido para botones más pequeños */
+  font-size: 1.2em;
+  /* Reducido para botones más pequeños */
   transition: transform 0.3s ease;
   opacity: 0.9;
 }
@@ -3289,11 +3441,14 @@ footer {
   right: -4px;
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
-  font-size: 0.6em; /* Reducido para botones más pequeños */
+  font-size: 0.6em;
+  /* Reducido para botones más pequeños */
   font-weight: 700;
-  padding: 2px 5px; /* Reducido */
+  padding: 2px 5px;
+  /* Reducido */
   border-radius: 8px;
-  min-width: 18px; /* Reducido */
+  min-width: 18px;
+  /* Reducido */
   text-align: center;
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
   border: 2px solid rgba(15, 23, 42, 0.8);
@@ -3368,9 +3523,12 @@ p.info {
 }
 
 @keyframes pulse-info {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
   }
+
   50% {
     box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
   }
@@ -3404,7 +3562,7 @@ p.error {
   font-size: 1.3em;
 }
 
-.risk-matrix-section > p {
+.risk-matrix-section>p {
   color: #94a3b8;
   margin-bottom: 20px;
   font-size: 0.9em;
@@ -3435,9 +3593,11 @@ p.error {
 
 .matrix-control-item input {
   background: var(--input-bg);
-  border: 1px solid rgba(71, 85, 105, 0.5); /* Mantiene borde gris específico */
+  border: 1px solid rgba(71, 85, 105, 0.5);
+  /* Mantiene borde gris específico */
   border-radius: var(--input-radius);
-  padding: 8px 10px; /* Padding específico */
+  padding: 8px 10px;
+  /* Padding específico */
   color: var(--text-primary);
   font-size: var(--font-size-sm);
   transition: var(--input-transition);
@@ -3446,7 +3606,8 @@ p.error {
 .matrix-control-item input:focus {
   outline: none;
   border-color: var(--input-border-focus);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); /* Sombra más sutil */
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  /* Sombra más sutil */
 }
 
 .matrix-generate-btn {
@@ -3617,12 +3778,14 @@ p.error {
 
 .filter-item input {
   padding: var(--input-padding);
-  background: rgba(30, 41, 59, 0.8); /* Background específico */
+  background: rgba(30, 41, 59, 0.8);
+  /* Background específico */
   border: 1px solid rgba(71, 85, 105, 0.5);
   border-radius: var(--input-radius);
   color: var(--text-primary);
   font-size: var(--font-size-sm);
-  transition: all 0.2s ease; /* Transición más rápida */
+  transition: all 0.2s ease;
+  /* Transición más rápida */
 }
 
 .filter-item input:focus {
@@ -3720,13 +3883,29 @@ p.error {
 }
 
 @keyframes pulseWarning {
-  0%, 100% { opacity: 0.9; }
-  50% { opacity: 1; }
+
+  0%,
+  100% {
+    opacity: 0.9;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
 
 @keyframes pulseError {
-  0%, 100% { opacity: 0.8; box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
-  50% { opacity: 1; box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); }
+
+  0%,
+  100% {
+    opacity: 0.8;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+  }
+
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+  }
 }
 
 .freshness-indicator {
@@ -3745,8 +3924,15 @@ p.error {
 }
 
 @keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-3px);
+  }
 }
 
 /* Indicadores de riesgo en rutas */
@@ -3782,8 +3968,16 @@ p.error {
 }
 
 @keyframes pulseHighRisk {
-  0%, 100% { opacity: 0.9; }
-  50% { opacity: 1; box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
+
+  0%,
+  100% {
+    opacity: 0.9;
+  }
+
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+  }
 }
 
 .risk-text {
@@ -3927,6 +4121,7 @@ p.error {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -3946,8 +4141,15 @@ p.error {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.9; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.9;
+  }
 }
 
 .warning-banner.stale-data {
@@ -4361,6 +4563,7 @@ p.error {
     opacity: 0;
     transform: scale(0.9) translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -4535,6 +4738,7 @@ p.error {
     opacity: 0;
     transform: translateX(100%);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -4741,6 +4945,7 @@ p.error {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -4961,6 +5166,7 @@ p.error {
     transform: scale(0.95) translateY(-10px);
     max-height: 0;
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -5034,6 +5240,7 @@ p.error {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -5310,8 +5517,13 @@ p.error {
 
 /* 🔄 ANIMACIONES REUTILIZABLES */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideIn {
@@ -5319,6 +5531,7 @@ p.error {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -5326,8 +5539,15 @@ p.error {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
 }
 
 /* Clases de animación */
@@ -5594,10 +5814,21 @@ p.error {
   border-color: rgba(59, 130, 246, 0.3);
 }
 
-.step-simple[data-step="1"]::before { background: linear-gradient(180deg, #10b981 0%, #059669 100%); }
-.step-simple[data-step="2"]::before { background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%); }
-.step-simple[data-step="3"]::before { background: linear-gradient(180deg, #3b82f6 0%, #1e3a8a 100%); }
-.step-simple[data-step="4"]::before { background: linear-gradient(180deg, #8b5cf6 0%, #6d28d9 100%); }
+.step-simple[data-step="1"]::before {
+  background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+}
+
+.step-simple[data-step="2"]::before {
+  background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+}
+
+.step-simple[data-step="3"]::before {
+  background: linear-gradient(180deg, #3b82f6 0%, #1e3a8a 100%);
+}
+
+.step-simple[data-step="4"]::before {
+  background: linear-gradient(180deg, #8b5cf6 0%, #6d28d9 100%);
+}
 
 .step-number {
   display: flex;
@@ -5616,10 +5847,21 @@ p.error {
   z-index: 1;
 }
 
-.step-simple[data-step="1"] .step-number { background: linear-gradient(135deg, #059669 0%, #10b981 100%); }
-.step-simple[data-step="2"] .step-number { background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%); }
-.step-simple[data-step="3"] .step-number { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
-.step-simple[data-step="4"] .step-number { background: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%); }
+.step-simple[data-step="1"] .step-number {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+}
+
+.step-simple[data-step="2"] .step-number {
+  background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+}
+
+.step-simple[data-step="3"] .step-number {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+}
+
+.step-simple[data-step="4"] .step-number {
+  background: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%);
+}
 
 .step-simple-content {
   flex: 1;
@@ -5766,6 +6008,7 @@ p.error {
     opacity: 0;
     transform: translateX(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -5776,10 +6019,21 @@ p.error {
   animation: stepSlideIn 0.3s ease-out;
 }
 
-.step-simple:nth-child(1) { animation-delay: 0.1s; }
-.step-simple:nth-child(2) { animation-delay: 0.2s; }
-.step-simple:nth-child(3) { animation-delay: 0.3s; }
-.step-simple:nth-child(4) { animation-delay: 0.4s; }
+.step-simple:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.step-simple:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.step-simple:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.step-simple:nth-child(4) {
+  animation-delay: 0.4s;
+}
 
 .step-simple:nth-child(1),
 .step-simple:nth-child(2),
@@ -6084,6 +6338,7 @@ p.error {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -6106,4 +6361,3 @@ p.error {
     padding: var(--spacing-sm);
   }
 }
-

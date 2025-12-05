@@ -69,9 +69,10 @@
   </div>
 
   <div class="tabs">
-    <button class="tab active" data-tab="routes">🎯 Rutas</button>
+    <button class="tab active" data-tab="routes">💵 Arbitraje Fiat</button>
+    <button class="tab" data-tab="crypto-arbitrage">🔄 Arbitraje Cripto</button>
     <button class="tab" data-tab="simulator">🧮 Simulador</button>
-    <button class="tab" data-tab="banks">🏦 Bancos</button>
+    <button class="tab" data-tab="banks">🏦 Exchanges</button>
   </div>
 
   <main>
@@ -102,6 +103,51 @@
         <p>Calculando rutas optimizadas...</p>
       </div>
       <div id="optimized-routes"></div>
+    </section>
+
+    <!-- TAB: Arbitraje Cripto (NUEVO) -->
+    <section id="tab-crypto-arbitrage" class="tab-content">
+      <!-- Selector de Criptomoneda -->
+      <div class="crypto-selector">
+        <label for="crypto-filter">Filtrar por cripto:</label>
+        <select id="crypto-filter" class="crypto-dropdown">
+          <option value="all">Todas las criptos</option>
+          <option value="BTC">Bitcoin (BTC)</option>
+          <option value="ETH">Ethereum (ETH)</option>
+          <option value="USDC">USD Coin (USDC)</option>
+          <option value="DAI">DAI</option>
+          <option value="BNB">Binance Coin (BNB)</option>
+          <option value="SOL">Solana (SOL)</option>
+          <option value="ADA">Cardano (ADA)</option>
+          <option value="XRP">Ripple (XRP)</option>
+          <option value="MATIC">Polygon (MATIC)</option>
+          <option value="DOGE">Dogecoin (DOGE)</option>
+          <option value="USDT">Tether (USDT)</option>
+        </select>
+      </div>
+
+      <!-- Filtros de Operación -->
+      <div class="filter-controls">
+        <div class="filter-buttons">
+          <button class="filter-btn-operation active" data-filter="all" title="Mostrar todas las operaciones">
+            <span>🎯 Todas</span>
+          </button>
+          <button class="filter-btn-operation" data-filter="direct" title="Solo operaciones directas (sin P2P)">
+            <span>⚡ Direct</span>
+          </button>
+          <button class="filter-btn-operation" data-filter="p2p" title="Solo operaciones P2P">
+            <span>🤝 P2P</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Contenedor de Rutas Crypto -->
+      <div id="crypto-routes-container">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Calculando oportunidades de arbitraje crypto...</p>
+        </div>
+      </div>
     </section>
 
     <!-- TAB: Simulador con Monto Personalizado -->

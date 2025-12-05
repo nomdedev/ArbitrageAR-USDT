@@ -26,7 +26,7 @@ try {
   if (utils && typeof utils.getProfitClasses === 'function') {
     global.getProfitClasses = utils.getProfitClasses;
   }
-} catch(e) {
+} catch (e) {
   // En navegador 'require' no está definido: dejamos que getProfitClasses esté definido en el scope global cuando se cargue desde <script>
 }
 
@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupRouteDetailsModal(); // NUEVO: Configurar modal de detalles de ruta
   checkForUpdates(); // NUEVO: Verificar actualizaciones disponibles
   loadUserSettings(); // NUEVO v5.0.28: Cargar configuración del usuario
+  setupCryptoArbitrageTab(); // NUEVO: Configurar pestaña de arbitraje cripto
   fetchAndDisplay();
   setupStorageListener(); // NUEVO: Escuchar cambios en configuración
   // loadBanksData(); // Ahora se carga solo cuando se activa la pestaña de bancos
@@ -113,7 +114,7 @@ function formatCommissionPercent(num) {
 // NUEVO: Obtener texto para mostrar la fuente del precio del dólar
 function getDollarSourceDisplay(official) {
   if (!official || !official.source) return 'N/A';
-  
+
   switch (official.source) {
     case 'manual':
       return '👤 Manual';
@@ -205,16 +206,16 @@ function getDataFreshnessLevel(timestamp) {
  */
 function validateRouteCalculations(route) {
   const warnings = [];
-  
+
   // Validar profit razonable
   if (route.profitPercentage > 50) {
     warnings.push('Profit extremadamente alto (>50%), verificar datos');
   }
-  
+
   if (route.profitPercentage < -90) {
     warnings.push('Pérdida extrema (<-90%), verificar datos');
   }
-  
+
   // Validar USD/USDT ratio
   if (route.calculation?.usdToUsdtRate) {
     const ratio = route.calculation.usdToUsdtRate;
@@ -222,16 +223,16 @@ function validateRouteCalculations(route) {
       warnings.push(`Ratio USD/USDT fuera de rango (${ratio.toFixed(4)})`);
     }
   }
-  
+
   // Validar montos
   if (route.calculation?.initialAmount <= 0) {
     warnings.push('Monto inicial inválido');
   }
-  
+
   if (route.calculation?.finalAmount < 0) {
     warnings.push('Monto final negativo');
   }
-  
+
   return {
     isValid: warnings.length === 0,
     warnings
@@ -281,7 +282,7 @@ function loadUserSettings() {
       // NUEVO v5.0.56: Modos de display adicionales
       sortByProfit: settings.sortByProfit !== false, // Por defecto ordenar por profit
       showOnlyProfitable: settings.showOnlyProfitable || false, // Por defecto mostrar todas
-      
+
       // Simulador
       defaultSimAmount: settings.defaultSimAmount || 1000000,
 
@@ -337,24 +338,24 @@ function updateDataStatusIndicator(data) {
 
   // Verificar salud del sistema
   const health = window.validationService.generateSystemHealthReport(data);
-  
+
   // Obtener frescura del precio oficial
   const freshness = window.validationService.getDataFreshnessLevel(data.oficial?.timestamp);
-  
+
   // Construir HTML del indicador
   let html = `<span class="freshness-indicator" style="color: ${freshness.color}">${freshness.icon}</span>`;
-  
+
   if (freshness.ageMinutes !== null) {
     html += ` <span class="age-text">Datos: hace ${freshness.ageMinutes} min</span>`;
   } else {
     html += ` <span class="age-text">Datos: Sin timestamp</span>`;
   }
-  
+
   // Mostrar advertencias si hay
   if (health.warnings.length > 0) {
     html += ` <span class="health-warning" title="${health.warnings.join(', ')}">⚠️</span>`;
   }
-  
+
   statusEl.innerHTML = html;
   statusEl.className = `data-status ${freshness.level}`;
 }
@@ -364,13 +365,13 @@ function updateDataStatusIndicator(data) {
  */
 function addRiskIndicatorToRoute(route, params) {
   if (!window.validationService) return '';
-  
+
   const risk = window.validationService.calculateRouteRiskLevel(
     route,
     route.profitPercentage,
     params
   );
-  
+
   return `
     <div class="risk-indicator risk-${risk.level}" title="Nivel de riesgo: ${risk.level}">
       ${risk.icon} <span class="risk-text">${risk.level === 'low' ? 'Bajo' : risk.level === 'medium' ? 'Medio' : 'Alto'}</span>
@@ -382,7 +383,7 @@ function addRiskIndicatorToRoute(route, params) {
 // Mostrar indicador de salud del mercado (versión compacta)
 function displayMarketHealth(health) {
   const container = document.getElementById('marketHealth');
-  
+
   if (!health) {
     container.style.display = 'none';
     return;
@@ -391,7 +392,7 @@ function displayMarketHealth(health) {
   container.style.display = 'block';
   container.style.backgroundColor = `${health.color}15`; // 15 = opacity
   container.style.borderColor = `${health.color}40`;
-  
+
   // Versión compacta: solo icono + status en una línea
   container.innerHTML = `
     <span class="market-icon">${health.icon}</span>
@@ -464,13 +465,13 @@ function applyP2PFilter() {
     console.warn('⚠️ No hay rutas disponibles para filtrar');
     return;
   }
-  
+
   // NUEVO v5.0.75: Poblar exchanges y usar filtros avanzados
   populateExchangeFilter();
   applyAllFilters();
   updateFilterCounts();
   return;
-  
+
   // --- CÓDIGO ANTERIOR COMENTADO PARA REFERENCIA ---
   /*
 
@@ -514,15 +515,15 @@ function updateFilterCounts() {
   const allCount = allRoutes.length;
   const p2pCount = allRoutes.filter(route => isP2PRoute(route)).length;
   const noP2pCount = allRoutes.filter(route => !isP2PRoute(route)).length;
-  
+
   const countAll = document.getElementById('count-all');
   const countP2P = document.getElementById('count-p2p');
   const countNoP2P = document.getElementById('count-no-p2p');
-  
+
   if (countAll) countAll.textContent = allCount;
   if (countP2P) countP2P.textContent = p2pCount;
   if (countNoP2P) countNoP2P.textContent = noP2pCount;
-  
+
   log(`📊 Contadores actualizados - Total: ${allCount}, P2P: ${p2pCount}, No P2P: ${noP2pCount}`);
 }
 
@@ -537,7 +538,7 @@ function setupAdvancedFilters() {
   // Toggle panel
   const toggleBtn = document.getElementById('toggle-advanced-filters');
   const panel = document.getElementById('advanced-filters-panel');
-  
+
   if (toggleBtn && panel) {
     toggleBtn.addEventListener('click', () => {
       const isVisible = panel.style.display !== 'none';
@@ -553,7 +554,7 @@ function setupAdvancedFilters() {
   // Filtro de profit mínimo - Actualizar valor mostrado
   const profitRange = document.getElementById('filter-profit-min');
   const profitValue = document.getElementById('filter-profit-value');
-  
+
   if (profitRange && profitValue) {
     profitRange.addEventListener('input', (e) => {
       const value = parseFloat(e.target.value);
@@ -775,25 +776,25 @@ function resetAdvancedFilters() {
 // Navegación entre tabs
 function setupTabNavigation() {
   const tabs = document.querySelectorAll('.tab');
-  
+
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       const tabId = tab.dataset.tab;
-      
+
       // Remover active de todos
       tabs.forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      
+
       // Activar el seleccionado
       tab.classList.add('active');
       const targetContent = document.getElementById(`tab-${tabId}`);
-      
+
       if (targetContent) {
         targetContent.classList.add('active');
       } else {
         console.error(`❌ No se encontró el contenido para tab-${tabId}`);
       }
-      
+
       // NUEVO v5.0: Si se abre el simulador, aplicar monto default
       if (tabId === 'simulator' && userSettings?.defaultSimAmount) {
         const amountInput = document.getElementById('sim-amount');
@@ -817,12 +818,12 @@ function setupRefreshButton() {
     fetchAndDisplay();
     loadBanksData();
   });
-  
+
   // Botón de configuración - Mostrar/ocultar filtros avanzados
   document.getElementById('settings').addEventListener('click', () => {
     const panel = document.getElementById('advanced-filters-panel');
     const toggleBtn = document.getElementById('toggle-advanced-filters');
-    
+
     if (panel && toggleBtn) {
       // Simular click en el botón de toggle para mostrar/ocultar el panel
       toggleBtn.click();
@@ -937,18 +938,18 @@ function handleSuccessfulData(data, container) {
   });
 
   currentData = data;
-  
+
   // Actualizar timestamp de última actualización
   const lastUpdateEl = document.getElementById('last-update');
   if (lastUpdateEl && data.lastUpdate) {
     updateTimestampWithFreshness(lastUpdateEl, data.lastUpdate);
   }
-  
+
   displayMarketHealth(data.marketHealth);
-  
+
   // NUEVO v5.0.28: Actualizar indicador de estado de datos
   updateDataStatusIndicator(data);
-  
+
   // NUEVO: Mostrar información del precio del dólar
   if (data.oficial) {
     console.log('📊 [SUCCESS] Llamando displayDollarInfo() con data.oficial');
@@ -994,23 +995,23 @@ function handleSuccessfulData(data, container) {
 // Obtener y mostrar datos de arbitraje (con retry automático)
 async function fetchAndDisplay(retryCount = 0) {
   console.log(`🔄 Cargando datos de arbitraje... (intento ${retryCount + 1})`);
-  
+
   const container = document.getElementById('optimized-routes');
   const loading = document.getElementById('loading');
   const maxRetries = 3;
-  
+
   loading.style.display = 'block';
   container.innerHTML = '';
-  
+
   // NUEVO v5.0: Cargar preferencias del usuario
   const settings = await chrome.storage.local.get('notificationSettings');
   userSettings = settings.notificationSettings || {};
-  
+
   try {
     console.log('📤 [POPUP] Solicitando datos al background...');
     console.log('📤 [POPUP] Verificando runtime disponible:', !!chrome.runtime);
     console.log('📤 [POPUP] Verificando sendMessage disponible:', !!chrome.runtime?.sendMessage);
-    
+
     // Timeout para detectar si el callback nunca se ejecuta
     let responseReceived = false;
     const timeoutId = setTimeout(() => {
@@ -1032,9 +1033,9 @@ async function fetchAndDisplay(retryCount = 0) {
         `;
       }
     }, 15000); // Aumentado a 15 segundos
-    
+
     console.log('📤 [POPUP] Enviando mensaje { action: "getArbitrages" }...');
-    
+
     // Verificar que chrome.runtime está disponible antes de enviar
     if (!chrome.runtime) {
       console.error('❌ [POPUP] chrome.runtime no está disponible');
@@ -1043,12 +1044,12 @@ async function fetchAndDisplay(retryCount = 0) {
       clearTimeout(timeoutId);
       return;
     }
-    
+
     try {
       chrome.runtime.sendMessage({ action: 'getArbitrages' }, data => {
         responseReceived = true;
         clearTimeout(timeoutId);
-        
+
         console.log('📥 [POPUP] Callback ejecutado - Datos recibidos del background:', {
           tieneData: !!data,
           oficialCompra: data?.oficial?.compra,
@@ -1059,7 +1060,7 @@ async function fetchAndDisplay(retryCount = 0) {
           usingCache: data?.usingCache
         });
         console.log('📥 [POPUP] chrome.runtime.lastError:', chrome.runtime.lastError);
-        
+
         if (chrome.runtime.lastError) {
           console.error('❌ Error en chrome.runtime:', chrome.runtime.lastError);
           loading.style.display = 'none';
@@ -1072,20 +1073,20 @@ async function fetchAndDisplay(retryCount = 0) {
           `;
           return;
         }
-      
-      console.log('📥 Procesando respuesta del background...');
-      
-      loading.style.display = 'none';
-      
-      if (!data) {
-        console.error('❌ No se recibió data del background');
-        handleNoData(container);
-        return;
-      }
 
-      // NUEVO: Manejar errores específicos del background
-      if (data.timeout) {
-        container.innerHTML = `
+        console.log('📥 Procesando respuesta del background...');
+
+        loading.style.display = 'none';
+
+        if (!data) {
+          console.error('❌ No se recibió data del background');
+          handleNoData(container);
+          return;
+        }
+
+        // NUEVO: Manejar errores específicos del background
+        if (data.timeout) {
+          container.innerHTML = `
           <div class="error-container">
             <h3>⏰ Timeout del Background</h3>
             <p>El procesamiento tomó demasiado tiempo.</p>
@@ -1093,11 +1094,11 @@ async function fetchAndDisplay(retryCount = 0) {
             <p><small>Si el problema persiste, recarga la extensión.</small></p>
           </div>
         `;
-        return;
-      }
+          return;
+        }
 
-      if (data.isTimeout) {
-        container.innerHTML = `
+        if (data.isTimeout) {
+          container.innerHTML = `
           <div class="error-container">
             <h3>⏰ Timeout de APIs</h3>
             <p>Las APIs externas no responden.</p>
@@ -1105,11 +1106,11 @@ async function fetchAndDisplay(retryCount = 0) {
             <p><small>Verifica tu conexión a internet.</small></p>
           </div>
         `;
-        return;
-      }
+          return;
+        }
 
-      if (data.backgroundUnhealthy) {
-        container.innerHTML = `
+        if (data.backgroundUnhealthy) {
+          container.innerHTML = `
           <div class="error-container">
             <h3>🏥 Background No Saludable</h3>
             <p>Las APIs externas no están disponibles.</p>
@@ -1117,25 +1118,25 @@ async function fetchAndDisplay(retryCount = 0) {
             <p><small>Esto puede ser temporal. Intenta de nuevo en unos minutos.</small></p>
           </div>
         `;
-        return;
-      }
+          return;
+        }
 
-      console.log('📥 Data válida recibida, procesando...');
-      
-      // Si está inicializando y aún no hay rutas, hacer retry automático
-      if (data.error?.includes('Inicializando') && retryCount < maxRetries) {
-        handleInitializationError(container, data, retryCount, maxRetries);
-        return;
-      }
+        console.log('📥 Data válida recibida, procesando...');
 
-      // Si alcanzamos el límite de reintentos
-      if (data.error && retryCount >= maxRetries) {
-        handleMaxRetriesError(container, data);
-        return;
-      }
-    
-      handleCacheIndicator(data, retryCount);
-      handleSuccessfulData(data, container);
+        // Si está inicializando y aún no hay rutas, hacer retry automático
+        if (data.error?.includes('Inicializando') && retryCount < maxRetries) {
+          handleInitializationError(container, data, retryCount, maxRetries);
+          return;
+        }
+
+        // Si alcanzamos el límite de reintentos
+        if (data.error && retryCount >= maxRetries) {
+          handleMaxRetriesError(container, data);
+          return;
+        }
+
+        handleCacheIndicator(data, retryCount);
+        handleSuccessfulData(data, container);
       });
     } catch (error) {
       console.error('❌ Error enviando mensaje al background:', error);
@@ -1191,7 +1192,7 @@ function applyMinProfitFilter(routes, filterMinProfit) {
   // filterMinProfit por defecto es -10.0% (muestra casi todo)
   // Usuario puede configurar desde -10% hasta +20%
   const minProfit = filterMinProfit ?? -10.0;
-  
+
   const beforeCount = routes.length;
   const filtered = routes.filter(r => r.profitPercentage >= minProfit);
   if (DEBUG_MODE) console.log(`🔧 [POPUP] Filtradas por ganancia mínima ${minProfit}%: ${beforeCount} → ${filtered.length} rutas`);
@@ -1209,7 +1210,7 @@ function applyPreferredExchangesFilter(routes, preferredExchanges) {
   const filtered = routes.filter(route => {
     // Una ruta pasa el filtro si al menos uno de sus exchanges está en la lista preferida
     return preferredExchanges.includes(route.buyExchange) ||
-           (route.sellExchange && preferredExchanges.includes(route.sellExchange));
+      (route.sellExchange && preferredExchanges.includes(route.sellExchange));
   });
 
   if (DEBUG_MODE) console.log(`🔧 [POPUP] Exchanges preferidos (${preferredExchanges.join(', ')}): ${beforeCount} → ${filtered.length} rutas`);
@@ -1245,21 +1246,21 @@ function applyLimit(routes, maxDisplay) {
 function displayArbitrages(arbitrages, official) {
   const container = document.getElementById('arbitrages');
   let html = '';
-  
+
   arbitrages.forEach((arb, index) => {
     // Determinar si es ganancia o pérdida
     const { isNegative, profitClass, profitBadgeClass } = getProfitClasses(arb.profitPercentage);
-    
+
     // Indicadores especiales
     const lowProfitIndicator = arb.profitPercentage >= 0 && arb.profitPercentage < 1 ? '<span class="low-profit-tag">👁️ Solo vista</span>' : '';
     const negativeIndicator = isNegative ? '<span class="negative-tag">⚠️ Pérdida</span>' : '';
-    
+
     // Símbolo según ganancia/pérdida
     const profitSymbol = isNegative ? '' : '+';
-    
+
     // Verificar si hay diferencia entre ganancia bruta y neta
     const hasFees = arb.fees && arb.fees.total > 0;
-    
+
     html += `
       <div class="arbitrage-card ${profitClass}" data-index="${index}">
         <div class="card-header">
@@ -1300,19 +1301,19 @@ function displayArbitrages(arbitrages, official) {
       </div>
     `;
   });
-  
+
   container.innerHTML = html;
-  
+
   // Agregar event listeners a las tarjetas
   document.querySelectorAll('.arbitrage-card').forEach(card => {
-    card.addEventListener('click', function() {
+    card.addEventListener('click', function () {
       const index = parseInt(this.dataset.index);
       selectArbitrage(index);
-      
+
       // Remover selección previa
       document.querySelectorAll('.arbitrage-card').forEach(c => c.classList.remove('selected'));
       this.classList.add('selected');
-      
+
       // Cambiar a la pestaña de guía
       document.querySelector('[data-tab="guide"]').click();
     });
@@ -1458,7 +1459,7 @@ function displayOptimizedRoutes(routes, official) {
   console.log(`🔍 [POPUP] Agregando event listeners a ${routeCards.length} route-cards`);
 
   routeCards.forEach((card, idx) => {
-    card.addEventListener('click', function(e) {
+    card.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
 
@@ -1799,12 +1800,12 @@ function showUsdToUsdtDetails(route) {
 // NUEVA FUNCIÓN v5.0.72: Mostrar guía desde datos de ruta directos (sin índice)
 function showRouteGuideFromData(route) {
   console.log(`🔍 [POPUP] showRouteGuideFromData() llamado con ruta:`, route);
-  
+
   if (!route) {
     console.warn(`❌ [POPUP] No hay datos de ruta disponibles`);
     return;
   }
-  
+
   // Convertir ruta a formato de arbitraje para la guía
   const arbitrage = {
     broker: route.isSingleExchange ? route.buyExchange : `${route.buyExchange} → ${route.sellExchange}`,
@@ -1813,19 +1814,19 @@ function showRouteGuideFromData(route) {
     isSingleExchange: route.isSingleExchange || false,
     profitPercentage: route.profitPercentage || 0,
     officialPrice: route.officialPrice || 0,
-  usdToUsdtRate: (typeof route.usdToUsdtRate === 'number' && isFinite(route.usdToUsdtRate)) ? route.usdToUsdtRate : null,
+    usdToUsdtRate: (typeof route.usdToUsdtRate === 'number' && isFinite(route.usdToUsdtRate)) ? route.usdToUsdtRate : null,
     usdtArsBid: route.usdtArsBid || 0,
     sellPrice: route.usdtArsBid || 0,
     transferFeeUSD: route.transferFeeUSD || 0,
     calculation: route.calculation || {},
     fees: route.fees || { trading: 0, withdrawal: 0 }
   };
-  
+
   console.log('🔄 [POPUP] Arbitrage convertido:', arbitrage);
-  
+
   selectedArbitrage = arbitrage;
   displayStepByStepGuide(arbitrage);
-  
+
   // Cambiar a la pestaña de guía
   const guideTab = document.querySelector('[data-tab="guide"]');
   if (guideTab) {
@@ -1843,16 +1844,16 @@ function showRouteGuide(index) {
   console.log(`🔍 [POPUP] currentData existe:`, !!currentData);
   console.log(`🔍 [POPUP] currentData.optimizedRoutes existe:`, !!currentData?.optimizedRoutes);
   console.log(`🔍 [POPUP] currentData.optimizedRoutes.length:`, currentData?.optimizedRoutes?.length);
-  
+
   if (!currentData?.optimizedRoutes?.[index]) {
     console.warn(`❌ [POPUP] No hay ruta disponible para el índice: ${index}`);
     console.warn(`   currentData:`, currentData);
     return;
   }
-  
+
   const route = currentData.optimizedRoutes[index];
   console.log(`✅ [POPUP] Ruta encontrada para índice ${index}:`, route);
-  
+
   // Convertir ruta a formato de arbitraje para la guía
   const arbitrage = {
     broker: route.isSingleExchange ? route.buyExchange : `${route.buyExchange} → ${route.sellExchange}`,
@@ -1861,19 +1862,19 @@ function showRouteGuide(index) {
     isSingleExchange: route.isSingleExchange || false,
     profitPercentage: route.profitPercentage || route.profitPercent || 0,
     officialPrice: route.officialPrice || 0,
-  usdToUsdtRate: (typeof route.usdToUsdtRate === 'number' && isFinite(route.usdToUsdtRate)) ? route.usdToUsdtRate : null,
+    usdToUsdtRate: (typeof route.usdToUsdtRate === 'number' && isFinite(route.usdToUsdtRate)) ? route.usdToUsdtRate : null,
     usdtArsBid: route.usdtArsBid || 0,
     sellPrice: route.usdtArsBid || 0,
     transferFeeUSD: route.transferFeeUSD || 0,
     calculation: route.calculation || {},
     fees: route.fees || { trading: 0, withdrawal: 0 }
   };
-  
+
   console.log('🔄 [POPUP] Arbitrage convertido:', arbitrage);
-  
+
   selectedArbitrage = arbitrage;
   displayStepByStepGuide(arbitrage);
-  
+
   // Cambiar a la pestaña de guía
   const guideTab = document.querySelector('[data-tab="guide"]');
   if (guideTab) {
@@ -1889,7 +1890,7 @@ function selectArbitrage(index) {
   if (!currentData?.arbitrages?.[index]) {
     return;
   }
-  
+
   selectedArbitrage = currentData.arbitrages[index];
   displayStepByStepGuide(selectedArbitrage);
 }
@@ -1933,7 +1934,7 @@ function setSafeHTML(element, html) {
 function getProfitClasses(profitPercent) {
   const isNegative = profitPercent < 0;
   const isHighProfit = profitPercent > 5;
-  
+
   let profitClass;
   if (isNegative) {
     profitClass = 'negative-profit';
@@ -1942,7 +1943,7 @@ function getProfitClasses(profitPercent) {
   } else {
     profitClass = '';
   }
-  
+
   let profitBadgeClass;
   if (isNegative) {
     profitBadgeClass = 'negative';
@@ -1951,20 +1952,20 @@ function getProfitClasses(profitPercent) {
   } else {
     profitBadgeClass = '';
   }
-  
+
   return { isNegative, profitClass, profitBadgeClass };
 }
 
 // Calcular valores para la guía paso a paso
 function calculateGuideValues(arb) {
   const calc = arb.calculation || {};
-  
+
   // CORREGIDO v5.0.71: Usar profitPercentage de calculation para consistencia
   // Si existe calculation.profitPercentage, usarlo; sino usar el top-level
-  const correctProfitPercentage = calc.profitPercentage !== undefined 
-    ? calc.profitPercentage 
+  const correctProfitPercentage = calc.profitPercentage !== undefined
+    ? calc.profitPercentage
     : arb.profitPercentage || 0;
-  
+
   return {
     estimatedInvestment: calc.initial || 100000,
     officialPrice: arb.officialPrice || 1000,
@@ -1975,7 +1976,7 @@ function calculateGuideValues(arb) {
     finalAmount: calc.finalAmount || (calc.arsFromSale || ((calc.usdtAfterFees || calc.usdPurchased || ((calc.initial || 100000) / (arb.officialPrice || 1000))) * (arb.sellPrice || arb.usdtArsBid || 1000))),
     profit: calc.netProfit || ((calc.finalAmount || calc.arsFromSale || ((calc.usdtAfterFees || calc.usdPurchased || ((calc.initial || 100000) / (arb.officialPrice || 1000))) * (arb.sellPrice || arb.usdtArsBid || 1000))) - (calc.initial || 100000)),
     profitPercentage: correctProfitPercentage,  // USAR EL VALOR CORRECTO
-  usdToUsdtRate: (typeof arb.usdToUsdtRate === 'number' && isFinite(arb.usdToUsdtRate)) ? arb.usdToUsdtRate : null,
+    usdToUsdtRate: (typeof arb.usdToUsdtRate === 'number' && isFinite(arb.usdToUsdtRate)) ? arb.usdToUsdtRate : null,
     usdtArsBid: arb.usdtArsBid || (arb.sellPrice || 1000),
     fees: arb.fees || { trading: 0, withdrawal: 0, total: 0 },
     broker: arb.broker || 'Exchange'
@@ -2037,7 +2038,7 @@ function generateGuideSteps(values) {
             <span class="calc-arrow">→</span>
             <span class="calc-result">${formatNumber(usdtAfterFees)} USDT</span>
           </div>
-          ${ (typeof usdToUsdtRate === 'number' && isFinite(usdToUsdtRate) && usdToUsdtRate > 1.005) ? `
+          ${(typeof usdToUsdtRate === 'number' && isFinite(usdToUsdtRate) && usdToUsdtRate > 1.005) ? `
           <div class="step-simple-warning">
             ⚠️ El exchange cobra ${formatCommissionPercent((usdToUsdtRate - 1) * 100)}% para esta conversión
           </div>
@@ -2642,7 +2643,7 @@ function getBankDisplayName(bankCode) {
     'promedio': 'Promedio Bancos',
     'menor_valor': 'Menor Valor'
   };
-  
+
   return bankNames[bankCode] || bankCode.charAt(0).toUpperCase() + bankCode.slice(1);
 }
 
@@ -2714,19 +2715,19 @@ async function loadBankRates() {
 function updateTimestampWithFreshness(container, timestamp) {
   const date = new Date(timestamp);
   const timeStr = date.toLocaleTimeString('es-AR');
-  
+
   // NUEVO v5.0.74: Indicador de frescura mejorado
   const freshness = getDataFreshnessLevel(timestamp);
-  
+
   container.innerHTML = `
     <span class="freshness-indicator" style="color: ${freshness.color}">${freshness.icon}</span>
     <span class="timestamp-text">${timeStr}</span>
     ${freshness.ageMinutes !== null ? `<span class="age-text">(hace ${freshness.ageMinutes} min)</span>` : ''}
   `;
-  
+
   // Agregar clase CSS según nivel de frescura
   container.className = `last-update-container ${freshness.level}`;
-  
+
   // NUEVO v5.0.74: Mostrar advertencia si datos muy desactualizados
   if (freshness.level === 'stale' && freshness.ageMinutes > 5) {
     showDataFreshnessWarning(freshness.ageMinutes);
@@ -2739,7 +2740,7 @@ function updateTimestampWithFreshness(container, timestamp) {
 function showDataFreshnessWarning(ageMinutes) {
   const warningContainer = document.getElementById('data-warning');
   if (!warningContainer) return;
-  
+
   warningContainer.innerHTML = `
     <div class="warning-banner stale-data">
       <span class="warning-icon">⚠️</span>
@@ -2755,20 +2756,20 @@ function setupAdvancedSimulator() {
   const toggleBtn = document.getElementById('toggle-advanced');
   const advancedConfig = document.getElementById('advanced-config');
   const resetConfigBtn = document.getElementById('btn-reset-config');
-  
+
   // Toggle configuración avanzada
   toggleBtn.addEventListener('click', () => {
     const isVisible = advancedConfig.style.display !== 'none';
     advancedConfig.style.display = isVisible ? 'none' : 'block';
     toggleBtn.textContent = isVisible ? '⚙️ Parámetros de Cálculo' : '🔽 Parámetros de Cálculo';
   });
-  
+
   // Generar matriz de riesgo
   const generateRiskMatrixBtn = document.getElementById('generate-risk-matrix');
   if (generateRiskMatrixBtn) {
     generateRiskMatrixBtn.addEventListener('click', generateRiskMatrix);
   }
-  
+
   // Filtros de la matriz
   const applyFilterBtn = document.getElementById('apply-matrix-filter');
   const resetFilterBtn = document.getElementById('reset-matrix-filter');
@@ -2778,10 +2779,10 @@ function setupAdvancedSimulator() {
   if (resetFilterBtn) {
     resetFilterBtn.addEventListener('click', resetMatrixFilter);
   }
-  
+
   // Reset configuración
   resetConfigBtn.addEventListener('click', resetSimulatorConfig);
-  
+
   // Cargar valores por defecto al iniciar
   loadDefaultSimulatorValues();
 }
@@ -2847,17 +2848,17 @@ function resetSimulatorConfig() {
     matrixMax: document.getElementById('matrix-max-percent'),
     matrixStep: document.getElementById('matrix-step-percent')
   };
-  
+
   // Verificar que todos existan
   const missingElements = Object.entries(elements)
     .filter(([key, value]) => !value)
     .map(([key]) => key);
-  
+
   if (missingElements.length > 0) {
     console.warn('⚠️ Elementos faltantes en resetSimulatorConfig:', missingElements);
     return;
   }
-  
+
   // Reset a valores por defecto
   elements.usdBuy.value = '';
   elements.usdSell.value = '';
@@ -2868,10 +2869,10 @@ function resetSimulatorConfig() {
   elements.matrixMin.value = '0';
   elements.matrixMax.value = '2';
   elements.matrixStep.value = '0.5';
-  
+
   // Recargar valores desde configuración
   loadDefaultSimulatorValues();
-  
+
   console.log('✅ Configuración del simulador reseteada');
 }
 
@@ -3113,23 +3114,23 @@ async function generateRiskMatrix(useCustomParams = false) {
 function applyMatrixFilter() {
   const minProfit = parseFloat(document.getElementById('filter-min-profit').value) || -5;
   const maxProfit = parseFloat(document.getElementById('filter-max-profit').value) || 10;
-  
+
   const matrixTable = document.getElementById('risk-matrix-table');
   if (!matrixTable) return;
-  
+
   const cells = matrixTable.querySelectorAll('td');
   let visibleCount = 0;
   let totalCells = 0;
-  
+
   cells.forEach(cell => {
     // Skip header cells
     if (cell.tagName === 'TH' || cell.querySelector('strong')) return;
-    
+
     const text = cell.textContent.trim();
     if (text.endsWith('%')) {
       totalCells++;
       const profitValue = parseFloat(text.replace('%', ''));
-      
+
       if (profitValue >= minProfit && profitValue <= maxProfit) {
         cell.style.opacity = '1';
         cell.style.backgroundColor = '';
@@ -3140,7 +3141,7 @@ function applyMatrixFilter() {
       }
     }
   });
-  
+
   // Mostrar contador
   const filterResults = document.getElementById('filter-results');
   const filterCount = document.getElementById('filter-count');
@@ -3153,19 +3154,19 @@ function applyMatrixFilter() {
 function resetMatrixFilter() {
   const matrixTable = document.getElementById('risk-matrix-table');
   if (!matrixTable) return;
-  
+
   const cells = matrixTable.querySelectorAll('td');
   cells.forEach(cell => {
     cell.style.opacity = '1';
     cell.style.backgroundColor = '';
   });
-  
+
   // Ocultar contador
   const filterResults = document.getElementById('filter-results');
   if (filterResults) {
     filterResults.style.display = 'none';
   }
-  
+
   // Reset valores de filtro
   document.getElementById('filter-min-profit').value = '-5';
   document.getElementById('filter-max-profit').value = '10';
@@ -3251,35 +3252,35 @@ async function showRecalculateDialog() {
   // Obtener configuración actual
   const settings = await chrome.storage.local.get('notificationSettings');
   const userSettings = settings.notificationSettings || {};
-  
+
   const currentPrice = currentData?.oficial?.compra || 1000;
   const isManual = userSettings.dollarPriceSource === 'manual';
-  
-  const message = isManual 
+
+  const message = isManual
     ? `💵 Precio manual actual: $${currentPrice.toFixed(2)}\n\n` +
-      'Puedes cambiarlo en Configuración o ingresa un nuevo valor temporal:'
+    'Puedes cambiarlo en Configuración o ingresa un nuevo valor temporal:'
     : `💵 Precio automático actual: $${currentPrice.toFixed(2)}\n\n` +
-      'Para usar un precio personalizado, activa "Precio manual" en Configuración.\n\n' +
-      'Por ahora, ¿quieres cambiar temporalmente a modo manual?';
-  
+    'Para usar un precio personalizado, activa "Precio manual" en Configuración.\n\n' +
+    'Por ahora, ¿quieres cambiar temporalmente a modo manual?';
+
   const customPrice = prompt(message, currentPrice.toFixed(2));
 
   if (customPrice && !isNaN(customPrice) && parseFloat(customPrice) > 0) {
     const price = parseFloat(customPrice);
-    
+
     // Actualizar a modo manual con el nuevo precio
     const newSettings = {
       ...userSettings,
       dollarPriceSource: 'manual',
       manualDollarPrice: price
     };
-    
+
     // Guardar en storage (esto disparará el listener en background)
     await chrome.storage.local.set({ notificationSettings: newSettings });
-    
+
     // Mostrar confirmación
     alert(`✅ Precio actualizado a $${price.toFixed(2)}\n\nRecalculando rutas...`);
-    
+
     // Esperar un momento para que el background procese
     setTimeout(() => {
       fetchAndDisplay(true); // Forzar actualización
@@ -3304,7 +3305,7 @@ async function checkForUpdates() {
   try {
     const result = await chrome.storage.local.get('updateAvailable');
     const updateInfo = result.updateAvailable;
-    
+
     if (updateInfo && updateInfo.available) {
       showUpdateBanner(updateInfo);
     }
@@ -3400,25 +3401,25 @@ function showUpdateBanner(updateInfo) {
   const banner = document.getElementById('update-banner');
   const messageEl = document.getElementById('update-message');
   const newVersionEl = document.getElementById('new-version');
-  
+
   if (!banner || !messageEl) return;
-  
+
   // Obtener versión actual del manifest
   const currentVersion = chrome.runtime.getManifest().version;
-  
+
   // Actualizar mensaje del commit
   const message = updateInfo.message || 'Nueva versión disponible';
   messageEl.textContent = message.substring(0, 80) + (message.length > 80 ? '...' : '');
-  
+
   // Mostrar versión nueva (primeros 7 caracteres del SHA)
   if (newVersionEl && updateInfo.version) {
     const shortSha = updateInfo.version.substring(0, 7);
     newVersionEl.textContent = `commit ${shortSha}`;
   }
-  
+
   // Mostrar banner
   banner.style.display = 'flex';
-  
+
   // Configurar botones
   setupUpdateBannerButtons(updateInfo);
 }
@@ -3427,7 +3428,7 @@ function showUpdateBanner(updateInfo) {
 function setupUpdateBannerButtons(updateInfo) {
   const viewBtn = document.getElementById('view-update');
   const dismissBtn = document.getElementById('dismiss-update');
-  
+
   if (viewBtn) {
     viewBtn.onclick = () => {
       // Abrir URL del commit en GitHub
@@ -3436,7 +3437,7 @@ function setupUpdateBannerButtons(updateInfo) {
       }
     };
   }
-  
+
   if (dismissBtn) {
     dismissBtn.onclick = async () => {
       // Ocultar banner
@@ -3444,7 +3445,7 @@ function setupUpdateBannerButtons(updateInfo) {
       if (banner) {
         banner.style.display = 'none';
       }
-      
+
       // Marcar como visto en storage
       try {
         await chrome.storage.local.set({
@@ -3457,7 +3458,7 @@ function setupUpdateBannerButtons(updateInfo) {
             available: false
           }
         });
-        
+
         console.log('✅ Actualización marcada como vista');
       } catch (error) {
         console.error('Error descartando actualización:', error);
@@ -3643,12 +3644,12 @@ function displayFilteredRoutes(routes) {
     const calc = route.calculation || {};
     const userReferenceAmount = userSettings?.defaultSimAmount || 1000000;
     const calculatedAmount = calc.initialAmount || 100000;
-    
+
     // Si el cálculo se hizo con el mismo monto, usar valores tal cual
     // Si el cálculo se hizo con un monto diferente, ajustar proporcionalmente
     const ratio = calculatedAmount !== 0 ? userReferenceAmount / calculatedAmount : 1;
     const shouldAdjust = Math.abs(ratio - 1) > 0.01; // Solo ajustar si diferencia significativa
-    
+
     const initialAmount = userReferenceAmount;
     const finalAmount = shouldAdjust && calc.finalAmount ? calc.finalAmount * ratio : (calc.finalAmount || initialAmount);
     const netProfit = shouldAdjust && calc.netProfit ? calc.netProfit * ratio : (calc.netProfit || 0);
@@ -3880,7 +3881,7 @@ function showToast(message, type = 'info') {
 }
 
 // Event listener global para botones de retry
-document.addEventListener('click', function(event) {
+document.addEventListener('click', function (event) {
   if (event.target.classList.contains('retry-btn') && event.target.dataset.action === 'reload') {
     location.reload();
   }
@@ -4410,3 +4411,335 @@ function applySortingToData(dataArray, sortPreference) {
     return 0;
   });
 }
+
+// ============================================
+// CRYPTO ARBITRAGE TAB - NUEVO v6.0
+// ============================================
+
+// Estado global para crypto arbitrage
+let cryptoRoutes = [];
+let filteredCryptoRoutes = [];
+let currentCryptoFilter = 'all'; // all, BTC, ETH, etc.
+let currentOperationFilter = 'all'; // all, direct, p2p
+
+/**
+ * Configurar pestaña de arbitraje cripto
+ */
+function setupCryptoArbitrageTab() {
+  console.log('🔄 Configurando pestaña de Arbitraje Cripto...');
+
+  // Event listener para el selector de criptos
+  const cryptoSelector = document.getElementById('crypto-filter');
+  if (cryptoSelector) {
+    cryptoSelector.addEventListener('change', (e) => {
+      currentCryptoFilter = e.target.value;
+      console.log(`💎 Filtro de cripto cambiado a: ${currentCryptoFilter}`);
+      filterAndRenderCryptoRoutes();
+    });
+  }
+
+  // Event listeners para los filtros de operación
+  const operationFilters = document.querySelectorAll('.filter-btn-operation');
+  operationFilters.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const filter = btn.dataset.filter;
+
+      // Actualizar estado activo
+      operationFilters.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      // Aplicar filtro
+      currentOperationFilter = filter;
+      console.log(`⚡ Filtro de operación cambiado a: ${currentOperationFilter}`);
+      filterAndRenderCryptoRoutes();
+    });
+  });
+
+  // Intentar cargar datos iniciales
+  fetchAndRenderCryptoRoutes();
+}
+
+/**
+ * Obtener datos de crypto arbitrage desde el background
+ */
+function fetchAndRenderCryptoRoutes() {
+  console.log('📡 Solicitando datos de crypto arbitrage al background...');
+
+  // Enviar mensaje al background script para obtener crypto routes
+  chrome.runtime.sendMessage(
+    { type: 'GET_CRYPTO_ARBITRAGE' },
+    (response) => {
+      if (chrome.runtime.lastError) {
+        console.error('❌ Error comunicándose con background:', chrome.runtime.lastError);
+        showCryptoError('Error de comunicación con el servicio');
+        return;
+      }
+
+      if (response && response.routes) {
+        console.log(`✅ Crypto routes recibidas: ${response.routes.length} rutas`);
+        cryptoRoutes = response.routes;
+        filterAndRenderCryptoRoutes();
+      } else {
+        console.warn('⚠️ No se recibieron crypto routes del background');
+        showCryptoEmpty('No hay datos de arbitraje crypto disponibles');
+      }
+    }
+  );
+}
+
+/**
+ * Filtrar y renderizar crypto routes según filtros actuales
+ */
+function filterAndRenderCryptoRoutes() {
+  let filtered = [...cryptoRoutes];
+
+  // Filtro por criptomoneda
+  if (currentCryptoFilter !== 'all') {
+    filtered = filtered.filter(route => route.crypto === currentCryptoFilter);
+    console.log(`🔍 Después de filtro crypto (${currentCryptoFilter}): ${filtered.length} rutas`);
+  }
+
+  // Filtro por tipo de operación
+  if (currentOperationFilter !== 'all') {
+    filtered = filtered.filter(route => {
+      const opType = route.operationType?.toLowerCase();
+      if (currentOperationFilter === 'direct') {
+        return opType === 'direct';
+      } else if (currentOperationFilter === 'p2p') {
+        return opType === 'p2p';
+      }
+      return true;
+    });
+    console.log(`🔍 Después de filtro operación (${currentOperationFilter}): ${filtered.length} rutas`);
+  }
+
+  filteredCryptoRoutes = filtered;
+  renderCryptoRoutes(filtered);
+}
+
+/**
+ * Renderizar crypto routes en el contenedor
+ */
+function renderCryptoRoutes(routes) {
+  const container = document.getElementById('crypto-routes-container');
+  if (!container) {
+    console.error('❌ Contenedor crypto-routes-container no encontrado');
+    return;
+  }
+
+  // Limpiar contenedor
+  container.innerHTML = '';
+
+  if (!routes || routes.length === 0) {
+    showCryptoEmpty('No se encontraron oportunidades con los filtros seleccionados');
+    return;
+  }
+
+  // Renderizar cada ruta
+  routes.forEach((route, index) => {
+    const card = createCryptoRouteCard(route, index);
+    container.appendChild(card);
+  });
+
+  console.log(`✅ Renderizadas ${routes.length} crypto routes`);
+}
+
+/**
+ * Crear card HTML para una ruta de crypto arbitrage
+ */
+function createCryptoRouteCard(route, index) {
+  const card = document.createElement('div');
+  card.className = 'crypto-route-card';
+
+  // Agregar clase de profit
+  if (route.profitPercent > 2) {
+    card.classList.add('profit-high');
+  } else if (route.profitPercent < 0) {
+    card.classList.add('profit-negative');
+  }
+
+  // Data attributes
+  card.dataset.crypto = route.crypto;
+  card.dataset.operationType = route.operationType;
+  card.dataset.index = index;
+
+  // Construir HTML
+  card.innerHTML = `
+    <div class="crypto-card-header">
+      <div class="crypto-info">
+        <span class="crypto-icon">${getCryptoIcon(route.crypto)}</span>
+        <span class="crypto-name">${route.crypto}</span>
+      </div>
+      <div class="profit-badge ${route.profitPercent >= 0 ? 'profit-positive' : 'profit-negative'}">
+        ${route.profitPercent >= 0 ? '+' : ''}${route.profitPercent.toFixed(2)}%
+      </div>
+    </div>
+    
+    <div class="crypto-card-body">
+      <div class="route-path">
+        <span class="exchange-badge">${capitalizeFirst(route.buyExchange)}</span>
+        <span class="arrow">→</span>
+        <span class="exchange-badge">${capitalizeFirst(route.sellExchange)}</span>
+      </div>
+      
+      <div class="operation-meta">
+        ${getOperationBadge(route.operationType)}
+        ${getSpeedIndicator(route.speed)}
+        ${getDifficultyIndicator(route.difficulty)}
+      </div>
+    </div>
+    
+    <div class="crypto-card-footer">
+      <div class="profit-details">
+        <span class="label">Ganancia estimada:</span>
+        <span class="value ${route.netProfit >= 0 ? '' : 'negative'}">
+          $${formatNumber(Math.abs(route.netProfit))} ARS
+        </span>
+      </div>
+      <button class="btn-details" data-route-index="${index}">
+        Ver detalles
+      </button>
+    </div>
+  `;
+
+  // Agregar event listener al botón de detalles
+  const detailsBtn = card.querySelector('.btn-details');
+  if (detailsBtn) {
+    detailsBtn.addEventListener('click', () => {
+      showCryptoRouteDetails(route);
+    });
+  }
+
+  return card;
+}
+
+/**
+ * Obtener icono emoji para cada criptomoneda
+ */
+function getCryptoIcon(symbol) {
+  const icons = {
+    'BTC': '₿',
+    'ETH': 'Ξ',
+    'USDC': '💵',
+    'USDT': '💲',
+    'DAI': '◈',
+    'BNB': '🔶',
+    'SOL': '◎',
+    'ADA': '₳',
+    'XRP': '✕',
+    'MATIC': '🔷',
+    'DOGE': '🐕'
+  };
+  return icons[symbol] || '💎';
+}
+
+/**
+ * Capitalizar primera letra
+ */
+function capitalizeFirst(str) {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+/**
+ * Obtener badge HTML para tipo de operación
+ */
+function getOperationBadge(operationType) {
+  const type = operationType?.toLowerCase() || 'direct';
+  const badges = {
+    'direct': '<span class="operation-badge direct">DIRECT</span>',
+    'p2p': '<span class="operation-badge p2p">P2P</span>',
+    'transfer': '<span class="operation-badge transfer">TRANSFER</span>'
+  };
+  return badges[type] || badges['direct'];
+}
+
+/**
+ * Obtener indicador de velocidad
+ */
+function getSpeedIndicator(speed) {
+  const speedLower = speed?.toLowerCase() || 'medium';
+  const indicators = {
+    'fast': '<span class="speed-indicator fast">⚡ Rápido</span>',
+    'medium': '<span class="speed-indicator medium">⏱️ Medio</span>',
+    'slow': '<span class="speed-indicator slow">🐌 Lento</span>'
+  };
+  return indicators[speedLower] || indicators['medium'];
+}
+
+/**
+ * Obtener indicador de dificultad
+ */
+function getDifficultyIndicator(difficulty) {
+  const diffLower = difficulty?.toLowerCase() || 'medium';
+  const indicators = {
+    'easy': '<span class="difficulty-indicator easy">✅ Fácil</span>',
+    'medium': '<span class="difficulty-indicator medium">⚠️ Medio</span>',
+    'hard': '<span class="difficulty-indicator hard">🔴 Difícil</span>'
+  };
+  return indicators[diffLower] || indicators['medium'];
+}
+
+/**
+ * Mostrar detalles de una ruta crypto en un modal o expandiendo la card
+ */
+function showCryptoRouteDetails(route) {
+  console.log('📊 Mostrando detalles de ruta crypto:', route);
+
+  // Por ahora, mostrar en console.log
+  // TODO: Implementar modal similar al de rutas fiat
+  const details = `
+    🔄 Arbitraje ${route.crypto}
+    📍 Ruta: ${route.buyExchange} → ${route.sellExchange}
+    💰 Tipo: ${route.operationType}
+    ⚡ Velocidad: ${route.speed}
+    🎯 Dificultad: ${route.difficulty}
+    
+    💵 Inversión inicial: $${formatNumber(route.calculation?.initialAmount || 0)} ARS
+    🛒 Comprar: ${route.calculation?.cryptoPurchased?.toFixed(8) || 0} ${route.crypto}
+    💸 Precio compra: $${formatNumber(route.buyPriceARS)} ARS
+    
+    📤 Transferir (después de fees): ${route.calculation?.cryptoAfterNetworkFee?.toFixed(8) || 0} ${route.crypto}
+    🌐 Network fee: ${route.calculation?.networkFee?.toFixed(8) || 0} ${route.crypto} ($${formatNumber(route.calculation?.networkFeeARS || 0)} ARS)
+    
+    💰 Vender por: $${formatNumber(route.calculation?.arsFromSale || 0)} ARS
+    💵 Precio venta: $${formatNumber(route.sellPriceARS)} ARS
+    
+    ✅ Ganancia bruta: $${formatNumber(route.grossProfit)} ARS (${route.grossProfitPercent?.toFixed(2)}%)
+    💎 Ganancia neta: $${formatNumber(route.netProfit)} ARS (${route.profitPercent?.toFixed(2)}%)
+    💸 Total fees: $${formatNumber(route.fees?.total || 0)} ARS
+  `;
+
+  alert(details);
+}
+
+/**
+ * Mostrar mensaje de error en el contenedor
+ */
+function showCryptoError(message) {
+  const container = document.getElementById('crypto-routes-container');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="empty-state">
+      <div class="empty-state-icon">❌</div>
+      <div class="empty-state-text">${message}</div>
+    </div>
+  `;
+}
+
+/**
+ * Mostrar mensaje de "sin datos" en el contenedor
+ */
+function showCryptoEmpty(message) {
+  const container = document.getElementById('crypto-routes-container');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="empty-state">
+      <div class="empty-state-icon">🔍</div>
+      <div class="empty-state-text">${message || 'No hay oportunidades de arbitraje disponibles'}</div>
+    </div>
+  `;
+}
+
