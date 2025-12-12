@@ -50,13 +50,14 @@
 
 | Tarea | Prioridad | Notas |
 |-------|-----------|-------|
-| **Reducir líneas CSS** | 🔴 ALTA | Actualmente 5818, objetivo <3500 |
-| Skeleton loaders | 🟡 MEDIA | No implementado aún |
+| **Reducir líneas CSS** | 🔴 ALTA | Actualmente 5870, objetivo <3500 |
+| Skeleton loaders | 🟡 MEDIA | Clases base añadidas (.skeleton) |
 | Focus trap en modal | 🟡 MEDIA | No hay `focusableElements` tracking |
-| Flash update animation | 🟡 MEDIA | `@keyframes flash-update` no existe |
-| Tab enter animation | 🟡 MEDIA | `@keyframes tab-enter` no existe |
-| Eliminar @keyframes duplicados | 🔴 ALTA | 5 definiciones de `@keyframes pulse` |
-| Unificar estilos duplicados | 🔴 ALTA | Código repetido en CSS |
+| Flash update animation | ✅ HECHO | `@keyframes flashUpdate` consolidado |
+| Tab enter animation | ✅ HECHO | `@keyframes tabEnter` consolidado |
+| Eliminar @keyframes duplicados | ✅ HECHO | Consolidados en sección única |
+| Unificar estilos duplicados | ⏳ EN PROGRESO | Secciones legacy eliminándose |
+| Consolidar media queries | ✅ HECHO | Unificadas al final del archivo |
 | Responsive design | 🟡 MEDIA | Parcialmente implementado |
 | Testing funcional completo | 🟢 BAJA | Documentar resultados |
 | Documentación final | 🟢 BAJA | Actualizar CHANGELOG |
@@ -65,11 +66,12 @@
 
 | Métrica | Inicio | Actual | Objetivo |
 |---------|--------|--------|----------|
-| Líneas popup.css | 6764 | **5381** | < 3500 ⚠️ (-20%) |
+| Líneas popup.css | 6764 | **5870** | < 3500 ⚠️ (-13.2%) |
 | Líneas options.css | ~896 | **576** | < 700 ✅ |
 | Focus states | Parcial | **15** | 100% ✅ |
 | Contraste WCAG AA | Parcial | ~85% | 100% |
 | @keyframes duplicados | 10+ | **0** | 0 ✅ |
+| Media queries duplicadas | 3 | **1** | 1 ✅ |
 
 ---
 
@@ -90,11 +92,11 @@
 ### Métricas Actuales
 
 ```
-📊 CSS: 5818 líneas (reducido de 6363, falta llegar a 3500)
+📊 CSS: 5870 líneas (reducido de 6764, falta llegar a 3500 - 13.2% completado)
 📊 Consistencia visual: ~85%
-📊 Responsive: ⚠️ Parcial
+📊 Responsive: ⚠️ Parcial (media queries consolidadas)
 📊 Accesibilidad: ~75%
-📊 Performance animaciones: Bueno
+📊 Performance animaciones: Bueno (animaciones consolidadas)
 ```
 
 ---
