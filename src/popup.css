@@ -339,10 +339,35 @@ a:focus-visible {
   20%, 40%, 60%, 80% { transform: translateX(5px); }
 }
 
+/* Slide Down - Para elementos que aparecen desde arriba */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Step Slide In - Para pasos de guía */
+@keyframes stepSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 /* Clases utilitarias de animación */
 .animate-pulse { animation: pulse 2s ease-in-out infinite; }
 .animate-fade-in { animation: fadeIn var(--duration-normal) ease-out; }
 .animate-slide-in { animation: slideIn var(--duration-normal) ease-out; }
+.animate-slide-down { animation: slideDown var(--duration-normal) ease-out; }
 .animate-tab-enter { animation: tabEnter var(--duration-normal) var(--ease-default); }
 .animate-rotate { animation: rotate 1s linear infinite; }
 .animate-flash { animation: flashUpdate 0.5s ease-out; }
@@ -868,17 +893,7 @@ main::-webkit-scrollbar-thumb:hover {
   letter-spacing: 0.3px;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* @keyframes slideDown - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
 
 /* INFORMACIÓN DEL PRECIO DEL DÓLAR - COMPACTA */
 .dollar-info {
@@ -1204,27 +1219,7 @@ main::-webkit-scrollbar-thumb:hover {
   border-top: 1px dashed var(--color-border-muted);
 }
 
-.click-to-expand {
-  font-size: var(--font-size-xs);
-  color: var(--color-brand-primary);
-  font-weight: var(--font-weight-medium);
-  opacity: 0.7;
-  transition: all var(--duration-fast) var(--ease-default);
-  display: inline-block;
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
-  background: rgba(59, 130, 246, 0.1);
-}
-
-.route-card:hover .click-to-expand {
-  opacity: 1;
-  background: rgba(59, 130, 246, 0.2);
-  transform: translateY(-1px);
-}
-
-.route-card.expanded .click-to-expand::before {
-  content: '👇 Click para ocultar';
-}
+/* .click-to-expand - ELIMINADO (no usado) */
 
 /* VISTA EXPANDIDA (detalles) */
 .route-details {
@@ -1234,17 +1229,7 @@ main::-webkit-scrollbar-thumb:hover {
   animation: slideDown 0.3s ease;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* @keyframes slideDown - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
 
 .route-header {
   margin-bottom: 16px;
@@ -1360,35 +1345,7 @@ main::-webkit-scrollbar-thumb:hover {
   color: #fbbf24;
 }
 
-.route-action-button {
-  margin-top: 12px;
-  text-align: center;
-}
-
-.guide-button {
-  width: 100%;
-  padding: 12px 20px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-size: 0.95em;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-}
-
-.guide-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-}
-
-.guide-button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-}
+/* .route-action-button, .guide-button - ELIMINADOS (no usados) */
 
 .info-banner {
   padding: 12px 16px;
@@ -1826,14 +1783,10 @@ main::-webkit-scrollbar-thumb:hover {
   border: 3px solid #30363d;
   border-top-color: #58a6ff;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: rotate 0.8s linear infinite;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
+/* @keyframes spin - Usar rotate (DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS) */
 
 .error-message {
   color: #f85149;
@@ -1907,69 +1860,7 @@ main::-webkit-scrollbar-thumb:hover {
   color: #d1d5db;
 }
 
-/* INFO SECTIONS */
-.info-section,
-.guide-intro,
-
-/* Mantener estilos legacy para compatibilidad */
-.banks-intro {
-  background: linear-gradient(135deg, rgba(30, 58, 138, 0.2) 0%, rgba(15, 23, 42, 0.4) 100%);
-  border-radius: 14px;
-  padding: 16px;
-  margin-bottom: 16px;
-  border: 1px solid rgba(59, 130, 246, 0.25);
-  box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.05);
-}
-
-.info-section h2,
-.guide-intro h2,
-.banks-intro h2 {
-  color: #60a5fa;
-  font-size: 1.2em;
-  margin-bottom: 12px;
-  font-weight: 700;
-}
-
-.info-section h3 {
-  color: #60a5fa;
-  font-size: 1em;
-  margin-bottom: 12px;
-  font-weight: 700;
-}
-
-.info-section p,
-.guide-intro p,
-.banks-intro p {
-  color: #cbd5e1;
-  font-size: 0.9em;
-  line-height: 1.6;
-  margin: 8px 0;
-}
-
-.info-section ul,
-.guide-intro ul {
-  list-style: none;
-  padding: 0;
-}
-
-.info-section li,
-.guide-intro li {
-  color: #cbd5e1;
-  font-size: 0.88em;
-  padding: 6px 0;
-  padding-left: 20px;
-  position: relative;
-}
-
-.info-section li::before,
-.guide-intro li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  color: #3b82f6;
-  font-weight: bold;
-}
-
+/* SELECT PROMPT */
 .select-prompt {
   text-align: center;
   padding: 40px 20px;
@@ -2596,16 +2487,7 @@ footer {
   animation: slideDown var(--duration-normal) var(--ease-default);
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* @keyframes slideDown - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
 
 .config-section {
   margin-bottom: var(--space-5);
@@ -3050,121 +2932,8 @@ footer {
   margin-top: 4px;
 }
 
-.profit-display-enhanced {
-  text-align: right;
-}
-
-.profit-percentage {
-  font-size: 2.2em;
-  font-weight: 800;
-  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  line-height: 1;
-  margin-bottom: 4px;
-}
-
-.profit-label {
-  color: #94a3b8;
-  font-size: 0.85em;
-  font-weight: 500;
-}
-
-/* Barra de progreso */
-.progress-bar-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 32px;
-  padding: 0 8px;
-  animation: fadeIn 0.6s ease-out 0.2s both;
-}
-
-/* @keyframes fadeIn - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
-
-.progress-step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  flex: 0 0 auto;
-  transition: all 0.3s ease;
-}
-
-.progress-step span {
-  font-size: 0.7em;
-  color: #64748b;
-  font-weight: 600;
-  white-space: nowrap;
-  text-align: center;
-}
-
-.progress-step.active span {
-  color: #3b82f6;
-}
-
-.progress-dot {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(51, 65, 85, 0.8);
-  border: 3px solid rgba(71, 85, 105, 0.5);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-}
-
-.progress-step.active .progress-dot {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  border-color: #60a5fa;
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
-  animation: dotPulse 1.5s ease-in-out infinite;
-}
-
-@keyframes dotPulse {
-
-  0%,
-  100% {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
-  }
-
-  50% {
-    box-shadow: 0 0 30px rgba(59, 130, 246, 0.9);
-  }
-}
-
-.progress-line {
-  flex: 1;
-  height: 3px;
-  background: linear-gradient(90deg, rgba(71, 85, 105, 0.5) 0%, rgba(71, 85, 105, 0.2) 100%);
-  margin: 0 4px;
-  border-radius: 2px;
-  position: relative;
-  overflow: hidden;
-}
-
-.progress-line::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.5), transparent);
-  animation: progressShimmer 2s ease-in-out infinite;
-}
-
-@keyframes progressShimmer {
-  to {
-    left: 100%;
-  }
-}
-
-/* Timeline de pasos */
-.steps-timeline {
-  position: relative;
-  padding-left: 8px;
-}
+/* .profit-display-enhanced, .profit-percentage, .profit-label - ELIMINADOS (no usados) */
+/* .progress-bar-container, .progress-step, .progress-dot, .progress-line, .steps-timeline - ELIMINADOS (no usados) */
 
 /* ============================================
    GUIDE RESPONSIVE STYLES
@@ -4293,17 +4062,7 @@ p.error {
   animation: slideDown 0.3s ease-out;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* @keyframes slideDown - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
 
 /* Banner de advertencia */
 .warning-banner {
@@ -4909,20 +4668,10 @@ p.error {
   margin: 12px 0;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  animation: panelSlideDown 0.3s ease-out;
+  animation: slideDown 0.3s ease-out;
 }
 
-@keyframes panelSlideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* @keyframes panelSlideDown - Usar slideDown (DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS) */
 
 .filters-panel-header {
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
@@ -5204,123 +4953,7 @@ p.error {
   color: #fbbf24;
 }
 
-/* ============================================
-   MODAL DE DETALLES DE RUTA v5.0.78
-   ============================================ */
-
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 24px 16px;
-  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
-}
-
-.modal-header h3 {
-  margin: 0;
-  color: #e1e8ed;
-  font-size: 1.25em;
-  font-weight: 600;
-}
-
-.modal-close-btn {
-  background: none;
-  border: none;
-  color: #94a3b8;
-  font-size: 1.5em;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-close-btn:hover {
-  background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
-  transform: scale(1.1);
-}
-
-.modal-body {
-  padding: 24px;
-  color: #e1e8ed;
-  line-height: 1.6;
-}
-
-.modal-body .guide-container-simple {
-  margin: 0;
-  padding: 0;
-}
-
-.modal-body .guide-header-simple {
-  margin-bottom: 24px;
-  padding: 16px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
-}
-
-.modal-body .guide-step {
-  margin-bottom: 16px;
-  padding: 16px;
-  border-radius: 8px;
-  border-left: 3px solid rgba(59, 130, 246, 0.5);
-  background: rgba(59, 130, 246, 0.05);
-  transition: all 0.3s ease;
-}
-
-.modal-body .guide-step:hover {
-  background: rgba(59, 130, 246, 0.1);
-  border-left-color: rgba(59, 130, 246, 0.8);
-}
-
-.modal-body .step-number {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  color: white;
-  font-weight: 600;
-  border: none;
-}
-
-.modal-body .step-title {
-  color: #e1e8ed;
-  font-weight: 500;
-}
-
-.modal-body .step-description {
-  color: #cbd5e1;
-}
-
-.modal-body .calculator-result {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #10b981;
-  font-weight: 600;
-}
-
-.modal-body .considerations-section {
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  color: #f59e0b;
-}
-
-.modal-body .considerations-section h4 {
-  color: #fbbf24;
-}
-
+/* MODAL DE DETALLES DE RUTA - Estilos legacy (principales en MODALES MODERNIZADOS v6.0.0) */
 /* Scrollbar personalizado para el modal */
 .modal-content::-webkit-scrollbar {
   width: 6px;
@@ -5695,21 +5328,7 @@ p.error {
   font-style: italic;
 }
 
-/* Responsive para exchanges */
-@media (max-width: 768px) {
-  .exchanges-list {
-    grid-template-columns: 1fr;
-  }
-
-  .filter-section {
-    flex-direction: column;
-    gap: var(--spacing-sm);
-  }
-
-  .filter-buttons {
-    justify-content: center;
-  }
-}
+/* Responsive para exchanges - Consolidado en @media (max-width: 768px) al final del archivo */
 
 /* ============================================
    MEJORAS PARA BOTONES DE PASOS DE RUTAS
@@ -5917,42 +5536,9 @@ p.error {
   margin-top: var(--spacing-xs);
 }
 
-/* Responsive para pasos */
-@media (max-width: 768px) {
-  .step-simple {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--spacing-xs);
-  }
+/* Responsive para pasos - Consolidado en @media (max-width: 768px) al final del archivo */
 
-  .step-number {
-    align-self: flex-start;
-    margin-bottom: var(--spacing-xs);
-  }
-
-  .step-simple-calc {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--spacing-xs);
-  }
-
-  .calc-arrow {
-    display: none;
-  }
-}
-
-/* Animaciones para pasos */
-@keyframes stepSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
+/* @keyframes stepSlideIn - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
 
 .step-simple {
   animation: stepSlideIn 0.3s ease-out;
@@ -6227,8 +5813,11 @@ p.error {
 
 /* @keyframes fadeIn - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
 
-/* Responsive para bancos */
+/* ==========================================
+   📱 MEDIA QUERIES CONSOLIDADAS (max-width: 768px)
+   ========================================== */
 @media (max-width: 768px) {
+  /* Bancos */
   .banks-grid {
     grid-template-columns: 1fr;
   }
@@ -6241,5 +5830,41 @@ p.error {
   .price-bid,
   .price-ask {
     padding: var(--spacing-sm);
+  }
+
+  /* Exchanges */
+  .exchanges-list {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-section {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .filter-buttons {
+    justify-content: center;
+  }
+
+  /* Pasos */
+  .step-simple {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-xs);
+  }
+
+  .step-number {
+    align-self: flex-start;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .step-simple-calc {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-xs);
+  }
+
+  .calc-arrow {
+    display: none;
   }
 }
