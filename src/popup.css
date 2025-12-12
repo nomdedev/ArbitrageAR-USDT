@@ -2006,139 +2006,19 @@ main::-webkit-scrollbar-thumb:hover {
   font-weight: 700;
 }
 
-/* NUEVO: Estilos para logos y detalles de bancos */
-.bank-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
+/* SECCIÓN ELIMINADA: Estilos para logos y detalles de bancos
+   Clases eliminadas: bank-header, bank-logo-container, bank-logo, bank-spread,
+   bank-source, bank-prices legacy, bank-price, bank-price-label, bank-price-value,
+   bank-price-alt (no usadas en templates actuales) */
 
-.bank-logo-container {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(59, 130, 246, 0.1);
-  border-radius: 8px;
-  flex-shrink: 0;
-}
+/* SECCIÓN ELIMINADA: UI compacta para bancos v5.0.23
+   Clases eliminadas: bank-card.compact, bank-header-compact, bank-source-compact,
+   bank-prices-compact, bank-price-compact, price-alt, bank-spread-compact,
+   best-bank-highlight, bestBankGlow, best-bank-header, best-bank-icon, best-bank-title,
+   best-bank-content, best-bank-name, best-bank-price, best-bank-source
+   (no usadas en templates actuales) */
 
-.bank-logo {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-  border-radius: 4px;
-}
-
-.bank-name {
-  color: #e1e8ed;
-  font-size: 1.1em;
-  font-weight: 700;
-  flex-grow: 1;
-}
-
-.bank-spread {
-  color: #fbbf24;
-  font-size: 0.85em;
-  font-weight: 600;
-  background: rgba(251, 191, 36, 0.1);
-  padding: 2px 8px;
-  border-radius: 10px;
-  border: 1px solid rgba(251, 191, 36, 0.3);
-}
-
-.bank-source {
-  color: #94a3b8;
-  font-size: 0.8em;
-  text-align: center;
-  margin-top: 8px;
-  padding: 4px 8px;
-  background: rgba(148, 163, 184, 0.1);
-  border-radius: 6px;
-}
-
-.bank-prices {
-  display: flex;
-  gap: 16px;
-  justify-content: space-between;
-}
-
-.bank-price {
-  flex: 1;
-  text-align: center;
-  padding: 8px 12px;
-  background: rgba(59, 130, 246, 0.05);
-  border-radius: 8px;
-  border: 1px solid rgba(59, 130, 246, 0.2);
-}
-
-.bank-price-label {
-  color: #94a3b8;
-  font-size: 0.8em;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
-}
-
-.bank-price-value {
-  color: #e1e8ed;
-  font-size: 1.2em;
-  font-weight: 700;
-}
-
-/* NUEVO v5.0.22: Precio alternativo de CriptoYa */
-.bank-price-alt {
-  color: #94a3b8;
-  font-size: 0.75em;
-  margin-top: 4px;
-  font-style: italic;
-  opacity: 0.8;
-}
-
-/* NUEVO v5.0.23: UI compacta para bancos */
-.bank-card.compact {
-  padding: 12px;
-  margin-bottom: 8px;
-  border-radius: 10px;
-}
-
-.bank-header-compact {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.bank-name {
-  color: #e1e8ed;
-  font-size: 1em;
-  font-weight: 700;
-}
-
-.bank-source-compact {
-  color: #94a3b8;
-  font-size: 0.75em;
-  background: rgba(148, 163, 184, 0.1);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: 500;
-}
-
-.bank-prices-compact {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.bank-price-compact {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9em;
-}
-
+/* Las clases .price-label y .price-value SÍ se usan: */
 .price-label {
   color: #94a3b8;
   font-weight: 500;
@@ -2151,99 +2031,7 @@ main::-webkit-scrollbar-thumb:hover {
   font-size: 1em;
 }
 
-.price-alt {
-  color: #60a5fa;
-  font-size: 0.8em;
-  margin-left: 8px;
-  opacity: 0.9;
-}
-
-.bank-spread-compact {
-  color: #fbbf24;
-  font-size: 0.8em;
-  font-weight: 600;
-  background: rgba(251, 191, 36, 0.1);
-  padding: 2px 6px;
-  border-radius: 6px;
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  align-self: flex-start;
-  margin-top: 4px;
-}
-
-/* NUEVO v5.0.23: Mejor precio bancario */
-.best-bank-highlight {
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(16, 185, 129, 0.25) 100%);
-  backdrop-filter: blur(20px);
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 16px;
-  border: 2px solid rgba(34, 197, 94, 0.4);
-  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
-  animation: bestBankGlow 2s ease-in-out infinite alternate;
-}
-
-@keyframes bestBankGlow {
-  0% {
-    box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
-  }
-
-  100% {
-    box-shadow: 0 8px 24px rgba(34, 197, 94, 0.5), 0 0 30px rgba(34, 197, 94, 0.2);
-  }
-}
-
-.best-bank-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.best-bank-icon {
-  font-size: 2em;
-  filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.8));
-}
-
-.best-bank-title {
-  color: #e1e8ed;
-  font-size: 1.2em;
-  font-weight: 700;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.best-bank-content {
-  text-align: center;
-}
-
-.best-bank-name {
-  color: #e1e8ed;
-  font-size: 1.4em;
-  font-weight: 800;
-  margin-bottom: 8px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.best-bank-price {
-  color: #22c55e;
-  font-size: 2.2em;
-  font-weight: 900;
-  margin-bottom: 8px;
-  text-shadow: 0 0 20px rgba(34, 197, 94, 0.8);
-  filter: brightness(1.2);
-}
-
-.best-bank-source {
-  color: #94a3b8;
-  font-size: 0.9em;
-  font-style: italic;
-  background: rgba(148, 163, 184, 0.1);
-  padding: 4px 12px;
-  border-radius: 20px;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  display: inline-block;
-}
-
-/* NUEVO: Controles de bancos */
+/* Controles de bancos */
 .banks-controls {
   display: flex;
   align-items: center;
@@ -2283,12 +2071,6 @@ main::-webkit-scrollbar-thumb:hover {
   transform: none;
 }
 
-.banks-timestamp {
-  color: #94a3b8;
-  font-size: 0.85em;
-  font-style: italic;
-}
-
 /* ============================================
    FOOTER
    ============================================ */
@@ -2320,17 +2102,8 @@ footer {
   display: none !important;
 }
 
-/* Badge "Mismo Broker" */
-.single-exchange-badge {
-  display: inline-block;
-  background: #238636;
-  color: white;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 10px;
-  font-weight: 700;
-  margin-left: 6px;
-}
+/* .single-exchange-badge - ELIMINADO (no usado en templates) */
+/* .banks-timestamp - ELIMINADO (no usado en templates) */
 
 /* ============================================
    SIMULADOR
@@ -2827,50 +2600,9 @@ footer {
   }
 }
 
-/* ==========================================
-   GUÍA PASO A PASO MEJORADA - UI/UX PREMIUM
-   ========================================== */
-
-/* Header del broker mejorado */
-.arbitrage-summary-enhanced {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%);
-  backdrop-filter: blur(20px);
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 24px;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.2);
-  animation: slideDown 0.5s ease-out;
-}
-
-/* @keyframes slideInDown - Usar slideDown (DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS) */
-
-.broker-badge {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.broker-icon {
-  font-size: 2.5em;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-/* @keyframes pulse - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
-
-.broker-info h3 {
-  color: #e2e8f0;
-  font-size: 1.4em;
-  font-weight: 700;
-  margin: 0;
-}
-
-/* .broker-tag - ELIMINADO (no usado en templates) */
-/* .profit-display-enhanced, .profit-percentage, .profit-label - ELIMINADOS (no usados) */
-/* .progress-bar-container, .progress-step, .progress-dot, .progress-line, .steps-timeline - ELIMINADOS (no usados) */
+/* SECCIÓN ELIMINADA: "GUÍA PASO A PASO MEJORADA - UI/UX PREMIUM"
+   Clases eliminadas: arbitrage-summary-enhanced, broker-badge, broker-icon,
+   broker-info h3 (no usadas en templates actuales) */
 
 /* ============================================
    GUIDE RESPONSIVE STYLES (Reducido)
