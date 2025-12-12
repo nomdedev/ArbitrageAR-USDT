@@ -258,6 +258,118 @@ a:focus-visible {
   }
 }
 
+/* ==========================================
+   🎬 ANIMACIONES CONSOLIDADAS
+   ========================================== */
+
+/* Pulse - Animación universal para indicadores activos */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+/* Pulse Glow - Con efecto de brillo */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 5px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 15px currentColor, 0 0 30px currentColor;
+  }
+}
+
+/* Skeleton Loader - Para estados de carga */
+@keyframes skeletonPulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Flash Update - Para datos actualizados */
+@keyframes flashUpdate {
+  0% { background: var(--color-success); opacity: 0.3; }
+  100% { background: transparent; opacity: 1; }
+}
+
+/* Tab Enter - Transición de pestañas */
+@keyframes tabEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade In */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Slide In */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Rotate - Para spinners */
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Shake - Para errores */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* Clases utilitarias de animación */
+.animate-pulse { animation: pulse 2s ease-in-out infinite; }
+.animate-fade-in { animation: fadeIn var(--duration-normal) ease-out; }
+.animate-slide-in { animation: slideIn var(--duration-normal) ease-out; }
+.animate-tab-enter { animation: tabEnter var(--duration-normal) var(--ease-default); }
+.animate-rotate { animation: rotate 1s linear infinite; }
+.animate-flash { animation: flashUpdate 0.5s ease-out; }
+
+/* Skeleton loader base */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-tertiary) 0%,
+    var(--color-bg-elevated) 50%,
+    var(--color-bg-tertiary) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+
+.skeleton-text {
+  height: 1em;
+  margin: 0.25em 0;
+}
+
+.skeleton-card {
+  height: 80px;
+  margin: var(--space-2) 0;
+}
+
 /* Skip link oculto (para lectores de pantalla) */
 .skip-link {
   position: absolute;
@@ -346,14 +458,6 @@ a:focus-visible {
   outline: none;
   border-color: var(--primary-blue);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-.tab-content {
-  display: none;
-}
-
-.tab-content.active {
-  display: block;
 }
 
 /* CLASES BASE UNIFICADAS */
@@ -630,16 +734,7 @@ main::-webkit-scrollbar-thumb:hover {
   animation: pulse 2s ease-in-out infinite;
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.7;
-    transform: scale(1.1);
-  }
-}
+/* @keyframes pulse - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
 
 .update-text {
   display: flex;
@@ -1317,29 +1412,7 @@ main::-webkit-scrollbar-thumb:hover {
   font-weight: 700;
 }
 
-.profit-badge {
-  padding: 8px 16px;
-  border-radius: 24px;
-  font-size: 1em;
-  font-weight: 800;
-  background: var(--gradient-success);
-  color: white;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.profit-badge.high {
-  background: var(--gradient-warning);
-  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.5);
-  animation: pulseGlow 2s ease-in-out infinite;
-}
-
-/* Badge para pérdidas (negativo) */
-.profit-badge.negative {
-  background: var(--gradient-error);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
+/* .profit-badge - DEFINIDO EN SECCIÓN PROFIT BADGES v6.0.0 (línea ~1109) */
 
 /* Tag para arbitrajes < 1% (solo visibles, no notificados) */
 .low-profit-tag {
@@ -1393,18 +1466,7 @@ main::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(15, 23, 42, 0.5) 100%);
 }
 
-@keyframes pulseGlow {
-
-  0%,
-  100% {
-    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.5);
-  }
-
-  50% {
-    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.8);
-    transform: scale(1.05);
-  }
-}
+/* @keyframes pulseGlow - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
 
 .card-body {
   position: relative;
@@ -1524,10 +1586,7 @@ main::-webkit-scrollbar-thumb:hover {
   animation: pulse 1.5s ease-in-out infinite;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
+/* @keyframes pulse - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
 
 /* Grid de precios */
 .price-grid {
@@ -2971,17 +3030,7 @@ footer {
   animation: pulse 2s ease-in-out infinite;
 }
 
-@keyframes pulse {
-
-  0%,
-  100% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.05);
-  }
-}
+/* @keyframes pulse - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
 
 .broker-info h3 {
   color: #e2e8f0;
@@ -3032,15 +3081,7 @@ footer {
   animation: fadeIn 0.6s ease-out 0.2s both;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
+/* @keyframes fadeIn - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
 
 .progress-step {
   display: flex;
@@ -3557,17 +3598,7 @@ footer {
   animation: rotate 3s ease-in-out infinite;
 }
 
-@keyframes rotate {
-
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-
-  50% {
-    transform: rotate(10deg);
-  }
-}
+/* @keyframes rotate - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
 
 .result-content {
   flex: 1;
@@ -4252,265 +4283,6 @@ p.error {
   color: #93c5fd;
 }
 
-/* ==========================================
-   INDICADORES DE VALIDACIÓN v5.0.28
-   ========================================== */
-
-/* Indicador de estado de datos (en header) */
-.data-status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.75em;
-  padding: 4px 10px;
-  background: rgba(15, 23, 42, 0.6);
-  border-radius: 12px;
-  border: 1px solid rgba(71, 85, 105, 0.4);
-  margin-top: 6px;
-  backdrop-filter: blur(8px);
-}
-
-.data-status.fresh {
-  border-color: rgba(74, 222, 128, 0.5);
-  background: rgba(34, 197, 94, 0.15);
-}
-
-.data-status.warning {
-  border-color: rgba(251, 191, 36, 0.5);
-  background: rgba(251, 191, 36, 0.15);
-  animation: pulseWarning 2s ease-in-out infinite;
-}
-
-.data-status.stale {
-  border-color: rgba(248, 113, 113, 0.5);
-  background: rgba(239, 68, 68, 0.15);
-  animation: pulseError 1.5s ease-in-out infinite;
-}
-
-@keyframes pulseWarning {
-
-  0%,
-  100% {
-    opacity: 0.9;
-  }
-
-  50% {
-    opacity: 1;
-  }
-}
-
-@keyframes pulseError {
-
-  0%,
-  100% {
-    opacity: 0.8;
-    box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
-  }
-
-  50% {
-    opacity: 1;
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
-  }
-}
-
-.freshness-indicator {
-  font-size: 1.1em;
-  filter: drop-shadow(0 0 2px currentColor);
-}
-
-.age-text {
-  color: #cbd5e1;
-  font-weight: 500;
-}
-
-.health-warning {
-  font-size: 1.1em;
-  animation: bounce 2s ease-in-out infinite;
-}
-
-@keyframes bounce {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-3px);
-  }
-}
-
-/* Indicadores de riesgo en rutas */
-.risk-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  border-radius: 8px;
-  font-size: 0.75em;
-  font-weight: 600;
-  margin-left: 8px;
-  border: 1px solid;
-}
-
-.risk-indicator.risk-low {
-  background: rgba(34, 197, 94, 0.2);
-  border-color: rgba(74, 222, 128, 0.5);
-  color: #4ade80;
-}
-
-.risk-indicator.risk-medium {
-  background: rgba(251, 191, 36, 0.2);
-  border-color: rgba(251, 191, 36, 0.5);
-  color: #fbbf24;
-}
-
-.risk-indicator.risk-high {
-  background: rgba(239, 68, 68, 0.2);
-  border-color: rgba(248, 113, 113, 0.5);
-  color: #f87171;
-  animation: pulseHighRisk 1.5s ease-in-out infinite;
-}
-
-@keyframes pulseHighRisk {
-
-  0%,
-  100% {
-    opacity: 0.9;
-  }
-
-  50% {
-    opacity: 1;
-    box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
-  }
-}
-
-.risk-text {
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.risk-reasons {
-  font-size: 0.9em;
-  color: #94a3b8;
-  font-weight: 400;
-  margin-top: 2px;
-  font-style: italic;
-}
-
-/* Mejoras en timestamp */
-#last-update {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-#last-update .age-info {
-  color: #94a3b8;
-  font-size: 0.9em;
-  font-style: italic;
-}
-
-/* Alertas de validación */
-.validation-alert {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(248, 113, 113, 0.5);
-  border-radius: 12px;
-  padding: 12px 16px;
-  margin: 12px 0;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.validation-alert-icon {
-  font-size: 1.3em;
-  flex-shrink: 0;
-}
-
-.validation-alert-content {
-  flex: 1;
-}
-
-.validation-alert-title {
-  font-weight: 700;
-  color: #f87171;
-  margin-bottom: 4px;
-}
-
-.validation-alert-list {
-  list-style: none;
-  padding-left: 0;
-  margin: 4px 0 0 0;
-}
-
-.validation-alert-list li {
-  padding: 3px 0;
-  color: #fca5a5;
-  font-size: 0.9em;
-}
-
-.validation-alert-list li::before {
-  content: '▸';
-  margin-right: 6px;
-  color: #f87171;
-}
-
-/* ESTADO DEL MERCADO CUANDO NO HAY RUTAS */
-.market-status {
-  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
-  border: 1px solid #4a5568;
-  border-radius: 12px;
-  padding: 20px;
-  text-align: center;
-  margin: 15px 0;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.market-status h3 {
-  color: #e2e8f0;
-  margin-bottom: 15px;
-  font-size: 1.2em;
-}
-
-.market-status p {
-  color: #a0aec0;
-  margin-bottom: 15px;
-  line-height: 1.5;
-}
-
-.market-info {
-  background: rgba(113, 128, 150, 0.1);
-  border-radius: 8px;
-  padding: 15px;
-  margin: 15px 0;
-  text-align: left;
-}
-
-.market-info strong {
-  color: #e2e8f0;
-  display: block;
-  margin-bottom: 10px;
-}
-
-.market-info ul {
-  margin: 0;
-  padding-left: 20px;
-}
-
-.market-info li {
-  color: #cbd5e0;
-  margin-bottom: 8px;
-  line-height: 1.4;
-}
-
-.market-info small {
-  color: #718096;
-  font-style: italic;
-  display: block;
-  margin-top: 10px;
-}
-
 /* ============================================
    INDICADORES DE ESTADO Y VALIDACIÓN v5.0.74
    ============================================ */
@@ -4545,17 +4317,7 @@ p.error {
   animation: pulse 2s ease-in-out infinite;
 }
 
-@keyframes pulse {
-
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.9;
-  }
-}
+/* @keyframes pulse - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
 
 .warning-banner.stale-data {
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%);
@@ -4693,243 +4455,6 @@ p.error {
   background: rgba(239, 68, 68, 0.15);
   color: #fca5a5;
   border: 1px solid rgba(248, 113, 113, 0.3);
-}
-
-/* ============================================
-   FILTROS AVANZADOS v5.0.75
-   ============================================ */
-
-.advanced-filters {
-  margin: 12px;
-  background: rgba(30, 41, 59, 0.6);
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid rgba(71, 85, 105, 0.3);
-}
-
-.toggle-filters-btn {
-  width: 100%;
-  padding: 12px 16px;
-  background: rgba(51, 65, 85, 0.4);
-  border: none;
-  color: #94a3b8;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.95em;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.toggle-filters-btn:hover {
-  background: rgba(71, 85, 105, 0.5);
-  color: #cbd5e1;
-}
-
-.toggle-icon {
-  font-size: 1.1em;
-}
-
-.toggle-text {
-  flex: 1;
-  text-align: left;
-}
-
-.toggle-arrow {
-  font-size: 0.9em;
-  transition: transform 0.3s ease;
-}
-
-.filters-panel {
-  padding: 16px;
-  background: rgba(15, 23, 42, 0.4);
-  animation: slideDown 0.3s ease-out;
-}
-
-.filter-group {
-  margin-bottom: 16px;
-}
-
-.filter-group:last-of-type {
-  margin-bottom: 0;
-}
-
-.filter-group-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9em;
-  font-weight: 600;
-  color: #cbd5e1;
-  margin-bottom: 8px;
-}
-
-.filter-group-icon {
-  font-size: 1.1em;
-}
-
-.filter-select {
-  width: 100%;
-  padding: 10px 12px;
-  background: rgba(30, 41, 59, 0.8);
-  border: 1px solid rgba(71, 85, 105, 0.5);
-  border-radius: 8px;
-  color: #e1e8ed;
-  font-size: 0.9em;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.filter-select:hover {
-  border-color: rgba(96, 165, 250, 0.5);
-  background: rgba(30, 41, 59, 0.9);
-}
-
-.filter-select:focus {
-  outline: none;
-  border-color: #60a5fa;
-  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
-}
-
-.filter-range-container {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.filter-range {
-  flex: 1;
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(71, 85, 105, 0.5);
-  outline: none;
-  -webkit-appearance: none;
-}
-
-.filter-range::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
-  cursor: pointer;
-  border: 2px solid #1e293b;
-  transition: all 0.2s ease;
-}
-
-.filter-range::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-  box-shadow: 0 0 8px rgba(96, 165, 250, 0.5);
-}
-
-.filter-range::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
-  cursor: pointer;
-  border: 2px solid #1e293b;
-  transition: all 0.2s ease;
-}
-
-.filter-range::-moz-range-thumb:hover {
-  transform: scale(1.2);
-  box-shadow: 0 0 8px rgba(96, 165, 250, 0.5);
-}
-
-.filter-range-value {
-  min-width: 45px;
-  text-align: right;
-  font-weight: 700;
-  color: #60a5fa;
-  font-size: 0.95em;
-}
-
-.filter-toggle-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  padding: 10px 12px;
-  background: rgba(30, 41, 59, 0.4);
-  border-radius: 8px;
-  border: 1px solid rgba(71, 85, 105, 0.3);
-  transition: all 0.2s ease;
-}
-
-.filter-toggle-label:hover {
-  background: rgba(30, 41, 59, 0.6);
-  border-color: rgba(96, 165, 250, 0.3);
-}
-
-.filter-checkbox {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  accent-color: #3b82f6;
-}
-
-.filter-toggle-text {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9em;
-  color: #cbd5e1;
-  font-weight: 500;
-}
-
-.filter-toggle-icon {
-  font-size: 1.1em;
-}
-
-.filter-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(71, 85, 105, 0.3);
-}
-
-.btn-filter-apply,
-.btn-filter-reset {
-  flex: 1;
-  padding: 10px 16px;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.9em;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.btn-filter-apply {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-}
-
-.btn-filter-apply:hover {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-}
-
-.btn-filter-reset {
-  background: rgba(71, 85, 105, 0.4);
-  color: #94a3b8;
-  border: 1px solid rgba(71, 85, 105, 0.5);
-}
-
-.btn-filter-reset:hover {
-  background: rgba(71, 85, 105, 0.6);
-  color: #cbd5e1;
-  border-color: rgba(96, 165, 250, 0.4);
 }
 
 /* ==========================================
@@ -5962,40 +5487,7 @@ p.error {
   color: white;
 }
 
-/* 🔄 ANIMACIONES REUTILIZABLES */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pulse {
-
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.7;
-  }
-}
+/* 🔄 ANIMACIONES - DEFINIDAS EN SECCIÓN DE ANIMACIONES CONSOLIDADAS (línea ~260) */
 
 /* Clases de animación */
 .animate-fade-in {
@@ -6733,18 +6225,7 @@ p.error {
   border-radius: var(--border-radius-sm);
 }
 
-/* Animaciones */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* @keyframes fadeIn - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
 
 /* Responsive para bancos */
 @media (max-width: 768px) {
