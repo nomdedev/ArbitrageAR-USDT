@@ -911,6 +911,7 @@ main::-webkit-scrollbar-thumb:hover {
    ============================================ */
 .arbitrage-card,
 .route-card {
+  display: flex;
   background: #161b22;
   border-radius: 8px;
   padding: 12px;
@@ -919,6 +920,7 @@ main::-webkit-scrollbar-thumb:hover {
   transition: all 0.15s ease;
   border: 1px solid #30363d;
   position: relative;
+  overflow: hidden;
 }
 
 .arbitrage-card:hover,
@@ -978,14 +980,7 @@ main::-webkit-scrollbar-thumb:hover {
   align-items: center;
 }
 
-/* Fila superior: Exchange + Ganancia */
-.route-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  position: relative;
-  margin-bottom: var(--space-3);
-}
+/* .route-header duplicado - ELIMINADO (usar definición L965) */
 
 .route-exchange-section {
   display: flex;
@@ -1144,89 +1139,25 @@ main::-webkit-scrollbar-thumb:hover {
 
 /* .click-to-expand - ELIMINADO (no usado) */
 
-/* VISTA EXPANDIDA (detalles) */
-.route-details {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(59, 130, 246, 0.2);
-  animation: slideDown 0.3s ease;
-}
+/* SECCIÓN ELIMINADA: VISTA EXPANDIDA legacy
+   Clases eliminadas: .route-details (duplicado), .route-header (duplicado),
+   .route-title, .route-title h3, .route-body, .route-step, .step-info,
+   .step-label, .step-value, .route-arrow (no usadas en templates actuales)
+   Mantener .route-summary y .step-number que SÍ se usan en popup.js */
 
-/* @keyframes slideDown - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
-
-.route-header {
-  margin-bottom: 16px;
-}
-
-.route-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.route-title h3 {
-  margin: 0;
-  font-size: 1.1em;
-  color: #e1e8ed;
-}
-
-.route-body {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.route-step {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px;
-  background: rgba(30, 41, 59, 0.4);
-  border-radius: 10px;
-  border: 1px solid rgba(59, 130, 246, 0.2);
-}
-
-.step-number {
-  font-size: 1.3em;
-  line-height: 1;
-}
-
-.step-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-}
-
-.step-label {
-  font-size: 0.9em;
-  color: #94a3b8;
-}
-
-.step-label strong {
-  color: #3b82f6;
-  font-weight: 600;
-}
-
-.step-value {
-  font-size: 1em;
-  font-weight: 600;
-  color: #e1e8ed;
-}
-
-.route-arrow {
-  text-align: center;
-  font-size: 1.2em;
-  padding: 4px 0;
-  color: #3b82f6;
-}
-
+/* .route-summary - usado en modal de detalles */
 .route-summary {
   margin-top: 12px;
   padding: 12px;
   background: rgba(15, 23, 42, 0.6);
   border-radius: 10px;
   border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* .step-number - usado en modal de detalles */
+.step-number {
+  font-size: 1.3em;
+  line-height: 1;
 }
 
 /* SECCIÓN ELIMINADA: summary-row, route-warning, info-banner, info-banner.success (no usadas) */
@@ -1258,13 +1189,7 @@ main::-webkit-scrollbar-thumb:hover {
    CARDS MEJORADAS v6.0.0 - Diseño accesible
    ============================================ */
 
-/* Estructura de card con indicador lateral */
-.arbitrage-card,
-.route-card {
-  display: flex;
-  position: relative;
-  overflow: hidden;
-}
+/* .route-card - CONSOLIDADO EN SECCIÓN "CARDS DE RUTAS" (L909) */
 
 .card-indicator,
 .route-indicator {
@@ -2162,213 +2087,11 @@ footer {
   font-weight: 600;
 }
 
-.params-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 8px;
-}
-
-.param-item {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.8em;
-  color: #cbd5e1;
-}
-
-.param-item span:first-child {
-  font-weight: 500;
-}
-
-/* Matriz de resultados */
-.matrix-result-card {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.15) 100%);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  border-radius: 12px;
-  padding: 20px;
-  animation: slideDown 0.4s ease;
-}
-
-.matrix-result-card h3 {
-  color: #e2e8f0;
-  margin-bottom: 8px;
-  text-align: center;
-}
-
-.matrix-description {
-  color: #cbd5e1;
-  font-size: 0.9em;
-  text-align: center;
-  margin-bottom: 20px;
-  line-height: 1.4;
-}
-
-.matrix-table-container {
-  overflow-x: auto;
-  margin-bottom: 16px;
-}
-
-.profit-matrix-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: rgba(15, 23, 42, 0.6);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.profit-matrix-table th,
-.profit-matrix-table td {
-  padding: 8px 12px;
-  text-align: center;
-  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
-  font-size: 0.85em;
-}
-
-.profit-matrix-table th {
-  background: rgba(59, 130, 246, 0.1);
-  color: #e2e8f0;
-  font-weight: 600;
-  font-size: 0.8em;
-}
-
-.profit-matrix-table tbody tr:hover {
-  background: rgba(59, 130, 246, 0.05);
-}
-
-.profit-matrix-table .target-percent {
-  font-weight: 700;
-  color: #3b82f6;
-}
-
-.profit-matrix-table .positive {
-  background: rgba(16, 185, 129, 0.05);
-}
-
-.profit-matrix-table .negative {
-  background: rgba(239, 68, 68, 0.05);
-}
-
-.matrix-note {
-  background: rgba(251, 191, 36, 0.1);
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  border-radius: 6px;
-  padding: 12px;
-  text-align: center;
-}
-
-.matrix-note small {
-  color: #d1d5db;
-  line-height: 1.4;
-}
-
-.simulator-results {
-  margin-top: 24px;
-  animation: slideDown 0.4s ease;
-}
-
-.sim-result-card {
-  background: rgba(15, 23, 42, 0.7);
-  border-radius: 16px;
-  padding: 20px;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-}
-
-.sim-result-card.positive {
-  border-color: rgba(34, 197, 94, 0.5);
-  background: rgba(34, 197, 94, 0.1);
-}
-
-.sim-result-card.negative {
-  border-color: rgba(239, 68, 68, 0.5);
-  background: rgba(239, 68, 68, 0.1);
-}
-
-.sim-result-card h3 {
-  color: #60a5fa;
-  font-size: 1.3em;
-  margin-bottom: 16px;
-  text-align: center;
-}
-
-.sim-breakdown {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.sim-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 12px;
-  background: rgba(30, 41, 59, 0.5);
-  border-radius: 8px;
-  border-left: 3px solid rgba(59, 130, 246, 0.5);
-}
-
-.sim-row.warning {
-  border-left-color: rgba(251, 191, 36, 0.7);
-  background: rgba(251, 191, 36, 0.1);
-}
-
-.sim-row span {
-  color: #cbd5e1;
-  font-size: 0.9em;
-}
-
-.sim-row strong {
-  color: #e2e8f0;
-  font-weight: 700;
-}
-
-.sim-final {
-  padding-top: 16px;
-  border-top: 2px solid rgba(59, 130, 246, 0.3);
-  margin-top: 8px;
-}
-
-.sim-profit {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px;
-  border-radius: 12px;
-  font-size: 1.1em;
-}
-
-.sim-profit.positive {
-  background: rgba(34, 197, 94, 0.15);
-  border: 1px solid rgba(34, 197, 94, 0.5);
-}
-
-.sim-profit.negative {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.5);
-}
-
-.sim-profit span {
-  color: #94a3b8;
-  font-weight: 600;
-}
-
-.sim-profit strong {
-  color: #e2e8f0;
-  font-weight: 800;
-  font-size: 1.15em;
-}
-
-.sim-note {
-  margin-top: 16px;
-  padding: 12px;
-  background: rgba(251, 191, 36, 0.1);
-  border-radius: 8px;
-  border-left: 3px solid rgba(251, 191, 36, 0.7);
-}
-
-.sim-note small {
-  color: #fbbf24;
-  font-size: 0.85em;
-}
+/* SECCIÓN ELIMINADA: Clases legacy de simulador (no usadas en templates actuales)
+   Clases eliminadas: params-grid, param-item, matrix-result-card, matrix-description,
+   profit-matrix-table, matrix-table-container, matrix-note, simulator-results,
+   sim-result-card, sim-breakdown, sim-row, sim-final, sim-profit, sim-note
+   La matriz actual usa risk-matrix-table definida en otra sección */
 
 /* RESPONSIVE */
 @media (max-width: 500px) {
@@ -2625,46 +2348,8 @@ footer {
   margin: 0;
 }
 
-/* ============================================
-   BADGES P2P
-   ============================================ */
-.route-badges {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-  margin-top: 8px;
-}
-
-.p2p-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(210, 153, 34, 0.15);
-  color: #d29922;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 4px;
-  border: 1px solid rgba(210, 153, 34, 0.3);
-  text-transform: uppercase;
-}
-
-.no-p2p-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(63, 185, 80, 0.15);
-  color: #3fb950;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 4px;
-  border: 1px solid rgba(63, 185, 80, 0.3);
-  text-transform: uppercase;
-}
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
+/* SECCIÓN ELIMINADA: BADGES P2P duplicados (definidos en L1010+)
+   .route-badges, .p2p-badge, .no-p2p-badge ya definidos arriba */
 
 .route-card.is-p2p {
   border-left: 3px solid var(--color-warning);
@@ -3329,117 +3014,15 @@ p.error {
   box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
 }
 
-.filter-range-container {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.filter-range {
-  flex: 1;
-  -webkit-appearance: none;
-  height: 6px;
-  background: var(--color-bg-elevated);
-  border-radius: var(--radius-full);
-  outline: none;
-}
-
-.filter-range::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
-  background: var(--color-brand-primary);
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  transition: all var(--duration-fast) var(--ease-default);
-}
-
-.filter-range::-webkit-slider-thumb:hover {
-  transform: scale(1.1);
-  box-shadow: var(--shadow-md);
-}
-
-.filter-range::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  background: var(--color-brand-primary);
-  border-radius: 50%;
-  cursor: pointer;
-  border: none;
-  box-shadow: var(--shadow-sm);
-}
-
-.filter-range-value {
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-brand-primary);
-  min-width: 40px;
-  text-align: center;
-}
-
-.filter-toggle-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 6px;
-  transition: background 0.2s ease;
-}
-
-.filter-toggle-label:hover {
-  background: rgba(59, 130, 246, 0.1);
-}
-
-.filter-checkbox {
-  width: 18px;
-  height: 18px;
-  accent-color: #3b82f6;
-}
-
-.filter-toggle-text {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #e1e8ed;
-  font-size: 0.9em;
-}
-
-.filter-toggle-icon {
-  font-size: 1em;
-}
+/* SECCIÓN ELIMINADA: filter-range, filter-toggle, filter-checkbox (no usadas en templates)
+   Las clases filter-range-container, filter-range, filter-range-value, filter-toggle-label,
+   filter-toggle-label:hover, filter-checkbox, filter-toggle-text, filter-toggle-icon 
+   no están siendo usadas en popup.js, popup.html ni renderHelpers.js */
 
 /* ============================================
    COMPONENTES DE RUTA (Reducido v5.0.75)
-   Clases eliminadas: route-info-section, route-exchange, route-profit,
-   route-badges, single-exchange-badge, negative-tag, route-row, 
-   route-label, route-value, route-actions, route-click-indicator, click-icon
+   NOTA: .route-header, .route-info, .route-details, .p2p-badge - DEFINIDOS EN SECCIÓN CARDS L965+
    ============================================ */
-
-.route-header {
-  display: block;
-  position: relative;
-  margin-bottom: 12px;
-}
-
-.route-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.p2p-badge {
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: 500;
-  background: #f59e0b;
-  color: white;
-}
-
-.route-details {
-  margin-bottom: 12px;
-}
 
 /* ============================================
    ESTADO SIN RUTAS
@@ -3554,135 +3137,11 @@ p.error {
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
-.filter-range-container {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.filter-range {
-  flex: 1;
-  height: 6px;
-  background: #334155;
-  border-radius: 3px;
-  outline: none;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-.filter-range::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  background: #3b82f6;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: all 0.2s ease;
-}
-
-.filter-range::-webkit-slider-thumb:hover {
-  background: #2563eb;
-  transform: scale(1.1);
-}
-
-.filter-range::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  background: #3b82f6;
-  border-radius: 50%;
-  cursor: pointer;
-  border: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: all 0.2s ease;
-}
-
-.filter-range::-moz-range-thumb:hover {
-  background: #2563eb;
-  transform: scale(1.1);
-}
-
-.filter-range-value {
-  font-size: 13px;
-  font-weight: 600;
-  color: #3b82f6;
-  min-width: 40px;
-  text-align: right;
-}
-
-.filter-toggle-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.filter-checkbox {
-  width: 16px;
-  height: 16px;
-  accent-color: #3b82f6;
-  cursor: pointer;
-}
-
-.filter-toggle-text {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: #e1e8ed;
-}
-
-.filter-toggle-icon {
-  font-size: 12px;
-}
-
-.filter-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #475569;
-}
-
-.btn-filter-apply,
-.btn-filter-reset {
-  flex: 1;
-  padding: 10px 16px;
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.btn-filter-apply {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-}
-
-.btn-filter-apply:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
-}
-
-.btn-filter-reset {
-  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
-  color: white;
-}
-
-.btn-filter-reset:hover {
-  background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3);
-}
+/* SECCIÓN ELIMINADA: Duplicados de filter-range, filter-toggle, filter-actions
+   Clases eliminadas: filter-range-container, filter-range, filter-range-value,
+   filter-toggle-label, filter-checkbox, filter-toggle-text, filter-toggle-icon,
+   filter-actions, btn-filter-apply, btn-filter-reset (todas definidas arriba y no usadas)
+*/
 
 /* SECCIÓN ELIMINADA: "EXPANSIÓN DE TARJETAS CON DETALLES v5.0.77" (no usado) */
 

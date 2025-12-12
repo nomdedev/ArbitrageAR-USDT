@@ -33,45 +33,36 @@
 | Sistema de espaciado (4px base) | ✅ HECHO | `--space-1` a `--space-8` |
 | Sistema de bordes y sombras | ✅ HECHO | `--radius-*`, `--shadow-*`, `--shadow-glow-*` |
 | Sistema de animaciones | ✅ HECHO | `--duration-*`, `--ease-*` |
-| Focus states (`:focus-visible`) | ✅ HECHO | 15 implementaciones en popup.css |
+| Focus states (`:focus-visible`) | ✅ HECHO | 15 implementaciones |
 | Soporte `prefers-reduced-motion` | ✅ HECHO | Media query implementada |
-| Modal con backdrop-filter blur | ✅ HECHO | 17 implementaciones |
-| Modal cierre con Escape | ✅ HECHO | Event listener implementado |
-| Modal atributos ARIA | ✅ HECHO | `role`, `aria-modal`, `aria-labelledby` |
-| Options page CSS reescrito | ✅ HECHO | 576 líneas (antes ~896) |
-| Options usa mismo sistema de diseño | ✅ HECHO | Variables compartidas |
+| Modal mejorado | ✅ HECHO | ARIA, Escape, Blur, click fuera |
+| Options page CSS reescrito | ✅ HECHO | 576 líneas |
 | Cards con indicador de ganancia | ✅ HECHO | En renderHelpers.js |
 | `formatVolume()` función | ✅ HECHO | En renderHelpers.js |
-| Animaciones pulse/glow | ✅ HECHO | Múltiples @keyframes |
-| Click fuera modal para cerrar | ✅ HECHO | En popup.js |
 | Header con botones mejorados | ✅ HECHO | Iconos y hover states |
+| @keyframes consolidados | ✅ HECHO | Sin duplicados |
+| Media queries consolidadas | ✅ HECHO | Unificadas al final |
+| Secciones legacy eliminadas | ✅ HECHO | EXPANSIÓN TARJETAS, btn/badge, bank-header, guía premium, exchange cards, summary-row, info-banner, price-row |
 
 ### ⏳ PENDIENTE
 
 | Tarea | Prioridad | Notas |
 |-------|-----------|-------|
-| **Reducir líneas CSS** | 🔴 ALTA | Actualmente 5870, objetivo <3500 |
-| Skeleton loaders | 🟡 MEDIA | Clases base añadidas (.skeleton) |
-| Focus trap en modal | 🟡 MEDIA | No hay `focusableElements` tracking |
-| Flash update animation | ✅ HECHO | `@keyframes flashUpdate` consolidado |
-| Tab enter animation | ✅ HECHO | `@keyframes tabEnter` consolidado |
-| Eliminar @keyframes duplicados | ✅ HECHO | Consolidados en sección única |
-| Unificar estilos duplicados | ⏳ EN PROGRESO | Secciones legacy eliminándose |
-| Consolidar media queries | ✅ HECHO | Unificadas al final del archivo |
-| Responsive design | 🟡 MEDIA | Parcialmente implementado |
+| **Reducir líneas CSS** | � CASI | 3947 líneas, objetivo <3500 (-447 más) |
+| Consolidar duplicados | ✅ HECHO | .route-card, .route-header, .route-details, badges |
+| Skeleton loaders en HTML | 🟡 MEDIA | Clases CSS listas |
+| Focus trap en modal | 🟡 MEDIA | Mejora de accesibilidad |
 | Testing funcional completo | 🟢 BAJA | Documentar resultados |
-| Documentación final | 🟢 BAJA | Actualizar CHANGELOG |
 
 ### 📊 Métricas Actuales vs Objetivo
 
-| Métrica | Inicio | Actual | Objetivo |
-|---------|--------|--------|----------|
-| Líneas popup.css | 6764 | **5870** | < 3500 ⚠️ (-13.2%) |
-| Líneas options.css | ~896 | **576** | < 700 ✅ |
-| Focus states | Parcial | **15** | 100% ✅ |
-| Contraste WCAG AA | Parcial | ~85% | 100% |
-| @keyframes duplicados | 10+ | **0** | 0 ✅ |
-| Media queries duplicadas | 3 | **1** | 1 ✅ |
+| Métrica | Inicio | Actual | Objetivo | Progreso |
+|---------|--------|--------|----------|----------|
+| Líneas popup.css | 6764 | **3947** | < 3500 | -42% ✅ |
+| Líneas options.css | ~896 | **576** | < 700 | ✅ |
+| Focus states | Parcial | **15** | 100% | ✅ |
+| @keyframes duplicados | 10+ | **0** | 0 | ✅ |
+| Media queries duplicadas | 3 | **1** | 1 | ✅ |
 
 ---
 
