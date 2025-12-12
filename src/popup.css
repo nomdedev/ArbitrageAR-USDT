@@ -1371,51 +1371,8 @@ main::-webkit-scrollbar-thumb:hover {
 
 /* .profit-badge - DEFINIDO EN SECCIÓN PROFIT BADGES v6.0.0 (línea ~1109) */
 
-/* Tag para arbitrajes < 1% (solo visibles, no notificados) */
-.low-profit-tag {
-  display: inline-block;
-  margin-left: 6px;
-  padding: 4px 8px;
-  font-size: 0.7em;
-  font-weight: 600;
-  background: rgba(100, 116, 139, 0.3);
-  color: #cbd5e1;
-  border-radius: 8px;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  vertical-align: middle;
-}
-
-/* Tag para pérdidas */
-.negative-tag {
-  display: inline-block;
-  margin-left: 6px;
-  padding: 4px 8px;
-  font-size: 0.7em;
-  font-weight: 600;
-  background: rgba(239, 68, 68, 0.3);
-  color: #fca5a5;
-  border-radius: 8px;
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  vertical-align: middle;
-}
-
-/* Indicadores de pérdida debajo del broker */
-.broker-loss-indicator,
-.route-loss-indicator {
-  margin-top: 4px;
-  margin-bottom: 8px;
-  text-align: left;
-}
-
-.broker-loss-indicator .negative-tag,
-.route-loss-indicator .negative-tag {
-  display: inline-block;
-  margin-left: 0;
-  font-size: 0.75em;
-  padding: 3px 6px;
-  background: rgba(239, 68, 68, 0.2);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-}
+/* SECCIÓN ELIMINADA: low-profit-tag, negative-tag, broker-loss-indicator,
+   route-loss-indicator - no usadas en templates actuales */
 
 /* Card con pérdida */
 .arbitrage-card.negative-profit {
@@ -2911,17 +2868,7 @@ footer {
   margin: 0;
 }
 
-.broker-tag {
-  display: inline-block;
-  background: rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
-  font-size: 0.75em;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-weight: 600;
-  margin-top: 4px;
-}
-
+/* .broker-tag - ELIMINADO (no usado en templates) */
 /* .profit-display-enhanced, .profit-percentage, .profit-label - ELIMINADOS (no usados) */
 /* .progress-bar-container, .progress-step, .progress-dot, .progress-line, .steps-timeline - ELIMINADOS (no usados) */
 
@@ -3944,10 +3891,11 @@ p.error {
   font-size: 1em;
 }
 
-/* TOAST NOTIFICATIONS - keyframe toastSlideIn eliminado (no usado) */
-
 /* ============================================
-   COMPONENTES DE RUTA OPTIMIZADOS v5.0.75
+   COMPONENTES DE RUTA (Reducido v5.0.75)
+   Clases eliminadas: route-info-section, route-exchange, route-profit,
+   route-badges, single-exchange-badge, negative-tag, route-row, 
+   route-label, route-value, route-actions, route-click-indicator, click-icon
    ============================================ */
 
 .route-header {
@@ -3956,137 +3904,23 @@ p.error {
   margin-bottom: 12px;
 }
 
-.route-info-section {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  align-items: flex-start;
-  margin-top: 4px;
-}
-
 .route-info {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.route-exchange {
-  font-size: 0.85em;
-  font-weight: 600;
-  color: #e1e8ed;
-}
-
-.route-profit {
-  font-size: 1em;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 4px;
-  display: inline-block;
-  white-space: nowrap;
-  position: absolute;
-  top: 0;
-  right: 0;
-}
-
-.route-profit.high {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-}
-
-.route-profit.negative {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: white;
-}
-
-.route-badges {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.single-exchange-badge,
-.p2p-badge,
-.negative-tag {
+.p2p-badge {
   font-size: 11px;
   padding: 2px 6px;
   border-radius: 4px;
   font-weight: 500;
-}
-
-.single-exchange-badge {
-  background: #3b82f6;
-  color: white;
-}
-
-.p2p-badge {
   background: #f59e0b;
-  color: white;
-}
-
-.negative-tag {
-  background: #ef4444;
   color: white;
 }
 
 .route-details {
   margin-bottom: 12px;
-}
-
-.route-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 4px 0;
-  font-size: 13px;
-}
-
-.route-label {
-  color: #94a3b8;
-  font-weight: 500;
-}
-
-.route-value {
-  color: #e1e8ed;
-  font-weight: 600;
-}
-
-.route-value.positive {
-  color: #10b981;
-}
-
-.route-value.negative {
-  color: #ef4444;
-}
-
-.route-actions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  margin-top: 12px;
-}
-
-.route-click-indicator {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  transition: all 0.2s ease;
-  opacity: 0.6;
-}
-
-.route-card:hover .route-click-indicator {
-  opacity: 1;
-  background: rgba(59, 130, 246, 0.2);
-  transform: scale(1.1);
-}
-
-.click-icon {
-  font-size: 12px;
-  line-height: 1;
 }
 
 /* ============================================
@@ -4332,99 +4166,9 @@ p.error {
   box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3);
 }
 
-/* ============================================
-   EXPANSIÓN DE TARJETAS CON DETALLES v5.0.77
-   ============================================ */
+/* SECCIÓN ELIMINADA: "EXPANSIÓN DE TARJETAS CON DETALLES v5.0.77" (no usado) */
 
-.route-card.expanded {
-  border: 2px solid rgba(59, 130, 246, 0.4);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
-}
-
-.route-details-expanded {
-  margin-top: 20px;
-  padding: 20px;
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.8) 100%);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-  animation: expandDetails 0.4s ease-out;
-}
-
-@keyframes expandDetails {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(-10px);
-    max-height: 0;
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    max-height: 1000px;
-  }
-}
-
-.route-details-expanded .guide-container-simple {
-  margin: 0;
-  padding: 0;
-}
-
-.route-details-expanded .guide-header-simple {
-  margin-bottom: 20px;
-  padding: 16px;
-  border-radius: 8px;
-}
-
-.route-details-expanded .guide-step {
-  margin-bottom: 16px;
-  padding: 12px 16px;
-  border-radius: 8px;
-  border-left: 3px solid rgba(59, 130, 246, 0.5);
-  background: rgba(59, 130, 246, 0.05);
-  transition: all 0.3s ease;
-}
-
-.route-details-expanded .guide-step:hover {
-  background: rgba(59, 130, 246, 0.1);
-  border-left-color: rgba(59, 130, 246, 0.8);
-}
-
-.route-details-expanded .step-number {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  color: white;
-  font-weight: 600;
-}
-
-.route-details-expanded .step-title {
-  color: #e1e8ed;
-  font-weight: 500;
-}
-
-.route-details-expanded .step-description {
-  color: #cbd5e1;
-  line-height: 1.5;
-}
-
-.route-details-expanded .calculator-result {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #10b981;
-  font-weight: 600;
-}
-
-.route-details-expanded .considerations-section {
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  color: #f59e0b;
-}
-
-.route-details-expanded .considerations-section h4 {
-  color: #fbbf24;
-}
-
-/* MODAL DE DETALLES DE RUTA - Estilos legacy (principales en MODALES MODERNIZADOS v6.0.0) */
-/* Scrollbar personalizado para el modal */
+/* MODAL DE DETALLES DE RUTA - Scrollbar */
 .modal-content::-webkit-scrollbar {
   width: 6px;
 }
@@ -4444,7 +4188,7 @@ p.error {
 }
 
 /* ============================================
-   SISTEMA DE COMPONENTES REUTILIZABLES v5.0.80
+   SISTEMA DE COMPONENTES REUTILIZABLES v5.0.80 (Reducido)
    ============================================ */
 
 /* 🎯 BOTONES BASE */
@@ -4470,78 +4214,6 @@ p.error {
   transform: none !important;
 }
 
-/* Variantes de botones */
-.btn-primary {
-  background: var(--gradient-primary);
-  color: white;
-  box-shadow: var(--shadow-md);
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: var(--gradient-primary-hover);
-  transform: var(--hover-lift);
-  box-shadow: var(--shadow-lg);
-}
-
-.btn-success {
-  background: var(--gradient-success);
-  color: white;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-}
-
-.btn-success:hover:not(:disabled) {
-  background: var(--gradient-success-hover);
-  transform: var(--hover-lift);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-}
-
-.btn-warning {
-  background: var(--gradient-warning);
-  color: white;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-}
-
-.btn-error {
-  background: var(--gradient-error);
-  color: white;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-}
-
-.btn-neutral {
-  background: var(--gradient-neutral);
-  color: white;
-  box-shadow: var(--shadow-md);
-}
-
-.btn-neutral:hover:not(:disabled) {
-  background: var(--gradient-neutral-hover);
-  transform: var(--hover-lift);
-  box-shadow: var(--shadow-lg);
-}
-
-/* Botones outline */
-.btn-outline {
-  background: transparent;
-  border: 1px solid var(--primary-blue);
-  color: var(--primary-blue);
-}
-
-.btn-outline:hover:not(:disabled) {
-  background: var(--primary-blue);
-  color: white;
-}
-
-/* Tamaños de botones */
-.btn-sm {
-  padding: var(--spacing-xs) var(--spacing-sm);
-  font-size: var(--font-size-xs);
-}
-
-.btn-lg {
-  padding: var(--spacing-md) var(--spacing-lg);
-  font-size: var(--font-size-base);
-}
-
 /* 🃏 CARDS BASE */
 .card {
   background: var(--card-bg);
@@ -4559,51 +4231,9 @@ p.error {
   border-color: var(--border-hover);
 }
 
-/* 📊 BADGES BASE */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--border-radius-sm);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  white-space: nowrap;
-}
-
-.badge-success {
-  background: var(--gradient-success);
-  color: white;
-}
-
-.badge-warning {
-  background: var(--gradient-warning);
-  color: white;
-}
-
-.badge-error {
-  background: var(--gradient-error);
-  color: white;
-}
-
-.badge-info {
-  background: var(--gradient-info);
-  color: white;
-}
-
-/* 🔄 ANIMACIONES - DEFINIDAS EN SECCIÓN DE ANIMACIONES CONSOLIDADAS (línea ~260) */
-
-/* Clases de animación */
-.animate-fade-in {
-  animation: fadeIn var(--anim-duration-normal) ease-out;
-}
-
-.animate-slide-in {
-  animation: slideIn var(--anim-duration-normal) ease-out;
-}
-
-.animate-pulse {
-  animation: pulse var(--anim-duration-slow) ease-in-out infinite;
-}
+/* SECCIÓN ELIMINADA: btn-primary, btn-success, btn-warning, btn-error, btn-neutral,
+   btn-outline, btn-sm, btn-lg, badge, badge-success, badge-warning, badge-error,
+   badge-info, animate-fade-in, animate-slide-in, animate-pulse (no usadas) */
 
 /* ============================================
    ESTILOS PARA PESTAÑA DE EXCHANGES v5.0.75
