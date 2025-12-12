@@ -1229,62 +1229,7 @@ main::-webkit-scrollbar-thumb:hover {
   border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
-.summary-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 6px 0;
-  font-size: 0.95em;
-  color: #cbd5e1;
-}
-
-.summary-row.highlight-row {
-  margin-top: 8px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(59, 130, 246, 0.3);
-  color: #e1e8ed;
-  font-size: 1em;
-}
-
-.summary-row .profit {
-  color: #10b981;
-  font-weight: 600;
-}
-
-.summary-row .loss {
-  color: #ef4444;
-  font-weight: 600;
-}
-
-.route-warning {
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: rgba(245, 158, 11, 0.1);
-  border-radius: 8px;
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  font-size: 0.85em;
-  color: #fbbf24;
-}
-
-/* .route-action-button, .guide-button - ELIMINADOS (no usados) */
-
-.info-banner {
-  padding: 12px 16px;
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: 12px;
-  margin-bottom: 16px;
-  color: #93c5fd;
-  font-size: 0.9em;
-}
-
-.info-banner.success {
-  background: rgba(16, 185, 129, 0.1);
-  border-color: rgba(16, 185, 129, 0.3);
-  color: #6ee7b7;
-}
+/* SECCIÓN ELIMINADA: summary-row, route-warning, info-banner, info-banner.success (no usadas) */
 
 .card-header h3 {
   font-size: 1.15em;
@@ -1293,9 +1238,6 @@ main::-webkit-scrollbar-thumb:hover {
 }
 
 /* .profit-badge - DEFINIDO EN SECCIÓN PROFIT BADGES v6.0.0 (línea ~1109) */
-
-/* SECCIÓN ELIMINADA: low-profit-tag, negative-tag, broker-loss-indicator,
-   route-loss-indicator - no usadas en templates actuales */
 
 /* Card con pérdida */
 .arbitrage-card.negative-profit {
@@ -1310,40 +1252,7 @@ main::-webkit-scrollbar-thumb:hover {
   z-index: 1;
 }
 
-.price-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px 0;
-  font-size: 0.92em;
-  border-bottom: 1px solid rgba(59, 130, 246, 0.1);
-  transition: all 0.3s ease;
-}
-
-.price-row:hover {
-  background: rgba(59, 130, 246, 0.05);
-  margin: 0 -8px;
-  padding: 10px 8px;
-  border-radius: 8px;
-}
-
-.price-row:last-child {
-  border-bottom: none;
-}
-
-.price-label {
-  color: #94a3b8;
-  font-weight: 600;
-}
-
-.price-value {
-  color: #e1e8ed;
-  font-weight: 700;
-}
-
-.price-value.highlight {
-  color: #10b981;
-  font-weight: 800;
-}
+/* SECCIÓN ELIMINADA: price-row y variantes (no usada en templates) */
 
 /* ============================================
    CARDS MEJORADAS v6.0.0 - Diseño accesible
