@@ -2886,20 +2886,10 @@ footer {
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 8px 32px rgba(59, 130, 246, 0.2);
-  animation: slideInDown 0.5s ease-out;
+  animation: slideDown 0.5s ease-out;
 }
 
-@keyframes slideInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* @keyframes slideInDown - Usar slideDown (DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS) */
 
 .broker-badge {
   display: flex;
@@ -2936,7 +2926,7 @@ footer {
 /* .progress-bar-container, .progress-step, .progress-dot, .progress-line, .steps-timeline - ELIMINADOS (no usados) */
 
 /* ============================================
-   GUIDE RESPONSIVE STYLES
+   GUIDE RESPONSIVE STYLES (Reducido)
    ============================================ */
 
 #selected-arbitrage-guide {
@@ -2945,330 +2935,24 @@ footer {
   overflow-x: hidden;
 }
 
-.step-container {
-  width: 100%;
-  max-width: 100%;
-  padding: 0;
-  margin: 0;
-}
-
-.step-item {
-  position: relative;
-  display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
-  animation: slideInLeft 0.5s ease-out both;
-  width: 100%;
-  max-width: 100%;
-}
-
-.step-timeline-connector {
-  position: absolute;
-  left: 24px;
-  top: 48px;
-  bottom: -20px;
-  width: 2px;
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.4) 0%, rgba(59, 130, 246, 0.1) 100%);
-  border-radius: 1px;
-}
-
-.step-icon-wrapper {
-  flex-shrink: 0;
-  position: relative;
-}
-
-.step-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(30, 58, 138, 0.3) 100%);
-  border: 2px solid rgba(59, 130, 246, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5em;
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
-  transition: all 0.3s ease;
-}
-
-.step-number-badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  width: 20px;
-  height: 20px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  border: 2px solid #0f172a;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.7em;
-  font-weight: 800;
-  color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.step-content-card {
-  flex: 1;
-  background: linear-gradient(135deg, rgba(30, 58, 138, 0.15) 0%, rgba(15, 23, 42, 0.3) 100%);
-  backdrop-filter: blur(20px);
-  border-radius: 12px;
-  padding: 16px;
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  transition: all 0.3s ease;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-.step-details-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  /* Una columna para mejor adaptabilidad */
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.detail-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(15, 23, 42, 0.5);
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid rgba(51, 65, 85, 0.5);
-  transition: all 0.3s ease;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.detail-content {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.detail-label {
-  color: #94a3b8;
-  font-size: 0.65em;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.detail-value {
-  color: #e2e8f0;
-  font-size: 0.8em;
-  font-weight: 700;
-  word-break: break-word;
-  line-height: 1.2;
-}
-
-.detail-value.highlight {
-  color: #3b82f6;
-  font-size: 0.85em;
-}
-
-/* Responsive para extensiones pequeñas */
-@media (max-width: 450px) {
-  .step-item {
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-
-  .step-content-card {
-    padding: 12px;
-  }
-
-  .step-icon {
-    width: 40px;
-    height: 40px;
-    font-size: 1.2em;
-  }
-
-  .step-timeline-connector {
-    left: 20px;
-    top: 40px;
-  }
-
-  .step-number-badge {
-    width: 18px;
-    height: 18px;
-    font-size: 0.6em;
-    top: -3px;
-    right: -3px;
-  }
-}
-
-.detail-value.fee {
-  color: #fbbf24;
-}
-
-.detail-value.fee-total {
-  color: #f59e0b;
-  font-weight: 800;
-}
-
-.step-warning {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(251, 191, 36, 0.1);
-  padding: 10px;
-  border-radius: 8px;
-  border-left: 3px solid rgba(251, 191, 36, 0.6);
-  margin-top: 12px;
-  font-size: 0.8em;
-  color: #fbbf24;
-}
+/* Clases legacy de guía eliminadas: .step-container, .step-item, .step-timeline-connector,
+   .step-icon-wrapper, .step-icon, .step-number-badge, .step-content-card, .step-details-grid,
+   .detail-item, .detail-content, .detail-label, .detail-value, .step-warning, .step-action,
+   .action-link (no se usan en templates actuales) */
 
 .warning-icon {
   font-size: 1.2em;
   flex-shrink: 0;
 }
 
-.step-action {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(51, 65, 85, 0.5);
-}
+/* Clases legacy de calculadora eliminadas: .calculation-box-enhanced, .calculation-header,
+   .calculation-icon, .calculation-flow, .calc-step, .calc-step-number, .calc-step-content,
+   .calc-arrow, .calc-fees-summary, .calculation-result, .result-icon, .result-content,
+   .result-label, .result-value, .result-percentage, .calculation-note-enhanced, .note-icon,
+   .important-considerations, .considerations-header, .considerations-list, .consideration-item,
+   .item-icon, .item-content (no se usan en templates actuales) */
 
-.action-link {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: #3b82f6;
-  text-decoration: none;
-  font-size: 0.85em;
-  font-weight: 600;
-  padding: 8px 12px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.action-link:hover {
-  background: rgba(59, 130, 246, 0.1);
-  color: #60a5fa;
-  padding-left: 16px;
-}
-
-.action-link .arrow {
-  font-size: 1.2em;
-  transition: transform 0.3s ease;
-}
-
-.action-link:hover .arrow {
-  transform: translateX(4px);
-}
-
-/* Calculadora mejorada */
-.calculation-box-enhanced {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(30, 58, 138, 0.2) 100%);
-  backdrop-filter: blur(20px);
-  border-radius: 16px;
-  padding: 20px;
-  margin: 24px 0;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.2);
-  animation: fadeInUp 0.6s ease-out 0.5s both;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.calculation-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 2px solid rgba(59, 130, 246, 0.2);
-}
-
-.calculation-icon {
-  font-size: 2em;
-}
-
-.calculation-header h4 {
-  color: #e2e8f0;
-  font-size: 1.2em;
-  font-weight: 700;
-  margin: 0;
-}
-
-.calculation-flow {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.calc-step {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: rgba(15, 23, 42, 0.5);
-  padding: 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(51, 65, 85, 0.5);
-  transition: all 0.3s ease;
-}
-
-.calc-step:hover {
-  background: rgba(30, 41, 59, 0.6);
-  border-color: rgba(59, 130, 246, 0.3);
-  transform: translateX(4px);
-}
-
-.calc-step.final {
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(16, 185, 129, 0.1) 100%);
-  border-color: rgba(34, 197, 94, 0.4);
-}
-
-.calc-step-number {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  color: white;
-  flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-}
-
-.calc-step.final .calc-step-number {
-  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-}
-
-.calc-step-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
+/* Las clases .calc-label, .calc-value, .calc-fee SÍ se usan: */
 .calc-label {
   color: #94a3b8;
   font-size: 0.8em;
@@ -3281,13 +2965,9 @@ footer {
   font-weight: 700;
 }
 
-.calc-value.initial {
-  color: #60a5fa;
-}
-
-.calc-value.final {
-  color: #34d399;
+.calc-value.big {
   font-size: 1.2em;
+  color: #34d399;
 }
 
 .calc-fee {
@@ -3295,202 +2975,6 @@ footer {
   font-size: 0.75em;
   font-weight: 600;
   margin-top: 2px;
-}
-
-.calc-arrow {
-  text-align: center;
-  color: #3b82f6;
-  font-size: 1.5em;
-  padding: 4px 0;
-  animation: bounce 2s ease-in-out infinite;
-}
-
-@keyframes bounce {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-4px);
-  }
-}
-
-.calc-arrow.final {
-  color: #34d399;
-}
-
-.calc-fees-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  background: rgba(251, 191, 36, 0.1);
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  margin: 8px 0;
-}
-
-.fees-icon {
-  font-size: 1.2em;
-}
-
-.fees-text {
-  color: #fbbf24;
-  font-size: 0.85em;
-  font-weight: 600;
-  flex: 1;
-}
-
-.fees-value {
-  color: #f59e0b;
-  font-weight: 800;
-  font-size: 0.95em;
-}
-
-.calculation-result {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(16, 185, 129, 0.15) 100%);
-  padding: 20px;
-  border-radius: 12px;
-  border: 2px solid rgba(34, 197, 94, 0.4);
-  margin-top: 16px;
-  box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
-}
-
-.result-icon {
-  font-size: 2.5em;
-  animation: rotate 3s ease-in-out infinite;
-}
-
-/* @keyframes rotate - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
-
-.result-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.result-label {
-  color: #94a3b8;
-  font-size: 0.85em;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.result-value {
-  color: #34d399;
-  font-size: 1.4em;
-  font-weight: 800;
-}
-
-.result-percentage {
-  color: #4ade80;
-  font-size: 1.1em;
-  font-weight: 700;
-}
-
-.calculation-note-enhanced {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(168, 85, 247, 0.1);
-  padding: 10px;
-  border-radius: 8px;
-  border-left: 3px solid rgba(168, 85, 247, 0.6);
-  margin-top: 12px;
-  font-size: 0.8em;
-  color: #c084fc;
-}
-
-.note-icon {
-  font-size: 1.2em;
-  flex-shrink: 0;
-}
-
-/* Consideraciones importantes mejoradas */
-.important-considerations {
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
-  backdrop-filter: blur(20px);
-  border-radius: 16px;
-  padding: 20px;
-  margin-top: 24px;
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  animation: fadeInUp 0.6s ease-out 0.6s both;
-}
-
-.considerations-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid rgba(251, 191, 36, 0.2);
-}
-
-.considerations-icon {
-  font-size: 1.8em;
-}
-
-.considerations-header h4 {
-  color: #fbbf24;
-  font-size: 1.1em;
-  font-weight: 700;
-  margin: 0;
-}
-
-.considerations-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.consideration-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  background: rgba(15, 23, 42, 0.4);
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(251, 191, 36, 0.15);
-  transition: all 0.3s ease;
-}
-
-.consideration-item:hover {
-  background: rgba(30, 41, 59, 0.5);
-  border-color: rgba(251, 191, 36, 0.3);
-  transform: translateX(4px);
-}
-
-.item-icon {
-  font-size: 1.3em;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.item-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.item-content strong {
-  color: #fbbf24;
-  font-size: 0.85em;
-  font-weight: 700;
-}
-
-.item-content span {
-  color: #cbd5e1;
-  font-size: 0.8em;
-  line-height: 1.5;
 }
 
 /* ==========================================
@@ -3506,7 +2990,7 @@ footer {
   margin-bottom: 12px;
   /* Reducido para diseño más compacto */
   border: 1px solid rgba(59, 130, 246, 0.25);
-  animation: slideInDown 0.5s ease-out;
+  animation: slideDown 0.5s ease-out;
 }
 
 .filter-section {
@@ -4460,21 +3944,7 @@ p.error {
   font-size: 1em;
 }
 
-/* ==========================================
-   TOAST NOTIFICATIONS
-   ========================================== */
-
-@keyframes toastSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(100%);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
+/* TOAST NOTIFICATIONS - keyframe toastSlideIn eliminado (no usado) */
 
 /* ============================================
    COMPONENTES DE RUTA OPTIMIZADOS v5.0.75
