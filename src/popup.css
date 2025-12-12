@@ -395,26 +395,9 @@ a:focus-visible {
   margin: var(--space-2) 0;
 }
 
-/* Skip link oculto (para lectores de pantalla) */
-.skip-link {
-  position: absolute;
-  top: -40px;
-  left: 0;
-  background: var(--color-bg-secondary);
-  color: var(--color-text-primary);
-  padding: var(--space-2) var(--space-4);
-  z-index: 10000;
-  transition: top var(--duration-fast);
-}
+/* SECCIÓN ELIMINADA: skip-link, tab-button (no usadas en templates) */
 
-.skip-link:focus {
-  top: 0;
-}
-
-/* ==========================================
-   ESTILOS PARA PESTAÑAS DE BANCOS
-   ========================================== */
-
+/* ESTILOS PARA PESTAÑAS DE BANCOS - .banks-tabs usado */
 .banks-tabs {
   display: flex;
   gap: var(--spacing-sm);
@@ -423,67 +406,7 @@ a:focus-visible {
   padding-bottom: var(--spacing-sm);
 }
 
-.tab-button {
-  background: transparent;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  color: var(--text-secondary);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  transition: all var(--anim-duration-normal) var(--anim-easing);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  flex: 1;
-  text-align: center;
-}
-
-.tab-button:hover {
-  background: rgba(59, 130, 246, 0.1);
-  border-color: rgba(59, 130, 246, 0.5);
-  color: var(--text-primary);
-}
-
-.tab-button.active {
-  background: var(--gradient-primary);
-  border-color: var(--primary-blue);
-  color: white;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-}
-
-.tab-controls {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: var(--spacing-md);
-}
-
-.sort-controls {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.sort-controls label {
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-}
-
-.sort-select {
-  background: var(--bg-secondary);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  color: var(--text-primary);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--border-radius-sm);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  min-width: 150px;
-}
-
-.sort-select:focus {
-  outline: none;
-  border-color: var(--primary-blue);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
+/* SECCIÓN ELIMINADA: sort-controls, sort-select (no usadas, ver banks-sort-controls) */
 
 /* CLASES BASE UNIFICADAS */
 .input-base {
@@ -1577,14 +1500,7 @@ main::-webkit-scrollbar-thumb:hover {
   gap: var(--space-2);
 }
 
-.route-number {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-brand-primary);
-  background: rgba(88, 166, 255, 0.1);
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
-}
+/* .route-number - ELIMINADO (no usado) */
 
 .route-path {
   font-size: var(--font-size-sm);
@@ -1927,47 +1843,17 @@ main::-webkit-scrollbar-thumb:hover {
 }
 
 /* ==========================================
-   ESTILOS PARA CARDS DE EXCHANGES
+   ESTILOS PARA CARDS DE EXCHANGES (Reducido)
+   ELIMINADOS: usdt-card, broker-card, binance-card, usdt-name, usdt-prices,
+   broker-prices, binance-prices, usdt-grid, brokers-grid, binance-grid
+   (no usados en templates actuales)
    ========================================== */
 
-.usdt-card,
-.broker-card,
-.binance-card {
-  background: linear-gradient(135deg, rgba(30, 58, 138, 0.15) 0%, rgba(15, 23, 42, 0.3) 100%);
-  backdrop-filter: blur(10px);
-  border-radius: 10px;
-  padding: 12px;
-  margin-bottom: 8px;
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  transition: all 0.2s ease;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.usdt-card:hover,
-.broker-card:hover,
-.binance-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
-  border-color: rgba(59, 130, 246, 0.3);
-}
-
-.usdt-name,
-.broker-name,
-.binance-name {
+.broker-name {
   color: #e1e8ed;
   font-size: 0.9em;
   font-weight: 600;
   flex: 1;
-}
-
-.usdt-prices,
-.broker-prices,
-.binance-prices {
-  display: flex;
-  gap: 12px;
-  align-items: center;
 }
 
 .price-bid,
@@ -1987,15 +1873,6 @@ main::-webkit-scrollbar-thumb:hover {
 
 .price-ask {
   color: #ef4444;
-}
-
-/* Grids para las cards de exchanges */
-.usdt-grid,
-.brokers-grid,
-.binance-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
 }
 
 /* Estilo para la sección de bancos */
