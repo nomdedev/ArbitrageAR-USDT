@@ -395,6 +395,22 @@ a:focus-visible {
   margin: var(--space-2) 0;
 }
 
+/* Skeleton container para estados de carga */
+.skeleton-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+.skeleton-container .loading-text {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-2);
+  animation: pulse 2s ease-in-out infinite;
+}
+
 /* SECCIÓN ELIMINADA: skip-link, tab-button (no usadas en templates) */
 
 /* ESTILOS PARA PESTAÑAS DE BANCOS - .banks-tabs usado */
@@ -1076,41 +1092,10 @@ main::-webkit-scrollbar-thumb:hover {
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
-.profit-badge.profit-low,
-.profit-badge.low {
-  background: var(--color-warning-subtle);
-  color: var(--color-warning);
-  border: 1px solid rgba(210, 153, 34, 0.3);
-}
+/* .profit-badge.profit-low, .profit-badge.low - ELIMINADO (no usado) */
 
-/* Información principal */
-.route-summary-line {
-  grid-column: 1;
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-.route-exchanges {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  font-weight: var(--font-weight-medium);
-}
-
-.route-exchanges strong {
-  color: var(--color-brand-primary);
-  font-weight: var(--font-weight-semibold);
-}
-
-.route-profit-line {
-  grid-column: 1 / -1;
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--space-2);
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--color-border-muted);
-}
+/* SECCIÓN ELIMINADA: .route-summary-line, .route-exchanges (no usados) */
+/* .route-profit-line - ELIMINADO (no usado) */
 
 .profit-amount {
   font-size: var(--font-size-sm);
@@ -1122,21 +1107,8 @@ main::-webkit-scrollbar-thumb:hover {
   color: var(--color-danger);
 }
 
-.investment-info {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-  font-weight: var(--font-weight-medium);
-}
-
-/* Acción de click más sutil */
-.route-action {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding-top: var(--space-2);
-  margin-top: var(--space-2);
-  border-top: 1px dashed var(--color-border-muted);
-}
-
+/* .investment-info - ELIMINADO (no usado) */
+/* .route-action - ELIMINADO (no usado) */
 /* .click-to-expand - ELIMINADO (no usado) */
 
 /* SECCIÓN ELIMINADA: VISTA EXPANDIDA legacy
@@ -1426,38 +1398,11 @@ main::-webkit-scrollbar-thumb:hover {
   opacity: 0.5;
 }
 
-.fees-row {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%);
-  margin: 10px -18px;
-  padding: 10px 18px;
-  border-radius: 10px;
-  border: 1px solid rgba(245, 158, 11, 0.2);
-}
+/* SECCIÓN ELIMINADA: fees-row, net-profit, source-row, source-value (no usadas) */
 
 .fee-value {
   color: #fbbf24;
   font-weight: 800;
-}
-
-.net-profit {
-  color: #10b981;
-  font-weight: 800;
-  font-size: 1.08em;
-}
-
-/* Estilo específico para la fila de fuente del precio del dólar */
-.source-row {
-  background: rgba(100, 116, 139, 0.1);
-  border-radius: 6px;
-  padding: 8px 12px;
-  margin: 8px -8px;
-  border: 1px solid rgba(100, 116, 139, 0.2);
-}
-
-.source-value {
-  color: #cbd5e1;
-  font-weight: 600;
-  font-size: 0.9em;
 }
 
 /* LOADING & MESSAGES */
@@ -1578,47 +1523,7 @@ main::-webkit-scrollbar-thumb:hover {
   border: 1px dashed rgba(59, 130, 246, 0.3);
 }
 
-/* BANKS */
-.bank-card {
-  background: linear-gradient(135deg, rgba(30, 58, 138, 0.25) 0%, rgba(15, 23, 42, 0.5) 100%);
-  backdrop-filter: blur(20px);
-  border-radius: 14px;
-  padding: 16px;
-  margin-bottom: 12px;
-  border: 1px solid rgba(59, 130, 246, 0.25);
-  transition: all 0.3s ease;
-}
-
-.bank-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
-  border-color: rgba(59, 130, 246, 0.4);
-}
-
-.bank-card h3 {
-  color: #e1e8ed;
-  font-size: 1.1em;
-  margin-bottom: 8px;
-  font-weight: 700;
-}
-
-.bank-card p {
-  color: #cbd5e1;
-  font-size: 0.9em;
-  margin: 4px 0;
-}
-
-.bank-card a {
-  color: #3b82f6;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.3s ease;
-}
-
-.bank-card a:hover {
-  color: #60a5fa;
-  text-decoration: underline;
-}
+/* SECCIÓN ELIMINADA: .bank-card con h3, p, a (no usado en templates actuales) */
 
 /* ============================================
    ESTILOS PARA FILAS DE BANCOS (DISEÑO SIMPLE)
@@ -1690,24 +1595,7 @@ main::-webkit-scrollbar-thumb:hover {
   flex: 1;
 }
 
-.price-bid,
-.price-ask {
-  color: #cbd5e1;
-  font-size: 0.85em;
-  font-weight: 500;
-  padding: 4px 8px;
-  background: rgba(59, 130, 246, 0.1);
-  border-radius: 6px;
-  border: 1px solid rgba(59, 130, 246, 0.2);
-}
-
-.price-bid {
-  color: #10b981;
-}
-
-.price-ask {
-  color: #ef4444;
-}
+/* SECCIÓN ELIMINADA: .price-bid, .price-ask (no usadas) */
 
 /* Estilo para la sección de bancos */
 .banks-section h3 {
@@ -1841,13 +1729,13 @@ footer {
   line-height: var(--line-height-normal);
 }
 
-.simulator-input,
-.simulator-route-selector {
+/* .simulator-route-selector - ELIMINADO (no usado) */
+
+.simulator-input {
   margin-bottom: var(--space-4);
 }
 
-.simulator-input label,
-.simulator-route-selector label {
+.simulator-input label {
   display: block;
   color: var(--color-text-primary);
   font-weight: var(--font-weight-medium);
@@ -1855,32 +1743,7 @@ footer {
   font-size: var(--font-size-sm);
 }
 
-.simulator-route-selector {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.simulator-route-selector label {
-  margin-bottom: 0;
-  white-space: nowrap;
-  min-width: fit-content;
-}
-
-.simulator-route-selector select {
-  flex: 1;
-  padding: var(--space-2) var(--space-3);
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
-  transition: all var(--duration-fast) var(--ease-default);
-  max-width: 300px;
-}
-
-.simulator-input input,
-.simulator-route-selector select {
+.simulator-input input {
   width: 100%;
   padding: var(--space-2) var(--space-3);
   background: var(--color-bg-primary);
@@ -1891,8 +1754,7 @@ footer {
   transition: all var(--duration-fast) var(--ease-default);
 }
 
-.simulator-input input:focus,
-.simulator-route-selector select:focus {
+.simulator-input input:focus {
   outline: none;
   border-color: var(--color-brand-primary);
   box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15);
@@ -2026,66 +1888,7 @@ footer {
   border-color: rgba(248, 81, 73, 0.4);
 }
 
-.simulator-actions {
-  display: flex;
-  gap: var(--space-3);
-  align-items: center;
-}
-
-.btn-simulate {
-  flex: 1;
-  padding: var(--space-3) var(--space-4);
-  background: var(--gradient-primary);
-  color: white;
-  border: none;
-  border-radius: var(--radius-lg);
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-md);
-  cursor: pointer;
-  transition: all var(--duration-fast) var(--ease-default);
-  box-shadow: var(--shadow-md);
-}
-
-.btn-simulate:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-}
-
-.btn-simulate:active {
-  transform: translateY(0);
-}
-
-.btn-load-defaults {
-  background: var(--color-bg-tertiary);
-  border: 1px solid var(--color-border-default);
-  color: var(--color-text-secondary);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: all var(--duration-fast) var(--ease-default);
-}
-
-.btn-load-defaults:hover {
-  background: var(--color-bg-elevated);
-  border-color: var(--color-border-emphasis);
-  color: var(--color-text-primary);
-}
-
-.sim-params-used {
-  background: rgba(88, 166, 255, 0.05);
-  border: 1px solid rgba(88, 166, 255, 0.15);
-  border-radius: var(--radius-md);
-  padding: var(--space-3);
-  margin-bottom: var(--space-4);
-}
-
-.sim-params-used h4 {
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
-  margin-bottom: 8px;
-  font-weight: 600;
-}
+/* SECCIÓN ELIMINADA: simulator-actions, btn-simulate, btn-load-defaults, sim-params-used (no usadas) */
 
 /* SECCIÓN ELIMINADA: Clases legacy de simulador (no usadas en templates actuales)
    Clases eliminadas: params-grid, param-item, matrix-result-card, matrix-description,
@@ -3762,22 +3565,7 @@ p.error {
   gap: var(--spacing-xs);
 }
 
-/* Tarjetas de bancos */
-.bank-card {
-  background: var(--bg-secondary);
-  border: 1px solid var(--bg-tertiary);
-  border-radius: var(--border-radius-sm);
-  padding: var(--spacing-xs);
-  transition: all var(--anim-duration-fast) var(--anim-easing);
-  position: relative;
-  margin-bottom: var(--spacing-xs);
-}
-
-.bank-card:hover {
-  border-color: var(--primary-blue);
-  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.15);
-  transform: translateY(-1px);
-}
+/* SECCIÓN ELIMINADA: .bank-card duplicado (no usado) */
 
 .bank-name {
   font-size: 10px;
@@ -3787,81 +3575,11 @@ p.error {
   text-align: center;
 }
 
-.bank-prices {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--spacing-xs);
-}
+/* SECCIÓN ELIMINADA: .bank-prices, .price-bid, .price-ask (no usadas) */
 
-.price-bid,
-.price-ask {
-  flex: 1;
-  text-align: center;
-  padding: 2px var(--spacing-xs);
-  border-radius: var(--border-radius-sm);
-  font-size: 10px;
-  font-weight: var(--font-weight-medium);
-}
-
-.price-bid {
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--success);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-}
-
-.price-ask {
-  background: rgba(239, 68, 68, 0.1);
-  color: var(--error);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-/* Header compacto de bancos */
-.banks-header-compact {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-lg);
-  padding-bottom: var(--spacing-md);
-  border-bottom: 1px solid var(--bg-tertiary);
-}
-
-.banks-title-section h2 {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-  margin: 0 0 var(--spacing-xs) 0;
-}
-
-.banks-subtitle {
-  font-size: var(--font-size-xs);
-  color: var(--text-secondary);
-  margin: 0;
-}
-
-.banks-actions {
-  display: flex;
-  gap: var(--spacing-sm);
-}
-
-.btn-refresh-compact {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--bg-tertiary);
-  border: 1px solid var(--bg-tertiary);
-  border-radius: var(--border-radius-sm);
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: all var(--anim-duration-fast) var(--anim-easing);
-}
-
-.btn-refresh-compact:hover {
-  background: var(--primary-blue);
-  border-color: var(--primary-blue);
-  color: white;
-}
+/* SECCIÓN ELIMINADA: Header compacto de bancos legacy
+   Clases eliminadas: banks-header-compact, banks-title-section h2, banks-subtitle,
+   banks-actions, btn-refresh-compact, banks-timestamp-compact (no usadas) */
 
 .refresh-icon {
   font-size: var(--font-size-base);
@@ -3877,19 +3595,6 @@ p.error {
   }
 }
 
-/* Timestamp de bancos */
-.banks-timestamp-compact {
-  text-align: center;
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-  margin-bottom: var(--spacing-lg);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background: var(--bg-tertiary);
-  border-radius: var(--border-radius-sm);
-}
-
-/* @keyframes fadeIn - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
-
 /* ==========================================
    📱 MEDIA QUERIES CONSOLIDADAS (max-width: 768px)
    ========================================== */
@@ -3899,15 +3604,7 @@ p.error {
     grid-template-columns: 1fr;
   }
 
-  .bank-prices {
-    flex-direction: column;
-    gap: var(--spacing-xs);
-  }
-
-  .price-bid,
-  .price-ask {
-    padding: var(--spacing-sm);
-  }
+  /* .bank-prices, .price-bid, .price-ask - ELIMINADOS (no usados) */
 
   /* Exchanges */
   .exchanges-list {

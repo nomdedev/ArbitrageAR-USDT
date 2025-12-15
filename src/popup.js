@@ -783,7 +783,10 @@ function setupTabNavigation() {
 
       // Remover active de todos
       tabs.forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => {
+        c.classList.remove('active');
+        c.classList.remove('animate-tab-enter');
+      });
 
       // Activar el seleccionado
       tab.classList.add('active');
@@ -791,6 +794,8 @@ function setupTabNavigation() {
 
       if (targetContent) {
         targetContent.classList.add('active');
+        // Agregar animación de entrada
+        targetContent.classList.add('animate-tab-enter');
       } else {
         console.error(`❌ No se encontró el contenido para tab-${tabId}`);
       }
@@ -2560,11 +2565,13 @@ async function loadBankRates() {
   const container = document.getElementById('banks-list');
   // Botón de refresh eliminado - funcionalidad ahora en botón principal del popup
 
-  // Mostrar loading
+  // Mostrar loading con skeleton
   container.innerHTML = `
-    <div class="loading">
-      <div class="spinner"></div>
-      <p>Cargando cotizaciones de exchanges...</p>
+    <div class="loading skeleton-container">
+      <div class="skeleton skeleton-card"></div>
+      <div class="skeleton skeleton-card"></div>
+      <div class="skeleton skeleton-card"></div>
+      <p class="loading-text">Cargando cotizaciones de exchanges...</p>
     </div>
   `;
 
@@ -3631,8 +3638,50 @@ function selectArbitrage(index) {
 let previouslyFocusedElement = null;
 
 /**
+ * Focus Trap para accesibilidad del modal
+ * v6.0.1: Atrapa el foco dentro del modal cuando está abierto
+ */
+function setupFocusTrap(modal) {
+  const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+  const focusableElements = modal.querySelectorAll(focusableSelectors);
+  
+  if (focusableElements.length === 0) return;
+  
+  const firstElement = focusableElements[0];
+  const lastElement = focusableElements[focusableElements.length - 1];
+  
+  // Handler para atrapar Tab y Shift+Tab
+  const trapFocusHandler = (e) => {
+    if (e.key !== 'Tab') return;
+    
+    if (e.shiftKey) {
+      // Shift + Tab: Si estamos en el primer elemento, ir al último
+      if (document.activeElement === firstElement) {
+        e.preventDefault();
+        lastElement.focus();
+      }
+    } else {
+      // Tab: Si estamos en el último elemento, ir al primero
+      if (document.activeElement === lastElement) {
+        e.preventDefault();
+        firstElement.focus();
+      }
+    }
+  };
+  
+  // Agregar listener
+  modal.addEventListener('keydown', trapFocusHandler);
+  
+  // Retornar función para remover el listener al cerrar
+  return () => modal.removeEventListener('keydown', trapFocusHandler);
+}
+
+// Variable para almacenar la función de cleanup del focus trap
+let cleanupFocusTrap = null;
+
+/**
  * Abrir modal con detalles de la ruta
- * Mejorado v6.0.0: Accesibilidad con focus management
+ * Mejorado v6.0.1: Accesibilidad con focus management y focus trap
  */
 function openRouteDetailsModal(arbitrage) {
   console.log('📱 [POPUP] Abriendo modal de detalles para:', arbitrage);
@@ -3675,6 +3724,9 @@ function openRouteDetailsModal(arbitrage) {
   if (modal) {
     modal.style.display = 'flex';
     
+    // Configurar focus trap para accesibilidad
+    cleanupFocusTrap = setupFocusTrap(modal);
+    
     // Focus al botón de cerrar para accesibilidad
     const closeBtn = document.getElementById('modal-close');
     if (closeBtn) {
@@ -3684,7 +3736,7 @@ function openRouteDetailsModal(arbitrage) {
     // Prevenir scroll del body mientras el modal está abierto
     document.body.style.overflow = 'hidden';
     
-    console.log('✅ [POPUP] Modal mostrado con focus management');
+    console.log('✅ [POPUP] Modal mostrado con focus management y focus trap');
   } else {
     console.error('❌ [POPUP] No se encontró el modal');
   }
@@ -3692,7 +3744,7 @@ function openRouteDetailsModal(arbitrage) {
 
 /**
  * Cerrar modal de detalles de ruta
- * Mejorado v6.0.0: Restauración de foco
+ * Mejorado v6.0.1: Restauración de foco y limpieza de focus trap
  */
 function closeRouteDetailsModal() {
   console.log('📱 [POPUP] Cerrando modal de detalles');
@@ -3700,6 +3752,12 @@ function closeRouteDetailsModal() {
   const modal = document.getElementById('route-details-modal');
   if (modal) {
     modal.style.display = 'none';
+    
+    // Limpiar focus trap
+    if (cleanupFocusTrap) {
+      cleanupFocusTrap();
+      cleanupFocusTrap = null;
+    }
     
     // Restaurar scroll del body
     document.body.style.overflow = '';
@@ -3805,11 +3863,13 @@ async function loadBanksData() {
   console.log('🚀 Iniciando loadBanksData...');
 
   try {
-    // Mostrar loading
+    // Mostrar loading con skeleton
     banksList.innerHTML = `
-      <div class="loading">
-        <div class="spinner"></div>
-        <p>Cargando cotizaciones de exchanges...</p>
+      <div class="loading skeleton-container">
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <p class="loading-text">Cargando cotizaciones de exchanges...</p>
       </div>
     `;
 
