@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ArbitrARS - Detector de Arbitraje",
-  "version": "6.0.0",
+  "version": "5.0.83",
   "description": "Extensión para navegadores Chromium que detecta oportunidades de arbitraje entre el Dólar Oficial argentino y USDT en exchanges locales",
   "permissions": [
     "storage",

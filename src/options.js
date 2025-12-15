@@ -2,6 +2,9 @@
 // OPTIONS PAGE LOGIC - ArbitrageAR v3.0
 // ============================================
 
+// Debug inmediato - CSP compliant (movido desde inline script)
+console.log('🚀 DEBUG: options.js cargado correctamente');
+
 // Configuración por defecto
 const DEFAULT_SETTINGS = {
   notificationsEnabled: true,
@@ -35,7 +38,9 @@ const DEFAULT_SETTINGS = {
   manualDollarPrice: 1400,
   preferredBank: 'consenso', // Método por defecto: consenso de bancos
   showBestBankPrice: false,
-  selectedBanks: undefined // undefined = usar bancos por defecto (bna, galicia, santander, bbva, icbc)
+  selectedBanks: undefined, // undefined = usar bancos por defecto (bna, galicia, santander, bbva, icbc)
+  selectedP2PExchanges: undefined, // undefined = usar todos los exchanges P2P
+  filterP2POutliers: true // Filtrar precios anómalos por defecto
 };
 
 // Cargar configuración al iniciar
@@ -44,6 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
   initializeBrokerFeesImproved();
   setupMainEventListeners(); // NUEVO: Configurar event listeners principales
+  setupCollapsibleSections(); // Configurar secciones colapsables
 });
 
 // Cargar configuración guardada
@@ -146,6 +152,25 @@ async function loadSettings() {
         cb.checked = selectedBanks.includes(cb.value);
       }
     });
+
+    // NUEVO v5.0.82: Configuración de exchanges P2P
+    const selectedP2PExchanges = settings.selectedP2PExchanges;
+    const defaultP2PExchanges = ['binancep2p', 'okexp2p', 'bybitp2p', 'bitgetp2p', 'kucoinp2p', 'bingxp2p'];
+
+    document.querySelectorAll('input[name="p2p-exchange"]').forEach(cb => {
+      // Si no hay configuración guardada o está vacía, usar exchanges por defecto
+      if (selectedP2PExchanges === undefined || (Array.isArray(selectedP2PExchanges) && selectedP2PExchanges.length === 0)) {
+        cb.checked = defaultP2PExchanges.includes(cb.value);
+      } else {
+        cb.checked = selectedP2PExchanges.includes(cb.value);
+      }
+    });
+
+    // Filtro de outliers P2P
+    const filterOutliersEl = document.getElementById('filter-p2p-outliers');
+    if (filterOutliersEl) {
+      filterOutliersEl.checked = settings.filterP2POutliers ?? true;
+    }
 
     // NUEVO v5.0.53: URLs de APIs
     document.getElementById('dolarapi-url').value = settings.dolarApiUrl ?? 'https://dolarapi.com/v1/dolares/oficial';
@@ -508,6 +533,11 @@ function getCurrentSettings() {
   const selectedBankCheckboxes = document.querySelectorAll('input[name="bank"]:checked');
   settings.selectedBanks = Array.from(selectedBankCheckboxes).map(cb => cb.value);
 
+  // NUEVO v5.0.82: Exchanges P2P seleccionados
+  const selectedP2PCheckboxes = document.querySelectorAll('input[name="p2p-exchange"]:checked');
+  settings.selectedP2PExchanges = Array.from(selectedP2PCheckboxes).map(cb => cb.value);
+  settings.filterP2POutliers = document.getElementById('filter-p2p-outliers')?.checked ?? true;
+
   // APIs
   settings.dolarApiUrl = document.getElementById('dolarapi-url')?.value || 'https://dolarapi.com/v1/dolares/oficial';
   settings.criptoyaUsdtArsUrl = document.getElementById('criptoya-ars-url')?.value || 'https://criptoya.com/api/usdt/ars/1';
@@ -550,6 +580,28 @@ function updateDollarPriceUI() {
   if (manualSection && dollarSourceRadio) {
     manualSection.style.display = dollarSourceRadio.value === 'manual' ? 'block' : 'none';
   }
+}
+
+// Configurar secciones colapsables
+function setupCollapsibleSections() {
+  const cardHeaders = document.querySelectorAll('.card-header[data-action="toggle-section"]');
+  
+  cardHeaders.forEach(header => {
+    header.addEventListener('click', () => {
+      const content = header.nextElementSibling;
+      const isCollapsed = content.classList.contains('collapsed');
+      
+      if (isCollapsed) {
+        // Expandir
+        content.classList.remove('collapsed');
+        header.classList.remove('collapsed');
+      } else {
+        // Colapsar
+        content.classList.add('collapsed');
+        header.classList.add('collapsed');
+      }
+    });
+  });
 }
 
 // Actualizar estado de UI según configuración de notificaciones

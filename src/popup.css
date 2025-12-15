@@ -927,23 +927,25 @@ main::-webkit-scrollbar-thumb:hover {
    ============================================ */
 .arbitrage-card,
 .route-card {
-  display: flex;
-  background: #161b22;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 8px;
-  cursor: pointer;
+  display: flex !important;
+  flex-direction: column !important;
+  background: #161b22 !important;
+  border-radius: 8px !important;
+  padding: 14px !important;
+  margin-bottom: 10px !important;
+  cursor: pointer !important;
   transition: all 0.15s ease;
-  border: 1px solid #30363d;
+  border: 1px solid #30363d !important;
   position: relative;
-  overflow: hidden;
+  overflow: visible !important;
+  min-height: 150px !important;
 }
 
-.arbitrage-card:hover,
 .route-card:hover {
   border-color: #58a6ff;
   background: #1c2128;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(88, 166, 255, 0.15);
 }
 
 /* Indicador de ganancia izquierdo */
@@ -979,7 +981,140 @@ main::-webkit-scrollbar-thumb:hover {
   background: #3fb950;
 }
 
-/* Header de la tarjeta */
+/* ============================================
+   FIAT ROUTE CARDS - Mismo estilo que crypto
+   ============================================ */
+
+/* Header de la tarjeta fiat */
+.route-card .fiat-card-header {
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.route-card .fiat-info {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+}
+
+.route-card .fiat-icon {
+  font-size: 1.2em;
+}
+
+.route-card .fiat-name {
+  font-weight: 600;
+  color: #e6edf3;
+  font-size: 0.95em;
+}
+
+/* Body de la tarjeta fiat */
+.route-card .fiat-card-body {
+  margin-bottom: 10px;
+  display: block !important;
+}
+
+.route-card .route-path-display {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.85em;
+  color: #e6edf3;
+}
+
+.route-card .exchange-badge {
+  background: #21262d;
+  color: #8b949e;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: 500;
+}
+
+.route-card .route-path-display .arrow {
+  color: #58a6ff;
+  font-size: 1.1em;
+}
+
+.route-card .operation-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.route-card .operation-badge {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.7em;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.route-card .operation-badge.direct {
+  background: rgba(63, 185, 80, 0.15);
+  color: #3fb950;
+}
+
+.route-card .operation-badge.p2p {
+  background: rgba(210, 153, 34, 0.15);
+  color: #d29922;
+}
+
+.route-card .volume-indicator {
+  font-size: 0.75em;
+  color: #8b949e;
+}
+
+/* Footer de la tarjeta fiat */
+.route-card .fiat-card-footer {
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px solid #30363d;
+}
+
+.route-card .profit-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.route-card .profit-details .label {
+  font-size: 0.7em;
+  color: #8b949e;
+}
+
+.route-card .profit-details .value {
+  font-weight: 600;
+  color: #3fb950;
+  font-size: 0.85em;
+}
+
+.route-card .profit-details .value.negative {
+  color: #f85149;
+}
+
+.route-card .btn-details {
+  background: #21262d;
+  color: #58a6ff;
+  border: 1px solid #30363d;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.route-card .btn-details:hover {
+  background: #30363d;
+  border-color: #58a6ff;
+}
+
+/* Header antiguo de la tarjeta (mantener para compatibilidad) */
 .card-header,
 .route-header {
   display: flex;
@@ -3641,4 +3776,428 @@ p.error {
   .calc-arrow {
     display: none;
   }
+}
+
+/* ==========================================
+   ESTILOS MODAL DE DETALLES DE ARBITRAJE v5.0.78
+   ========================================== */
+
+.arbitrage-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.detail-profit {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.detail-profit .profit-value {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.detail-profit.positive .profit-value {
+  color: var(--color-success);
+}
+
+.detail-profit.negative .profit-value {
+  color: var(--color-danger);
+}
+
+.detail-profit .profit-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.detail-type .type-badge {
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.detail-summary {
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-2) 0;
+}
+
+.summary-row:not(:last-child) {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.summary-row.highlight {
+  background: var(--color-bg-elevated);
+  margin: var(--space-2) calc(-1 * var(--space-3));
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+}
+
+.summary-row .label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.summary-row .value {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.summary-row .value.positive {
+  color: var(--color-success);
+}
+
+.summary-row .value.negative {
+  color: var(--color-danger);
+}
+
+.detail-steps h4,
+.detail-fees h4,
+.detail-rates h4 {
+  margin: 0 0 var(--space-3) 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.step-item {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.step-item:last-child {
+  border-bottom: none;
+}
+
+.step-item .step-number {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  background: var(--color-brand-primary);
+  color: white;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+}
+
+.step-item .step-content {
+  flex: 1;
+}
+
+.step-item .step-title {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-1);
+}
+
+.step-item .step-desc {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+.detail-fees {
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+}
+
+.fees-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.fee-item {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.detail-rates {
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+}
+
+.rates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: var(--space-2);
+}
+
+.rate-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.rate-item .rate-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.rate-item .rate-value {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+/* ============================================
+   CRYPTO ROUTE CARDS - v5.0.80
+   Estilos para tarjetas de arbitraje crypto
+   ============================================ */
+
+.crypto-route-card {
+  display: flex !important;
+  flex-direction: column !important;
+  background: #161b22 !important;
+  border-radius: 8px !important;
+  padding: 14px !important;
+  margin-bottom: 10px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease;
+  border: 1px solid #30363d !important;
+  position: relative;
+  overflow: visible !important;
+  min-height: 150px !important;
+}
+
+.crypto-route-card:hover {
+  border-color: #58a6ff;
+  background: #1c2128;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(88, 166, 255, 0.15);
+}
+
+/* Indicador lateral de ganancia */
+.crypto-route-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  background: #3fb950;
+  border-radius: 0 2px 2px 0;
+}
+
+.crypto-route-card.profit-high::before {
+  background: #3fb950;
+  width: 4px;
+}
+
+.crypto-route-card.profit-negative::before {
+  background: #f85149;
+}
+
+/* Header de la tarjeta crypto */
+.crypto-route-card .crypto-card-header {
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.crypto-route-card .crypto-info {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+}
+
+.crypto-route-card .crypto-icon {
+  font-size: 1.2em;
+}
+
+.crypto-route-card .crypto-name {
+  font-weight: 600;
+  color: #e6edf3;
+  font-size: 0.95em;
+}
+
+/* Badge de profit */
+.profit-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9em;
+}
+
+.profit-badge.profit-positive {
+  background: rgba(63, 185, 80, 0.15);
+  color: #3fb950;
+  border: 1px solid rgba(63, 185, 80, 0.3);
+}
+
+.profit-badge.profit-negative {
+  background: rgba(248, 81, 73, 0.15);
+  color: #f85149;
+  border: 1px solid rgba(248, 81, 73, 0.3);
+}
+
+/* Body de la tarjeta crypto */
+.crypto-card-body {
+  margin-bottom: 10px;
+  display: block !important;
+}
+
+.crypto-route-card .route-path {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.85em;
+  color: #e6edf3;
+}
+
+.crypto-route-card .exchange-badge {
+  background: #21262d;
+  color: #8b949e;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: 500;
+}
+
+.crypto-route-card .route-path .arrow {
+  color: #58a6ff;
+  font-size: 1.1em;
+}
+
+/* Meta de operación */
+.operation-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.operation-badge {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.7em;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.operation-badge.direct {
+  background: rgba(63, 185, 80, 0.15);
+  color: #3fb950;
+}
+
+.operation-badge.p2p {
+  background: rgba(210, 153, 34, 0.15);
+  color: #d29922;
+}
+
+.operation-badge.transfer {
+  background: rgba(88, 166, 255, 0.15);
+  color: #58a6ff;
+}
+
+.speed-indicator,
+.difficulty-indicator {
+  font-size: 0.75em;
+  color: #8b949e;
+}
+
+/* Footer de la tarjeta crypto */
+.crypto-route-card .crypto-card-footer {
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px solid #30363d;
+}
+
+.crypto-route-card .profit-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.crypto-route-card .profit-details .label {
+  font-size: 0.7em;
+  color: #8b949e;
+}
+
+.crypto-route-card .profit-details .value {
+  font-weight: 600;
+  color: #3fb950;
+  font-size: 0.85em;
+}
+
+.crypto-route-card .profit-details .value.negative {
+  color: #f85149;
+}
+
+/* Botón ver detalles */
+.crypto-route-card .btn-details {
+  background: #21262d;
+  color: #58a6ff;
+  border: 1px solid #30363d;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.crypto-route-card .btn-details:hover {
+  background: #30363d;
+  border-color: #58a6ff;
+}
+
+/* Container de rutas crypto */
+#crypto-routes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Empty state para crypto */
+#crypto-routes-container .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.empty-state-icon {
+  font-size: 2.5em;
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+
+.empty-state-text {
+  color: #8b949e;
+  font-size: 0.9em;
 }

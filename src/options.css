@@ -63,16 +63,37 @@ body {
 
 /* ===== LAYOUT ===== */
 .container {
-  max-width: 900px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: var(--space-5);
+  padding: var(--space-6);
 }
 
 .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: var(--space-4);
   margin-bottom: var(--space-5);
+}
+
+/* ===== HEADER ===== */
+.options-header {
+  text-align: center;
+  padding: var(--space-6) 0;
+  margin-bottom: var(--space-5);
+  border-bottom: 2px solid var(--color-border-default);
+}
+
+.options-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.options-header .subtitle {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin: 0;
 }
 
 /* ===== CARDS ===== */
@@ -81,19 +102,75 @@ body {
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  transition: var(--transition);
 }
 
-.card h2 {
+.card:hover {
+  border-color: var(--color-border-emphasis);
+}
+
+.card-header {
   background: var(--color-bg-tertiary);
   color: var(--color-text-primary);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-4) var(--space-5);
   margin: 0;
-  font-size: 14px;
-  font-weight: 600;
   border-bottom: 1px solid var(--color-border-default);
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  transition: var(--transition);
+}
+
+.card-header:hover {
+  background: var(--color-bg-elevated);
+}
+
+.card-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
   gap: var(--space-2);
+}
+
+.toggle-icon {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  transition: transform 0.2s ease;
+}
+
+.card-header.collapsed .toggle-icon {
+  transform: rotate(-90deg);
+}
+
+.card-content {
+  padding: var(--space-5);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-4);
+  transition: all 0.3s ease;
+  max-height: 5000px;
+  overflow: hidden;
+}
+
+.card-content.collapsed {
+  max-height: 0;
+  padding: 0 var(--space-5);
+  opacity: 0;
+}
+
+.section-description {
+  grid-column: 1 / -1;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  margin-bottom: var(--space-2);
+  padding: var(--space-3);
+  background: var(--color-bg-tertiary);
+  border-left: 3px solid var(--color-brand-primary);
+  border-radius: var(--radius-sm);
 }
 
 .content {
@@ -366,6 +443,44 @@ input:checked + .slider::before {
   color: var(--color-text-primary);
 }
 
+/* ===== EXCHANGES P2P GRID ===== */
+.exchanges-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.exchange-group {
+  background: var(--color-bg-tertiary);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-muted);
+}
+
+.exchange-group h4 {
+  margin: 0 0 var(--space-2) 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.exchange-group label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-1);
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.exchange-group label:hover {
+  color: var(--color-text-primary);
+}
+
 /* ===== BUTTONS ===== */
 .btn {
   display: inline-flex;
@@ -456,6 +571,7 @@ input:checked + .slider::before {
 
 /* ===== BROKER FEES - NUEVA INTERFAZ ===== */
 .broker-fees-improved {
+  grid-column: 1 / -1;
   margin-top: var(--space-4);
   padding-top: var(--space-4);
   border-top: 1px solid var(--color-border-muted);
@@ -467,6 +583,9 @@ input:checked + .slider::before {
   padding: var(--space-4);
   margin-bottom: var(--space-4);
   border: 1px solid var(--color-border-muted);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
 }
 
 .form-row {
@@ -480,7 +599,12 @@ input:checked + .slider::before {
   margin-bottom: 0;
 }
 
-.broker-dropdown {
+.form-row .field {
+  flex: 1;
+}
+
+.broker-dropdown,
+.add-broker-form select {
   width: 100%;
   background: var(--color-bg-primary);
   border: 1px solid var(--color-border-default);
@@ -490,12 +614,29 @@ input:checked + .slider::before {
   font-size: 12px;
 }
 
-.broker-dropdown:focus {
+.broker-dropdown:focus,
+.add-broker-form select:focus {
   outline: none;
   border-color: var(--color-brand-primary);
 }
 
 /* Lista de Brokers Configurados */
+.card-content h4 {
+  grid-column: 1 / -1;
+  margin: var(--space-4) 0 var(--space-2) 0;
+  padding-top: var(--space-4);
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  border-top: 1px solid var(--color-border-muted);
+}
+
+.card-content h4:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
 .broker-fees-list h4 {
   margin: 0 0 var(--space-3) 0;
   color: var(--color-text-primary);
@@ -626,13 +767,32 @@ input:checked + .slider::before {
 }
 
 /* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+  .container {
+    max-width: 1000px;
+  }
+  
+  .card-content {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
 @media (max-width: 800px) {
   .container {
     padding: var(--space-3);
   }
 
-  .grid {
+  .options-header h1 {
+    font-size: 24px;
+  }
+
+  .card-content {
     grid-template-columns: 1fr;
+    padding: var(--space-4);
+  }
+
+  .card-header {
+    padding: var(--space-3) var(--space-4);
   }
 
   .exchange-grid {
@@ -640,6 +800,10 @@ input:checked + .slider::before {
   }
 
   .banks-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .exchanges-grid {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -661,6 +825,10 @@ input:checked + .slider::before {
 
 @media (max-width: 500px) {
   .banks-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .exchanges-grid {
     grid-template-columns: 1fr;
   }
 

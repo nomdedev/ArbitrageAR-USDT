@@ -1,9 +1,11 @@
 // ============================================
 // MAIN BACKGROUND SCRIPT - VERSIÓN SIMPLIFICADA (SIN MÓDULOS)
 // Solo usar si "type": "module" no funciona en tu navegador
+// v5.0.83 - Add P2P exchange filters and outlier detection
 // ============================================
 
-console.log('🔧 [BACKGROUND] Iniciando service worker...');
+console.log('🔧 [BACKGROUND] Iniciando service worker v5.0.83...');
+console.log('🔧 [BACKGROUND] Timestamp carga:', new Date().toISOString());
 
 // ============================================
 // IMPORTACIONES INLINE DE UTILIDADES
@@ -149,6 +151,131 @@ const BANK_CALCULATIONS = {
         }
         return null;
     }
+  }
+};
+
+// ============================================
+// FILTRADO DE EXCHANGES P2P - v5.0.82
+// ============================================
+
+const P2P_FILTERS = {
+  // Lista de todos los exchanges P2P conocidos
+  ALL_P2P_EXCHANGES: [
+    'binancep2p', 'okexp2p', 'bybitp2p', 'bitgetp2p', 'kucoinp2p',
+    'bingxp2p', 'huobip2p', 'mexcp2p', 'weexp2p', 'coinexp2p',
+    'eldoradop2p', 'paydecep2p', 'lemoncashp2p'
+  ],
+
+  // Exchanges P2P por defecto (los más confiables)
+  DEFAULT_P2P_EXCHANGES: ['binancep2p', 'okexp2p', 'bybitp2p', 'bitgetp2p', 'kucoinp2p', 'bingxp2p'],
+
+  /**
+   * Verificar si un exchange es P2P
+   */
+  isP2PExchange(exchangeName) {
+    if (!exchangeName) return false;
+    const name = exchangeName.toLowerCase();
+    return name.includes('p2p') || this.ALL_P2P_EXCHANGES.includes(name);
+  },
+
+  /**
+   * Filtrar datos de USDT por exchanges P2P seleccionados
+   */
+  filterBySelectedExchanges(usdtData, selectedExchanges) {
+    if (!usdtData || typeof usdtData !== 'object') return usdtData;
+    if (!selectedExchanges || !Array.isArray(selectedExchanges) || selectedExchanges.length === 0) {
+      // Si no hay selección, usar todos menos los P2P por defecto excluidos
+      selectedExchanges = this.DEFAULT_P2P_EXCHANGES;
+    }
+
+    const filtered = {};
+    Object.entries(usdtData).forEach(([exchange, data]) => {
+      // Si es P2P, verificar si está en la lista seleccionada
+      if (this.isP2PExchange(exchange)) {
+        if (selectedExchanges.includes(exchange.toLowerCase())) {
+          filtered[exchange] = data;
+        }
+      } else {
+        // Si no es P2P, siempre incluirlo
+        filtered[exchange] = data;
+      }
+    });
+
+    return filtered;
+  },
+
+  /**
+   * Filtrar outliers de precios (precios anómalos)
+   * Excluye precios que estén más del umbral% alejados del promedio
+   */
+  filterOutliers(usdtData, threshold = 0.15) {
+    if (!usdtData || typeof usdtData !== 'object') return usdtData;
+
+    // Calcular precios válidos para el promedio
+    const validPrices = [];
+    Object.entries(usdtData).forEach(([exchange, data]) => {
+      if (data && typeof data === 'object') {
+        if (data.bid > 0) validPrices.push(data.bid);
+        if (data.ask > 0) validPrices.push(data.ask);
+      }
+    });
+
+    if (validPrices.length < 3) return usdtData; // No hay suficientes datos para filtrar
+
+    // Calcular mediana (más robusto que el promedio)
+    validPrices.sort((a, b) => a - b);
+    const median = validPrices[Math.floor(validPrices.length / 2)];
+    
+    // Umbral de desviación permitida
+    const minPrice = median * (1 - threshold);
+    const maxPrice = median * (1 + threshold);
+
+    const filtered = {};
+    let outlierCount = 0;
+
+    Object.entries(usdtData).forEach(([exchange, data]) => {
+      if (!data || typeof data !== 'object') return;
+
+      // Verificar si el precio está dentro del rango aceptable
+      const bidOk = data.bid <= 0 || (data.bid >= minPrice && data.bid <= maxPrice);
+      const askOk = data.ask <= 0 || (data.ask >= minPrice && data.ask <= maxPrice);
+
+      if (bidOk && askOk) {
+        filtered[exchange] = data;
+      } else {
+        outlierCount++;
+        console.log(`⚠️ [P2P-FILTER] Outlier detectado: ${exchange} - bid: ${data.bid}, ask: ${data.ask} (mediana: ${median.toFixed(2)}, rango: ${minPrice.toFixed(2)}-${maxPrice.toFixed(2)})`);
+      }
+    });
+
+    if (outlierCount > 0) {
+      console.log(`🔍 [P2P-FILTER] ${outlierCount} outliers filtrados de ${Object.keys(usdtData).length} exchanges`);
+    }
+
+    return filtered;
+  },
+
+  /**
+   * Aplicar todos los filtros según configuración del usuario
+   */
+  applyFilters(usdtData, userSettings) {
+    if (!usdtData) return usdtData;
+
+    let filtered = { ...usdtData };
+
+    // 1. Filtrar por exchanges P2P seleccionados
+    const selectedP2P = userSettings?.selectedP2PExchanges;
+    if (selectedP2P && Array.isArray(selectedP2P) && selectedP2P.length > 0) {
+      filtered = this.filterBySelectedExchanges(filtered, selectedP2P);
+      console.log(`🔍 [P2P-FILTER] Filtrado por exchanges seleccionados: ${Object.keys(filtered).length} exchanges`);
+    }
+
+    // 2. Filtrar outliers si está habilitado
+    if (userSettings?.filterP2POutliers !== false) {
+      filtered = this.filterOutliers(filtered);
+    }
+
+    return filtered;
   }
 };
 
@@ -422,14 +549,52 @@ async function fetchWithRateLimit(url) {
 async function fetchDolarOficial(userSettings) {
   const url = userSettings.criptoyaDolarOficialUrl || 'https://criptoya.com/api/dolar/oficial';
   const data = await fetchWithRateLimit(url);
-  if (data && typeof data.compra === 'number' && typeof data.venta === 'number') {
-    // NUEVO v5.0.45: Agregar información de fuente para mostrar en UI
-    return {
-      ...data,
-      source: 'criptoya_oficial',
-      timestamp: Date.now()
-    };
+  
+  log('[BACKGROUND] 📊 Respuesta dolar oficial:', data ? Object.keys(data) : 'null');
+  
+  // CORREGIDO v5.0.76: La API /api/dolar/oficial devuelve objeto con bancos, no precio directo
+  // Formato: { bna: { ask, bid, ... }, galicia: { ask, bid, ... }, ... }
+  if (data && typeof data === 'object') {
+    // Si tiene el formato antiguo (compra/venta directos)
+    if (typeof data.compra === 'number' && typeof data.venta === 'number') {
+      return {
+        ...data,
+        source: 'criptoya_oficial',
+        timestamp: Date.now()
+      };
+    }
+    
+    // Formato nuevo: extraer precio de BNA como referencia oficial
+    if (data.bna && typeof data.bna.ask === 'number') {
+      const bnaData = data.bna;
+      log('[BACKGROUND] 💵 Usando BNA como precio oficial:', bnaData);
+      return {
+        compra: bnaData.bid || bnaData.totalBid || 0,
+        venta: bnaData.ask || bnaData.totalAsk || 0,
+        source: 'criptoya_bna',
+        banco: 'Banco Nación',
+        timestamp: Date.now()
+      };
+    }
+    
+    // Fallback: usar el primer banco disponible
+    const firstBank = Object.keys(data).find(key => 
+      data[key] && typeof data[key].ask === 'number'
+    );
+    if (firstBank) {
+      const bankData = data[firstBank];
+      log('[BACKGROUND] 💵 Usando', firstBank, 'como fallback:', bankData);
+      return {
+        compra: bankData.bid || bankData.totalBid || 0,
+        venta: bankData.ask || bankData.totalAsk || 0,
+        source: `criptoya_${firstBank}`,
+        banco: firstBank,
+        timestamp: Date.now()
+      };
+    }
   }
+  
+  log('[BACKGROUND] ⚠️ No se pudo parsear respuesta de dolar oficial');
   return null;
 }
 
@@ -437,30 +602,38 @@ async function fetchAllDollarTypes(userSettings) {
   const url = userSettings.criptoyaDolarUrl || 'https://criptoya.com/api/bancostodos';
   log('[BACKGROUND] 🔄 Fetching bancos from:', url);
   console.log('[FETCH] 🔄 Iniciando fetchAllDollarTypes desde:', url);
-  const data = await fetchWithRateLimit(url);
-  log('[BACKGROUND] 📊 Bancos data received:', data ? Object.keys(data).length + ' bancos' : 'null');
-  console.log('[FETCH] 📊 Datos crudos recibidos:', data);
-  if (data && typeof data === 'object') {
-    // Los datos de CriptoYa ya vienen en formato objeto
-    const dollarTypes = {};
-    Object.entries(data).forEach(([key, value]) => {
-      if (value && typeof value === 'object' && (typeof value.bid === 'number' || typeof value.ask === 'number')) {
-        dollarTypes[key] = {
-          nombre: key.charAt(0).toUpperCase() + key.slice(1), // Capitalizar nombre
-          compra: value.bid || value.totalBid || 0,
-          venta: value.ask || value.totalAsk || 0,
-          source: 'criptoya_bancostodos',
-          timestamp: Date.now()
-        };
-      }
-    });
-    log('[BACKGROUND] 📤 Processed bancos data:', Object.keys(dollarTypes).length + ' bancos procesados');
-    console.log('[FETCH] 📤 Datos procesados:', Object.keys(dollarTypes).length + ' bancos');
-    return dollarTypes;
+  
+  try {
+    const data = await fetchWithRateLimit(url);
+    log('[BACKGROUND] 📊 Bancos data received:', data ? Object.keys(data).length + ' bancos' : 'null');
+    console.log('[FETCH] 📊 Datos crudos recibidos:', data);
+    
+    if (data && typeof data === 'object') {
+      // Los datos de CriptoYa ya vienen en formato objeto
+      const dollarTypes = {};
+      Object.entries(data).forEach(([key, value]) => {
+        if (value && typeof value === 'object' && (typeof value.bid === 'number' || typeof value.ask === 'number')) {
+          dollarTypes[key] = {
+            nombre: key.charAt(0).toUpperCase() + key.slice(1), // Capitalizar nombre
+            compra: value.bid || value.totalBid || 0,
+            venta: value.ask || value.totalAsk || 0,
+            source: 'criptoya_bancostodos',
+            timestamp: Date.now()
+          };
+        }
+      });
+      log('[BACKGROUND] 📤 Processed bancos data:', Object.keys(dollarTypes).length + ' bancos procesados');
+      console.log('[FETCH] 📤 Datos procesados:', Object.keys(dollarTypes).length + ' bancos');
+      return dollarTypes;
+    }
+    
+    log('[BACKGROUND] ❌ No data received from bancos API');
+    console.log('[FETCH] ❌ No se pudieron procesar datos de bancos');
+    return null;
+  } catch (error) {
+    console.error('[FETCH] ❌ Error en fetchAllDollarTypes:', error);
+    return null;
   }
-  log('[BACKGROUND] ❌ No data received from bancos API');
-  console.log('[FETCH] ❌ No se pudieron procesar datos de bancos');
-  return null;
 }
 
 async function fetchUSDT(userSettings) {
@@ -935,12 +1108,15 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
     const totalFees = tradingFeeAmount * sellPrice + sellFeeAmount + withdrawalFee + transferFee + bankFee;
 
     // Crear objeto de ruta
+    const isP2P = exchange.toLowerCase().includes('p2p');
+    log(`📋 [${exchange}] Creando ruta - isP2P: ${isP2P}`);
+    
     routes.push({
       broker: exchange,
       buyExchange: exchange,
       sellExchange: exchange,
       isSingleExchange: true,
-      requiresP2P: exchange.toLowerCase().includes('p2p'),
+      requiresP2P: isP2P,
       profitPercent: netPercent,
       profitPercentage: netPercent,
       grossProfitPercent: grossPercent,
@@ -991,9 +1167,27 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
   // Ordenar TODAS las rutas por rentabilidad neta
   routes.sort((a, b) => b.profitPercent - a.profitPercent);
 
+  // CORREGIDO v5.0.77: Devolver un balance de rutas P2P y no-P2P
+  // En lugar de solo las top 50, asegurar que haya rutas de ambos tipos
+  const p2pRoutes = routes.filter(r => r.requiresP2P);
+  const directRoutes = routes.filter(r => !r.requiresP2P);
+  
+  log(`✅ [CALC] Rutas P2P: ${p2pRoutes.length} | Rutas directas: ${directRoutes.length}`);
+  
+  // Tomar las mejores de cada tipo para asegurar diversidad
+  const maxPerType = 50;
+  const balancedRoutes = [
+    ...directRoutes.slice(0, maxPerType),
+    ...p2pRoutes.slice(0, maxPerType)
+  ];
+  
+  // Re-ordenar las rutas combinadas
+  balancedRoutes.sort((a, b) => b.profitPercent - a.profitPercent);
+
   log(`✅ [CALC] Rutas totales: ${routes.length} (Intra: ${processedCount}, Inter: ${interBrokerRoutes.length})`);
-  log(`✅ Calculadas ${routes.length} rutas con monto base $${initialAmount.toLocaleString()}`);
-  return routes.slice(0, 50);
+  log(`✅ [CALC] Rutas balanceadas: ${balancedRoutes.length} (Directas: ${Math.min(directRoutes.length, maxPerType)}, P2P: ${Math.min(p2pRoutes.length, maxPerType)})`);
+  log(`✅ Calculadas ${balancedRoutes.length} rutas con monto base $${initialAmount.toLocaleString()}`);
+  return balancedRoutes;
 }
 
 // ============================================
@@ -1225,6 +1419,71 @@ async function calculateUsdToUsdtRoutes(oficial, usdt, usdtUsd, userSettings = {
 // ============================================
 // NUEVO: CÁLCULO DE RUTAS CRYPTO-ARBITRAGE
 // ============================================
+
+/**
+ * Función auxiliar para procesar crypto arbitrage
+ * @param {Function} sendResponse - Callback para enviar respuesta
+ */
+async function processCryptoArbitrage(sendResponse) {
+  try {
+    // Obtener lista de criptos activas y configuración desde storage
+    const result = await chrome.storage.local.get(['activeCryptos', 'notificationSettings']);
+    
+    const activeCryptos = result.activeCryptos && Array.isArray(result.activeCryptos) 
+      ? result.activeCryptos 
+      : ['BTC', 'ETH', 'USDC', 'DAI', 'USDT'];
+    const userSettings = result.notificationSettings || {};
+    
+    log(`[CRYPTO-ARB] Obteniendo datos para ${activeCryptos.length} criptos activas: ${activeCryptos.join(', ')}`);
+
+    // Obtener datos de todas las criptos activas usando fetch directo
+    const cryptoData = {};
+    for (const symbol of activeCryptos) {
+      try {
+        const response = await fetch(`https://criptoya.com/api/${symbol}/ars/1`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data && typeof data === 'object') {
+            cryptoData[symbol] = { ...data, symbol, timestamp: Date.now() };
+            log(`[CRYPTO-ARB] ✅ ${symbol}: ${Object.keys(data).filter(k => k !== 'time').length} exchanges`);
+          }
+        }
+      } catch (e) {
+        log(`[CRYPTO-ARB] ⚠️ Error obteniendo ${symbol}: ${e.message}`);
+      }
+    }
+
+    if (Object.keys(cryptoData).length === 0) {
+      log('[CRYPTO-ARB] ⚠️ No se obtuvieron datos de criptos');
+      sendResponse({ routes: [] });
+      return;
+    }
+
+    log(`[CRYPTO-ARB] Datos obtenidos para ${Object.keys(cryptoData).length} criptos`);
+
+    // Calcular rutas de arbitraje crypto-to-crypto
+    const routes = await calculateCryptoArbitrageRoutes(
+      cryptoData,
+      currentData.oficial,
+      userSettings
+    );
+
+    log(`[CRYPTO-ARB] ✅ ${routes.length} rutas calculadas exitosamente`);
+    
+    // Mostrar mejores y peores rutas
+    if (routes.length > 0) {
+      const bestRoute = routes[0];
+      const worstRoute = routes[routes.length - 1];
+      log(`[CRYPTO-ARB] 🏆 Mejor: ${bestRoute.crypto} ${bestRoute.broker}: ${bestRoute.profitPercent.toFixed(2)}%`);
+      log(`[CRYPTO-ARB] 📉 Peor: ${worstRoute.crypto} ${worstRoute.broker}: ${worstRoute.profitPercent.toFixed(2)}%`);
+    }
+
+    sendResponse({ routes: routes || [] });
+  } catch (error) {
+    console.error('[CRYPTO-ARB] ❌ Error calculando crypto arbitrage:', error);
+    sendResponse({ routes: [], error: error.message });
+  }
+}
 
 /**
  * Calcular arbitraje entre criptomonedas en diferentes exchanges
@@ -1741,6 +2000,9 @@ async function updateData() {
 
     // Decidir cómo obtener el precio del dólar oficial
     let oficial;
+    log('🔍 [BACKGROUND] dollarPriceSource:', userSettings.dollarPriceSource);
+    log('🔍 [BACKGROUND] preferredBank:', userSettings.preferredBank);
+    
     if (userSettings.dollarPriceSource === 'manual') {
       // Usar precio manual configurado por el usuario
       const manualPrice = userSettings.manualDollarPrice || 1400;
@@ -1807,18 +2069,39 @@ async function updateData() {
         }
       } else {
         // Usar precio oficial estándar
-        log('🌐 Obteniendo precio oficial desde DolarAPI...');
+        log('🌐 [BACKGROUND] Obteniendo precio oficial desde CriptoYa...');
         oficial = await fetchDolarOficial(userSettings);
+        log('🌐 [BACKGROUND] Resultado fetchDolarOficial:', oficial);
       }
     }
 
+    // NUEVO v5.0.76: Si aún no hay oficial, usar fallback
+    if (!oficial) {
+      log('⚠️ [BACKGROUND] No se obtuvo oficial, creando fallback...');
+      const manualPrice = userSettings.manualDollarPrice || 1450;
+      oficial = {
+        compra: manualPrice,
+        venta: manualPrice,
+        source: 'fallback_default',
+        timestamp: Date.now()
+      };
+    }
+
     // Obtener precios de USDT en paralelo
-    const [usdt, usdtUsd] = await Promise.all([
+    const [usdtRaw, usdtUsd] = await Promise.all([
       fetchUSDT(userSettings),
       fetchUSDTtoUSD(userSettings)
     ]);
 
-    log('📊 Datos obtenidos:', { oficial: !!oficial, usdt: !!usdt, usdtUsd: !!usdtUsd });
+    // NUEVO v5.0.82: Aplicar filtros de exchanges P2P y outliers
+    const usdt = P2P_FILTERS.applyFilters(usdtRaw, userSettings);
+    
+    log('📊 Datos obtenidos:', { 
+      oficial: !!oficial, 
+      usdtRaw: usdtRaw ? Object.keys(usdtRaw).length : 0,
+      usdtFiltered: usdt ? Object.keys(usdt).length : 0,
+      usdtUsd: !!usdtUsd 
+    });
 
     if (!oficial || !usdt) {
       log('❌ Faltan datos básicos');
@@ -1935,9 +2218,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     currentData = null;
     log('[BACKGROUND] 🗑️ Cache limpiada (currentData = null)');
 
-    // Actualizar configuración del usuario
-    userSettings = request.settings;
-    log('[BACKGROUND] 👤 userSettings actualizada con nueva configuración');
+    // NOTA: No es necesario guardar userSettings global - updateData() lee del storage directamente
+    log('[BACKGROUND] 👤 Configuración será leída desde storage en updateData()');
 
     // Forzar recálculo de datos con nueva configuración
     updateData().then(data => {
@@ -2043,67 +2325,29 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   // NUEVO v6.0: Handler para crypto arbitrage
   if (request.action === 'GET_CRYPTO_ARBITRAGE' || request.type === 'GET_CRYPTO_ARBITRAGE') {
-    log('[CRYPTO-ARB] 📥 Solicitud de crypto arbitrage recibida');
+    log('[CRYPTO-ARB] 📥 Solicitud de crypto arbitrage recibida v5.0.76');
 
     // Verificar que hayamos datos disponibles
     if (!currentData || !currentData.oficial) {
-      log('[CRYPTO-ARB] ⚠️ No hay datos disponibles (currentData es null)');
-      sendResponse({ routes: [] });
-      return false;
-    }
-
-    // Obtener lista de criptos activas desde storage
-    chrome.storage.local.get('activeCryptos').then(async (result) => {
-      try {
-        const activeCryptos = result.activeCryptos && Array.isArray(result.activeCryptos) 
-          ? result.activeCryptos 
-          : ['BTC', 'ETH', 'USDC', 'DAI', 'USDT'];
-        
-        log(`[CRYPTO-ARB] Obteniendo datos para ${activeCryptos.length} criptos activas`);
-
-        // Obtener datos de todas las criptos activas usando fetch directo
-        const cryptoData = {};
-        for (const symbol of activeCryptos) {
-          try {
-            const response = await fetch(`https://criptoya.com/api/${symbol}/ars/1`);
-            if (response.ok) {
-              const data = await response.json();
-              if (data && typeof data === 'object') {
-                cryptoData[symbol] = { ...data, symbol, timestamp: Date.now() };
-              }
-            }
-          } catch (e) {
-            log(`[CRYPTO-ARB] ⚠️ Error obteniendo ${symbol}: ${e.message}`);
-          }
-        }
-
-        if (Object.keys(cryptoData).length === 0) {
-          log('[CRYPTO-ARB] ⚠️ No se obtuvieron datos de criptos');
+      log('[CRYPTO-ARB] ⚠️ No hay datos disponibles (currentData es null), intentando actualizar...');
+      // Intentar actualizar datos primero
+      updateData().then(async () => {
+        if (!currentData || !currentData.oficial) {
+          log('[CRYPTO-ARB] ❌ No se pudieron obtener datos después de actualizar');
           sendResponse({ routes: [] });
           return;
         }
+        // Continuar con el cálculo
+        await processCryptoArbitrage(sendResponse);
+      }).catch(err => {
+        console.error('[CRYPTO-ARB] ❌ Error actualizando datos:', err);
+        sendResponse({ routes: [], error: err.message });
+      });
+      return true;
+    }
 
-        log(`[CRYPTO-ARB] Datos obtenidos para ${Object.keys(cryptoData).length} criptos`);
-
-        // Calcular rutas de arbitraje crypto-to-crypto
-        const routes = await calculateCryptoArbitrageRoutes(
-          cryptoData,
-          currentData.oficial,
-          userSettings || {}
-        );
-
-        log(`[CRYPTO-ARB] ✅ ${routes.length} rutas calculadas exitosamente`);
-
-        sendResponse({ routes: routes || [] });
-      } catch (error) {
-        console.error('[CRYPTO-ARB] ❌ Error calculando crypto arbitrage:', error);
-        sendResponse({ routes: [], error: error.message });
-      }
-    }).catch(error => {
-      console.error('[CRYPTO-ARB] ❌ Error obteniendo criptos activas:', error);
-      sendResponse({ routes: [], error: error.message });
-    });
-
+    // Procesar crypto arbitrage
+    processCryptoArbitrage(sendResponse);
     return true; // Respuesta asíncrona
   }
 
@@ -2114,40 +2358,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 log('[BACKGROUND] Listener registrado');
 
-// ============================================
-// LISTENER DE CAMBIOS EN CONFIGURACIÓN
-// ============================================
-
-// NUEVO v5.0.48: Detectar cuando el usuario cambia configuración y recalcular
-chrome.storage.onChanged.addListener((changes, namespace) => {
-  if (namespace === 'local' && changes.notificationSettings) {
-    const oldSettings = changes.notificationSettings.oldValue || {};
-    const newSettings = changes.notificationSettings.newValue || {};
-
-    log('⚙️ [STORAGE] Configuración cambió');
-
-    // Detectar cambios que requieren recálculo de rutas
-    const dollarSourceChanged = oldSettings.dollarPriceSource !== newSettings.dollarPriceSource;
-    const manualPriceChanged = oldSettings.manualDollarPrice !== newSettings.manualDollarPrice;
-    const bankMethodChanged = oldSettings.preferredBank !== newSettings.preferredBank;
-
-    if (dollarSourceChanged || manualPriceChanged || bankMethodChanged) {
-      log('🔄 [STORAGE] Cambios críticos detectados, forzando actualización...');
-      log('   - Fuente dólar:', oldSettings.dollarPriceSource, '→', newSettings.dollarPriceSource);
-      log('   - Precio manual:', oldSettings.manualDollarPrice, '→', newSettings.manualDollarPrice);
-      log('   - Método banco:', oldSettings.preferredBank, '→', newSettings.preferredBank);
-
-      // Forzar actualización de datos
-      updateData().then(() => {
-        log('✅ [STORAGE] Datos actualizados con nueva configuración');
-      }).catch(error => {
-        console.error('❌ [STORAGE] Error actualizando datos:', error);
-      });
-    }
-  }
-});
-
-log('[BACKGROUND] Listener de storage registrado');
+// NOTA: El listener de storage está unificado más abajo en la sección de inicialización
 
 // ============================================
 // INICIALIZACIÓN
@@ -2200,14 +2411,38 @@ async function startPeriodicUpdates() {
 // Iniciar actualizaciones periódicas
 startPeriodicUpdates();
 
-// Listener para cambios en configuración del usuario
+// ============================================
+// LISTENER UNIFICADO DE CAMBIOS EN CONFIGURACIÓN
+// ============================================
 chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace === 'local' && changes.notificationSettings) {
     const oldSettings = changes.notificationSettings.oldValue || {};
     const newSettings = changes.notificationSettings.newValue || {};
 
+    log('⚙️ [STORAGE] Configuración cambió');
+
+    // Detectar cambios críticos que requieren recálculo de rutas
+    const dollarSourceChanged = oldSettings.dollarPriceSource !== newSettings.dollarPriceSource;
+    const manualPriceChanged = oldSettings.manualDollarPrice !== newSettings.manualDollarPrice;
+    const bankMethodChanged = oldSettings.preferredBank !== newSettings.preferredBank;
+    const amountChanged = oldSettings.defaultSimAmount !== newSettings.defaultSimAmount;
+
+    // Si cambió la configuración del dólar, forzar actualización
+    if (dollarSourceChanged || manualPriceChanged || bankMethodChanged) {
+      log('🔄 [STORAGE] Cambios críticos detectados, forzando actualización...');
+      log('   - Fuente dólar:', oldSettings.dollarPriceSource, '→', newSettings.dollarPriceSource);
+      log('   - Precio manual:', oldSettings.manualDollarPrice, '→', newSettings.manualDollarPrice);
+      log('   - Método banco:', oldSettings.preferredBank, '→', newSettings.preferredBank);
+
+      updateData().then(() => {
+        log('✅ [STORAGE] Datos actualizados con nueva configuración');
+      }).catch(error => {
+        console.error('❌ [STORAGE] Error actualizando datos:', error);
+      });
+    }
+
     // Si cambió el monto por defecto, recalcular rutas
-    if (oldSettings.defaultSimAmount !== newSettings.defaultSimAmount) {
+    if (amountChanged) {
       log(`💰 Monto por defecto cambió: $${oldSettings.defaultSimAmount} → $${newSettings.defaultSimAmount}`);
       log('🔄 Recalculando rutas con nuevo monto...');
       updateData().then(() => {
@@ -2215,7 +2450,7 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
       });
     }
 
-    // NUEVO v5.0.54: Si cambió el intervalo de actualización, reiniciar el timer
+    // Si cambió el intervalo de actualización, reiniciar el timer
     if (oldSettings.updateIntervalMinutes !== newSettings.updateIntervalMinutes) {
       log(`⏰ Intervalo cambió: ${oldSettings.updateIntervalMinutes}min → ${newSettings.updateIntervalMinutes}min`);
       log('🔄 Reiniciando actualizaciones periódicas...');
@@ -2230,6 +2465,5 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
   }
 });
 
-log('[BACKGROUND] Background completamente inicializado');
-
+log('[BACKGROUND] Listener de storage registrado');
 log('[BACKGROUND] Background completamente inicializado');

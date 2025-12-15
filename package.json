@@ -1,6 +1,6 @@
 {
   "name": "arbitragear-extension",
-  "version": "5.0.75",
+  "version": "5.0.83",
   "description": "Extensión de Chrome para detectar oportunidades de arbitraje entre el dólar oficial argentino y exchanges de USDT",
   "main": "src/background/main-simple.js",
   "scripts": {

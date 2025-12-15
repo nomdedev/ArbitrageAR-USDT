@@ -79,31 +79,48 @@
     const hasVolume = route.volume && route.volume > 0;
     const volumeDisplay = hasVolume ? `Vol: ${formatVolume(route.volume)}` : '';
     
+    // Determinar tipo de operación
+    const isP2P = route.requiresP2P || (route.buyExchange && route.buyExchange.toLowerCase().includes('p2p'));
+    const operationType = isP2P ? 'P2P' : 'DIRECT';
+    const operationBadgeClass = isP2P ? 'p2p' : 'direct';
+    
     // Data para el click handler
     const routeData = JSON.stringify({ ...route, displayMetrics }).replace(/'/g, "&apos;");
 
     return `
-      <div class="route-card ${profitClass}" data-index="${index}" data-route='${routeData}' 
+      <div class="route-card ${profitClass} ${isP2P ? 'is-p2p' : 'is-direct'}" data-index="${index}" data-route='${routeData}' 
            role="button" tabindex="0" aria-label="Ruta: ${routeDescription}, ganancia ${profitSymbol}${formatNumber(displayMetrics.percentage)} por ciento">
-        <div class="route-content">
-          <div class="route-header">
-            <div class="route-info">
-              <span class="route-path">🏦 ${escapeHtml(routeDescription)}</span>
-            </div>
-            <div class="profit-badge ${profitBadgeClass}">
-              ${profitSymbol}${formatNumber(displayMetrics.percentage)}%
-            </div>
+        <div class="fiat-card-header">
+          <div class="fiat-info">
+            <span class="fiat-icon">💵</span>
+            <span class="fiat-name">USDT/ARS</span>
           </div>
-          <div class="route-details">
-            <div class="route-amount-container">
-              <div class="route-amount">
-                <span class="amount-label">Ganancia:</span>
-                <span class="amount-value ${isNegative ? 'negative' : 'positive'}">${displayMetrics.mainValue}</span>
-              </div>
-              ${displayMetrics.secondaryInfo ? `<div class="route-investment">${displayMetrics.secondaryInfo}</div>` : ''}
-            </div>
-            ${hasVolume ? `<div class="route-volume">${volumeDisplay}</div>` : ''}
+          <div class="profit-badge ${profitBadgeClass}">
+            ${profitSymbol}${formatNumber(displayMetrics.percentage)}%
           </div>
+        </div>
+        
+        <div class="fiat-card-body">
+          <div class="route-path-display">
+            <span class="exchange-badge">${escapeHtml(route.buyExchange || 'Compra')}</span>
+            <span class="arrow">→</span>
+            <span class="exchange-badge">${escapeHtml(route.sellExchange || 'Venta')}</span>
+          </div>
+          
+          <div class="operation-meta">
+            <span class="operation-badge ${operationBadgeClass}">${operationType}</span>
+            ${hasVolume ? `<span class="volume-indicator">📊 ${volumeDisplay}</span>` : ''}
+          </div>
+        </div>
+        
+        <div class="fiat-card-footer">
+          <div class="profit-details">
+            <span class="label">Ganancia estimada:</span>
+            <span class="value ${isNegative ? 'negative' : ''}">${displayMetrics.mainValue} ARS</span>
+          </div>
+          <button class="btn-details" data-route-index="${index}">
+            Ver detalles
+          </button>
         </div>
       </div>
     `;
