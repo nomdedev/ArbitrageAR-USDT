@@ -31,9 +31,7 @@ export function calculateBankConsensus(bankData, selectedBanks = null) {
 
   // Calcular mediana (más robusta que promedio)
   const mid = Math.floor(prices.length / 2);
-  const median = prices.length % 2 === 0
-    ? (prices[mid - 1] + prices[mid]) / 2
-    : prices[mid];
+  const median = prices.length % 2 === 0 ? (prices[mid - 1] + prices[mid]) / 2 : prices[mid];
 
   return {
     price: Math.round(median * 100) / 100, // Redondear a 2 decimales
@@ -202,7 +200,7 @@ export const DEFAULT_BANKS = ['bna', 'galicia', 'santander', 'bbva', 'icbc'];
 export const BANK_CODE_MAPPING = {
   'Banco Nación': 'bna',
   'BBVA Banco Francés': 'bbva',
-  'BBVA': 'bbva',
+  BBVA: 'bbva',
   'Banco Piano': 'piano',
   'Banco Hipotecario': 'hipotecario',
   'Banco Galicia': 'galicia',
@@ -212,9 +210,9 @@ export const BANK_CODE_MAPPING = {
   'Banco Supervielle': 'supervielle',
   'Banco Patagonia': 'patagonia',
   'Banco Comafi': 'comafi',
-  'ICBC': 'icbc',
-  'Bind': 'bind',
-  'Bancor': 'bancor',
+  ICBC: 'icbc',
+  Bind: 'bind',
+  Bancor: 'bancor',
   'Nuevo Banco del Chaco': 'chaco',
   'Banco Chaco': 'chaco',
   'Banco de la Pampa': 'pampa',
@@ -241,23 +239,23 @@ export function getBankCode(fullName) {
  */
 export function normalizeBankName(code) {
   const bankNames = {
-    'bna': 'Banco Nación',
-    'bbva': 'BBVA',
-    'piano': 'Banco Piano',
-    'hipotecario': 'Banco Hipotecario',
-    'galicia': 'Banco Galicia',
-    'santander': 'Banco Santander',
-    'ciudad': 'Banco Ciudad',
-    'supervielle': 'Banco Supervielle',
-    'patagonia': 'Banco Patagonia',
-    'comafi': 'Banco Comafi',
-    'icbc': 'ICBC',
-    'bind': 'Bind',
-    'bancor': 'Bancor',
-    'chaco': 'Banco Chaco',
-    'pampa': 'Banco Pampa',
-    'provincia': 'Banco Provincia',
-    'columbia': 'Banco Columbia'
+    bna: 'Banco Nación',
+    bbva: 'BBVA',
+    piano: 'Banco Piano',
+    hipotecario: 'Banco Hipotecario',
+    galicia: 'Banco Galicia',
+    santander: 'Banco Santander',
+    ciudad: 'Banco Ciudad',
+    supervielle: 'Banco Supervielle',
+    patagonia: 'Banco Patagonia',
+    comafi: 'Banco Comafi',
+    icbc: 'ICBC',
+    bind: 'Bind',
+    bancor: 'Bancor',
+    chaco: 'Banco Chaco',
+    pampa: 'Banco Pampa',
+    provincia: 'Banco Provincia',
+    columbia: 'Banco Columbia'
   };
 
   return bankNames[code] || code.charAt(0).toUpperCase() + code.slice(1);

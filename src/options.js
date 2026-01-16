@@ -10,7 +10,17 @@ const DEFAULT_SETTINGS = {
   notificationsEnabled: true,
   alertThreshold: 1.0, // Umbral único de alerta (%)
   soundEnabled: true,
-  notificationExchanges: ['binance', 'buenbit', 'lemoncash', 'ripio', 'fiwind', 'letsbit'],
+  notificationExchanges: [
+    'binance',
+    'buenbit',
+    'lemoncash',
+    'ripio',
+    'fiwind',
+    'letsbit',
+    'belo',
+    'tiendacrypto',
+    'satoshitango'
+  ],
   preferredExchanges: [],
   dataFreshnessWarning: true, // Alertar si datos tienen más de 5 min
   riskAlertsEnabled: true, // Mostrar semáforo de riesgo
@@ -21,10 +31,10 @@ const DEFAULT_SETTINGS = {
   maxRoutesDisplay: 20,
   filterMinProfit: -10.0, // Umbral mínimo de ganancia para MOSTRAR rutas (%) - por defecto -10% (mostrar casi todo)
   sortByProfit: true, // Ordenar rutas por ganancia descendente
-  extraTradingFee: 0,        // 0% - Usuario debe configurar según su exchange
-  extraWithdrawalFee: 0,     // $0 ARS - Usuario debe configurar si aplica
-  extraTransferFee: 0,       // $0 ARS - Usuario debe configurar si aplica
-  bankCommissionFee: 0,      // $0 ARS - Usuario debe configurar si aplica
+  extraTradingFee: 0, // 0% - Usuario debe configurar según su exchange
+  extraWithdrawalFee: 0, // $0 ARS - Usuario debe configurar si aplica
+  extraTransferFee: 0, // $0 ARS - Usuario debe configurar si aplica
+  bankCommissionFee: 0, // $0 ARS - Usuario debe configurar si aplica
   fallbackUsdToUsdtRate: 1.0, // Tasa de fallback si API USDT/USD falla (paridad 1:1)
   applyFeesInCalculation: false, // CORREGIDO: false por defecto = sin fees
   brokerFees: [], // Array de {broker: string, buyFee: number, sellFee: number}
@@ -86,16 +96,30 @@ async function loadSettings() {
     // NUEVO: Exchanges para notificaciones
     if (settings.notificationExchanges && settings.notificationExchanges.length > 0) {
       settings.notificationExchanges.forEach(exchange => {
-        const checkbox = document.querySelector(`input[name="notify-exchange"][value="${exchange}"]`);
+        const checkbox = document.querySelector(
+          `input[name="notify-exchange"][value="${exchange}"]`
+        );
         if (checkbox) {
           checkbox.checked = true;
         }
       });
     } else {
-      // Por defecto, marcar los principales exchanges
-      const defaultExchanges = ['binance', 'buenbit', 'lemoncash', 'ripio', 'fiwind', 'letsbit'];
+      // Por defecto, marcar los principales exchanges argentinos
+      const defaultExchanges = [
+        'binance',
+        'buenbit',
+        'lemoncash',
+        'ripio',
+        'fiwind',
+        'letsbit',
+        'belo',
+        'tiendacrypto',
+        'satoshitango'
+      ];
       defaultExchanges.forEach(exchange => {
-        const checkbox = document.querySelector(`input[name="notify-exchange"][value="${exchange}"]`);
+        const checkbox = document.querySelector(
+          `input[name="notify-exchange"][value="${exchange}"]`
+        );
         if (checkbox) {
           checkbox.checked = true;
         }
@@ -126,13 +150,17 @@ async function loadSettings() {
     if (riskAlertsEl) riskAlertsEl.checked = settings.riskAlertsEnabled ?? true;
 
     const confirmHighAmountEl = document.getElementById('confirm-high-amount');
-    if (confirmHighAmountEl) confirmHighAmountEl.checked = settings.requireConfirmHighAmount ?? true;
+    if (confirmHighAmountEl) {
+      confirmHighAmountEl.checked = settings.requireConfirmHighAmount ?? true;
+    }
 
     const highThresholdEl = document.getElementById('high-threshold');
     if (highThresholdEl) highThresholdEl.value = settings.minProfitWarning ?? 500000;
 
     // NUEVO: Configuración de precio del dólar
-    const dollarSourceRadio = document.querySelector(`input[name="dollar-price-source"][value="${settings.dollarPriceSource ?? 'auto'}"]`);
+    const dollarSourceRadio = document.querySelector(
+      `input[name="dollar-price-source"][value="${settings.dollarPriceSource ?? 'auto'}"]`
+    );
     if (dollarSourceRadio) {
       dollarSourceRadio.checked = true;
     }
@@ -146,7 +174,10 @@ async function loadSettings() {
     document.querySelectorAll('input[name="bank"]').forEach(cb => {
       // Si no hay configuración guardada o está vacía, usar bancos por defecto
       // Si hay configuración guardada con bancos, usar esa configuración
-      if (selectedBanks === undefined || (Array.isArray(selectedBanks) && selectedBanks.length === 0)) {
+      if (
+        selectedBanks === undefined ||
+        (Array.isArray(selectedBanks) && selectedBanks.length === 0)
+      ) {
         cb.checked = defaultSelectedBanks.includes(cb.value);
       } else {
         cb.checked = selectedBanks.includes(cb.value);
@@ -173,10 +204,14 @@ async function loadSettings() {
     }
 
     // NUEVO v5.0.53: URLs de APIs
-    document.getElementById('dolarapi-url').value = settings.dolarApiUrl ?? 'https://dolarapi.com/v1/dolares/oficial';
-    document.getElementById('criptoya-ars-url').value = settings.criptoyaUsdtArsUrl ?? 'https://criptoya.com/api/usdt/ars/1';
-    document.getElementById('criptoya-usd-url').value = settings.criptoyaUsdtUsdUrl ?? 'https://criptoya.com/api/usdt/usd/1';
-    document.getElementById('criptoya-banks-url').value = settings.criptoyaBanksUrl ?? 'https://criptoya.com/api/bancostodos';
+    document.getElementById('dolarapi-url').value =
+      settings.dolarApiUrl ?? 'https://dolarapi.com/v1/dolares/oficial';
+    document.getElementById('criptoya-ars-url').value =
+      settings.criptoyaUsdtArsUrl ?? 'https://criptoya.com/api/usdt/ars/1';
+    document.getElementById('criptoya-usd-url').value =
+      settings.criptoyaUsdtUsdUrl ?? 'https://criptoya.com/api/usdt/usd/1';
+    document.getElementById('criptoya-banks-url').value =
+      settings.criptoyaBanksUrl ?? 'https://criptoya.com/api/bancostodos';
 
     // NUEVO v5.0.54: Intervalos de actualización
     document.getElementById('update-interval').value = settings.updateIntervalMinutes ?? 5;
@@ -462,11 +497,18 @@ async function saveSettings(settings = null) {
     // NUEVO: Notificar al background script que la configuración cambió
     try {
       console.log('📤 [OPTIONS] Enviando settingsUpdated al background...');
-      console.log('📤 [OPTIONS] Configuración a enviar:', JSON.stringify({
-        dollarPriceSource: settingsToSave.dollarPriceSource,
-        manualDollarPrice: settingsToSave.manualDollarPrice,
-        preferredBank: settingsToSave.preferredBank
-      }, null, 2));
+      console.log(
+        '📤 [OPTIONS] Configuración a enviar:',
+        JSON.stringify(
+          {
+            dollarPriceSource: settingsToSave.dollarPriceSource,
+            manualDollarPrice: settingsToSave.manualDollarPrice,
+            preferredBank: settingsToSave.preferredBank
+          },
+          null,
+          2
+        )
+      );
 
       const response = await chrome.runtime.sendMessage({
         action: 'settingsUpdated',
@@ -484,7 +526,6 @@ async function saveSettings(settings = null) {
       } else {
         console.warn('⚠️ [OPTIONS] Background respondió con error:', response?.error);
       }
-
     } catch (error) {
       console.warn('⚠️ [OPTIONS] Error enviando mensaje al background:', error);
       // No es crítico, el background se actualizará en la próxima carga
@@ -508,11 +549,14 @@ function getCurrentSettings() {
   settings.soundEnabled = document.getElementById('sound-enabled')?.checked ?? true;
 
   // Exchanges para notificaciones
-  const notifyExchangeCheckboxes = document.querySelectorAll('input[name="notify-exchange"]:checked');
+  const notifyExchangeCheckboxes = document.querySelectorAll(
+    'input[name="notify-exchange"]:checked'
+  );
   settings.notificationExchanges = Array.from(notifyExchangeCheckboxes).map(cb => cb.value);
 
   // Simulador
-  settings.defaultSimAmount = parseInt(document.getElementById('simulator-amount')?.value) || 1000000;
+  settings.defaultSimAmount =
+    parseInt(document.getElementById('simulator-amount')?.value) || 1000000;
   settings.maxRoutesDisplay = parseInt(document.getElementById('max-routes')?.value) || 20;
   settings.filterMinProfit = parseFloat(document.getElementById('min-profit')?.value) || -10.0;
   settings.sortByProfit = document.getElementById('sort-profit')?.checked ?? true;
@@ -526,7 +570,8 @@ function getCurrentSettings() {
   // Configuración del dólar
   const dollarSourceRadio = document.querySelector('input[name="dollar-price-source"]:checked');
   settings.dollarPriceSource = dollarSourceRadio?.value || 'auto';
-  settings.manualDollarPrice = parseFloat(document.getElementById('manual-dollar-price')?.value) || 1400;
+  settings.manualDollarPrice =
+    parseFloat(document.getElementById('manual-dollar-price')?.value) || 1400;
   settings.preferredBank = document.getElementById('dollar-method')?.value || 'consenso';
 
   // Bancos seleccionados
@@ -539,20 +584,27 @@ function getCurrentSettings() {
   settings.filterP2POutliers = document.getElementById('filter-p2p-outliers')?.checked ?? true;
 
   // APIs
-  settings.dolarApiUrl = document.getElementById('dolarapi-url')?.value || 'https://dolarapi.com/v1/dolares/oficial';
-  settings.criptoyaUsdtArsUrl = document.getElementById('criptoya-ars-url')?.value || 'https://criptoya.com/api/usdt/ars/1';
-  settings.criptoyaUsdtUsdUrl = document.getElementById('criptoya-usd-url')?.value || 'https://criptoya.com/api/usdt/usd/1';
-  settings.criptoyaBanksUrl = document.getElementById('criptoya-banks-url')?.value || 'https://criptoya.com/api/bancostodos';
+  settings.dolarApiUrl =
+    document.getElementById('dolarapi-url')?.value || 'https://dolarapi.com/v1/dolares/oficial';
+  settings.criptoyaUsdtArsUrl =
+    document.getElementById('criptoya-ars-url')?.value || 'https://criptoya.com/api/usdt/ars/1';
+  settings.criptoyaUsdtUsdUrl =
+    document.getElementById('criptoya-usd-url')?.value || 'https://criptoya.com/api/usdt/usd/1';
+  settings.criptoyaBanksUrl =
+    document.getElementById('criptoya-banks-url')?.value || 'https://criptoya.com/api/bancostodos';
 
   // Actualización
   settings.updateIntervalMinutes = parseInt(document.getElementById('update-interval')?.value) || 5;
-  settings.requestTimeoutSeconds = parseInt(document.getElementById('request-timeout')?.value) || 10;
+  settings.requestTimeoutSeconds =
+    parseInt(document.getElementById('request-timeout')?.value) || 10;
 
   // Seguridad
   settings.dataFreshnessWarning = document.getElementById('freshness-warning')?.checked ?? true;
   settings.riskAlertsEnabled = document.getElementById('risk-alerts')?.checked ?? true;
-  settings.requireConfirmHighAmount = document.getElementById('confirm-high-amount')?.checked ?? true;
-  settings.minProfitWarning = parseFloat(document.getElementById('high-threshold')?.value) || 500000;
+  settings.requireConfirmHighAmount =
+    document.getElementById('confirm-high-amount')?.checked ?? true;
+  settings.minProfitWarning =
+    parseFloat(document.getElementById('high-threshold')?.value) || 500000;
 
   return settings;
 }
@@ -609,11 +661,7 @@ function updateUIState() {
   const notifyEnabled = document.getElementById('notify-enabled')?.checked ?? true;
 
   // Deshabilitar elementos relacionados con notificaciones si están desactivadas
-  const notificationElements = [
-    'alert-threshold',
-    'notify-frequency',
-    'sound-enabled'
-  ];
+  const notificationElements = ['alert-threshold', 'notify-frequency', 'sound-enabled'];
 
   notificationElements.forEach(id => {
     const el = document.getElementById(id);

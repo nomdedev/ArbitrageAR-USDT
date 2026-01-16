@@ -13,6 +13,15 @@ Bienvenido al índice de documentación del proyecto.
 - `TESTING_INSTRUCTIONS.md` — Instrucciones de testing
 - `docs/TESTING_REPORT_V4.0.md` — Reporte de testing
 
+## Documentación técnica (NUEVO)
+
+- `docs/API_INTERNA.md` — **Documentación de API interna** (DataService, ValidationService, Notificaciones, StateManager)
+- `docs/ARQUITECTURA_TECNICA.md` — Arquitectura técnica del proyecto
+- `docs/AUDITORIA_COMPLETA_2026.md` — Auditoría completa con progreso de mejoras
+- `docs/COMPONENTS_DATASERVICE.md` — Detalles del DataService
+- `docs/COMPONENTS_DOC.md` — Documentación de componentes
+- `docs/COMPONENTS_POPUP_CORE.md` — Core del popup
+
 ## Hotfixes y parches
 - `docs/HOTFIX_SUMMARY.md` — Resumen y enlaces a hotfixes v5.x
 - Archivos completos: `docs/archive/hotfixes/` (contiene todos los hotfixes individuales)

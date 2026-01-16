@@ -3,7 +3,7 @@
 function getProfitClasses(profitPercent) {
   const isNegative = profitPercent < 0;
   const isHighProfit = profitPercent > 5;
-  
+
   let profitClass;
   if (isNegative) {
     profitClass = 'negative-profit';
@@ -12,7 +12,7 @@ function getProfitClasses(profitPercent) {
   } else {
     profitClass = '';
   }
-  
+
   let profitBadgeClass;
   if (isNegative) {
     profitBadgeClass = 'negative';
@@ -21,7 +21,7 @@ function getProfitClasses(profitPercent) {
   } else {
     profitBadgeClass = '';
   }
-  
+
   return { isNegative, profitClass, profitBadgeClass };
 }
 
