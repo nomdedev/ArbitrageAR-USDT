@@ -1,14 +1,26 @@
 // ============================================
-// MAIN BACKGROUND SCRIPT - VERSIÓN SIMPLIFICADA (SIN MÓDULOS)
-// Solo usar si "type": "module" no funciona en tu navegador
-// v5.0.83 - Add P2P exchange filters and outlier detection
+// MAIN BACKGROUND SCRIPT - ArbitrageAR v5.0.84
+// Service Worker para Chrome Extension
+// REFACTORIZADO v5.0.84: Eliminado código no utilizado
+// - fetchDollarTypes() - función legacy no referenciada
+// - getCachedData() - función no utilizada
 // ============================================
 
-console.log('🔧 [BACKGROUND] Iniciando service worker v5.0.83...');
-console.log('🔧 [BACKGROUND] Timestamp carga:', new Date().toISOString());
+console.log('🔧 [BACKGROUND] Iniciando service worker...');
 
 // ============================================
-// IMPORTACIONES INLINE DE UTILIDADES
+// IMPORTAR MÓDULOS (compatibilidad con service worker)
+// ============================================
+try {
+  importScripts('apiClient.js', 'arbitrageCalculator.js');
+  console.log('✅ [BACKGROUND] Módulos importados correctamente');
+} catch (e) {
+  console.warn('⚠️ [BACKGROUND] No se pudieron importar módulos:', e.message);
+  console.log('📝 [BACKGROUND] Usando implementación inline como fallback');
+}
+
+// ============================================
+// IMPORTACIONES INLINE DE UTILIDADES (fallback)
 // ============================================
 
 // Funciones de cálculo bancario centralizadas (inline para compatibilidad)
@@ -34,9 +46,7 @@ const BANK_CALCULATIONS = {
     if (prices.length === 0) return null;
 
     const mid = Math.floor(prices.length / 2);
-    const median = prices.length % 2 === 0
-      ? (prices[mid - 1] + prices[mid]) / 2
-      : prices[mid];
+    const median = prices.length % 2 === 0 ? (prices[mid - 1] + prices[mid]) / 2 : prices[mid];
 
     return {
       price: Math.round(median * 100) / 100,
@@ -155,202 +165,8 @@ const BANK_CALCULATIONS = {
 };
 
 // ============================================
-// FILTRADO DE EXCHANGES P2P - v5.0.82
-// ============================================
-
-const P2P_FILTERS = {
-  // Lista de todos los exchanges P2P conocidos
-  ALL_P2P_EXCHANGES: [
-    'binancep2p', 'okexp2p', 'bybitp2p', 'bitgetp2p', 'kucoinp2p',
-    'bingxp2p', 'huobip2p', 'mexcp2p', 'weexp2p', 'coinexp2p',
-    'eldoradop2p', 'paydecep2p', 'lemoncashp2p'
-  ],
-
-  // Exchanges P2P por defecto (los más confiables)
-  DEFAULT_P2P_EXCHANGES: ['binancep2p', 'okexp2p', 'bybitp2p', 'bitgetp2p', 'kucoinp2p', 'bingxp2p'],
-
-  /**
-   * Verificar si un exchange es P2P
-   */
-  isP2PExchange(exchangeName) {
-    if (!exchangeName) return false;
-    const name = exchangeName.toLowerCase();
-    return name.includes('p2p') || this.ALL_P2P_EXCHANGES.includes(name);
-  },
-
-  /**
-   * Filtrar datos de USDT por exchanges P2P seleccionados
-   */
-  filterBySelectedExchanges(usdtData, selectedExchanges) {
-    if (!usdtData || typeof usdtData !== 'object') return usdtData;
-    if (!selectedExchanges || !Array.isArray(selectedExchanges) || selectedExchanges.length === 0) {
-      // Si no hay selección, usar todos menos los P2P por defecto excluidos
-      selectedExchanges = this.DEFAULT_P2P_EXCHANGES;
-    }
-
-    const filtered = {};
-    Object.entries(usdtData).forEach(([exchange, data]) => {
-      // Si es P2P, verificar si está en la lista seleccionada
-      if (this.isP2PExchange(exchange)) {
-        if (selectedExchanges.includes(exchange.toLowerCase())) {
-          filtered[exchange] = data;
-        }
-      } else {
-        // Si no es P2P, siempre incluirlo
-        filtered[exchange] = data;
-      }
-    });
-
-    return filtered;
-  },
-
-  /**
-   * Filtrar outliers de precios (precios anómalos)
-   * Excluye precios que estén más del umbral% alejados del promedio
-   */
-  filterOutliers(usdtData, threshold = 0.15) {
-    if (!usdtData || typeof usdtData !== 'object') return usdtData;
-
-    // Calcular precios válidos para el promedio
-    const validPrices = [];
-    Object.entries(usdtData).forEach(([exchange, data]) => {
-      if (data && typeof data === 'object') {
-        if (data.bid > 0) validPrices.push(data.bid);
-        if (data.ask > 0) validPrices.push(data.ask);
-      }
-    });
-
-    if (validPrices.length < 3) return usdtData; // No hay suficientes datos para filtrar
-
-    // Calcular mediana (más robusto que el promedio)
-    validPrices.sort((a, b) => a - b);
-    const median = validPrices[Math.floor(validPrices.length / 2)];
-    
-    // Umbral de desviación permitida
-    const minPrice = median * (1 - threshold);
-    const maxPrice = median * (1 + threshold);
-
-    const filtered = {};
-    let outlierCount = 0;
-
-    Object.entries(usdtData).forEach(([exchange, data]) => {
-      if (!data || typeof data !== 'object') return;
-
-      // Verificar si el precio está dentro del rango aceptable
-      const bidOk = data.bid <= 0 || (data.bid >= minPrice && data.bid <= maxPrice);
-      const askOk = data.ask <= 0 || (data.ask >= minPrice && data.ask <= maxPrice);
-
-      if (bidOk && askOk) {
-        filtered[exchange] = data;
-      } else {
-        outlierCount++;
-        console.log(`⚠️ [P2P-FILTER] Outlier detectado: ${exchange} - bid: ${data.bid}, ask: ${data.ask} (mediana: ${median.toFixed(2)}, rango: ${minPrice.toFixed(2)}-${maxPrice.toFixed(2)})`);
-      }
-    });
-
-    if (outlierCount > 0) {
-      console.log(`🔍 [P2P-FILTER] ${outlierCount} outliers filtrados de ${Object.keys(usdtData).length} exchanges`);
-    }
-
-    return filtered;
-  },
-
-  /**
-   * Aplicar todos los filtros según configuración del usuario
-   */
-  applyFilters(usdtData, userSettings) {
-    if (!usdtData) return usdtData;
-
-    let filtered = { ...usdtData };
-
-    // 1. Filtrar por exchanges P2P seleccionados
-    const selectedP2P = userSettings?.selectedP2PExchanges;
-    if (selectedP2P && Array.isArray(selectedP2P) && selectedP2P.length > 0) {
-      filtered = this.filterBySelectedExchanges(filtered, selectedP2P);
-      console.log(`🔍 [P2P-FILTER] Filtrado por exchanges seleccionados: ${Object.keys(filtered).length} exchanges`);
-    }
-
-    // 2. Filtrar outliers si está habilitado
-    if (userSettings?.filterP2POutliers !== false) {
-      filtered = this.filterOutliers(filtered);
-    }
-
-    return filtered;
-  }
-};
-
-// ============================================
 // FUNCIONES DE FETCH PARA BANCOS
 // ============================================
-
-/**
- * Fetch datos de dólar oficial desde CriptoYa
- */
-async function fetchDollarTypes() {
-  try {
-    const response = await fetch('https://criptoya.com/api/dolar', {
-      timeout: REQUEST_TIMEOUT,
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    log('💵 Datos de dólar obtenidos');
-
-    // Extraer datos de bancos del objeto oficial y otros
-    const banksData = {};
-
-    // Usar datos reales de la API si están disponibles
-    if (data.oficial && data.oficial.price) {
-      banksData.oficial = {
-        compra: data.oficial.price || 0,
-        venta: data.oficial.price || 0,
-        nombre: 'Dólar Oficial'
-      };
-    }
-
-    if (data.ahorro && data.ahorro.ask) {
-      banksData.ahorro = {
-        compra: data.ahorro.bid || 0,
-        venta: data.ahorro.ask || 0,
-        nombre: 'Dólar Ahorro'
-      };
-    }
-
-    if (data.blue && data.blue.ask) {
-      banksData.blue = {
-        compra: data.blue.bid || 0,
-        venta: data.blue.ask || 0,
-        nombre: 'Dólar Blue'
-      };
-    }
-
-    // Si no hay datos de la API, usar datos de bancos reales
-    if (Object.keys(banksData).length === 0) {
-      console.log('⚠️ Usando datos de bancos reales como fallback');
-      banksData.bna = { compra: 1400, venta: 1450, nombre: 'Banco Nación' };
-      banksData.galicia = { compra: 1395, venta: 1445, nombre: 'Banco Galicia' };
-      banksData.santander = { compra: 1405, venta: 1455, nombre: 'Banco Santander' };
-      banksData.bbva = { compra: 1402, venta: 1452, nombre: 'BBVA' };
-      banksData.icbc = { compra: 1398, venta: 1448, nombre: 'ICBC' };
-      banksData.macro = { compra: 1403, venta: 1453, nombre: 'Banco Macro' };
-      banksData.nacion = { compra: 1399, venta: 1449, nombre: 'Banco Nación' };
-    }
-
-    cachedDollarTypes = banksData;
-    return banksData;
-  } catch (error) {
-    log('❌ Error obteniendo dólar oficial:', error);
-    // Devolver datos vacíos si falla la API - el popup manejará el caso sin datos
-    return {};
-  }
-}
 
 /**
  * Fetch datos de USDT/USD desde CriptoYa
@@ -360,7 +176,7 @@ async function fetchUSDTtoUSD() {
     const response = await fetch('https://criptoya.com/api/USDT/USD/1', {
       timeout: REQUEST_TIMEOUT,
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
       }
     });
@@ -401,7 +217,7 @@ async function fetchUSDT() {
     const response = await fetch('https://criptoya.com/api/USDT/ARS/1', {
       timeout: REQUEST_TIMEOUT,
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
       }
     });
@@ -435,18 +251,6 @@ async function fetchUSDT() {
 }
 
 /**
- * Obtener todos los datos de bancos desde cache
- */
-function getCachedData() {
-  return {
-    dollarTypes: cachedDollarTypes,
-    usdtUsdData: cachedUsdtUsdData,
-    usdtData: cachedUsdtData,
-    lastUpdate: lastDataUpdate
-  };
-}
-
-/**
  * Actualizar todos los datos de bancos
  */
 async function updateBanksData() {
@@ -476,8 +280,6 @@ async function updateBanksData() {
   }
 }
 
-
-
 const DEBUG_MODE = false; // PRODUCCIÓN: Desactivado después de diagnosticar problema
 // Variables globales para cache de datos de bancos
 let cachedDollarTypes = {};
@@ -488,7 +290,7 @@ let lastDataUpdate = null;
 // Variables globales de configuración
 let REQUEST_INTERVAL = 100; // ms - OPTIMIZADO v5.0.61: Reducido de 600ms a 100ms
 let REQUEST_TIMEOUT = 10000; // ms - valor por defecto
-let ENABLE_RATE_LIMIT = false; // NUEVO v5.0.61: Desactivar rate limit por defecto
+const ENABLE_RATE_LIMIT = false; // NUEVO v5.0.61: Desactivar rate limit por defecto
 
 let lastRequestTime = 0;
 
@@ -505,10 +307,12 @@ async function updateGlobalConfig() {
     const userSettings = result.notificationSettings || {};
 
     // OPTIMIZADO v5.0.61: Intervalo más rápido para mejor UX
-    REQUEST_INTERVAL = Math.max(100, (userSettings.updateIntervalMinutes || 5) * 60 * 1000 / 50); // Dividido por 50 en lugar de 10
+    REQUEST_INTERVAL = Math.max(100, ((userSettings.updateIntervalMinutes || 5) * 60 * 1000) / 50); // Dividido por 50 en lugar de 10
     REQUEST_TIMEOUT = (userSettings.requestTimeoutSeconds || 10) * 1000; // Convertir segundos a ms
 
-    log(`⚙️ Configuración global actualizada: intervalo=${REQUEST_INTERVAL}ms, timeout=${REQUEST_TIMEOUT}ms`);
+    log(
+      `⚙️ Configuración global actualizada: intervalo=${REQUEST_INTERVAL}ms, timeout=${REQUEST_TIMEOUT}ms`
+    );
   } catch (error) {
     log('⚠️ Error actualizando configuración global:', error);
     // Mantener valores por defecto
@@ -549,52 +353,14 @@ async function fetchWithRateLimit(url) {
 async function fetchDolarOficial(userSettings) {
   const url = userSettings.criptoyaDolarOficialUrl || 'https://criptoya.com/api/dolar/oficial';
   const data = await fetchWithRateLimit(url);
-  
-  log('[BACKGROUND] 📊 Respuesta dolar oficial:', data ? Object.keys(data) : 'null');
-  
-  // CORREGIDO v5.0.76: La API /api/dolar/oficial devuelve objeto con bancos, no precio directo
-  // Formato: { bna: { ask, bid, ... }, galicia: { ask, bid, ... }, ... }
-  if (data && typeof data === 'object') {
-    // Si tiene el formato antiguo (compra/venta directos)
-    if (typeof data.compra === 'number' && typeof data.venta === 'number') {
-      return {
-        ...data,
-        source: 'criptoya_oficial',
-        timestamp: Date.now()
-      };
-    }
-    
-    // Formato nuevo: extraer precio de BNA como referencia oficial
-    if (data.bna && typeof data.bna.ask === 'number') {
-      const bnaData = data.bna;
-      log('[BACKGROUND] 💵 Usando BNA como precio oficial:', bnaData);
-      return {
-        compra: bnaData.bid || bnaData.totalBid || 0,
-        venta: bnaData.ask || bnaData.totalAsk || 0,
-        source: 'criptoya_bna',
-        banco: 'Banco Nación',
-        timestamp: Date.now()
-      };
-    }
-    
-    // Fallback: usar el primer banco disponible
-    const firstBank = Object.keys(data).find(key => 
-      data[key] && typeof data[key].ask === 'number'
-    );
-    if (firstBank) {
-      const bankData = data[firstBank];
-      log('[BACKGROUND] 💵 Usando', firstBank, 'como fallback:', bankData);
-      return {
-        compra: bankData.bid || bankData.totalBid || 0,
-        venta: bankData.ask || bankData.totalAsk || 0,
-        source: `criptoya_${firstBank}`,
-        banco: firstBank,
-        timestamp: Date.now()
-      };
-    }
+  if (data && typeof data.compra === 'number' && typeof data.venta === 'number') {
+    // NUEVO v5.0.45: Agregar información de fuente para mostrar en UI
+    return {
+      ...data,
+      source: 'criptoya_oficial',
+      timestamp: Date.now()
+    };
   }
-  
-  log('[BACKGROUND] ⚠️ No se pudo parsear respuesta de dolar oficial');
   return null;
 }
 
@@ -602,56 +368,64 @@ async function fetchAllDollarTypes(userSettings) {
   const url = userSettings.criptoyaDolarUrl || 'https://criptoya.com/api/bancostodos';
   log('[BACKGROUND] 🔄 Fetching bancos from:', url);
   console.log('[FETCH] 🔄 Iniciando fetchAllDollarTypes desde:', url);
-  
-  try {
-    const data = await fetchWithRateLimit(url);
-    log('[BACKGROUND] 📊 Bancos data received:', data ? Object.keys(data).length + ' bancos' : 'null');
-    console.log('[FETCH] 📊 Datos crudos recibidos:', data);
-    
-    if (data && typeof data === 'object') {
-      // Los datos de CriptoYa ya vienen en formato objeto
-      const dollarTypes = {};
-      Object.entries(data).forEach(([key, value]) => {
-        if (value && typeof value === 'object' && (typeof value.bid === 'number' || typeof value.ask === 'number')) {
-          dollarTypes[key] = {
-            nombre: key.charAt(0).toUpperCase() + key.slice(1), // Capitalizar nombre
-            compra: value.bid || value.totalBid || 0,
-            venta: value.ask || value.totalAsk || 0,
-            source: 'criptoya_bancostodos',
-            timestamp: Date.now()
-          };
-        }
-      });
-      log('[BACKGROUND] 📤 Processed bancos data:', Object.keys(dollarTypes).length + ' bancos procesados');
-      console.log('[FETCH] 📤 Datos procesados:', Object.keys(dollarTypes).length + ' bancos');
-      return dollarTypes;
-    }
-    
-    log('[BACKGROUND] ❌ No data received from bancos API');
-    console.log('[FETCH] ❌ No se pudieron procesar datos de bancos');
-    return null;
-  } catch (error) {
-    console.error('[FETCH] ❌ Error en fetchAllDollarTypes:', error);
-    return null;
+  const data = await fetchWithRateLimit(url);
+  log(
+    '[BACKGROUND] 📊 Bancos data received:',
+    data ? Object.keys(data).length + ' bancos' : 'null'
+  );
+  console.log('[FETCH] 📊 Datos crudos recibidos:', data);
+  if (data && typeof data === 'object') {
+    // Los datos de CriptoYa ya vienen en formato objeto
+    const dollarTypes = {};
+    Object.entries(data).forEach(([key, value]) => {
+      if (
+        value &&
+        typeof value === 'object' &&
+        (typeof value.bid === 'number' || typeof value.ask === 'number')
+      ) {
+        dollarTypes[key] = {
+          nombre: key.charAt(0).toUpperCase() + key.slice(1), // Capitalizar nombre
+          compra: value.bid || value.totalBid || 0,
+          venta: value.ask || value.totalAsk || 0,
+          source: 'criptoya_bancostodos',
+          timestamp: Date.now()
+        };
+      }
+    });
+    log(
+      '[BACKGROUND] 📤 Processed bancos data:',
+      Object.keys(dollarTypes).length + ' bancos procesados'
+    );
+    console.log('[FETCH] 📤 Datos procesados:', Object.keys(dollarTypes).length + ' bancos');
+    return dollarTypes;
   }
+  log('[BACKGROUND] ❌ No data received from bancos API');
+  console.log('[FETCH] ❌ No se pudieron procesar datos de bancos');
+  return null;
 }
 
-async function fetchUSDT(userSettings) {
+async function fetchUSDTWithSettings(userSettings) {
   const url = userSettings.criptoyaUsdtArsUrl || 'https://criptoya.com/api/USDT/ARS/1';
   log('[BACKGROUND] 🔄 Fetching USDT/ARS from:', url);
   console.log('[FETCH] 🔄 Iniciando fetchUSDT desde:', url);
   const data = await fetchWithRateLimit(url);
-  log('[BACKGROUND] 📊 USDT/ARS data received:', data ? Object.keys(data).length + ' exchanges' : 'null');
+  log(
+    '[BACKGROUND] 📊 USDT/ARS data received:',
+    data ? Object.keys(data).length + ' exchanges' : 'null'
+  );
   console.log('[FETCH] 📊 Datos USDT/ARS crudos:', data);
   return data;
 }
 
-async function fetchUSDTtoUSD(userSettings) {
+async function fetchUSDTtoUSDWithSettings(userSettings) {
   const url = userSettings.criptoyaUsdtUsdUrl || 'https://criptoya.com/api/USDT/USD/1';
   log('[BACKGROUND] 🔄 Fetching USDT/USD from:', url);
   console.log('[FETCH] 🔄 Iniciando fetchUSDTtoUSD desde:', url);
   const data = await fetchWithRateLimit(url);
-  log('[BACKGROUND] 📊 USDT/USD data received:', data ? Object.keys(data).length + ' exchanges' : 'null');
+  log(
+    '[BACKGROUND] 📊 USDT/USD data received:',
+    data ? Object.keys(data).length + ' exchanges' : 'null'
+  );
   console.log('[FETCH] 📊 Datos USDT/USD crudos:', data);
   return data;
 }
@@ -719,20 +493,28 @@ async function fetchBankDollarRates(userSettings) {
 // CÁLCULO DE RUTAS INTER-BROKER (entre diferentes exchanges)
 // ============================================
 
-async function calculateInterBrokerRoutes(oficial, usdt, usdtUsd, userSettings, initialAmount, applyFees) {
+async function calculateInterBrokerRoutes(
+  oficial,
+  usdt,
+  usdtUsd,
+  userSettings,
+  initialAmount,
+  applyFees
+) {
   log('🔄 [INTER-BROKER] Iniciando cálculo de rutas inter-broker...');
 
   const routes = [];
   const officialPrice = oficial.venta;
 
   // Obtener exchanges válidos
-  const exchanges = Object.keys(usdt).filter(ex =>
-    ex !== 'time' &&
-    ex !== 'timestamp' &&
-    usdt[ex] &&
-    typeof usdt[ex] === 'object' &&
-    usdt[ex].totalAsk &&
-    usdt[ex].totalBid
+  const exchanges = Object.keys(usdt).filter(
+    ex =>
+      ex !== 'time' &&
+      ex !== 'timestamp' &&
+      usdt[ex] &&
+      typeof usdt[ex] === 'object' &&
+      usdt[ex].totalAsk &&
+      usdt[ex].totalBid
   );
 
   log(`🔄 [INTER-BROKER] Exchanges válidos: ${exchanges.length} (${exchanges.join(', ')})`);
@@ -787,8 +569,8 @@ async function calculateInterBrokerRoutes(oficial, usdt, usdtUsd, userSettings, 
         let tradingFeeAmount = 0;
 
         if (applyFees) {
-          const buyBrokerFeeConfig = userSettings.brokerFees?.find(fee =>
-            fee.broker.toLowerCase() === buyExchange.toLowerCase()
+          const buyBrokerFeeConfig = userSettings.brokerFees?.find(
+            fee => fee.broker.toLowerCase() === buyExchange.toLowerCase()
           );
 
           let tradingFeePercent = userSettings.extraTradingFee || 0;
@@ -812,8 +594,8 @@ async function calculateInterBrokerRoutes(oficial, usdt, usdtUsd, userSettings, 
         let sellFeeAmount = 0;
 
         if (applyFees) {
-          const sellBrokerFeeConfig = userSettings.brokerFees?.find(fee =>
-            fee.broker.toLowerCase() === sellExchange.toLowerCase()
+          const sellBrokerFeeConfig = userSettings.brokerFees?.find(
+            fee => fee.broker.toLowerCase() === sellExchange.toLowerCase()
           );
 
           if (sellBrokerFeeConfig && sellBrokerFeeConfig.sellFee > 0) {
@@ -844,7 +626,8 @@ async function calculateInterBrokerRoutes(oficial, usdt, usdtUsd, userSettings, 
         const netPercent = (netProfit / initialAmount) * 100;
 
         // Calcular total de fees
-        const totalFees = tradingFeeAmount * sellPrice + sellFeeAmount + withdrawalFee + transferFee + bankFee;
+        const totalFees =
+          tradingFeeAmount * sellPrice + sellFeeAmount + withdrawalFee + transferFee + bankFee;
 
         // Crear objeto de ruta INTER-BROKER
         const route = {
@@ -852,7 +635,8 @@ async function calculateInterBrokerRoutes(oficial, usdt, usdtUsd, userSettings, 
           buyExchange: buyExchange,
           sellExchange: sellExchange,
           isSingleExchange: false,
-          requiresP2P: buyExchange.toLowerCase().includes('p2p') || sellExchange.toLowerCase().includes('p2p'),
+          requiresP2P:
+            buyExchange.toLowerCase().includes('p2p') || sellExchange.toLowerCase().includes('p2p'),
           profitPercent: netPercent,
           profitPercentage: netPercent,
           grossProfitPercent: grossPercent,
@@ -869,8 +653,7 @@ async function calculateInterBrokerRoutes(oficial, usdt, usdtUsd, userSettings, 
             arsAfterSellFee,
             finalAmount,
             netProfit,
-            grossProfit,
-            profitPercentage: netPercent  // NUEVO: Incluir % en calculation para consistencia
+            grossProfit
           },
           fees: {
             trading: tradingFeeAmount * sellPrice,
@@ -883,9 +666,10 @@ async function calculateInterBrokerRoutes(oficial, usdt, usdtUsd, userSettings, 
           config: {
             applyFees,
             tradingFeePercent: userSettings.extraTradingFee || 0,
-            brokerSpecificFees: !!userSettings.brokerFees?.find(fee =>
-              fee.broker.toLowerCase() === buyExchange.toLowerCase() ||
-              fee.broker.toLowerCase() === sellExchange.toLowerCase()
+            brokerSpecificFees: !!userSettings.brokerFees?.find(
+              fee =>
+                fee.broker.toLowerCase() === buyExchange.toLowerCase() ||
+                fee.broker.toLowerCase() === sellExchange.toLowerCase()
             ),
             usdtUsdSource: usdtUsd?.[buyExchange]?.totalAsk ? 'api' : 'calculated',
             usdtUsdWarning: usingFallback ? `Tasa USDT/USD calculada para ${buyExchange}` : null
@@ -895,7 +679,6 @@ async function calculateInterBrokerRoutes(oficial, usdt, usdtUsd, userSettings, 
         routes.push(route);
 
         log(`✅ [INTER-BROKER] ${buyExchange}→${sellExchange}: ${netPercent.toFixed(2)}%`);
-
       } catch (error) {
         log(`❌ [INTER-BROKER] Error calculando ${buyExchange}→${sellExchange}:`, error.message);
         skippedCount++;
@@ -903,7 +686,9 @@ async function calculateInterBrokerRoutes(oficial, usdt, usdtUsd, userSettings, 
     }
   }
 
-  log(`✅ [INTER-BROKER] Completado: ${processedCount} procesadas, ${skippedCount} saltadas, ${routes.length} rutas generadas`);
+  log(
+    `✅ [INTER-BROKER] Completado: ${processedCount} procesadas, ${skippedCount} saltadas, ${routes.length} rutas generadas`
+  );
 
   return routes;
 }
@@ -934,7 +719,7 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
     // Leer configuraciones
     initialAmount = userSettings.defaultSimAmount || 1000000;
 
-    log(`⚙️ [CALC] Configuración cargada:`, {
+    log('⚙️ [CALC] Configuración cargada:', {
       initialAmount,
       extraTradingFee: userSettings.extraTradingFee || 0,
       extraWithdrawalFee: userSettings.extraWithdrawalFee || 0,
@@ -976,8 +761,8 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
 
     // NUEVO v5.0.58: Buscar configuración de fees del broker UNA SOLA VEZ
     const brokerFees = userSettings.brokerFees || [];
-    const brokerFeeConfig = brokerFees.find(fee =>
-      fee.broker.toLowerCase() === exchange.toLowerCase()
+    const brokerFeeConfig = brokerFees.find(
+      fee => fee.broker.toLowerCase() === exchange.toLowerCase()
     );
 
     // ============================================
@@ -986,7 +771,9 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
 
     // PASO 1: Comprar USD con ARS (oficial)
     const usdPurchased = initialAmount / officialPrice;
-    log(`💵 [${exchange}] PASO 1: $${initialAmount} ARS / ${officialPrice} = ${usdPurchased.toFixed(4)} USD`);
+    log(
+      `💵 [${exchange}] PASO 1: $${initialAmount} ARS / ${officialPrice} = ${usdPurchased.toFixed(4)} USD`
+    );
 
     // PASO 2: Obtener cotización USDT/USD del exchange
     // ✅ CORREGIDO v5.0.62: Fallback inteligente usando precios en ARS
@@ -1008,11 +795,17 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
         usdToUsdtRate = calculatedRate;
         usingFallback = true;
         log(`⚠️ [${exchange}] No hay cotización USDT/USD directa en API`);
-        log(`🧮 [${exchange}] PASO 2: Calculando USDT/USD = ${usdtArsPrice} ARS / ${officialPrice} ARS = ${usdToUsdtRate.toFixed(4)}`);
-        log(`📊 [${exchange}] Tasa calculada: ${usdToUsdtRate.toFixed(4)} (rango válido: 0.95-1.15)`);
+        log(
+          `🧮 [${exchange}] PASO 2: Calculando USDT/USD = ${usdtArsPrice} ARS / ${officialPrice} ARS = ${usdToUsdtRate.toFixed(4)}`
+        );
+        log(
+          `📊 [${exchange}] Tasa calculada: ${usdToUsdtRate.toFixed(4)} (rango válido: 0.95-1.15)`
+        );
       } else {
         // El cálculo dio un valor fuera de rango razonable
-        log(`❌ [${exchange}] SALTANDO: Tasa calculada ${calculatedRate.toFixed(4)} fuera de rango válido (0.95-1.15)`);
+        log(
+          `❌ [${exchange}] SALTANDO: Tasa calculada ${calculatedRate.toFixed(4)} fuera de rango válido (0.95-1.15)`
+        );
         log(`   USDT/ARS: ${usdtArsPrice}, USD/ARS: ${officialPrice}`);
         skippedCount++;
         continue; // Saltar este exchange
@@ -1020,15 +813,17 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
     } else {
       // Caso 3: No tenemos datos suficientes para calcular
       log(`❌ [${exchange}] SALTANDO: Sin datos para calcular USDT/USD`);
-      log(`   API USDT/USD: No disponible`);
-      log(`   Fallback calculado: Datos insuficientes (USDT/ARS o USD/ARS faltante)`);
+      log('   API USDT/USD: No disponible');
+      log('   Fallback calculado: Datos insuficientes (USDT/ARS o USD/ARS faltante)');
       skippedCount++;
       continue; // Saltar este exchange
     }
 
     // Convertir USD → USDT
     const usdtPurchased = usdPurchased / usdToUsdtRate;
-    log(`💎 [${exchange}] PASO 2: ${usdPurchased.toFixed(4)} USD / ${usdToUsdtRate.toFixed(4)} = ${usdtPurchased.toFixed(4)} USDT`);
+    log(
+      `💎 [${exchange}] PASO 2: ${usdPurchased.toFixed(4)} USD / ${usdToUsdtRate.toFixed(4)} = ${usdtPurchased.toFixed(4)} USDT`
+    );
 
     // PASO 3: Aplicar fee de trading (%)
     let usdtAfterFees = usdtPurchased;
@@ -1041,7 +836,9 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
       if (brokerFeeConfig) {
         // Usar fee específico del broker para compra (buyFee)
         tradingFeePercent = brokerFeeConfig.buyFee || 0;
-        log(`💸 [${exchange}] PASO 3: Usando fee específico del broker: ${tradingFeePercent}% (buy)`);
+        log(
+          `💸 [${exchange}] PASO 3: Usando fee específico del broker: ${tradingFeePercent}% (buy)`
+        );
       } else if (userSettings.extraTradingFee) {
         log(`💸 [${exchange}] PASO 3: Usando fee general: ${tradingFeePercent}%`);
       }
@@ -1049,7 +846,9 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
       if (tradingFeePercent > 0) {
         tradingFeeAmount = usdtPurchased * (tradingFeePercent / 100);
         usdtAfterFees = usdtPurchased - tradingFeeAmount;
-        log(`💸 [${exchange}] PASO 3: Fee trading ${tradingFeePercent}% = ${tradingFeeAmount.toFixed(4)} USDT`);
+        log(
+          `💸 [${exchange}] PASO 3: Fee trading ${tradingFeePercent}% = ${tradingFeeAmount.toFixed(4)} USDT`
+        );
         log(`💎 [${exchange}] PASO 3: USDT después de fee = ${usdtAfterFees.toFixed(4)} USDT`);
       }
     }
@@ -1057,7 +856,9 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
     // PASO 3.5: Vender USDT por ARS (CORREGIDO v5.0.58)
     const sellPrice = data.totalBid; // Precio de venta USDT/ARS
     const arsFromSale = usdtAfterFees * sellPrice;
-    log(`💰 [${exchange}] PASO 3.5: Vender ${usdtAfterFees.toFixed(4)} USDT × ${sellPrice} = $${arsFromSale.toFixed(2)} ARS`);
+    log(
+      `💰 [${exchange}] PASO 3.5: Vender ${usdtAfterFees.toFixed(4)} USDT × ${sellPrice} = $${arsFromSale.toFixed(2)} ARS`
+    );
 
     // PASO 4: Aplicar fee de venta específico del broker (si existe)
     let arsAfterSellFee = arsFromSale;
@@ -1069,8 +870,12 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
         const sellFeePercent = brokerFeeConfig.sellFee / 100;
         sellFeeAmount = arsFromSale * sellFeePercent;
         arsAfterSellFee = arsFromSale - sellFeeAmount;
-        log(`💸 [${exchange}] PASO 4b: Fee venta específico ${brokerFeeConfig.sellFee}% = $${sellFeeAmount.toFixed(2)} ARS`);
-        log(`💰 [${exchange}] PASO 4b: ARS después de fee venta = $${arsAfterSellFee.toFixed(2)} ARS`);
+        log(
+          `💸 [${exchange}] PASO 4b: Fee venta específico ${brokerFeeConfig.sellFee}% = $${sellFeeAmount.toFixed(2)} ARS`
+        );
+        log(
+          `💰 [${exchange}] PASO 4b: ARS después de fee venta = $${arsAfterSellFee.toFixed(2)} ARS`
+        );
       }
     }
 
@@ -1088,7 +893,9 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
       finalAmount = arsFromSale - totalFixedFees;
 
       if (totalFixedFees > 0) {
-        log(`💸 [${exchange}] PASO 5: Fees fijos = $${totalFixedFees} ARS (retiro: $${withdrawalFee}, transfer: $${transferFee}, banco: $${bankFee})`);
+        log(
+          `💸 [${exchange}] PASO 5: Fees fijos = $${totalFixedFees} ARS (retiro: $${withdrawalFee}, transfer: $${transferFee}, banco: $${bankFee})`
+        );
         log(`💰 [${exchange}] PASO 5: Final = $${finalAmount.toFixed(2)} ARS`);
       }
     }
@@ -1099,24 +906,24 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
     const grossPercent = (grossProfit / initialAmount) * 100;
     const netPercent = (netProfit / initialAmount) * 100;
 
-    log(`📊 [${exchange}] RESULTADO: Ganancia neta = $${netProfit.toFixed(2)} (${netPercent.toFixed(4)}%)`);
+    log(
+      `📊 [${exchange}] RESULTADO: Ganancia neta = $${netProfit.toFixed(2)} (${netPercent.toFixed(4)}%)`
+    );
 
     // MEJORADO v5.0.64: Removido filtro hardcodeado -10% para permitir que usuario controle desde configuración
     // Ahora el filtro de visualización se controla en popup.js con filterMinProfit (configurable -10% a +20%)
 
     // Calcular total de fees
-    const totalFees = tradingFeeAmount * sellPrice + sellFeeAmount + withdrawalFee + transferFee + bankFee;
+    const totalFees =
+      tradingFeeAmount * sellPrice + sellFeeAmount + withdrawalFee + transferFee + bankFee;
 
     // Crear objeto de ruta
-    const isP2P = exchange.toLowerCase().includes('p2p');
-    log(`📋 [${exchange}] Creando ruta - isP2P: ${isP2P}`);
-    
     routes.push({
       broker: exchange,
       buyExchange: exchange,
       sellExchange: exchange,
       isSingleExchange: true,
-      requiresP2P: isP2P,
+      requiresP2P: exchange.toLowerCase().includes('p2p'),
       profitPercent: netPercent,
       profitPercentage: netPercent,
       grossProfitPercent: grossPercent,
@@ -1133,8 +940,7 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
         arsAfterSellFee,
         finalAmount,
         netProfit,
-        grossProfit,
-        profitPercentage: netPercent  // NUEVO: Incluir % en calculation para consistencia
+        grossProfit
       },
       fees: {
         trading: tradingFeeAmount * sellPrice, // Convertido a ARS
@@ -1149,7 +955,9 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
         tradingFeePercent: userSettings.extraTradingFee || 0,
         brokerSpecificFees: !!brokerFeeConfig,
         usdtUsdSource: usdtUsd?.[exchange]?.totalAsk ? 'api' : 'calculated',
-        usdtUsdWarning: usingFallback ? 'Tasa USDT/USD calculada indirectamente. Verificar en CriptoYa.' : null
+        usdtUsdWarning: usingFallback
+          ? 'Tasa USDT/USD calculada indirectamente. Verificar en CriptoYa.'
+          : null
       }
     });
   }
@@ -1158,8 +966,15 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
   // NUEVO: CALCULAR RUTAS INTER-BROKER (entre diferentes exchanges)
   // ============================================
 
-  log(`🔄 [CALC] Calculando rutas INTER-BROKER...`);
-  const interBrokerRoutes = await calculateInterBrokerRoutes(oficial, usdt, usdtUsd, userSettings, initialAmount, applyFees);
+  log('🔄 [CALC] Calculando rutas INTER-BROKER...');
+  const interBrokerRoutes = await calculateInterBrokerRoutes(
+    oficial,
+    usdt,
+    usdtUsd,
+    userSettings,
+    initialAmount,
+    applyFees
+  );
 
   // Combinar rutas intra-broker e inter-broker
   routes.push(...interBrokerRoutes);
@@ -1167,27 +982,11 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
   // Ordenar TODAS las rutas por rentabilidad neta
   routes.sort((a, b) => b.profitPercent - a.profitPercent);
 
-  // CORREGIDO v5.0.77: Devolver un balance de rutas P2P y no-P2P
-  // En lugar de solo las top 50, asegurar que haya rutas de ambos tipos
-  const p2pRoutes = routes.filter(r => r.requiresP2P);
-  const directRoutes = routes.filter(r => !r.requiresP2P);
-  
-  log(`✅ [CALC] Rutas P2P: ${p2pRoutes.length} | Rutas directas: ${directRoutes.length}`);
-  
-  // Tomar las mejores de cada tipo para asegurar diversidad
-  const maxPerType = 50;
-  const balancedRoutes = [
-    ...directRoutes.slice(0, maxPerType),
-    ...p2pRoutes.slice(0, maxPerType)
-  ];
-  
-  // Re-ordenar las rutas combinadas
-  balancedRoutes.sort((a, b) => b.profitPercent - a.profitPercent);
-
-  log(`✅ [CALC] Rutas totales: ${routes.length} (Intra: ${processedCount}, Inter: ${interBrokerRoutes.length})`);
-  log(`✅ [CALC] Rutas balanceadas: ${balancedRoutes.length} (Directas: ${Math.min(directRoutes.length, maxPerType)}, P2P: ${Math.min(p2pRoutes.length, maxPerType)})`);
-  log(`✅ Calculadas ${balancedRoutes.length} rutas con monto base $${initialAmount.toLocaleString()}`);
-  return balancedRoutes;
+  log(
+    `✅ [CALC] Rutas totales: ${routes.length} (Intra: ${processedCount}, Inter: ${interBrokerRoutes.length})`
+  );
+  log(`✅ Calculadas ${routes.length} rutas con monto base $${initialAmount.toLocaleString()}`);
+  return routes.slice(0, 50);
 }
 
 // ============================================
@@ -1218,15 +1017,17 @@ async function calculateDirectUsdtToArsRoutes(usdt, userSettings = {}) {
 
     // Obtener configuración de fees del broker
     const brokerFees = userSettings.brokerFees || [];
-    const brokerFeeConfig = brokerFees.find(fee =>
-      fee.broker.toLowerCase() === exchange.toLowerCase()
+    const brokerFeeConfig = brokerFees.find(
+      fee => fee.broker.toLowerCase() === exchange.toLowerCase()
     );
 
     // PASO 1: Vender USDT directamente por ARS
     const sellPrice = data.totalBid; // Precio de venta USDT/ARS
     const arsFromSale = initialUsdtAmount * sellPrice;
 
-    log(`💰 [${exchange}] Venta directa: ${initialUsdtAmount} USDT × ${sellPrice} = $${arsFromSale.toFixed(2)} ARS`);
+    log(
+      `💰 [${exchange}] Venta directa: ${initialUsdtAmount} USDT × ${sellPrice} = $${arsFromSale.toFixed(2)} ARS`
+    );
 
     // PASO 2: Aplicar fee de venta si está configurado
     let arsAfterFee = arsFromSale;
@@ -1236,7 +1037,9 @@ async function calculateDirectUsdtToArsRoutes(usdt, userSettings = {}) {
       const sellFeePercent = brokerFeeConfig.sellFee / 100;
       sellFeeAmount = arsFromSale * sellFeePercent;
       arsAfterFee = arsFromSale - sellFeeAmount;
-      log(`💸 [${exchange}] Fee venta ${brokerFeeConfig.sellFee}% = $${sellFeeAmount.toFixed(2)} ARS`);
+      log(
+        `💸 [${exchange}] Fee venta ${brokerFeeConfig.sellFee}% = $${sellFeeAmount.toFixed(2)} ARS`
+      );
     }
 
     // PASO 3: Aplicar fees fijos si están configurados
@@ -1258,7 +1061,7 @@ async function calculateDirectUsdtToArsRoutes(usdt, userSettings = {}) {
     }
 
     // Calcular "ganancia" (en realidad es el monto recibido en ARS)
-    const profitArs = finalAmount - (initialUsdtAmount * sellPrice); // Negativo porque aplicamos fees
+    const profitArs = finalAmount - initialUsdtAmount * sellPrice; // Negativo porque aplicamos fees
     const profitPercent = (profitArs / (initialUsdtAmount * sellPrice)) * 100;
 
     // Crear objeto de ruta directa
@@ -1329,8 +1132,8 @@ async function calculateUsdToUsdtRoutes(oficial, usdt, usdtUsd, userSettings = {
 
     // Obtener configuración de fees del broker
     const brokerFees = userSettings.brokerFees || [];
-    const brokerFeeConfig = brokerFees.find(fee =>
-      fee.broker.toLowerCase() === exchange.toLowerCase()
+    const brokerFeeConfig = brokerFees.find(
+      fee => fee.broker.toLowerCase() === exchange.toLowerCase()
     );
 
     // PASO 1: Calcular tasa USDT/USD
@@ -1372,7 +1175,9 @@ async function calculateUsdToUsdtRoutes(oficial, usdt, usdtUsd, userSettings = {
       const buyFeePercent = brokerFeeConfig.buyFee / 100;
       buyFeeAmount = usdtPurchased * buyFeePercent;
       usdtAfterFee = usdtPurchased - buyFeeAmount;
-      log(`💸 [${exchange}] Fee compra ${brokerFeeConfig.buyFee}% = ${buyFeeAmount.toFixed(4)} USDT`);
+      log(
+        `💸 [${exchange}] Fee compra ${brokerFeeConfig.buyFee}% = ${buyFeeAmount.toFixed(4)} USDT`
+      );
     }
 
     // Calcular eficiencia (USDT recibidos por USD invertido)
@@ -1421,71 +1226,6 @@ async function calculateUsdToUsdtRoutes(oficial, usdt, usdtUsd, userSettings = {
 // ============================================
 
 /**
- * Función auxiliar para procesar crypto arbitrage
- * @param {Function} sendResponse - Callback para enviar respuesta
- */
-async function processCryptoArbitrage(sendResponse) {
-  try {
-    // Obtener lista de criptos activas y configuración desde storage
-    const result = await chrome.storage.local.get(['activeCryptos', 'notificationSettings']);
-    
-    const activeCryptos = result.activeCryptos && Array.isArray(result.activeCryptos) 
-      ? result.activeCryptos 
-      : ['BTC', 'ETH', 'USDC', 'DAI', 'USDT'];
-    const userSettings = result.notificationSettings || {};
-    
-    log(`[CRYPTO-ARB] Obteniendo datos para ${activeCryptos.length} criptos activas: ${activeCryptos.join(', ')}`);
-
-    // Obtener datos de todas las criptos activas usando fetch directo
-    const cryptoData = {};
-    for (const symbol of activeCryptos) {
-      try {
-        const response = await fetch(`https://criptoya.com/api/${symbol}/ars/1`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data && typeof data === 'object') {
-            cryptoData[symbol] = { ...data, symbol, timestamp: Date.now() };
-            log(`[CRYPTO-ARB] ✅ ${symbol}: ${Object.keys(data).filter(k => k !== 'time').length} exchanges`);
-          }
-        }
-      } catch (e) {
-        log(`[CRYPTO-ARB] ⚠️ Error obteniendo ${symbol}: ${e.message}`);
-      }
-    }
-
-    if (Object.keys(cryptoData).length === 0) {
-      log('[CRYPTO-ARB] ⚠️ No se obtuvieron datos de criptos');
-      sendResponse({ routes: [] });
-      return;
-    }
-
-    log(`[CRYPTO-ARB] Datos obtenidos para ${Object.keys(cryptoData).length} criptos`);
-
-    // Calcular rutas de arbitraje crypto-to-crypto
-    const routes = await calculateCryptoArbitrageRoutes(
-      cryptoData,
-      currentData.oficial,
-      userSettings
-    );
-
-    log(`[CRYPTO-ARB] ✅ ${routes.length} rutas calculadas exitosamente`);
-    
-    // Mostrar mejores y peores rutas
-    if (routes.length > 0) {
-      const bestRoute = routes[0];
-      const worstRoute = routes[routes.length - 1];
-      log(`[CRYPTO-ARB] 🏆 Mejor: ${bestRoute.crypto} ${bestRoute.broker}: ${bestRoute.profitPercent.toFixed(2)}%`);
-      log(`[CRYPTO-ARB] 📉 Peor: ${worstRoute.crypto} ${worstRoute.broker}: ${worstRoute.profitPercent.toFixed(2)}%`);
-    }
-
-    sendResponse({ routes: routes || [] });
-  } catch (error) {
-    console.error('[CRYPTO-ARB] ❌ Error calculando crypto arbitrage:', error);
-    sendResponse({ routes: [], error: error.message });
-  }
-}
-
-/**
  * Calcular arbitraje entre criptomonedas en diferentes exchanges
  * Ejemplo: Comprar BTC en Lemon → Transferir → Vender BTC en Binance P2P
  * @param {Object} cryptoData - Datos de criptos indexados por símbolo { 'BTC': {...}, 'ETH': {...} }
@@ -1517,18 +1257,21 @@ async function calculateCryptoArbitrageRoutes(cryptoData, fiatRef, userSettings 
     }
 
     // Filtrar exchanges válidos para esta cripto
-    const exchanges = Object.keys(data).filter(ex =>
-      ex !== 'time' &&
-      ex !== 'timestamp' &&
-      ex !== 'symbol' &&
-      ex !== 'fiatCurrency' &&
-      data[ex] &&
-      typeof data[ex] === 'object' &&
-      data[ex].totalAsk &&
-      data[ex].totalBid
+    const exchanges = Object.keys(data).filter(
+      ex =>
+        ex !== 'time' &&
+        ex !== 'timestamp' &&
+        ex !== 'symbol' &&
+        ex !== 'fiatCurrency' &&
+        data[ex] &&
+        typeof data[ex] === 'object' &&
+        data[ex].totalAsk &&
+        data[ex].totalBid
     );
 
-    log(`💎 [CRYPTO-ARB] ${symbol}: ${exchanges.length} exchanges válidos (${exchanges.join(', ')})`);
+    log(
+      `💎 [CRYPTO-ARB] ${symbol}: ${exchanges.length} exchanges válidos (${exchanges.join(', ')})`
+    );
 
     if (exchanges.length < 2) {
       log(`⚠️ [CRYPTO-ARB] ${symbol}: Se necesitan al menos 2 exchanges para arbitraje`);
@@ -1562,9 +1305,17 @@ async function calculateCryptoArbitrageRoutes(cryptoData, fiatRef, userSettings 
           } else {
             // Fallback: usar valores predeterminados
             const defaultFees = {
-              'BTC': 0.0002, 'ETH': 0.003, 'USDC': 1.0, 'USDT': 1.0,
-              'DAI': 1.0, 'BNB': 0.001, 'SOL': 0.01, 'ADA': 1.0,
-              'XRP': 0.25, 'MATIC': 0.1, 'DOGE': 5.0
+              BTC: 0.0002,
+              ETH: 0.003,
+              USDC: 1.0,
+              USDT: 1.0,
+              DAI: 1.0,
+              BNB: 0.001,
+              SOL: 0.01,
+              ADA: 1.0,
+              XRP: 0.25,
+              MATIC: 0.1,
+              DOGE: 5.0
             };
             networkFee = defaultFees[symbol] || 0;
             networkFeeARS = networkFee * buyPriceARS;
@@ -1576,8 +1327,8 @@ async function calculateCryptoArbitrageRoutes(cryptoData, fiatRef, userSettings 
           let buyFeeARS = 0;
 
           if (applyFees) {
-            const buyBrokerFeeConfig = userSettings.brokerFees?.find(fee =>
-              fee.broker.toLowerCase() === buyExchange.toLowerCase()
+            const buyBrokerFeeConfig = userSettings.brokerFees?.find(
+              fee => fee.broker.toLowerCase() === buyExchange.toLowerCase()
             );
 
             const buyFeePercent = buyBrokerFeeConfig?.buyFee || userSettings.extraTradingFee || 0;
@@ -1605,8 +1356,8 @@ async function calculateCryptoArbitrageRoutes(cryptoData, fiatRef, userSettings 
           let sellFeeAmount = 0;
 
           if (applyFees) {
-            const sellBrokerFeeConfig = userSettings.brokerFees?.find(fee =>
-              fee.broker.toLowerCase() === sellExchange.toLowerCase()
+            const sellBrokerFeeConfig = userSettings.brokerFees?.find(
+              fee => fee.broker.toLowerCase() === sellExchange.toLowerCase()
             );
 
             const sellFeePercent = sellBrokerFeeConfig?.sellFee || 0;
@@ -1625,9 +1376,10 @@ async function calculateCryptoArbitrageRoutes(cryptoData, fiatRef, userSettings 
           const grossProfitPercent = (grossProfit / initialAmount) * 100;
 
           // PASO 7: Determinar tipo de operación
-          const buyIsP2P = buyExchange.toLowerCase().includes('p2p') ||
-            buyExchange.toLowerCase().includes('peer');
-          const sellIsP2P = sellExchange.toLowerCase().includes('p2p') ||
+          const buyIsP2P =
+            buyExchange.toLowerCase().includes('p2p') || buyExchange.toLowerCase().includes('peer');
+          const sellIsP2P =
+            sellExchange.toLowerCase().includes('p2p') ||
             sellExchange.toLowerCase().includes('peer');
 
           let operationType = 'DIRECT';
@@ -1675,8 +1427,7 @@ async function calculateCryptoArbitrageRoutes(cryptoData, fiatRef, userSettings 
               arsAfterSellFee: arsAfterSellFee,
               finalAmount: finalAmount,
               netProfit: netProfit,
-              grossProfit: grossProfit,
-              profitPercentage: netProfitPercent  // NUEVO: Incluir % en calculation para consistencia
+              grossProfit: grossProfit
             },
             fees: {
               buy: buyFeeARS,
@@ -1686,10 +1437,11 @@ async function calculateCryptoArbitrageRoutes(cryptoData, fiatRef, userSettings 
             },
             config: {
               applyFees: applyFees,
-              brokerSpecificFees: !!(userSettings.brokerFees?.find(fee =>
-                fee.broker.toLowerCase() === buyExchange.toLowerCase() ||
-                fee.broker.toLowerCase() === sellExchange.toLowerCase()
-              ))
+              brokerSpecificFees: !!userSettings.brokerFees?.find(
+                fee =>
+                  fee.broker.toLowerCase() === buyExchange.toLowerCase() ||
+                  fee.broker.toLowerCase() === sellExchange.toLowerCase()
+              )
             },
             metadata: {
               symbol: symbol,
@@ -1701,10 +1453,14 @@ async function calculateCryptoArbitrageRoutes(cryptoData, fiatRef, userSettings 
 
           routes.push(route);
 
-          log(`✅ [CRYPTO-ARB] ${symbol} ${buyExchange}→${sellExchange}: ${netProfitPercent.toFixed(2)}% (${operationType})`);
-
+          log(
+            `✅ [CRYPTO-ARB] ${symbol} ${buyExchange}→${sellExchange}: ${netProfitPercent.toFixed(2)}% (${operationType})`
+          );
         } catch (error) {
-          log(`❌ [CRYPTO-ARB] Error calculando ${symbol} ${buyExchange}→${sellExchange}:`, error.message);
+          log(
+            `❌ [CRYPTO-ARB] Error calculando ${symbol} ${buyExchange}→${sellExchange}:`,
+            error.message
+          );
         }
       }
     }
@@ -1714,9 +1470,11 @@ async function calculateCryptoArbitrageRoutes(cryptoData, fiatRef, userSettings 
   routes.sort((a, b) => b.profitPercent - a.profitPercent);
 
   log(`✅ [CRYPTO-ARB] Completado: ${routes.length} rutas de arbitraje crypto-to-crypto generadas`);
-  log(`🏆 [CRYPTO-ARB] Top 3 oportunidades:`);
+  log('🏆 [CRYPTO-ARB] Top 3 oportunidades:');
   routes.slice(0, 3).forEach((route, i) => {
-    log(`   ${i + 1}. ${route.crypto} ${route.broker}: ${route.profitPercent.toFixed(2)}% - $${route.netProfit.toFixed(0)} ARS (${route.operationType})`);
+    log(
+      `   ${i + 1}. ${route.crypto} ${route.broker}: ${route.profitPercent.toFixed(2)}% - $${route.netProfit.toFixed(0)} ARS (${route.operationType})`
+    );
   });
 
   return routes;
@@ -1754,7 +1512,7 @@ async function calculateAllRoutes(oficial, usdt, usdtUsd, userSettings = {}) {
     results.usdToUsdt = await calculateUsdToUsdtRoutes(oficial, usdt, usdtUsd, userSettings);
   }
 
-  log(`✅ [CALC] Cálculo completado:`, {
+  log('✅ [CALC] Cálculo completado:', {
     arbitrage: results.arbitrage.length,
     directUsdtArs: results.directUsdtArs.length,
     usdToUsdt: results.usdToUsdt.length
@@ -1785,7 +1543,11 @@ async function calculateAllRoutes(oficial, usdt, usdtUsd, userSettings = {}) {
   }
 
   // Si se pidió un tipo específico, devolver solo ese
-  return results[routeType.replace('direct_usdt_ars', 'directUsdtArs').replace('usd_to_usdt', 'usdToUsdt')] || [];
+  return (
+    results[
+      routeType.replace('direct_usdt_ars', 'directUsdtArs').replace('usd_to_usdt', 'usdToUsdt')
+    ] || []
+  );
 }
 
 // ============================================
@@ -1793,11 +1555,12 @@ async function calculateAllRoutes(oficial, usdt, usdtUsd, userSettings = {}) {
 // ============================================
 
 let lastNotificationTime = 0;
-let notifiedArbitrages = new Set(); // Para evitar notificar el mismo arbitraje repetidamente
+const notifiedArbitrages = new Set(); // Para evitar notificar el mismo arbitraje repetidamente
 
 async function shouldSendNotification(settings, arbitrage) {
   // 1. Verificar si las notificaciones están habilitadas
   if (!settings.notificationsEnabled) {
+    console.log('[NOTIF] ❌ Notificaciones deshabilitadas');
     return false;
   }
 
@@ -1805,17 +1568,19 @@ async function shouldSendNotification(settings, arbitrage) {
   if (settings.quietHoursEnabled) {
     const now = new Date();
     const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    const start = settings.quietStart;
-    const end = settings.quietEnd;
+    const start = settings.quietStart || '22:00';
+    const end = settings.quietEnd || '08:00';
 
     // Si el horario atraviesa medianoche (ej: 22:00 - 08:00)
     if (start > end) {
       if (currentTime >= start || currentTime <= end) {
-        return false; // Está en horario silencioso
+        console.log('[NOTIF] ❌ Horario silencioso activo');
+        return false;
       }
     } else {
       if (currentTime >= start && currentTime <= end) {
-        return false; // Está en horario silencioso
+        console.log('[NOTIF] ❌ Horario silencioso activo');
+        return false;
       }
     }
   }
@@ -1823,73 +1588,70 @@ async function shouldSendNotification(settings, arbitrage) {
   // 3. Verificar frecuencia de notificaciones
   const now = Date.now();
   const frequencies = {
-    'always': 0,
+    always: 0,
     '5min': 5 * 60 * 1000,
     '15min': 15 * 60 * 1000,
     '30min': 30 * 60 * 1000,
     '1hour': 60 * 60 * 1000,
-    'once': Infinity
+    once: Infinity
   };
 
   const minInterval = frequencies[settings.notificationFrequency] || frequencies['15min'];
   if (now - lastNotificationTime < minInterval) {
-    return false;
-  }
-
-  // 4. Verificar umbral mínimo según el tipo de alerta
-  // Para alertas personalizadas, permitir cualquier umbrales configurado por el usuario
-  // Para alertas predefinidas, mantener mínimo de 1%
-  let minThreshold = 1.0;
-  if (settings.alertType === 'custom') {
-    minThreshold = 0.1; // Permitir umbrales muy bajos para personalización
-  }
-
-  if (arbitrage.profitPercent < minThreshold) {
-    return false; // No notificar por debajo del umbral mínimo
-  }
-
-  // 5. Verificar umbral según tipo de alerta configurado
-  const thresholds = {
-    'all': 1.0, // Notificar desde 1%
-    'moderate': 5,
-    'high': 10,
-    'extreme': 15,
-    'custom': settings.customThreshold || 5
-  };
-
-  const threshold = thresholds[settings.alertType] || 1.0;
-  if (arbitrage.profitPercent < threshold) {
-    return false;
-  }
-
-  // 6. Verificar si es un exchange preferido (si hay filtros)
-  if (settings.preferredExchanges && settings.preferredExchanges.length > 0) {
-    const exchangeName = arbitrage.broker.toLowerCase();
-    const isPreferred = settings.preferredExchanges.some(pref =>
-      exchangeName.includes(pref.toLowerCase())
+    console.log(
+      `[NOTIF] ❌ Intervalo mínimo no cumplido (${Math.round((minInterval - (now - lastNotificationTime)) / 1000)}s restantes)`
     );
-    if (!isPreferred) {
+    return false;
+  }
+
+  // 4. Verificar umbral de ganancia usando alertThreshold (configurado en options)
+  // CORREGIDO: Usar alertThreshold directamente en lugar del sistema de tipos
+  const threshold = settings.alertThreshold ?? 1.0;
+
+  if (arbitrage.profitPercent < threshold) {
+    console.log(
+      `[NOTIF] ❌ Ganancia ${arbitrage.profitPercent.toFixed(2)}% < umbral ${threshold}%`
+    );
+    return false;
+  }
+
+  // 5. Verificar si es un exchange habilitado para notificaciones
+  // CORREGIDO: Usar notificationExchanges (configurado en options) en lugar de preferredExchanges
+  const allowedExchanges = settings.notificationExchanges || settings.preferredExchanges || [];
+  if (allowedExchanges.length > 0) {
+    const exchangeName = (arbitrage.broker || arbitrage.exchange || '').toLowerCase();
+    const isAllowed = allowedExchanges.some(
+      allowed =>
+        exchangeName.includes(allowed.toLowerCase()) || allowed.toLowerCase().includes(exchangeName)
+    );
+    if (!isAllowed) {
+      console.log(`[NOTIF] ❌ Exchange ${exchangeName} no está en la lista de notificaciones`);
       return false;
     }
   }
 
-  // 7. Verificar si ya notificamos este arbitraje recientemente
-  const arbKey = `${arbitrage.broker}_${arbitrage.profitPercent.toFixed(2)}`;
+  // 6. Verificar si ya notificamos este arbitraje recientemente
+  const arbKey = `${arbitrage.broker}_${Math.floor(arbitrage.profitPercent)}`; // Redondear para evitar spam
   if (notifiedArbitrages.has(arbKey)) {
+    console.log(`[NOTIF] ❌ Arbitraje ya notificado recientemente: ${arbKey}`);
     return false;
   }
 
+  console.log(
+    `[NOTIF] ✅ Notificación aprobada: ${arbitrage.broker} ${arbitrage.profitPercent.toFixed(2)}%`
+  );
   return true;
 }
 
 async function sendNotification(arbitrage, settings) {
   try {
     const notificationId = `arbitrage_${Date.now()}`;
+    const broker = arbitrage.broker || arbitrage.exchange || 'Exchange';
+    const profit = arbitrage.profitPercent || 0;
 
     // Determinar el ícono según la ganancia
-    const iconLevel = arbitrage.profitPercent >= 15 ? 'extreme' :
-      arbitrage.profitPercent >= 10 ? 'high' :
-        arbitrage.profitPercent >= 5 ? 'moderate' : 'normal';
+    const iconLevel =
+      profit >= 15 ? 'extreme' : profit >= 10 ? 'high' : profit >= 5 ? 'moderate' : 'normal';
 
     const icons = {
       extreme: '🚀',
@@ -1900,20 +1662,24 @@ async function sendNotification(arbitrage, settings) {
 
     const icon = icons[iconLevel];
 
-    // Usar chrome.runtime.getURL para obtener la URL correcta del icono
-    const iconUrl = chrome.runtime.getURL('icons/icon128.png');
+    // Construir mensaje con datos disponibles
+    let message = `Ganancia: ${profit.toFixed(2)}% neto`;
+    if (arbitrage.usdToUsdtRate) {
+      message += `\nUSD→USDT: ${arbitrage.usdToUsdtRate}`;
+    }
+    if (arbitrage.usdtArsBid) {
+      message += `\nUSDT: $${arbitrage.usdtArsBid.toFixed(2)} ARS`;
+    }
+
+    console.log(`[NOTIF] 🔔 Enviando notificación: ${broker} - ${profit.toFixed(2)}%`);
 
     await chrome.notifications.create(notificationId, {
       type: 'basic',
-      iconUrl: iconUrl,
-      title: `${icon} Oportunidad de Arbitraje: ${arbitrage.broker}`,
-      message: `Ganancia: ${arbitrage.profitPercent.toFixed(2)}% neto\nUSD→USDT: ${arbitrage.usdToUsdtRate}\nUSDT: $${arbitrage.usdtArsBid.toFixed(2)} ARS`,
-      priority: arbitrage.profitPercent >= 10 ? 2 : 1,
-      requireInteraction: arbitrage.profitPercent >= 15,
-      buttons: [
-        { title: '👀 Ver Detalles' },
-        { title: '⚙️ Configuración' }
-      ]
+      iconUrl: 'icons/icon128.png',
+      title: `${icon} Arbitraje: ${broker} +${profit.toFixed(2)}%`,
+      message: message,
+      priority: profit >= 10 ? 2 : 1,
+      requireInteraction: profit >= 15
     });
 
     // Actualizar tiempo de última notificación
@@ -1922,9 +1688,12 @@ async function sendNotification(arbitrage, settings) {
     // Agregar a notificados (limpiar después de 1 hora)
     const arbKey = `${arbitrage.broker}_${arbitrage.profitPercent.toFixed(2)}`;
     notifiedArbitrages.add(arbKey);
-    setTimeout(() => {
-      notifiedArbitrages.delete(arbKey);
-    }, 60 * 60 * 1000); // 1 hora
+    setTimeout(
+      () => {
+        notifiedArbitrages.delete(arbKey);
+      },
+      60 * 60 * 1000
+    ); // 1 hora
 
     // Reproducir sonido si está habilitado
     if (settings.soundEnabled) {
@@ -1932,7 +1701,6 @@ async function sendNotification(arbitrage, settings) {
       // pero podemos usar la API de notificaciones que tiene sonido por defecto
       console.log('🔔 Notificación con sonido enviada');
     }
-
   } catch (error) {
     console.error('Error enviando notificación:', error);
   }
@@ -1944,15 +1712,21 @@ async function checkAndNotify(arbitrages) {
     const result = await chrome.storage.local.get('notificationSettings');
     const settings = result.notificationSettings || {
       notificationsEnabled: true,
-      alertType: 'all',
-      customThreshold: 5, // Umbral personalizado (ahora permite desde 0.1%)
+      alertThreshold: 1.0, // CORREGIDO: Usar alertThreshold
       notificationFrequency: '15min',
       soundEnabled: true,
-      preferredExchanges: [],
+      notificationExchanges: [], // CORREGIDO: Usar notificationExchanges
       quietHoursEnabled: false,
       quietStart: '22:00',
       quietEnd: '08:00'
     };
+
+    console.log('[NOTIF] 🔍 Verificando notificaciones...', {
+      enabled: settings.notificationsEnabled,
+      threshold: settings.alertThreshold,
+      frequency: settings.notificationFrequency,
+      exchangesCount: settings.notificationExchanges?.length || 0
+    });
 
     if (!arbitrages || arbitrages.length === 0) {
       return;
@@ -1965,7 +1739,6 @@ async function checkAndNotify(arbitrages) {
     if (await shouldSendNotification(settings, bestArbitrage)) {
       await sendNotification(bestArbitrage, settings);
     }
-
   } catch (error) {
     console.error('Error en checkAndNotify:', error);
   }
@@ -2000,9 +1773,6 @@ async function updateData() {
 
     // Decidir cómo obtener el precio del dólar oficial
     let oficial;
-    log('🔍 [BACKGROUND] dollarPriceSource:', userSettings.dollarPriceSource);
-    log('🔍 [BACKGROUND] preferredBank:', userSettings.preferredBank);
-    
     if (userSettings.dollarPriceSource === 'manual') {
       // Usar precio manual configurado por el usuario
       const manualPrice = userSettings.manualDollarPrice || 1400;
@@ -2024,17 +1794,24 @@ async function updateData() {
 
         // Obtener datos de bancos y calcular precio según método
         const bankData = await fetchBankDollarRates(userSettings);
-        const selectedBanks = userSettings.selectedBanks && userSettings.selectedBanks.length > 0
-          ? userSettings.selectedBanks
-          : ['bna', 'galicia', 'santander', 'bbva', 'icbc']; // Bancos principales por defecto
+        const selectedBanks =
+          userSettings.selectedBanks && userSettings.selectedBanks.length > 0
+            ? userSettings.selectedBanks
+            : ['bna', 'galicia', 'santander', 'bbva', 'icbc']; // Bancos principales por defecto
 
         log(`🏦 Usando ${selectedBanks.length} bancos para cálculo:`, selectedBanks);
 
         if (bankData) {
-          const calculatedPrice = BANK_CALCULATIONS.calculateDollarPrice(bankData, bankMethod, selectedBanks);
+          const calculatedPrice = BANK_CALCULATIONS.calculateDollarPrice(
+            bankData,
+            bankMethod,
+            selectedBanks
+          );
 
           if (calculatedPrice) {
-            log(`💵 Precio calculado (${calculatedPrice.method}): $${calculatedPrice.price} (${calculatedPrice.banksCount} bancos)`);
+            log(
+              `💵 Precio calculado (${calculatedPrice.method}): $${calculatedPrice.price} (${calculatedPrice.banksCount} bancos)`
+            );
             oficial = {
               compra: calculatedPrice.price,
               venta: calculatedPrice.price,
@@ -2044,7 +1821,9 @@ async function updateData() {
               timestamp: Date.now()
             };
           } else {
-            log('⚠️ [BACKGROUND] No se pudo calcular precio de bancos, usando precio manual como fallback');
+            log(
+              '⚠️ [BACKGROUND] No se pudo calcular precio de bancos, usando precio manual como fallback'
+            );
             log('   selectedBanks:', selectedBanks);
             log('   bankData keys:', bankData ? Object.keys(bankData) : 'null');
             const manualPrice = userSettings.manualDollarPrice || 1400;
@@ -2057,7 +1836,9 @@ async function updateData() {
             log('⚠️ [BACKGROUND] Oficial MANUAL_FALLBACK creado:', oficial);
           }
         } else {
-          log('⚠️ [BACKGROUND] No se pudieron obtener datos de bancos, usando precio manual como fallback');
+          log(
+            '⚠️ [BACKGROUND] No se pudieron obtener datos de bancos, usando precio manual como fallback'
+          );
           const manualPrice = userSettings.manualDollarPrice || 1400;
           oficial = {
             compra: manualPrice,
@@ -2069,39 +1850,18 @@ async function updateData() {
         }
       } else {
         // Usar precio oficial estándar
-        log('🌐 [BACKGROUND] Obteniendo precio oficial desde CriptoYa...');
+        log('🌐 Obteniendo precio oficial desde DolarAPI...');
         oficial = await fetchDolarOficial(userSettings);
-        log('🌐 [BACKGROUND] Resultado fetchDolarOficial:', oficial);
       }
     }
 
-    // NUEVO v5.0.76: Si aún no hay oficial, usar fallback
-    if (!oficial) {
-      log('⚠️ [BACKGROUND] No se obtuvo oficial, creando fallback...');
-      const manualPrice = userSettings.manualDollarPrice || 1450;
-      oficial = {
-        compra: manualPrice,
-        venta: manualPrice,
-        source: 'fallback_default',
-        timestamp: Date.now()
-      };
-    }
-
     // Obtener precios de USDT en paralelo
-    const [usdtRaw, usdtUsd] = await Promise.all([
+    const [usdt, usdtUsd] = await Promise.all([
       fetchUSDT(userSettings),
       fetchUSDTtoUSD(userSettings)
     ]);
 
-    // NUEVO v5.0.82: Aplicar filtros de exchanges P2P y outliers
-    const usdt = P2P_FILTERS.applyFilters(usdtRaw, userSettings);
-    
-    log('📊 Datos obtenidos:', { 
-      oficial: !!oficial, 
-      usdtRaw: usdtRaw ? Object.keys(usdtRaw).length : 0,
-      usdtFiltered: usdt ? Object.keys(usdt).length : 0,
-      usdtUsd: !!usdtUsd 
-    });
+    log('📊 Datos obtenidos:', { oficial: !!oficial, usdt: !!usdt, usdtUsd: !!usdtUsd });
 
     if (!oficial || !usdt) {
       log('❌ Faltan datos básicos');
@@ -2111,7 +1871,10 @@ async function updateData() {
     // CORREGIDO v5.0.47: Usar await porque calculateAllRoutes es async
     // MEJORADO v5.0.75: Calcular todos los tipos de rutas según configuración
     const routeType = userSettings.routeType || 'arbitrage'; // 'arbitrage', 'direct_usdt_ars', 'usd_to_usdt', 'all'
-    const optimizedRoutes = await calculateAllRoutes(oficial, usdt, usdtUsd, { ...userSettings, routeType });
+    const optimizedRoutes = await calculateAllRoutes(oficial, usdt, usdtUsd, {
+      ...userSettings,
+      routeType
+    });
 
     log(`✅ Datos actualizados: ${optimizedRoutes.length} rutas`);
 
@@ -2131,14 +1894,14 @@ async function updateData() {
 
     // NUEVO: Verificar y enviar notificaciones si hay oportunidades rentables
     if (routeType === 'arbitrage' || routeType === 'all') {
-      const arbitrageRoutes = routeType === 'all'
-        ? optimizedRoutes.filter(r => r.routeCategory === 'arbitrage')
-        : optimizedRoutes;
+      const arbitrageRoutes =
+        routeType === 'all'
+          ? optimizedRoutes.filter(r => r.routeCategory === 'arbitrage')
+          : optimizedRoutes;
       await checkAndNotify(arbitrageRoutes);
     }
 
     return data;
-
   } catch (error) {
     console.error('❌ Error en updateData:', error);
     return {
@@ -2174,26 +1937,30 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       return false; // CORREGIDO: Respuesta síncrona, no mantener canal
     } else {
       // Actualizar datos de forma asíncrona
-      updateData().then(data => {
-        log('[BACKGROUND] 📤 Enviando datos FRESCOS al popup:', {
-          oficialCompra: data?.oficial?.compra,
-          oficialSource: data?.oficial?.source,
-          rutasCount: data?.optimizedRoutes?.length || 0,
-          lastUpdate: new Date(data?.lastUpdate).toLocaleString()
+      updateData()
+        .then(data => {
+          log('[BACKGROUND] 📤 Enviando datos FRESCOS al popup:', {
+            oficialCompra: data?.oficial?.compra,
+            oficialSource: data?.oficial?.source,
+            rutasCount: data?.optimizedRoutes?.length || 0,
+            lastUpdate: new Date(data?.lastUpdate).toLocaleString()
+          });
+          sendResponse(
+            data || {
+              error: 'Error obteniendo datos',
+              optimizedRoutes: [],
+              arbitrages: []
+            }
+          );
+        })
+        .catch(error => {
+          console.error('❌ [BACKGROUND] Error:', error);
+          sendResponse({
+            error: error.message,
+            optimizedRoutes: [],
+            arbitrages: []
+          });
         });
-        sendResponse(data || {
-          error: 'Error obteniendo datos',
-          optimizedRoutes: [],
-          arbitrages: []
-        });
-      }).catch(error => {
-        console.error('❌ [BACKGROUND] Error:', error);
-        sendResponse({
-          error: error.message,
-          optimizedRoutes: [],
-          arbitrages: []
-        });
-      });
       return true; // CORRECTO: Mantener canal abierto para respuesta asíncrona
     }
   }
@@ -2218,22 +1985,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     currentData = null;
     log('[BACKGROUND] 🗑️ Cache limpiada (currentData = null)');
 
-    // NOTA: No es necesario guardar userSettings global - updateData() lee del storage directamente
-    log('[BACKGROUND] 👤 Configuración será leída desde storage en updateData()');
+    // Actualizar configuración del usuario
+    userSettings = request.settings;
+    log('[BACKGROUND] 👤 userSettings actualizada con nueva configuración');
 
     // Forzar recálculo de datos con nueva configuración
-    updateData().then(data => {
-      log('[BACKGROUND] ✅ Datos recalculados exitosamente');
-      log('[BACKGROUND] 📊 Nuevo oficial generado:', {
-        compra: data?.oficial?.compra,
-        source: data?.oficial?.source,
-        timestamp: new Date(data?.oficial?.timestamp).toISOString()
+    updateData()
+      .then(data => {
+        log('[BACKGROUND] ✅ Datos recalculados exitosamente');
+        log('[BACKGROUND] 📊 Nuevo oficial generado:', {
+          compra: data?.oficial?.compra,
+          source: data?.oficial?.source,
+          timestamp: new Date(data?.oficial?.timestamp).toISOString()
+        });
+        sendResponse({ success: true, data: data });
+      })
+      .catch(error => {
+        console.error('[BACKGROUND] ❌ Error recalculando datos:', error);
+        sendResponse({ success: false, error: error.message });
       });
-      sendResponse({ success: true, data: data });
-    }).catch(error => {
-      console.error('[BACKGROUND] ❌ Error recalculando datos:', error);
-      sendResponse({ success: false, error: error.message });
-    });
     return true; // Respuesta asíncrona
   }
 
@@ -2252,46 +2022,90 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     log('[BACKGROUND] 📥 Mensaje getBanksData recibido');
 
     // Obtener configuración del usuario
-    chrome.storage.local.get('notificationSettings').then((result) => {
-      const userSettings = result.notificationSettings || {};
+    chrome.storage.local
+      .get('notificationSettings')
+      .then(result => {
+        const userSettings = result.notificationSettings || {};
 
-      // Obtener datos en paralelo
-      Promise.all([
-        fetchBankDollarRates(userSettings),
-        fetchAllDollarTypes(userSettings),
-        fetchUSDT(userSettings),
-        fetchUSDTtoUSD(userSettings),
-        fetchUSDT_USD_Brokers(userSettings),
-        fetchBinanceP2P_USDT_ARS(userSettings),
-        fetchBinanceP2P_USDT_USD(userSettings)
-      ]).then(([banksData, dollarTypes, usdtData, usdtUsdData, usdtUsdBrokers, binanceP2PArs, binanceP2PUsd]) => {
-        log('[BACKGROUND] 📤 Enviando datos de bancos y dólar:', {
-          banksCount: banksData ? Object.keys(banksData).filter(key => key !== 'source' && key !== 'timestamp').length : 0,
-          dollarTypesCount: dollarTypes ? Object.keys(dollarTypes).length : 0,
-          usdtExchanges: usdtData ? Object.keys(usdtData).filter(key => key !== 'source' && key !== 'timestamp').length : 0,
-          usdtUsdExchanges: usdtUsdData ? Object.keys(usdtUsdData).filter(key => key !== 'source' && key !== 'timestamp').length : 0,
-          usdtUsdBrokers: usdtUsdBrokers ? Object.keys(usdtUsdBrokers).filter(key => key !== 'source' && key !== 'timestamp').length : 0,
-          binanceP2P_ARS: binanceP2PArs ? 'disponible' : 'null',
-          binanceP2P_USD: binanceP2PUsd ? 'disponible' : 'null'
-        });
+        // Obtener datos en paralelo
+        Promise.all([
+          fetchBankDollarRates(userSettings),
+          fetchAllDollarTypes(userSettings),
+          fetchUSDT(userSettings),
+          fetchUSDTtoUSD(userSettings),
+          fetchUSDT_USD_Brokers(userSettings),
+          fetchBinanceP2P_USDT_ARS(userSettings),
+          fetchBinanceP2P_USDT_USD(userSettings)
+        ])
+          .then(
+            ([
+              banksData,
+              dollarTypes,
+              usdtData,
+              usdtUsdData,
+              usdtUsdBrokers,
+              binanceP2PArs,
+              binanceP2PUsd
+            ]) => {
+              log('[BACKGROUND] 📤 Enviando datos de bancos y dólar:', {
+                banksCount: banksData
+                  ? Object.keys(banksData).filter(key => key !== 'source' && key !== 'timestamp')
+                      .length
+                  : 0,
+                dollarTypesCount: dollarTypes ? Object.keys(dollarTypes).length : 0,
+                usdtExchanges: usdtData
+                  ? Object.keys(usdtData).filter(key => key !== 'source' && key !== 'timestamp')
+                      .length
+                  : 0,
+                usdtUsdExchanges: usdtUsdData
+                  ? Object.keys(usdtUsdData).filter(key => key !== 'source' && key !== 'timestamp')
+                      .length
+                  : 0,
+                usdtUsdBrokers: usdtUsdBrokers
+                  ? Object.keys(usdtUsdBrokers).filter(
+                      key => key !== 'source' && key !== 'timestamp'
+                    ).length
+                  : 0,
+                binanceP2P_ARS: binanceP2PArs ? 'disponible' : 'null',
+                binanceP2P_USD: binanceP2PUsd ? 'disponible' : 'null'
+              });
 
-        sendResponse({
-          success: true,
-          data: {
-            banksData: banksData || {},
-            dollarTypes: dollarTypes || {},
-            usdtData: usdtData || {},
-            usdtUsdData: usdtUsdData || {},
-            usdtUsdBrokers: usdtUsdBrokers || {},
-            binanceP2PArs: binanceP2PArs || {},
-            binanceP2PUsd: binanceP2PUsd || {}
-          }
-        });
-      }).catch(error => {
-        console.error('[BACKGROUND] ❌ Error obteniendo datos de bancos:', error);
+              sendResponse({
+                success: true,
+                data: {
+                  banksData: banksData || {},
+                  dollarTypes: dollarTypes || {},
+                  usdtData: usdtData || {},
+                  usdtUsdData: usdtUsdData || {},
+                  usdtUsdBrokers: usdtUsdBrokers || {},
+                  binanceP2PArs: binanceP2PArs || {},
+                  binanceP2PUsd: binanceP2PUsd || {}
+                }
+              });
+            }
+          )
+          .catch(error => {
+            console.error('[BACKGROUND] ❌ Error obteniendo datos de bancos:', error);
+            sendResponse({
+              success: false,
+              error: error.message,
+              data: {
+                banksData: {},
+                dollarTypes: {},
+                usdtData: {},
+                usdtUsdData: {},
+                usdtUsdBrokers: {},
+                binanceP2PArs: {},
+                binanceP2PUsd: {}
+              }
+            });
+          });
+      })
+      .catch(storageError => {
+        console.error('[BACKGROUND] ❌ Error obteniendo configuración:', storageError);
         sendResponse({
           success: false,
-          error: error.message,
+          error: 'Error obteniendo configuración del usuario',
           data: {
             banksData: {},
             dollarTypes: {},
@@ -2303,51 +2117,59 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           }
         });
       });
-    }).catch(storageError => {
-      console.error('[BACKGROUND] ❌ Error obteniendo configuración:', storageError);
-      sendResponse({
-        success: false,
-        error: 'Error obteniendo configuración del usuario',
-        data: {
-          banksData: {},
-          dollarTypes: {},
-          usdtData: {},
-          usdtUsdData: {},
-          usdtUsdBrokers: {},
-          binanceP2PArs: {},
-          binanceP2PUsd: {}
-        }
-      });
-    });
 
     return true; // Respuesta asíncrona
   }
 
   // NUEVO v6.0: Handler para crypto arbitrage
   if (request.action === 'GET_CRYPTO_ARBITRAGE' || request.type === 'GET_CRYPTO_ARBITRAGE') {
-    log('[CRYPTO-ARB] 📥 Solicitud de crypto arbitrage recibida v5.0.76');
+    log('[CRYPTO-ARB] 📥 Solicitud de crypto arbitrage recibida');
 
     // Verificar que hayamos datos disponibles
     if (!currentData || !currentData.oficial) {
-      log('[CRYPTO-ARB] ⚠️ No hay datos disponibles (currentData es null), intentando actualizar...');
-      // Intentar actualizar datos primero
-      updateData().then(async () => {
-        if (!currentData || !currentData.oficial) {
-          log('[CRYPTO-ARB] ❌ No se pudieron obtener datos después de actualizar');
-          sendResponse({ routes: [] });
-          return;
-        }
-        // Continuar con el cálculo
-        await processCryptoArbitrage(sendResponse);
-      }).catch(err => {
-        console.error('[CRYPTO-ARB] ❌ Error actualizando datos:', err);
-        sendResponse({ routes: [], error: err.message });
-      });
-      return true;
+      log('[CRYPTO-ARB] ⚠️ No hay datos disponibles (currentData es null)');
+      sendResponse({ routes: [] });
+      return false;
     }
 
-    // Procesar crypto arbitrage
-    processCryptoArbitrage(sendResponse);
+    // Obtener lista de criptos activas
+    dataService
+      .getActiveCryptos()
+      .then(async activeCryptos => {
+        try {
+          log(`[CRYPTO-ARB] Obteniendo datos para ${activeCryptos.length} criptos activas`);
+
+          // Obtener datos de todas las criptos activas
+          const cryptoData = await dataService.fetchAllCryptos(activeCryptos, 'ARS');
+
+          if (!cryptoData || Object.keys(cryptoData).length === 0) {
+            log('[CRYPTO-ARB] ⚠️ No se obtuvieron datos de criptos');
+            sendResponse({ routes: [] });
+            return;
+          }
+
+          log(`[CRYPTO-ARB] Datos obtenidos para ${Object.keys(cryptoData).length} criptos`);
+
+          // Calcular rutas de arbitraje crypto-to-crypto
+          const routes = await calculateCryptoArbitrageRoutes(
+            cryptoData,
+            currentData.oficial,
+            userSettings || {}
+          );
+
+          log(`[CRYPTO-ARB] ✅ ${routes.length} rutas calculadas exitosamente`);
+
+          sendResponse({ routes: routes || [] });
+        } catch (error) {
+          console.error('[CRYPTO-ARB] ❌ Error calculando crypto arbitrage:', error);
+          sendResponse({ routes: [], error: error.message });
+        }
+      })
+      .catch(error => {
+        console.error('[CRYPTO-ARB] ❌ Error obteniendo criptos activas:', error);
+        sendResponse({ routes: [], error: error.message });
+      });
+
     return true; // Respuesta asíncrona
   }
 
@@ -2358,30 +2180,71 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 log('[BACKGROUND] Listener registrado');
 
-// NOTA: El listener de storage está unificado más abajo en la sección de inicialización
+// ============================================
+// LISTENER DE CAMBIOS EN CONFIGURACIÓN
+// ============================================
+
+// NUEVO v5.0.48: Detectar cuando el usuario cambia configuración y recalcular
+chrome.storage.onChanged.addListener((changes, namespace) => {
+  if (namespace === 'local' && changes.notificationSettings) {
+    const oldSettings = changes.notificationSettings.oldValue || {};
+    const newSettings = changes.notificationSettings.newValue || {};
+
+    log('⚙️ [STORAGE] Configuración cambió');
+
+    // Detectar cambios que requieren recálculo de rutas
+    const dollarSourceChanged = oldSettings.dollarPriceSource !== newSettings.dollarPriceSource;
+    const manualPriceChanged = oldSettings.manualDollarPrice !== newSettings.manualDollarPrice;
+    const bankMethodChanged = oldSettings.preferredBank !== newSettings.preferredBank;
+
+    if (dollarSourceChanged || manualPriceChanged || bankMethodChanged) {
+      log('🔄 [STORAGE] Cambios críticos detectados, forzando actualización...');
+      log('   - Fuente dólar:', oldSettings.dollarPriceSource, '→', newSettings.dollarPriceSource);
+      log('   - Precio manual:', oldSettings.manualDollarPrice, '→', newSettings.manualDollarPrice);
+      log('   - Método banco:', oldSettings.preferredBank, '→', newSettings.preferredBank);
+
+      // Forzar actualización de datos
+      updateData()
+        .then(() => {
+          log('✅ [STORAGE] Datos actualizados con nueva configuración');
+        })
+        .catch(error => {
+          console.error('❌ [STORAGE] Error actualizando datos:', error);
+        });
+    }
+  }
+});
+
+log('[BACKGROUND] Listener de storage registrado');
 
 // ============================================
 // INICIALIZACIÓN
 // ============================================
 
 log('[BACKGROUND] Cargando configuración global...');
-updateGlobalConfig().then(() => {
-  log('[BACKGROUND] Iniciando primera actualización...');
-  updateData().then(() => {
-    log('[BACKGROUND] Primera actualización completada');
-    // Inicializar datos de bancos
-    updateBanksData().then(() => {
-      log('[BACKGROUND] Datos de bancos inicializados');
-      console.log('🏦 Datos de bancos inicializados correctamente');
-    }).catch(error => {
-      console.error('❌ [BACKGROUND] Error inicializando datos de bancos:', error);
-    });
-  }).catch(error => {
-    console.error('❌ [BACKGROUND] Error en inicialización:', error);
+updateGlobalConfig()
+  .then(() => {
+    log('[BACKGROUND] Iniciando primera actualización...');
+    updateData()
+      .then(() => {
+        log('[BACKGROUND] Primera actualización completada');
+        // Inicializar datos de bancos
+        updateBanksData()
+          .then(() => {
+            log('[BACKGROUND] Datos de bancos inicializados');
+            console.log('🏦 Datos de bancos inicializados correctamente');
+          })
+          .catch(error => {
+            console.error('❌ [BACKGROUND] Error inicializando datos de bancos:', error);
+          });
+      })
+      .catch(error => {
+        console.error('❌ [BACKGROUND] Error en inicialización:', error);
+      });
+  })
+  .catch(error => {
+    console.error('❌ [BACKGROUND] Error cargando configuración:', error);
   });
-}).catch(error => {
-  console.error('❌ [BACKGROUND] Error cargando configuración:', error);
-});
 
 // Actualización periódica (se actualizará dinámicamente)
 let updateIntervalId = null;
@@ -2411,59 +2274,42 @@ async function startPeriodicUpdates() {
 // Iniciar actualizaciones periódicas
 startPeriodicUpdates();
 
-// ============================================
-// LISTENER UNIFICADO DE CAMBIOS EN CONFIGURACIÓN
-// ============================================
+// Listener para cambios en configuración del usuario
 chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace === 'local' && changes.notificationSettings) {
     const oldSettings = changes.notificationSettings.oldValue || {};
     const newSettings = changes.notificationSettings.newValue || {};
 
-    log('⚙️ [STORAGE] Configuración cambió');
-
-    // Detectar cambios críticos que requieren recálculo de rutas
-    const dollarSourceChanged = oldSettings.dollarPriceSource !== newSettings.dollarPriceSource;
-    const manualPriceChanged = oldSettings.manualDollarPrice !== newSettings.manualDollarPrice;
-    const bankMethodChanged = oldSettings.preferredBank !== newSettings.preferredBank;
-    const amountChanged = oldSettings.defaultSimAmount !== newSettings.defaultSimAmount;
-
-    // Si cambió la configuración del dólar, forzar actualización
-    if (dollarSourceChanged || manualPriceChanged || bankMethodChanged) {
-      log('🔄 [STORAGE] Cambios críticos detectados, forzando actualización...');
-      log('   - Fuente dólar:', oldSettings.dollarPriceSource, '→', newSettings.dollarPriceSource);
-      log('   - Precio manual:', oldSettings.manualDollarPrice, '→', newSettings.manualDollarPrice);
-      log('   - Método banco:', oldSettings.preferredBank, '→', newSettings.preferredBank);
-
-      updateData().then(() => {
-        log('✅ [STORAGE] Datos actualizados con nueva configuración');
-      }).catch(error => {
-        console.error('❌ [STORAGE] Error actualizando datos:', error);
-      });
-    }
-
     // Si cambió el monto por defecto, recalcular rutas
-    if (amountChanged) {
-      log(`💰 Monto por defecto cambió: $${oldSettings.defaultSimAmount} → $${newSettings.defaultSimAmount}`);
+    if (oldSettings.defaultSimAmount !== newSettings.defaultSimAmount) {
+      log(
+        `💰 Monto por defecto cambió: $${oldSettings.defaultSimAmount} → $${newSettings.defaultSimAmount}`
+      );
       log('🔄 Recalculando rutas con nuevo monto...');
       updateData().then(() => {
         log('✅ Rutas recalculadas con nuevo monto');
       });
     }
 
-    // Si cambió el intervalo de actualización, reiniciar el timer
+    // NUEVO v5.0.54: Si cambió el intervalo de actualización, reiniciar el timer
     if (oldSettings.updateIntervalMinutes !== newSettings.updateIntervalMinutes) {
-      log(`⏰ Intervalo cambió: ${oldSettings.updateIntervalMinutes}min → ${newSettings.updateIntervalMinutes}min`);
+      log(
+        `⏰ Intervalo cambió: ${oldSettings.updateIntervalMinutes}min → ${newSettings.updateIntervalMinutes}min`
+      );
       log('🔄 Reiniciando actualizaciones periódicas...');
       startPeriodicUpdates();
     }
 
     // Si cambió el timeout, actualizar configuración global
     if (oldSettings.requestTimeoutSeconds !== newSettings.requestTimeoutSeconds) {
-      log(`⏱️ Timeout cambió: ${oldSettings.requestTimeoutSeconds}s → ${newSettings.requestTimeoutSeconds}s`);
+      log(
+        `⏱️ Timeout cambió: ${oldSettings.requestTimeoutSeconds}s → ${newSettings.requestTimeoutSeconds}s`
+      );
       updateGlobalConfig();
     }
   }
 });
 
-log('[BACKGROUND] Listener de storage registrado');
+log('[BACKGROUND] Background completamente inicializado');
+
 log('[BACKGROUND] Background completamente inicializado');

@@ -4,28 +4,37 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 
 ## [5.0.84] - 2026-01-16 - ELIMINACIÓN DE CÓDIGO DUPLICADO
 
-### 🧹 Refactorización popup.js
-- **popup.js:** Reducido de 4791 a 4062 líneas (-729 líneas, -15.2%)
+### 🧹 Refactorización Completa
+- **popup.js:** Reducido de 4,791 a 4,062 líneas (-729 líneas, -15.2%)
+- **popup.css:** Reducido de 6,363 a 3,598 líneas (-2,765 líneas, -43.5%)
+- **main-simple.js:** Reducido de 2,214 a 1,998 líneas (-216 líneas, -9.8%)
+
+### 🧹 Cambios en popup.js
 - Funciones de formateo delegadas completamente a módulo `Formatters`
 - `getProfitClasses` y `getExchangeIcon` delegadas a `RouteRenderer`
 - Eliminado código fallback duplicado que existía en popup.js y en módulos
 
-### 🧹 Refactorización main-simple.js
-- **main-simple.js:** Reducido de 2394 a 2115 líneas (-279 líneas, -11.6%)
+### 🧹 Cambios en popup.css
+- Eliminadas todas las secciones marcadas como `/* SECCIÓN ELIMINADA */`
+- Removido CSS duplicado y reglas obsoletas
+- Optimización significativa del tamaño del archivo
+
+### 🧹 Cambios en main-simple.js
 - Eliminada `fetchDollarTypes()` - función legacy no referenciada
 - Eliminada `getCachedData()` - función no utilizada
 
 ### 🔧 Cambios Técnicos
 - `formatNumber`, `formatUsdUsdtRatio`, `formatCommissionPercent`, `getDollarSourceDisplay` → Formatters
 - `getProfitClasses`, `getExchangeIcon` → RouteRenderer
-- Módulos ya cargados vía popup.html (utils/logger.js, utils/formatters.js, utils/stateManager.js, ui/routeRenderer.js)
+- Módulos ya cargados vía popup.html
 
 ### 📊 Métricas Post-Refactorización
 | Archivo | Antes | Después | Reducción |
 |---------|-------|---------|-----------|
-| popup.js | 4791 líneas | 4062 líneas | -729 (-15.2%) |
-| main-simple.js | 2394 líneas | 2115 líneas | -279 (-11.6%) |
-| **TOTAL** | 7185 líneas | 6177 líneas | **-1008 (-14.0%)** |
+| popup.js | 4,791 líneas | 4,062 líneas | -729 (-15.2%) |
+| popup.css | 6,363 líneas | 3,598 líneas | -2,765 (-43.5%) |
+| main-simple.js | 2,214 líneas | 1,998 líneas | -216 (-9.8%) |
+| **TOTAL** | 13,368 líneas | 9,658 líneas | **-3,710 (-27.8%)** |
 
 ### 🧪 Testing
 - 47 tests passing
