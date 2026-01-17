@@ -2,82 +2,82 @@
 
 Todos los cambios notables de este proyecto serán documentados en este archivo.
 
-## [6.0.0] - 2025-01-XX - REDISEÑO VISUAL COMPLETO 🎨
+## [5.0.84] - 2026-01-16 - ELIMINACIÓN DE CÓDIGO DUPLICADO
 
-### ✨ Nuevo Sistema de Diseño v6.0.0
-Rediseño visual completo de la extensión con un sistema de variables CSS moderno inspirado en GitHub Dark Theme.
+### 🧹 Refactorización
+- **popup.js:** Reducido de 4791 a 4056 líneas (-735 líneas, -15.3%)
+- **popup.js:** Funciones de formateo delegadas completamente a módulo `Formatters`
+- **popup.js:** `getProfitClasses` y `getExchangeIcon` delegadas a `RouteRenderer`
+- **Eliminado código fallback duplicado** que existía en popup.js y en módulos
 
-### 🎨 Cambios Visuales Principales
-- **Sistema de Variables CSS:** Nuevo sistema unificado con nomenclatura semántica
-  - Colores: `--color-bg-*`, `--color-text-*`, `--color-brand-*`
-  - Espaciado: `--space-1` a `--space-8`
-  - Tipografía: `--font-size-*`, `--font-weight-*`
-  - Bordes: `--radius-sm` a `--radius-full`
-  - Sombras: `--shadow-sm`, `--shadow-md`, `--shadow-lg`
-  - Gradientes: `--gradient-primary`, `--gradient-success`, etc.
-  
-- **Header Modernizado:**
-  - Nuevo gradiente sutil en fondo
-  - Logo con animación hover
-  - Botones de acción con iconos mejorados
-  
-- **Sistema de Pestañas:**
-  - Indicador animado con underline
-  - Transiciones suaves al cambiar pestaña
-  - Estados hover y active mejorados
-  
-- **Tarjetas de Rutas v6.0.0:**
-  - Diseño con indicador lateral de ganancia
-  - Grid de precios compra/venta
-  - Badges de ganancia con colores semánticos
-  - Status indicators (🔥, ✓, 👁️, ⚠️)
-  - Función `formatVolume()` para mostrar volumen
-  - Animaciones de entrada (fade + slide)
-  
-- **Accesibilidad WCAG 2.1:**
-  - Focus states consistentes en toda la UI
-  - Soporte completo para navegación por teclado
-  - Atributos ARIA en modal (role, aria-modal, aria-labelledby)
-  - Focus trap en modal con restauración de foco
-  - Soporte `prefers-reduced-motion`
-  
-- **Modales Mejorados:**
-  - Overlay con backdrop-filter blur(8px)
-  - Animaciones fade + slide
-  - Escape para cerrar
-  - Click fuera para cerrar
-  - Focus management completo
-  
-- **Simulador:**
-  - Container modernizado
-  - Inputs y selects con nuevo estilo
-  - Resultados con mejor jerarquía visual
-  
-- **Página Options:**
-  - CSS completamente reescrito (896→671 líneas)
-  - Broker Fees con CRUD completo
-  - Diseño unificado con popup
+### 🔧 Cambios Técnicos
+- `formatNumber`, `formatUsdUsdtRatio`, `formatCommissionPercent`, `getDollarSourceDisplay` → Formatters
+- `getProfitClasses`, `getExchangeIcon` → RouteRenderer
+- Módulos ya cargados vía popup.html (utils/logger.js, utils/formatters.js, utils/stateManager.js, ui/routeRenderer.js)
 
-### 🔧 Archivos Modificados
-- `src/popup.css`: Refactorización completa (~6700 líneas, sistema unificado)
-- `src/popup.js`: Modal con focus management mejorado
-- `src/popup.html`: Atributos ARIA en modal
-- `src/options.css`: Reescrito con GitHub Dark theme
-- `src/options.js`: `initializeBrokerFeesImproved()` implementado
-- `src/renderHelpers.js`: Cards mejoradas con más información
-- `manifest.json`: Actualizado a versión 6.0.0
+### 📊 Métricas Post-Refactorización
+| Archivo | Antes | Después | Reducción |
+|---------|-------|---------|-----------|
+| popup.js | 4791 líneas | 4056 líneas | -735 (-15.3%) |
+| popup.css | 6371 líneas | En progreso | - |
+| main-simple.js | 2470 líneas | 2394 líneas | -76 |
 
-### 📏 Mejoras Técnicas
-- Variables CSS con compatibilidad hacia atrás (aliases legacy)
-- Eliminación de estilos duplicados
-- Animaciones optimizadas con `will-change`
-- Transiciones consistentes en todo el proyecto
-- Focus states globales con :focus-visible
+### 🧪 Testing
+- 47 tests passing
+- Sin regresiones funcionales
 
-### 🧪 Tests
-- Suite E2E completa con 10 categorías de tests
-- Tests de renderHelpers con formatVolume()
-- 100% tests pasando (3/3 archivos, 10/10 E2E)
+---
+
+## [5.0.83] - 2026-01-16 - SISTEMA DE ALERTAS CORREGIDO
+
+### 🐛 BUG FIX CRÍTICO
+- **SOLUCIONADO:** Sistema de alertas/notificaciones no respetaba configuración del usuario
+- **Problema:** El `alertThreshold` de options.js no coincidía con lo que buscaba main-simple.js
+- **Problema:** `notificationExchanges` no se usaba correctamente (se buscaba `preferredExchanges`)
+- **Impacto:** Las notificaciones se enviaban sin respetar umbral ni filtro de exchanges
+
+### 🔧 Cambios Técnicos
+- **main-simple.js:** `shouldSendNotification()` ahora usa `alertThreshold` directamente
+- **main-simple.js:** Corregido filtro de exchanges a `notificationExchanges`
+- **main-simple.js:** Agregado logging para debugging de decisiones de notificación
+- **main-simple.js:** `arbKey` ahora usa `Math.floor()` para evitar spam de notificaciones
+
+### 🧪 Testing
+- **Nuevos tests:** 11 tests de notificaciones agregados (`tests/notifications.test.js`)
+- **Total tests:** 47 tests, todos pasando
+- **Cobertura:** Threshold, exchanges, case-insensitive matching, rate limiting
+
+### 📚 Documentación
+- **NUEVO:** `docs/API_INTERNA.md` - Documentación completa de APIs internas
+- **Actualizado:** `docs/DOCS_INDEX.md` - Agregada sección de documentación técnica
+- **Actualizado:** `docs/AUDITORIA_COMPLETA_2026.md` - Puntuación global: 7.9/10 (+2.0)
+
+### 📊 Métricas
+| Métrica | Antes | Después |
+|---------|-------|---------|
+| Tests | 36 | 47 |
+| Puntuación audit | 7.5/10 | 7.9/10 |
+| Sistema alertas | 🔴 Broken | ✅ Funcional |
+
+---
+
+## [5.0.82] - 2026-01-15 - CI/CD + PRESETS SIMULADOR
+
+### ✨ Nuevas Funcionalidades
+- **CI/CD GitHub Actions:** Workflows para lint, test, build automáticos
+- **Auto-release:** Publicación automática con tags `v*.*.*`
+- **Presets de simulador:** 3 perfiles de riesgo (Conservador, Moderado, Agresivo)
+
+### 🔧 Archivos Agregados
+- `.github/workflows/ci.yml` - Pipeline de CI
+- `.github/workflows/release.yml` - Auto-release
+
+### 📊 Presets de Simulador
+| Perfil | Fee Compra | Fee Venta | Spread |
+|--------|------------|-----------|--------|
+| Conservador | 1.5% | 1.5% | 1.02x |
+| Moderado | 1.0% | 1.0% | 1.01x |
+| Agresivo | 0.5% | 0.5% | 1.005x |
 
 ---
 
