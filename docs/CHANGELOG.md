@@ -4,11 +4,16 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 
 ## [5.0.84] - 2026-01-16 - ELIMINACIÓN DE CÓDIGO DUPLICADO
 
-### 🧹 Refactorización
-- **popup.js:** Reducido de 4791 a 4056 líneas (-735 líneas, -15.3%)
-- **popup.js:** Funciones de formateo delegadas completamente a módulo `Formatters`
-- **popup.js:** `getProfitClasses` y `getExchangeIcon` delegadas a `RouteRenderer`
-- **Eliminado código fallback duplicado** que existía en popup.js y en módulos
+### 🧹 Refactorización popup.js
+- **popup.js:** Reducido de 4791 a 4062 líneas (-729 líneas, -15.2%)
+- Funciones de formateo delegadas completamente a módulo `Formatters`
+- `getProfitClasses` y `getExchangeIcon` delegadas a `RouteRenderer`
+- Eliminado código fallback duplicado que existía en popup.js y en módulos
+
+### 🧹 Refactorización main-simple.js
+- **main-simple.js:** Reducido de 2394 a 2115 líneas (-279 líneas, -11.6%)
+- Eliminada `fetchDollarTypes()` - función legacy no referenciada
+- Eliminada `getCachedData()` - función no utilizada
 
 ### 🔧 Cambios Técnicos
 - `formatNumber`, `formatUsdUsdtRatio`, `formatCommissionPercent`, `getDollarSourceDisplay` → Formatters
@@ -18,9 +23,9 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 ### 📊 Métricas Post-Refactorización
 | Archivo | Antes | Después | Reducción |
 |---------|-------|---------|-----------|
-| popup.js | 4791 líneas | 4056 líneas | -735 (-15.3%) |
-| popup.css | 6371 líneas | En progreso | - |
-| main-simple.js | 2470 líneas | 2394 líneas | -76 |
+| popup.js | 4791 líneas | 4062 líneas | -729 (-15.2%) |
+| main-simple.js | 2394 líneas | 2115 líneas | -279 (-11.6%) |
+| **TOTAL** | 7185 líneas | 6177 líneas | **-1008 (-14.0%)** |
 
 ### 🧪 Testing
 - 47 tests passing
