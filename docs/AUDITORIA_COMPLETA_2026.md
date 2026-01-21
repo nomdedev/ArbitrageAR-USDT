@@ -719,7 +719,7 @@ validateExchangeData(data, pair) {
 
 **Mejoras en UX:**
 - Secciones visualmente separadas con descripciones explicativas
-- Configuración independiente para cada tipo de exchange
+- **TODOS los exchanges marcados por defecto** (23 exchanges tradicionales)
 - Mayor claridad para usuarios sobre qué exchanges están disponibles
 
 #### 2. 🟡 XSS Potencial en innerHTML - PENDIENTE
