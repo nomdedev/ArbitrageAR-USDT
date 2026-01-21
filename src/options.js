@@ -206,10 +206,15 @@ async function loadSettings() {
 
     // NUEVO v5.0.85: Configuración de exchanges tradicionales
     const selectedTraditionalExchanges = settings.selectedTraditionalExchanges;
-    const defaultTraditionalExchanges = ['binance', 'bybit', 'buenbit', 'ripio', 'satoshitango', 'tiendacrypto', 'belo', 'fiwind', 'letsbit', 'lemoncash'];
+    // Por defecto, incluir TODOS los exchanges tradicionales disponibles
+    const defaultTraditionalExchanges = [
+      'binance', 'bybit', 'buenbit', 'ripio', 'satoshitango', 'tiendacrypto', 'belo', 'fiwind', 'letsbit', 'lemoncash',
+      'ripioexchange', 'universalcoins', 'decrypto', 'vitawallet', 'saldo', 'astropay', 'pluscrypto', 'eluter', 'trubit', 'bitsoalpha',
+      'cocoscrypto', 'cryptomktpro', 'wallbit'
+    ];
 
     document.querySelectorAll('input[name="traditional-exchange"]').forEach(cb => {
-      // Si no hay configuración guardada o está vacía, usar exchanges por defecto
+      // Si no hay configuración guardada o está vacía, usar TODOS los exchanges por defecto
       if (selectedTraditionalExchanges === undefined || (Array.isArray(selectedTraditionalExchanges) && selectedTraditionalExchanges.length === 0)) {
         cb.checked = defaultTraditionalExchanges.includes(cb.value);
       } else {

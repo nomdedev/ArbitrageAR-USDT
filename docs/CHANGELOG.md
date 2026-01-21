@@ -9,10 +9,10 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 - **Nueva sección "Exchanges solo P2P"**: Exchanges que operan únicamente en modo P2P (OKX, Bitget, KuCoin, etc.)
 - **Nueva sección "Exchanges Tradicionales"**: Exchanges que operan únicamente en modo tradicional (Buenbit, Ripio, etc.)
 
-### 🔧 Mejoras en la UI de Configuración
-- **Separación visual clara**: Cada tipo de exchange en su propia sección colapsable
-- **Descripciones explicativas**: Texto que explica qué tipo de exchanges contiene cada sección
-- **Organización lógica**: Exchanges agrupados por importancia (Principales, Secundarios, Otros)
+### 🔧 Mejoras en Configuración de Exchanges
+- **Por defecto marcados**: Ahora TODOS los exchanges tradicionales están marcados por defecto (antes solo 10)
+- **Control total**: Usuario puede seleccionar/deseleccionar cualquier exchange individualmente
+- **Claridad**: Descripción actualizada indicando que por defecto todos están seleccionados
 
 ### 📊 Exchanges Disponibles por Categoría
 
