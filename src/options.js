@@ -50,6 +50,7 @@ const DEFAULT_SETTINGS = {
   showBestBankPrice: false,
   selectedBanks: undefined, // undefined = usar bancos por defecto (bna, galicia, santander, bbva, icbc)
   selectedP2PExchanges: undefined, // undefined = usar todos los exchanges P2P
+  selectedTraditionalExchanges: undefined, // undefined = usar todos los exchanges tradicionales
   filterP2POutliers: true // Filtrar precios anómalos por defecto
 };
 
@@ -202,6 +203,19 @@ async function loadSettings() {
     if (filterOutliersEl) {
       filterOutliersEl.checked = settings.filterP2POutliers ?? true;
     }
+
+    // NUEVO v5.0.85: Configuración de exchanges tradicionales
+    const selectedTraditionalExchanges = settings.selectedTraditionalExchanges;
+    const defaultTraditionalExchanges = ['binance', 'bybit', 'buenbit', 'ripio', 'satoshitango', 'tiendacrypto', 'belo', 'fiwind', 'letsbit', 'lemoncash'];
+
+    document.querySelectorAll('input[name="traditional-exchange"]').forEach(cb => {
+      // Si no hay configuración guardada o está vacía, usar exchanges por defecto
+      if (selectedTraditionalExchanges === undefined || (Array.isArray(selectedTraditionalExchanges) && selectedTraditionalExchanges.length === 0)) {
+        cb.checked = defaultTraditionalExchanges.includes(cb.value);
+      } else {
+        cb.checked = selectedTraditionalExchanges.includes(cb.value);
+      }
+    });
 
     // NUEVO v5.0.53: URLs de APIs
     document.getElementById('dolarapi-url').value =
@@ -582,6 +596,10 @@ function getCurrentSettings() {
   const selectedP2PCheckboxes = document.querySelectorAll('input[name="p2p-exchange"]:checked');
   settings.selectedP2PExchanges = Array.from(selectedP2PCheckboxes).map(cb => cb.value);
   settings.filterP2POutliers = document.getElementById('filter-p2p-outliers')?.checked ?? true;
+
+  // NUEVO v5.0.85: Exchanges tradicionales seleccionados
+  const selectedTraditionalCheckboxes = document.querySelectorAll('input[name="traditional-exchange"]:checked');
+  settings.selectedTraditionalExchanges = Array.from(selectedTraditionalCheckboxes).map(cb => cb.value);
 
   // APIs
   settings.dolarApiUrl =

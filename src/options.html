@@ -105,14 +105,29 @@
         </div>
         <div class="card-content">
           <p class="section-description">Selecciona los exchanges P2P a incluir en cálculos</p>
-          
+
+          <!-- Exchanges con versión P2P -->
           <div class="field full">
+            <h3>🏢 Exchanges con versión P2P</h3>
+            <p class="subsection-description">Estos exchanges tienen tanto versión normal como P2P</p>
             <div class="exchanges-grid">
               <div class="exchange-group">
                 <h4>Principales</h4>
                 <label><input type="checkbox" name="p2p-exchange" value="binancep2p"> Binance P2P</label>
-                <label><input type="checkbox" name="p2p-exchange" value="okexp2p"> OKX P2P</label>
                 <label><input type="checkbox" name="p2p-exchange" value="bybitp2p"> Bybit P2P</label>
+                <label><input type="checkbox" name="p2p-exchange" value="lemoncashp2p"> Lemon Cash P2P</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Exchanges solo P2P -->
+          <div class="field full">
+            <h3>🔄 Exchanges solo P2P</h3>
+            <p class="subsection-description">Estos exchanges solo operan en modo P2P</p>
+            <div class="exchanges-grid">
+              <div class="exchange-group">
+                <h4>Principales</h4>
+                <label><input type="checkbox" name="p2p-exchange" value="okexp2p"> OKX P2P</label>
                 <label><input type="checkbox" name="p2p-exchange" value="bitgetp2p"> Bitget P2P</label>
                 <label><input type="checkbox" name="p2p-exchange" value="kucoinp2p"> KuCoin P2P</label>
               </div>
@@ -128,7 +143,6 @@
                 <h4>Otros</h4>
                 <label><input type="checkbox" name="p2p-exchange" value="eldoradop2p"> El Dorado P2P</label>
                 <label><input type="checkbox" name="p2p-exchange" value="paydecep2p"> Paydece P2P</label>
-                <label><input type="checkbox" name="p2p-exchange" value="lemoncashp2p"> Lemon P2P</label>
               </div>
             </div>
           </div>
@@ -140,6 +154,54 @@
               Filtrar precios anómalos
             </label>
             <small class="field-hint">Excluye precios más del 15% alejados del promedio</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- 🏛️ EXCHANGES TRADICIONALES -->
+      <section class="card">
+        <div class="card-header" data-action="toggle-section">
+          <h2>🏛️ Exchanges Tradicionales</h2>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="card-content">
+          <p class="section-description">Selecciona los exchanges tradicionales (no P2P) a incluir en cálculos</p>
+
+          <div class="field full">
+            <div class="exchanges-grid">
+              <div class="exchange-group">
+                <h4>Principales</h4>
+                <label><input type="checkbox" name="traditional-exchange" value="binance"> Binance</label>
+                <label><input type="checkbox" name="traditional-exchange" value="bybit"> Bybit</label>
+                <label><input type="checkbox" name="traditional-exchange" value="buenbit"> Buenbit</label>
+                <label><input type="checkbox" name="traditional-exchange" value="ripio"> Ripio</label>
+                <label><input type="checkbox" name="traditional-exchange" value="satoshitango"> SatoshiTango</label>
+                <label><input type="checkbox" name="traditional-exchange" value="tiendacrypto"> TiendaCrypto</label>
+                <label><input type="checkbox" name="traditional-exchange" value="belo"> Belo</label>
+                <label><input type="checkbox" name="traditional-exchange" value="fiwind"> Fiwind</label>
+                <label><input type="checkbox" name="traditional-exchange" value="letsbit"> Letsbit</label>
+                <label><input type="checkbox" name="traditional-exchange" value="lemoncash"> Lemon Cash</label>
+              </div>
+              <div class="exchange-group">
+                <h4>Secundarios</h4>
+                <label><input type="checkbox" name="traditional-exchange" value="ripioexchange"> Ripio Exchange</label>
+                <label><input type="checkbox" name="traditional-exchange" value="universalcoins"> Universal Coins</label>
+                <label><input type="checkbox" name="traditional-exchange" value="decrypto"> Decrypto</label>
+                <label><input type="checkbox" name="traditional-exchange" value="vitawallet"> Vita Wallet</label>
+                <label><input type="checkbox" name="traditional-exchange" value="saldo"> Saldo</label>
+                <label><input type="checkbox" name="traditional-exchange" value="astropay"> AstroPay</label>
+                <label><input type="checkbox" name="traditional-exchange" value="pluscrypto"> PlusCrypto</label>
+                <label><input type="checkbox" name="traditional-exchange" value="eluter"> Eluter</label>
+                <label><input type="checkbox" name="traditional-exchange" value="trubit"> Trubit</label>
+                <label><input type="checkbox" name="traditional-exchange" value="bitsoalpha"> Bitso Alpha</label>
+              </div>
+              <div class="exchange-group">
+                <h4>Otros</h4>
+                <label><input type="checkbox" name="traditional-exchange" value="cocoscrypto"> Cocos Crypto</label>
+                <label><input type="checkbox" name="traditional-exchange" value="cryptomktpro"> CryptoMKT Pro</label>
+                <label><input type="checkbox" name="traditional-exchange" value="wallbit"> Wallbit</label>
+              </div>
+            </div>
           </div>
         </div>
       </section>

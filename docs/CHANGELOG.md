@@ -2,7 +2,35 @@
 
 Todos los cambios notables de este proyecto serán documentados en este archivo.
 
-## [5.0.84] - 2026-01-16 - ELIMINACIÓN DE CÓDIGO DUPLICADO
+## [5.0.85] - 2026-01-21 - SEPARACIÓN DE EXCHANGES P2P Y TRADICIONALES
+
+### 🎯 Reorganización de Configuración de Exchanges
+- **Nueva sección "Exchanges con P2P"**: Exchanges que tienen versión normal y P2P (Binance, Bybit, Lemon Cash)
+- **Nueva sección "Exchanges solo P2P"**: Exchanges que operan únicamente en modo P2P (OKX, Bitget, KuCoin, etc.)
+- **Nueva sección "Exchanges Tradicionales"**: Exchanges que operan únicamente en modo tradicional (Buenbit, Ripio, etc.)
+
+### 🔧 Mejoras en la UI de Configuración
+- **Separación visual clara**: Cada tipo de exchange en su propia sección colapsable
+- **Descripciones explicativas**: Texto que explica qué tipo de exchanges contiene cada sección
+- **Organización lógica**: Exchanges agrupados por importancia (Principales, Secundarios, Otros)
+
+### 📊 Exchanges Disponibles por Categoría
+
+**Exchanges con versión P2P:**
+- Binance / Binance P2P
+- Bybit / Bybit P2P  
+- Lemon Cash / Lemon Cash P2P
+
+**Exchanges solo P2P:**
+- OKX P2P, Bitget P2P, KuCoin P2P, BingX P2P, Huobi P2P, MEXC P2P, WeeX P2P, CoinEx P2P, El Dorado P2P, Paydece P2P
+
+**Exchanges solo tradicionales:**
+- Buenbit, Ripio, SatoshiTango, TiendaCrypto, Belo, Fiwind, Letsbit, Ripio Exchange, Universal Coins, Decrypto, Vita Wallet, Saldo, AstroPay, PlusCrypto, Eluter, Trubit, Bitso Alpha, Cocos Crypto, CryptoMKT Pro, Wallbit
+
+### 🧪 Testing
+- 47 tests passing
+- Nueva configuración `selectedTraditionalExchanges` agregada
+- Lógica de carga/guardado actualizada para ambas secciones
 
 ### 🧹 Refactorización Completa
 - **popup.js:** Reducido de 4,791 a 4,062 líneas (-729 líneas, -15.2%)

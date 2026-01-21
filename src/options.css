@@ -173,6 +173,13 @@ body {
   border-radius: var(--radius-sm);
 }
 
+.subsection-description {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  margin-bottom: var(--space-3);
+  font-style: italic;
+}
+
 .content {
   padding: var(--space-4);
   display: flex;
