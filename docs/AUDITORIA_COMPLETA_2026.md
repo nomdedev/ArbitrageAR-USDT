@@ -1,8 +1,8 @@
-# 🔍 AUDITORÍA COMPLETA - ArbitrageAR-USDT v5.0.84
+# 🔍 AUDITORÍA COMPLETA - ArbitrageAR-USDT v5.0.85
 
 > **Fecha de auditoría inicial:** 14 de enero de 2026  
-> **Última actualización:** 16 de enero de 2026  
-> **Versión analizada:** 5.0.84  
+> **Última actualización:** 21 de enero de 2026  
+> **Versión analizada:** 5.0.85  
 > **Auditor:** GitHub Copilot
 
 ---
@@ -710,6 +710,18 @@ validateExchangeData(data, pair) {
 }
 ```
 
+#### 1.1. ✅ IMPLEMENTADO: Separación de Exchanges P2P y Tradicionales (v5.0.85)
+
+**Nueva organización de configuración:**
+- **🏢 Exchanges con P2P**: Binance, Bybit, Lemon Cash (tienen versión normal y P2P)
+- **🔄 Exchanges solo P2P**: OKX, Bitget, KuCoin, BingX, Huobi, MEXC, WeeX, CoinEx, El Dorado, Paydece
+- **🏛️ Exchanges Tradicionales**: Buenbit, Ripio, SatoshiTango, TiendaCrypto, Belo, Fiwind, Letsbit, y 14 más
+
+**Mejoras en UX:**
+- Secciones visualmente separadas con descripciones explicativas
+- Configuración independiente para cada tipo de exchange
+- Mayor claridad para usuarios sobre qué exchanges están disponibles
+
 #### 2. 🟡 XSS Potencial en innerHTML - PENDIENTE
 
 ```javascript
@@ -1041,6 +1053,7 @@ console.log(`✅ Version bumped to ${newVersion}`);
 | **UX Simulador** | 🟡 | ✅ | Presets agregados |
 | **Sistema Alertas** | 🔴 | ✅ | Corregido v5.0.83 |
 | **Documentación API** | 🔴 | ✅ | API_INTERNA.md |
+| **Separación Exchanges** | 🔴 | ✅ | P2P vs Tradicionales v5.0.85 |
 | **Código duplicado** | 🔴 | ✅ | Eliminado v5.0.84 |
 
 ---
@@ -1078,5 +1091,5 @@ La puntuación general ha mejorado de **5.9/10 a 8.1/10**, lo que representa una
 ---
 
 *Auditoría inicial: Enero 2026*  
-*Última actualización: 16 de enero de 2026 - Versión 5.0.84*  
+*Última actualización: 21 de enero de 2026 - Versión 5.0.85*  
 *Por: GitHub Copilot*
