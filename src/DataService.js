@@ -108,7 +108,11 @@ class DataService {
     const data = await this.fetchWithRateLimit(url);
 
     if (data && typeof data === 'object') {
-      console.log(`💎 Datos ${symbol}/${fiatCurrency} obtenidos:`, Object.keys(data).length, 'exchanges');
+      console.log(
+        `💎 Datos ${symbol}/${fiatCurrency} obtenidos:`,
+        Object.keys(data).length,
+        'exchanges'
+      );
       return {
         ...data,
         symbol: symbol,
@@ -132,7 +136,11 @@ class DataService {
     const data = await this.fetchWithRateLimit(url);
 
     if (data && typeof data === 'object') {
-      console.log(`🔄 Datos ${symbolFrom}/${symbolTo} obtenidos:`, Object.keys(data).length, 'exchanges');
+      console.log(
+        `🔄 Datos ${symbolFrom}/${symbolTo} obtenidos:`,
+        Object.keys(data).length,
+        'exchanges'
+      );
       return {
         ...data,
         symbolFrom: symbolFrom,
@@ -195,7 +203,19 @@ class DataService {
    */
   async fetchAllCryptos(cryptoList = null, fiatCurrency = 'ARS') {
     // Default: Top 10 criptos
-    const defaultCryptos = ['BTC', 'ETH', 'USDC', 'DAI', 'BNB', 'SOL', 'ADA', 'XRP', 'MATIC', 'DOGE', 'USDT'];
+    const defaultCryptos = [
+      'BTC',
+      'ETH',
+      'USDC',
+      'DAI',
+      'BNB',
+      'SOL',
+      'ADA',
+      'XRP',
+      'MATIC',
+      'DOGE',
+      'USDT'
+    ];
     const cryptos = cryptoList || defaultCryptos;
 
     console.log(`🔄 Obteniendo datos para ${cryptos.length} criptomonedas...`);
@@ -218,7 +238,9 @@ class DataService {
       }
     });
 
-    console.log(`✅ Datos obtenidos para ${Object.keys(cryptoData).length}/${cryptos.length} criptomonedas`);
+    console.log(
+      `✅ Datos obtenidos para ${Object.keys(cryptoData).length}/${cryptos.length} criptomonedas`
+    );
     return cryptoData;
   }
 
@@ -232,103 +254,103 @@ class DataService {
    */
   getDefaultNetworkFees() {
     return {
-      'BTC': {
-        'binance': 0.0005,
-        'binancep2p': 0.0005,
-        'lemon': 0.0001,
-        'ripio': 0.0002,
-        'buenbit': 0.0003,
-        'satoshitango': 0.0002,
-        'belo': 0.0003,
-        'default': 0.0002
+      BTC: {
+        binance: 0.0005,
+        binancep2p: 0.0005,
+        lemon: 0.0001,
+        ripio: 0.0002,
+        buenbit: 0.0003,
+        satoshitango: 0.0002,
+        belo: 0.0003,
+        default: 0.0002
       },
-      'ETH': {
-        'binance': 0.005,
-        'binancep2p': 0.005,
-        'lemon': 0.003,
-        'ripio': 0.004,
-        'buenbit': 0.004,
-        'satoshitango': 0.003,
-        'belo': 0.004,
-        'default': 0.003
+      ETH: {
+        binance: 0.005,
+        binancep2p: 0.005,
+        lemon: 0.003,
+        ripio: 0.004,
+        buenbit: 0.004,
+        satoshitango: 0.003,
+        belo: 0.004,
+        default: 0.003
       },
-      'USDC': {
-        'binance': 1.0,
-        'binancep2p': 1.0,
-        'lemon': 0.5,
-        'ripio': 1.5,
-        'buenbit': 1.0,
-        'satoshitango': 1.0,
-        'belo': 1.0,
-        'default': 1.0
+      USDC: {
+        binance: 1.0,
+        binancep2p: 1.0,
+        lemon: 0.5,
+        ripio: 1.5,
+        buenbit: 1.0,
+        satoshitango: 1.0,
+        belo: 1.0,
+        default: 1.0
       },
-      'USDT': {
-        'binance': 1.0,
-        'binancep2p': 1.0,
-        'lemon': 0.5,
-        'ripio': 1.5,
-        'buenbit': 1.0,
-        'satoshitango': 1.0,
-        'belo': 1.0,
-        'default': 1.0
+      USDT: {
+        binance: 1.0,
+        binancep2p: 1.0,
+        lemon: 0.5,
+        ripio: 1.5,
+        buenbit: 1.0,
+        satoshitango: 1.0,
+        belo: 1.0,
+        default: 1.0
       },
-      'DAI': {
-        'binance': 1.0,
-        'binancep2p': 1.0,
-        'lemon': 0.8,
-        'ripio': 1.2,
-        'buenbit': 1.0,
-        'satoshitango': 1.0,
-        'belo': 1.0,
-        'default': 1.0
+      DAI: {
+        binance: 1.0,
+        binancep2p: 1.0,
+        lemon: 0.8,
+        ripio: 1.2,
+        buenbit: 1.0,
+        satoshitango: 1.0,
+        belo: 1.0,
+        default: 1.0
       },
-      'BNB': {
-        'binance': 0.0005,
-        'binancep2p': 0.0005,
-        'lemon': 0.001,
-        'ripio': 0.001,
-        'buenbit': 0.001,
-        'default': 0.001
+      BNB: {
+        binance: 0.0005,
+        binancep2p: 0.0005,
+        lemon: 0.001,
+        ripio: 0.001,
+        buenbit: 0.001,
+        default: 0.001
       },
-      'SOL': {
-        'binance': 0.01,
-        'binancep2p': 0.01,
-        'lemon': 0.008,
-        'ripio': 0.01,
-        'buenbit': 0.01,
-        'default': 0.01
+      SOL: {
+        binance: 0.01,
+        binancep2p: 0.01,
+        lemon: 0.008,
+        ripio: 0.01,
+        buenbit: 0.01,
+        default: 0.01
       },
-      'ADA': {
-        'binance': 1.0,
-        'binancep2p': 1.0,
-        'lemon': 0.8,
-        'ripio': 1.2,
-        'buenbit': 1.0,
-        'default': 1.0
+      ADA: {
+        binance: 1.0,
+        binancep2p: 1.0,
+        lemon: 0.8,
+        ripio: 1.2,
+        buenbit: 1.0,
+        default: 1.0
       },
-      'XRP': {
-        'binance': 0.25,
-        'binancep2p': 0.25,
-        'lemon': 0.2,
-        'ripio': 0.3,
-        'buenbit': 0.25,
-        'default': 0.25
+      XRP: {
+        binance: 0.25,
+        binancep2p: 0.25,
+        lemon: 0.2,
+        ripio: 0.3,
+        buenbit: 0.25,
+        default: 0.25
       },
-      'MATIC': {
-        'binance': 0.1,
-        'binancep2p': 0.1,
-        'lemon': 0.08,
-        'ripio': 0.12,
-        'buenbit': 0.1,
-        'default': 0.1
+      MATIC: {
+        binance: 0.1,
+        binancep2p: 0.1,
+        lemon: 0.08,
+        ripio: 0.12,
+        buenbit: 0.1,
+        default: 0.1
       },
-      'DOGE': {
-        'binance': 5.0,
-        'binancep2p': 5.0,
-        'lemon': 4.0,
-        'ripio': 6.0,
-        'buenbit': 5.0,
-        'default': 5.0
+      DOGE: {
+        binance: 5.0,
+        binancep2p: 5.0,
+        lemon: 4.0,
+        ripio: 6.0,
+        buenbit: 5.0,
+        default: 5.0
       }
     };
   }
@@ -434,8 +456,8 @@ class DataService {
 
           bankRates[bankCode] = {
             name: bankName,
-            compra: sellPrice,  // FIX v5.0.35: Usar sellPrice (precio que pagamos al banco)
-            venta: buyPrice,    // FIX v5.0.35: Usar buyPrice (precio que recibimos del banco)
+            compra: sellPrice, // FIX v5.0.35: Usar sellPrice (precio que pagamos al banco)
+            venta: buyPrice, // FIX v5.0.35: Usar buyPrice (precio que recibimos del banco)
             spread: sellPrice - buyPrice,
             timestamp: new Date().toISOString(),
             source: 'dolarito'
@@ -443,9 +465,10 @@ class DataService {
         }
       }
 
-      console.log(`💰 Precios bancarios obtenidos (dolarito): ${Object.keys(bankRates).length} bancos`);
+      console.log(
+        `💰 Precios bancarios obtenidos (dolarito): ${Object.keys(bankRates).length} bancos`
+      );
       return bankRates;
-
     } catch (error) {
       console.error('Error obteniendo precios bancarios de Dolarito:', error);
       return null;
@@ -481,9 +504,10 @@ class DataService {
         }
       }
 
-      console.log(`💰 Precios bancarios obtenidos (criptoya): ${Object.keys(bankRates).length} bancos`);
+      console.log(
+        `💰 Precios bancarios obtenidos (criptoya): ${Object.keys(bankRates).length} bancos`
+      );
       return bankRates;
-
     } catch (error) {
       console.error('Error obteniendo precios bancarios de CriptoYa:', error);
       return null;
@@ -493,23 +517,23 @@ class DataService {
   // NUEVO v5.0.22: Normalizar nombres de bancos de CriptoYa
   normalizeBankName(code) {
     const bankNames = {
-      'bna': 'Banco Nación',
-      'bbva': 'BBVA',
-      'piano': 'Banco Piano',
-      'hipotecario': 'Banco Hipotecario',
-      'galicia': 'Banco Galicia',
-      'santander': 'Banco Santander',
-      'ciudad': 'Banco Ciudad',
-      'supervielle': 'Banco Supervielle',
-      'patagonia': 'Banco Patagonia',
-      'comafi': 'Banco Comafi',
-      'icbc': 'ICBC',
-      'bind': 'Bind',
-      'bancor': 'Bancor',
-      'chaco': 'Banco Chaco',
-      'pampa': 'Banco Pampa',
-      'provincia': 'Banco Provincia',
-      'columbia': 'Banco Columbia'
+      bna: 'Banco Nación',
+      bbva: 'BBVA',
+      piano: 'Banco Piano',
+      hipotecario: 'Banco Hipotecario',
+      galicia: 'Banco Galicia',
+      santander: 'Banco Santander',
+      ciudad: 'Banco Ciudad',
+      supervielle: 'Banco Supervielle',
+      patagonia: 'Banco Patagonia',
+      comafi: 'Banco Comafi',
+      icbc: 'ICBC',
+      bind: 'Bind',
+      bancor: 'Bancor',
+      chaco: 'Banco Chaco',
+      pampa: 'Banco Pampa',
+      provincia: 'Banco Provincia',
+      columbia: 'Banco Columbia'
     };
 
     return bankNames[code] || code.charAt(0).toUpperCase() + code.slice(1);
@@ -520,7 +544,7 @@ class DataService {
     const bankCodes = {
       'Banco Nación': 'bna',
       'BBVA Banco Francés': 'bbva',
-      'BBVA': 'bbva',
+      BBVA: 'bbva',
       'Banco Piano': 'piano',
       'Banco Hipotecario': 'hipotecario',
       'Banco Galicia': 'galicia',
@@ -530,9 +554,9 @@ class DataService {
       'Banco Supervielle': 'supervielle',
       'Banco Patagonia': 'patagonia',
       'Banco Comafi': 'comafi',
-      'ICBC': 'icbc',
-      'Bind': 'bind',
-      'Bancor': 'bancor',
+      ICBC: 'icbc',
+      Bind: 'bind',
+      Bancor: 'bancor',
       'Nuevo Banco del Chaco': 'chaco',
       'Banco Chaco': 'chaco',
       'Banco de la Pampa': 'pampa',
@@ -581,7 +605,6 @@ class DataService {
 
       console.log(`💰 Precios bancarios combinados: ${Object.keys(combined).length} bancos`);
       return combined;
-
     } catch (error) {
       console.error('Error combinando precios bancarios:', error);
       // Fallback: intentar cada fuente por separado

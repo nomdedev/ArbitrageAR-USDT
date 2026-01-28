@@ -377,21 +377,64 @@ async function fetchAllDollarTypes(userSettings) {
   if (data && typeof data === 'object') {
     // Los datos de CriptoYa ya vienen en formato objeto
     const dollarTypes = {};
+    let invalidBanks = [];
+    let suspiciousBanks = [];
+    let spreads = [];
+    
     Object.entries(data).forEach(([key, value]) => {
       if (
-        value &&
-        typeof value === 'object' &&
-        (typeof value.bid === 'number' || typeof value.ask === 'number')
-      ) {
+          value &&
+          typeof value === 'object' &&
+          (typeof value.bid === 'number' || typeof value.ask === 'number')
+        ) {
+        const ask = value.ask || value.totalAsk;
+        const bid = value.bid || value.totalBid;
+        
+        // VALIDACIÓN FUNDAMENTAL: ask > bid (spread positivo)
+        if (ask <= bid) {
+          console.error(`❌ [VALIDACIÓN] ${key}: ask (${ask}) <= bid (${bid}) - CAMPOS INVERTIDOS`);
+          console.error(`   Esto es IMPOSIBLE: el banco vende más barato de lo que compra`);
+          console.error(`   Spread negativo: ${(bid - ask).toFixed(2)}`);
+          invalidBanks.push({ bankCode: key, ask, bid, error: 'Spread negativo - ask debe ser mayor que bid' });
+          return; // NO incluir este banco
+        }
+        
+        // Validar spread razonable (0.1% - 5%)
+        const spread = ask - bid;
+        const spreadPercent = (spread / ask) * 100;
+        spreads.push({ bankCode: key, spread, spreadPercent });
+        
+        if (spreadPercent < 0.1) {
+          console.warn(`⚠️ [VALIDACIÓN] ${key}: Spread ${spreadPercent.toFixed(2)}% muy bajo (sospechoso)`);
+          suspiciousBanks.push({ bankCode: key, spreadPercent, warning: 'Spread muy bajo - posible error en datos' });
+        } else if (spreadPercent > 5) {
+          console.warn(`⚠️ [VALIDACIÓN] ${key}: Spread ${spreadPercent.toFixed(2)}% muy alto (sospechoso)`);
+          suspiciousBanks.push({ bankCode: key, spreadPercent, warning: 'Spread muy alto - posible error en datos' });
+        }
+        
         dollarTypes[key] = {
           nombre: key.charAt(0).toUpperCase() + key.slice(1), // Capitalizar nombre
-          compra: value.bid || value.totalBid || 0,
-          venta: value.ask || value.totalAsk || 0,
+          compra: bid,
+          venta: ask,
           source: 'criptoya_bancostodos',
           timestamp: Date.now()
         };
       }
     });
+    
+    // Loggear resumen de validación
+    if (invalidBanks.length > 0) {
+      console.error(`❌ [VALIDACIÓN] ${invalidBanks.length} bancos con datos inválidos:`, invalidBanks);
+      console.error('   Estos bancos serán excluidos de los cálculos');
+    }
+    
+    if (suspiciousBanks.length > 0) {
+      console.warn(`⚠️ [VALIDACIÓN] ${suspiciousBanks.length} bancos con spreads anómalos:`, suspiciousBanks);
+    }
+    
+    const avgSpread = spreads.reduce((sum, s) => sum + s.spreadPercent, 0) / spreads.length;
+    console.log(`📊 [VALIDACIÓN] Spread promedio: ${avgSpread.toFixed(2)}%`);
+    
     log(
       '[BACKGROUND] 📤 Processed bancos data:',
       Object.keys(dollarTypes).length + ' bancos procesados'
@@ -509,7 +552,16 @@ async function calculateInterBrokerRoutes(
   // NUEVO: Filtrar exchanges según configuración del usuario
   let filteredUsdt = usdt;
   const selectedUsdtBrokers = userSettings.selectedUsdtBrokers;
+
+  // NUEVO: Subdivisión de exchanges P2P por función
+  const p2pUsdtArsExchanges = userSettings.p2pUsdtArsExchanges || [];
+  const p2pUsdUsdtExchanges = userSettings.p2pUsdUsdtExchanges || [];
+  const p2pSyncExchanges = userSettings.p2pSyncExchanges || [];
   
+  const disabledP2pUsdtArs = userSettings.disabledP2pUsdtArs || [];
+  const disabledP2pUsdUsdt = userSettings.disabledP2pUsdUsdt || [];
+  const disabledP2pSync = userSettings.disabledP2pSync || [];
+
   // Si el usuario seleccionó exchanges específicos, filtrar
   if (selectedUsdtBrokers && Array.isArray(selectedUsdtBrokers) && selectedUsdtBrokers.length > 0) {
     filteredUsdt = {};
@@ -520,6 +572,86 @@ async function calculateInterBrokerRoutes(
     });
     log(`🔄 [INTER-BROKER] Filtrando exchanges: ${selectedUsdtBrokers.length} seleccionados`);
   }
+  
+  // NUEVO: Filtrar exchanges P2P por función (USDT/ARS para paso 3)
+  let filteredP2pUsdtArs = filteredUsdt;
+  if (p2pUsdtArsExchanges && Array.isArray(p2pUsdtArsExchanges) && p2pUsdtArsExchanges.length > 0) {
+    filteredP2pUsdtArs = {};
+    p2pUsdtArsExchanges.forEach(exchange => {
+      if (filteredUsdt[exchange] && exchange.toLowerCase().includes('p2p')) {
+        filteredP2pUsdtArs[exchange] = filteredUsdt[exchange];
+      }
+    });
+    log(`🔄 [INTER-BROKER] Filtrando P2P USDT/ARS: ${p2pUsdtArsExchanges.length} seleccionados`);
+  }
+  
+  // Excluir exchanges P2P desactivados para USDT/ARS
+  if (disabledP2pUsdtArs && Array.isArray(disabledP2pUsdtArs) && disabledP2pUsdtArs.length > 0) {
+    filteredP2pUsdtArs = Object.entries(filteredP2pUsdtArs)
+      .filter(([exchange]) => !disabledP2pUsdtArs.includes(exchange))
+      .reduce((acc, [exchange, data]) => {
+        acc[exchange] = data;
+        return acc;
+      }, {});
+    log(`🔄 [INTER-BROKER] Excluyendo P2P USDT/ARS desactivados: ${disabledP2pUsdtArs.length}`);
+  }
+  
+  // NUEVO: Filtrar exchanges P2P por función (USD/USDT para paso 2)
+  let filteredP2pUsdUsdt = filteredUsdt;
+  if (p2pUsdUsdtExchanges && Array.isArray(p2pUsdUsdtExchanges) && p2pUsdUsdtExchanges.length > 0) {
+    filteredP2pUsdUsdt = {};
+    p2pUsdUsdtExchanges.forEach(exchange => {
+      if (filteredUsdt[exchange] && exchange.toLowerCase().includes('p2p')) {
+        filteredP2pUsdUsdt[exchange] = filteredUsdt[exchange];
+      }
+    });
+    log(`🔄 [INTER-BROKER] Filtrando P2P USD/USDT: ${p2pUsdUsdtExchanges.length} seleccionados`);
+  }
+  
+  // Excluir exchanges P2P desactivados para USD/USDT
+  if (disabledP2pUsdUsdt && Array.isArray(disabledP2pUsdUsdt) && disabledP2pUsdUsdt.length > 0) {
+    filteredP2pUsdUsdt = Object.entries(filteredP2pUsdUsdt)
+      .filter(([exchange]) => !disabledP2pUsdUsdt.includes(exchange))
+      .reduce((acc, [exchange, data]) => {
+        acc[exchange] = data;
+        return acc;
+      }, {});
+    log(`🔄 [INTER-BROKER] Excluyendo P2P USD/USDT desactivados: ${disabledP2pUsdUsdt.length}`);
+  }
+  
+  // NUEVO: Sincronizar exchanges P2P seleccionados para ambos pasos
+  let filteredP2pSync = filteredUsdt;
+  if (p2pSyncExchanges && Array.isArray(p2pSyncExchanges) && p2pSyncExchanges.length > 0) {
+    filteredP2pSync = {};
+    p2pSyncExchanges.forEach(exchange => {
+      if (filteredUsdt[exchange] && exchange.toLowerCase().includes('p2p')) {
+        filteredP2pSync[exchange] = filteredUsdt[exchange];
+      }
+    });
+    log(`🔄 [INTER-BROKER] Sincronizando P2P: ${p2pSyncExchanges.length} seleccionados`);
+  }
+  
+  // Excluir exchanges P2P desactivados para sincronización
+  if (disabledP2pSync && Array.isArray(disabledP2pSync) && disabledP2pSync.length > 0) {
+    filteredP2pSync = Object.entries(filteredP2pSync)
+      .filter(([exchange]) => !disabledP2pSync.includes(exchange))
+      .reduce((acc, [exchange, data]) => {
+        acc[exchange] = data;
+        return acc;
+      }, {});
+    log(`🔄 [INTER-BROKER] Excluyendo P2P sincronización desactivados: ${disabledP2pSync.length}`);
+  }
+  
+  // NUEVO: Combinar todos los exchanges filtrados
+  const combinedFilteredUsdt = {
+    ...filteredUsdt,
+    ...filteredP2pUsdtArs,
+    ...filteredP2pUsdUsdt,
+    ...filteredP2pSync
+  };
+  
+  // Usar el combinedFilteredUsdt para el cálculo
+  filteredUsdt = combinedFilteredUsdt;
 
   // Obtener exchanges válidos
   const exchanges = Object.keys(filteredUsdt).filter(
@@ -759,7 +891,7 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
   // NUEVO: Filtrar exchanges según configuración del usuario
   let filteredUsdt = usdt;
   const selectedUsdtBrokers = userSettings.selectedUsdtBrokers;
-  
+
   // Si el usuario seleccionó exchanges específicos, filtrar
   if (selectedUsdtBrokers && Array.isArray(selectedUsdtBrokers) && selectedUsdtBrokers.length > 0) {
     filteredUsdt = {};
@@ -1739,6 +1871,12 @@ async function sendNotification(arbitrage, settings) {
 // Verificar y enviar notificaciones después de actualizar datos
 async function checkAndNotify(arbitrages) {
   try {
+    // NUEVO: No enviar notificaciones en la primera actualización (inicialización)
+    if (isFirstUpdate) {
+      console.log('[NOTIF] ⏭️ Saltando notificación en inicialización (isFirstUpdate = true)');
+      return;
+    }
+
     const result = await chrome.storage.local.get('notificationSettings');
     const settings = result.notificationSettings || {
       notificationsEnabled: true,
@@ -1780,6 +1918,7 @@ async function checkAndNotify(arbitrages) {
 
 let currentData = null;
 let lastUpdate = null;
+let isFirstUpdate = true; // NUEVO: Bandera para evitar notificaciones en inicialización
 
 // ============================================
 // ACTUALIZACIÓN DE DATOS
@@ -1931,6 +2070,9 @@ async function updateData() {
       await checkAndNotify(arbitrageRoutes);
     }
 
+    // NUEVO: Marcar que ya no es la primera actualización
+    isFirstUpdate = false;
+
     return data;
   } catch (error) {
     console.error('❌ Error en updateData:', error);
@@ -2018,6 +2160,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // Actualizar configuración del usuario
     userSettings = request.settings;
     log('[BACKGROUND] 👤 userSettings actualizada con nueva configuración');
+
+    // NUEVO: Restablecer isFirstUpdate para evitar notificaciones al cambiar configuración
+    isFirstUpdate = false; // Mantener false para permitir notificaciones después de cambiar configuración
 
     // Forzar recálculo de datos con nueva configuración
     updateData()
@@ -2293,12 +2438,12 @@ async function startPeriodicUpdates() {
   try {
     // Limpiar alarmas existentes
     await chrome.alarms.clear(ALARM_NAME);
-    
+
     // Crear nueva alarma periódica
     await chrome.alarms.create(ALARM_NAME, {
       periodInMinutes: intervalMinutes
     });
-    
+
     log(`✅ Alarma creada: ${ALARM_NAME} cada ${intervalMinutes} minutos`);
   } catch (error) {
     console.error('❌ Error creando alarma:', error);

@@ -52,7 +52,34 @@ const DEFAULT_SETTINGS = {
   selectedP2PExchanges: undefined, // undefined = usar todos los exchanges P2P
   selectedTraditionalExchanges: undefined, // undefined = usar todos los exchanges tradicionales
   selectedUsdtBrokers: undefined, // undefined = usar TODOS los exchanges USDT disponibles
-  filterP2POutliers: true // Filtrar precios anómalos por defecto
+  filterP2POutliers: true, // Filtrar precios anómalos por defecto
+  
+  // NUEVO: Selección granular de exchanges por paso del arbitraje
+  paso1_ars_usd_banco: 'auto', // 'auto' o código de banco específico para ARS → USD
+  paso2_usd_usdt_exchange: 'auto', // 'auto' o código de exchange específico para USD → USDT
+  paso3_usdt_ars_exchange: 'auto', // 'auto' o código de exchange específico para USDT → ARS
+  
+  // NUEVO: Exchanges desactivados por paso
+  disabledExchanges: {
+    paso1: [], // Bancos desactivados para ARS → USD
+    paso2: [], // Exchanges desactivados para USD → USDT
+    paso3: []  // Exchanges desactivados para USDT → ARS
+  },
+  
+  // NUEVO: Validación de datos
+  validateBankSpreads: true, // Validar que ask > bid (spread positivo)
+  validateExchangeData: true, // Validar consistencia de datos de exchanges
+  logValidationErrors: true, // Loggear errores de validación
+  
+  // NUEVO: Subdivisión de exchanges P2P por función
+  p2pUsdtArsExchanges: undefined, // Exchanges P2P para USDT/ARS (paso 3)
+  p2pUsdUsdtExchanges: undefined, // Exchanges P2P para USD/USDT (paso 2)
+  p2pSyncExchanges: undefined, // Exchanges P2P para sincronización (paso 2 y 3)
+  
+  // NUEVO: Exchanges desactivados por función P2P
+  disabledP2pUsdtArs: [], // Exchanges P2P desactivados para USDT/ARS
+  disabledP2pUsdUsdt: [], // Exchanges P2P desactivados para USD/USDT
+  disabledP2pSync: [], // Exchanges P2P desactivados para sincronización
 };
 
 // Cargar configuración al iniciar
@@ -186,16 +213,70 @@ async function loadSettings() {
       }
     });
 
-    // NUEVO v5.0.82: Configuración de exchanges P2P
-    const selectedP2PExchanges = settings.selectedP2PExchanges;
-    const defaultP2PExchanges = ['binancep2p', 'okexp2p', 'bybitp2p', 'bitgetp2p', 'kucoinp2p', 'bingxp2p'];
+    // NUEVO v5.0.82: Configuración de exchanges P2P subdivididos por función
+    // Paso 2: USD → USDT (Compra USDT)
+    const p2pUsdtUsdtExchanges = settings.p2pUsdUsdtExchanges;
+    const defaultP2pUsdtUsdtExchanges = [
+      'binancep2p',
+      'okexp2p',
+      'bybitp2p',
+      'bitgetp2p',
+      'kucoinp2p',
+      'bingxp2p'
+    ];
 
-    document.querySelectorAll('input[name="p2p-exchange"]').forEach(cb => {
-      // Si no hay configuración guardada o está vacía, usar exchanges por defecto
-      if (selectedP2PExchanges === undefined || (Array.isArray(selectedP2PExchanges) && selectedP2PExchanges.length === 0)) {
-        cb.checked = defaultP2PExchanges.includes(cb.value);
+    document.querySelectorAll('input[name="p2p-usdt-usdt-exchange"]').forEach(cb => {
+      if (
+        p2pUsdtUsdtExchanges === undefined ||
+        (Array.isArray(p2pUsdtUsdtExchanges) && p2pUsdtUsdtExchanges.length === 0)
+      ) {
+        cb.checked = defaultP2pUsdtUsdtExchanges.includes(cb.value);
       } else {
-        cb.checked = selectedP2PExchanges.includes(cb.value);
+        cb.checked = p2pUsdtUsdtExchanges.includes(cb.value);
+      }
+    });
+
+    // Paso 3: USDT → ARS (Venta USDT)
+    const p2pUsdtArsExchanges = settings.p2pUsdtArsExchanges;
+    const defaultP2pUsdtArsExchanges = [
+      'binancep2p',
+      'okexp2p',
+      'bybitp2p',
+      'bitgetp2p',
+      'kucoinp2p',
+      'bingxp2p'
+    ];
+
+    document.querySelectorAll('input[name="p2p-usdt-ars-exchange"]').forEach(cb => {
+      if (
+        p2pUsdtArsExchanges === undefined ||
+        (Array.isArray(p2pUsdtArsExchanges) && p2pUsdtArsExchanges.length === 0)
+      ) {
+        cb.checked = defaultP2pUsdtArsExchanges.includes(cb.value);
+      } else {
+        cb.checked = p2pUsdtArsExchanges.includes(cb.value);
+      }
+    });
+
+    // Sincronización: Ambos pasos
+    const p2pSyncExchanges = settings.p2pSyncExchanges;
+    const defaultP2pSyncExchanges = [
+      'binancep2p',
+      'okexp2p',
+      'bybitp2p',
+      'bitgetp2p',
+      'kucoinp2p',
+      'bingxp2p'
+    ];
+
+    document.querySelectorAll('input[name="p2p-sync-exchange"]').forEach(cb => {
+      if (
+        p2pSyncExchanges === undefined ||
+        (Array.isArray(p2pSyncExchanges) && p2pSyncExchanges.length === 0)
+      ) {
+        cb.checked = defaultP2pSyncExchanges.includes(cb.value);
+      } else {
+        cb.checked = p2pSyncExchanges.includes(cb.value);
       }
     });
 
@@ -209,14 +290,37 @@ async function loadSettings() {
     const selectedTraditionalExchanges = settings.selectedTraditionalExchanges;
     // Por defecto, incluir TODOS los exchanges tradicionales disponibles
     const defaultTraditionalExchanges = [
-      'binance', 'bybit', 'buenbit', 'ripio', 'satoshitango', 'tiendacrypto', 'belo', 'fiwind', 'letsbit', 'lemoncash',
-      'ripioexchange', 'universalcoins', 'decrypto', 'vitawallet', 'saldo', 'astropay', 'pluscrypto', 'eluter', 'trubit', 'bitsoalpha',
-      'cocoscrypto', 'cryptomktpro', 'wallbit'
+      'binance',
+      'bybit',
+      'buenbit',
+      'ripio',
+      'satoshitango',
+      'tiendacrypto',
+      'belo',
+      'fiwind',
+      'letsbit',
+      'lemoncash',
+      'ripioexchange',
+      'universalcoins',
+      'decrypto',
+      'vitawallet',
+      'saldo',
+      'astropay',
+      'pluscrypto',
+      'eluter',
+      'trubit',
+      'bitsoalpha',
+      'cocoscrypto',
+      'cryptomktpro',
+      'wallbit'
     ];
 
     document.querySelectorAll('input[name="traditional-exchange"]').forEach(cb => {
       // Si no hay configuración guardada o está vacía, usar TODOS los exchanges por defecto
-      if (selectedTraditionalExchanges === undefined || (Array.isArray(selectedTraditionalExchanges) && selectedTraditionalExchanges.length === 0)) {
+      if (
+        selectedTraditionalExchanges === undefined ||
+        (Array.isArray(selectedTraditionalExchanges) && selectedTraditionalExchanges.length === 0)
+      ) {
         cb.checked = defaultTraditionalExchanges.includes(cb.value);
       } else {
         cb.checked = selectedTraditionalExchanges.includes(cb.value);
@@ -227,14 +331,36 @@ async function loadSettings() {
     const selectedUsdtBrokers = settings.selectedUsdtBrokers;
     // Por defecto, incluir TODOS los exchanges USDT disponibles
     const defaultUsdtBrokers = [
-      'binance', 'buenbit', 'lemoncash', 'ripio', 'fiwind', 'letsbit', 'belo', 'tiendacrypto', 'satoshitango',
-      'ripioexchange', 'universalcoins', 'decrypto', 'vitawallet', 'saldo', 'astropay', 'pluscrypto', 'eluter', 'trubit', 'bitsoalpha',
-      'cocoscrypto', 'cryptomktpro', 'wallbit'
+      'binance',
+      'buenbit',
+      'lemoncash',
+      'ripio',
+      'fiwind',
+      'letsbit',
+      'belo',
+      'tiendacrypto',
+      'satoshitango',
+      'ripioexchange',
+      'universalcoins',
+      'decrypto',
+      'vitawallet',
+      'saldo',
+      'astropay',
+      'pluscrypto',
+      'eluter',
+      'trubit',
+      'bitsoalpha',
+      'cocoscrypto',
+      'cryptomktpro',
+      'wallbit'
     ];
 
     document.querySelectorAll('input[name="usdt-broker"]').forEach(cb => {
       // Si no hay configuración guardada o está vacía, usar TODOS los exchanges por defecto
-      if (selectedUsdtBrokers === undefined || (Array.isArray(selectedUsdtBrokers) && selectedUsdtBrokers.length === 0)) {
+      if (
+        selectedUsdtBrokers === undefined ||
+        (Array.isArray(selectedUsdtBrokers) && selectedUsdtBrokers.length === 0)
+      ) {
         cb.checked = defaultUsdtBrokers.includes(cb.value);
       } else {
         cb.checked = selectedUsdtBrokers.includes(cb.value);
@@ -406,13 +532,14 @@ function initializeBrokerFeesImproved() {
   });
 
   function updateAddButtonState() {
-    const hasValidBroker = brokerSelect.value && (brokerSelect.value !== 'other' || customBrokerName.value.trim());
+    const hasValidBroker =
+      brokerSelect.value && (brokerSelect.value !== 'other' || customBrokerName.value.trim());
     const hasValidFees = buyFeeInput.value || sellFeeInput.value;
     addButton.disabled = !(hasValidBroker && hasValidFees);
   }
 
   function loadBrokerFees() {
-    chrome.storage.local.get('notificationSettings', (result) => {
+    chrome.storage.local.get('notificationSettings', result => {
       const settings = result.notificationSettings || {};
       const brokerFees = settings.brokerFees || [];
 
@@ -526,7 +653,7 @@ function initializeBrokerFeesImproved() {
       sellFee: parseFloat(item.dataset.sellFee) || 0
     }));
 
-    chrome.storage.local.get('notificationSettings', (result) => {
+    chrome.storage.local.get('notificationSettings', result => {
       const settings = result.notificationSettings || DEFAULT_SETTINGS;
       settings.brokerFees = brokerFees;
       chrome.storage.local.set({ notificationSettings: settings }, () => {
@@ -636,17 +763,40 @@ function getCurrentSettings() {
   const selectedBankCheckboxes = document.querySelectorAll('input[name="bank"]:checked');
   settings.selectedBanks = Array.from(selectedBankCheckboxes).map(cb => cb.value);
 
-  // NUEVO v5.0.82: Exchanges P2P seleccionados
-  const selectedP2PCheckboxes = document.querySelectorAll('input[name="p2p-exchange"]:checked');
-  settings.selectedP2PExchanges = Array.from(selectedP2PCheckboxes).map(cb => cb.value);
+  // NUEVO v5.0.82: Configuración de exchanges P2P subdivididos por función
+  // Paso 2: USD → USDT (Compra USDT)
+  const p2pUsdtUsdtCheckboxes = document.querySelectorAll(
+    'input[name="p2p-usdt-usdt-exchange"]:checked'
+  );
+  settings.p2pUsdtUsdtExchanges = Array.from(p2pUsdtUsdtCheckboxes).map(cb => cb.value);
+
+  // Paso 3: USDT → ARS (Venta USDT)
+  const p2pUsdtArsCheckboxes = document.querySelectorAll(
+    'input[name="p2p-usdt-ars-exchange"]:checked'
+  );
+  settings.p2pUsdtArsExchanges = Array.from(p2pUsdtArsCheckboxes).map(cb => cb.value);
+
+  // Sincronización: Ambos pasos
+  const p2pSyncCheckboxes = document.querySelectorAll(
+    'input[name="p2p-sync-exchange"]:checked'
+  );
+  settings.p2pSyncExchanges = Array.from(p2pSyncCheckboxes).map(cb => cb.value);
+
+  // Filtro de outliers P2P
   settings.filterP2POutliers = document.getElementById('filter-p2p-outliers')?.checked ?? true;
 
   // NUEVO v5.0.85: Exchanges tradicionales seleccionados
-  const selectedTraditionalCheckboxes = document.querySelectorAll('input[name="traditional-exchange"]:checked');
-  settings.selectedTraditionalExchanges = Array.from(selectedTraditionalCheckboxes).map(cb => cb.value);
+  const selectedTraditionalCheckboxes = document.querySelectorAll(
+    'input[name="traditional-exchange"]:checked'
+  );
+  settings.selectedTraditionalExchanges = Array.from(selectedTraditionalCheckboxes).map(
+    cb => cb.value
+  );
 
   // NUEVO: Exchanges USDT seleccionados para rutas
-  const selectedUsdtBrokerCheckboxes = document.querySelectorAll('input[name="usdt-broker"]:checked');
+  const selectedUsdtBrokerCheckboxes = document.querySelectorAll(
+    'input[name="usdt-broker"]:checked'
+  );
   settings.selectedUsdtBrokers = Array.from(selectedUsdtBrokerCheckboxes).map(cb => cb.value);
 
   // APIs
@@ -703,12 +853,12 @@ function updateDollarPriceUI() {
 // Configurar secciones colapsables
 function setupCollapsibleSections() {
   const cardHeaders = document.querySelectorAll('.card-header[data-action="toggle-section"]');
-  
+
   cardHeaders.forEach(header => {
     header.addEventListener('click', () => {
       const content = header.nextElementSibling;
       const isCollapsed = content.classList.contains('collapsed');
-      
+
       if (isCollapsed) {
         // Expandir
         content.classList.remove('collapsed');

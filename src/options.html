@@ -1,457 +1,841 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Configuración - ArbitrARS</title>
-  <link rel="stylesheet" href="options.css">
-</head>
-<body>
-  <div class="container">
-    <header class="options-header">
-      <h1>⚙️ Configuración</h1>
-      <p class="subtitle">Personaliza ArbitrARS según tus necesidades</p>
-    </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Configuración - ArbitrARS</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header class="options-header">
+        <h1>⚙️ Configuración</h1>
+        <p class="subtitle">Personaliza ArbitrARS según tus necesidades</p>
+      </header>
 
-    <div class="grid">
-
-      <!-- 💵 PRECIO DEL DÓLAR -->
-      <section class="card">
-        <div class="card-header" data-action="toggle-section">
-          <h2>💵 Precio del Dólar</h2>
-          <span class="toggle-icon">▼</span>
-        </div>
-        <div class="card-content">
-          <p class="section-description">Configura cómo se obtiene el precio de referencia del dólar oficial</p>
-
-          <div class="field">
-            <label>Fuente del precio</label>
-            <div class="radio-group">
-              <label><input type="radio" name="dollar-price-source" value="auto" checked> 🌐 Automático</label>
-              <label><input type="radio" name="dollar-price-source" value="manual"> ✏️ Manual</label>
-            </div>
+      <div class="grid">
+        <!-- 💵 PRECIO DEL DÓLAR -->
+        <section class="card">
+          <div class="card-header" data-action="toggle-section">
+            <h2>💵 Precio del Dólar</h2>
+            <span class="toggle-icon">▼</span>
           </div>
+          <div class="card-content">
+            <p class="section-description">
+              Configura cómo se obtiene el precio de referencia del dólar oficial
+            </p>
 
-          <div class="field" id="manual-price-section">
-            <label for="manual-dollar-price">Precio manual (ARS)</label>
-            <div class="input-group">
-              <input type="number" id="manual-dollar-price" min="100" max="5000" step="0.01" value="1400">
-              <span>ARS</span>
-            </div>
-            <small class="field-hint">Solo se usa si seleccionas "Manual"</small>
-          </div>
-
-          <div class="field" id="bank-method">
-            <label for="dollar-method">Método de cálculo</label>
-            <select id="dollar-method">
-              <option value="consenso" selected>🔥 Consenso (recomendado)</option>
-              <option value="promedio">📊 Promedio simple</option>
-              <option value="mejor-compra">📉 Mejor compra</option>
-              <option value="mejor-venta">📈 Mejor venta</option>
-              <option value="bna">🏛️ Banco Nación</option>
-              <option value="galicia">🏦 Galicia</option>
-              <option value="santander">🏦 Santander</option>
-              <option value="bbva">🏦 BBVA</option>
-              <option value="icbc">🏦 ICBC</option>
-            </select>
-          </div>
-
-          <div class="field full">
-            <label>Bancos a consultar</label>
-            <div class="banks-grid">
-              <div class="bank-group">
-                <h4>Principales</h4>
-                <label><input type="checkbox" name="bank" value="bna"> Nación</label>
-                <label><input type="checkbox" name="bank" value="galicia"> Galicia</label>
-                <label><input type="checkbox" name="bank" value="santander"> Santander</label>
-                <label><input type="checkbox" name="bank" value="bbva"> BBVA</label>
-                <label><input type="checkbox" name="bank" value="icbc"> ICBC</label>
-              </div>
-              <div class="bank-group">
-                <h4>Regionales</h4>
-                <label><input type="checkbox" name="bank" value="ciudad"> Ciudad</label>
-                <label><input type="checkbox" name="bank" value="provincia"> Provincia</label>
-                <label><input type="checkbox" name="bank" value="chaco"> Chaco</label>
-                <label><input type="checkbox" name="bank" value="pampa"> Pampa</label>
-                <label><input type="checkbox" name="bank" value="bancor"> Bancor</label>
-              </div>
-              <div class="bank-group">
-                <h4>Otros</h4>
-                <label><input type="checkbox" name="bank" value="supervielle"> Supervielle</label>
-                <label><input type="checkbox" name="bank" value="patagonia"> Patagonia</label>
-                <label><input type="checkbox" name="bank" value="hipotecario"> Hipotecario</label>
-                <label><input type="checkbox" name="bank" value="comafi"> Comafi</label>
-                <label><input type="checkbox" name="bank" value="piano"> Piano</label>
-                <label><input type="checkbox" name="bank" value="bind"> Bind</label>
+            <div class="field">
+              <label>Fuente del precio</label>
+              <div class="radio-group">
+                <label>
+                  <input type="radio" name="dollar-price-source" value="auto" checked />
+                  🌐 Automático
+                </label>
+                <label>
+                  <input type="radio" name="dollar-price-source" value="manual" />
+                  ✏️ Manual
+                </label>
               </div>
             </div>
-          </div>
 
-          <div class="field">
-            <label class="switch">
-              <input type="checkbox" id="best-bank-only">
-              <span class="slider"></span>
-              Solo mejor precio bancario
-            </label>
-          </div>
-        </div>
-      </section>
-
-      <!-- 🔄 EXCHANGES P2P -->
-      <section class="card">
-        <div class="card-header" data-action="toggle-section">
-          <h2>🔄 Exchanges P2P</h2>
-          <span class="toggle-icon">▼</span>
-        </div>
-        <div class="card-content">
-          <p class="section-description">Selecciona los exchanges P2P a incluir en cálculos</p>
-
-          <!-- Exchanges con versión P2P -->
-          <div class="field full">
-            <h3>🏢 Exchanges con versión P2P</h3>
-            <p class="subsection-description">Estos exchanges tienen tanto versión normal como P2P</p>
-            <div class="exchanges-grid">
-              <div class="exchange-group">
-                <h4>Principales</h4>
-                <label><input type="checkbox" name="p2p-exchange" value="binancep2p"> Binance P2P</label>
-                <label><input type="checkbox" name="p2p-exchange" value="bybitp2p"> Bybit P2P</label>
-                <label><input type="checkbox" name="p2p-exchange" value="lemoncashp2p"> Lemon Cash P2P</label>
+            <div class="field" id="manual-price-section">
+              <label for="manual-dollar-price">Precio manual (ARS)</label>
+              <div class="input-group">
+                <input
+                  type="number"
+                  id="manual-dollar-price"
+                  min="100"
+                  max="5000"
+                  step="0.01"
+                  value="1400"
+                />
+                <span>ARS</span>
               </div>
+              <small class="field-hint">Solo se usa si seleccionas "Manual"</small>
             </div>
-          </div>
 
-          <!-- Exchanges solo P2P -->
-          <div class="field full">
-            <h3>🔄 Exchanges solo P2P</h3>
-            <p class="subsection-description">Estos exchanges solo operan en modo P2P</p>
-            <div class="exchanges-grid">
-              <div class="exchange-group">
-                <h4>Principales</h4>
-                <label><input type="checkbox" name="p2p-exchange" value="okexp2p"> OKX P2P</label>
-                <label><input type="checkbox" name="p2p-exchange" value="bitgetp2p"> Bitget P2P</label>
-                <label><input type="checkbox" name="p2p-exchange" value="kucoinp2p"> KuCoin P2P</label>
-              </div>
-              <div class="exchange-group">
-                <h4>Secundarios</h4>
-                <label><input type="checkbox" name="p2p-exchange" value="bingxp2p"> BingX P2P</label>
-                <label><input type="checkbox" name="p2p-exchange" value="huobip2p"> Huobi P2P</label>
-                <label><input type="checkbox" name="p2p-exchange" value="mexcp2p"> MEXC P2P</label>
-                <label><input type="checkbox" name="p2p-exchange" value="weexp2p"> WeeX P2P</label>
-                <label><input type="checkbox" name="p2p-exchange" value="coinexp2p"> CoinEx P2P</label>
-              </div>
-              <div class="exchange-group">
-                <h4>Otros</h4>
-                <label><input type="checkbox" name="p2p-exchange" value="eldoradop2p"> El Dorado P2P</label>
-                <label><input type="checkbox" name="p2p-exchange" value="paydecep2p"> Paydece P2P</label>
-              </div>
+            <div class="field" id="bank-method">
+              <label for="dollar-method">Método de cálculo</label>
+              <select id="dollar-method">
+                <option value="consenso" selected>🔥 Consenso (recomendado)</option>
+                <option value="promedio">📊 Promedio simple</option>
+                <option value="mejor-compra">📉 Mejor compra</option>
+                <option value="mejor-venta">📈 Mejor venta</option>
+                <option value="bna">🏛️ Banco Nación</option>
+                <option value="galicia">🏦 Galicia</option>
+                <option value="santander">🏦 Santander</option>
+                <option value="bbva">🏦 BBVA</option>
+                <option value="icbc">🏦 ICBC</option>
+              </select>
             </div>
-          </div>
 
-          <div class="field">
-            <label class="switch">
-              <input type="checkbox" id="filter-p2p-outliers" checked>
-              <span class="slider"></span>
-              Filtrar precios anómalos
-            </label>
-            <small class="field-hint">Excluye precios más del 15% alejados del promedio</small>
-          </div>
-        </div>
-      </section>
-
-      <!-- 🏛️ EXCHANGES TRADICIONALES -->
-      <section class="card">
-        <div class="card-header" data-action="toggle-section">
-          <h2>🏛️ Exchanges Tradicionales</h2>
-          <span class="toggle-icon">▼</span>
-        </div>
-        <div class="card-content">
-          <p class="section-description">Selecciona los exchanges tradicionales (no P2P) a incluir en cálculos. Por defecto todos están seleccionados.</p>
-
-          <div class="field full">
-            <div class="exchanges-grid">
-              <div class="exchange-group">
-                <h4>Principales</h4>
-                <label><input type="checkbox" name="traditional-exchange" value="binance"> Binance</label>
-                <label><input type="checkbox" name="traditional-exchange" value="bybit"> Bybit</label>
-                <label><input type="checkbox" name="traditional-exchange" value="buenbit"> Buenbit</label>
-                <label><input type="checkbox" name="traditional-exchange" value="ripio"> Ripio</label>
-                <label><input type="checkbox" name="traditional-exchange" value="satoshitango"> SatoshiTango</label>
-                <label><input type="checkbox" name="traditional-exchange" value="tiendacrypto"> TiendaCrypto</label>
-                <label><input type="checkbox" name="traditional-exchange" value="belo"> Belo</label>
-                <label><input type="checkbox" name="traditional-exchange" value="fiwind"> Fiwind</label>
-                <label><input type="checkbox" name="traditional-exchange" value="letsbit"> Letsbit</label>
-                <label><input type="checkbox" name="traditional-exchange" value="lemoncash"> Lemon Cash</label>
-              </div>
-              <div class="exchange-group">
-                <h4>Secundarios</h4>
-                <label><input type="checkbox" name="traditional-exchange" value="ripioexchange"> Ripio Exchange</label>
-                <label><input type="checkbox" name="traditional-exchange" value="universalcoins"> Universal Coins</label>
-                <label><input type="checkbox" name="traditional-exchange" value="decrypto"> Decrypto</label>
-                <label><input type="checkbox" name="traditional-exchange" value="vitawallet"> Vita Wallet</label>
-                <label><input type="checkbox" name="traditional-exchange" value="saldo"> Saldo</label>
-                <label><input type="checkbox" name="traditional-exchange" value="astropay"> AstroPay</label>
-                <label><input type="checkbox" name="traditional-exchange" value="pluscrypto"> PlusCrypto</label>
-                <label><input type="checkbox" name="traditional-exchange" value="eluter"> Eluter</label>
-                <label><input type="checkbox" name="traditional-exchange" value="trubit"> Trubit</label>
-                <label><input type="checkbox" name="traditional-exchange" value="bitsoalpha"> Bitso Alpha</label>
-              </div>
-              <div class="exchange-group">
-                <h4>Otros</h4>
-                <label><input type="checkbox" name="traditional-exchange" value="cocoscrypto"> Cocos Crypto</label>
-                <label><input type="checkbox" name="traditional-exchange" value="cryptomktpro"> CryptoMKT Pro</label>
-                <label><input type="checkbox" name="traditional-exchange" value="wallbit"> Wallbit</label>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 💎 EXCHANGES USDT PARA RUTAS -->
-      <section class="card">
-        <div class="card-header" data-action="toggle-section">
-          <h2>💎 Exchanges USDT para Rutas</h2>
-          <span class="toggle-icon">▼</span>
-        </div>
-        <div class="card-content">
-          <p class="section-description">Selecciona qué exchanges USDT usar para calcular rutas de arbitraje. Por defecto todos están seleccionados.</p>
-          <p class="field-hint">ℹ️ Solo se usarán los exchanges seleccionados para calcular rutas. Si no seleccionas ninguno, se usarán todos.</p>
-
-          <div class="field full">
-            <div class="exchanges-grid">
-              <div class="exchange-group">
-                <h4>Principales</h4>
-                <label><input type="checkbox" name="usdt-broker" value="binance"> Binance</label>
-                <label><input type="checkbox" name="usdt-broker" value="bybit"> Bybit</label>
-                <label><input type="checkbox" name="usdt-broker" value="buenbit"> Buenbit</label>
-                <label><input type="checkbox" name="usdt-broker" value="ripio"> Ripio</label>
-                <label><input type="checkbox" name="usdt-broker" value="satoshitango"> SatoshiTango</label>
-                <label><input type="checkbox" name="usdt-broker" value="tiendacrypto"> TiendaCrypto</label>
-                <label><input type="checkbox" name="usdt-broker" value="belo"> Belo</label>
-                <label><input type="checkbox" name="usdt-broker" value="fiwind"> Fiwind</label>
-                <label><input type="checkbox" name="usdt-broker" value="letsbit"> Letsbit</label>
-                <label><input type="checkbox" name="usdt-broker" value="lemoncash"> Lemon Cash</label>
-              </div>
-              <div class="exchange-group">
-                <h4>Secundarios</h4>
-                <label><input type="checkbox" name="usdt-broker" value="ripioexchange"> Ripio Exchange</label>
-                <label><input type="checkbox" name="usdt-broker" value="universalcoins"> Universal Coins</label>
-                <label><input type="checkbox" name="usdt-broker" value="decrypto"> Decrypto</label>
-                <label><input type="checkbox" name="usdt-broker" value="vitawallet"> Vita Wallet</label>
-                <label><input type="checkbox" name="usdt-broker" value="saldo"> Saldo</label>
-                <label><input type="checkbox" name="usdt-broker" value="astropay"> AstroPay</label>
-                <label><input type="checkbox" name="usdt-broker" value="pluscrypto"> PlusCrypto</label>
-                <label><input type="checkbox" name="usdt-broker" value="eluter"> Eluter</label>
-                <label><input type="checkbox" name="usdt-broker" value="trubit"> Trubit</label>
-                <label><input type="checkbox" name="usdt-broker" value="bitsoalpha"> Bitso Alpha</label>
-              </div>
-              <div class="exchange-group">
-                <h4>Otros</h4>
-                <label><input type="checkbox" name="usdt-broker" value="cocoscrypto"> Cocos Crypto</label>
-                <label><input type="checkbox" name="usdt-broker" value="cryptomktpro"> CryptoMKT Pro</label>
-                <label><input type="checkbox" name="usdt-broker" value="wallbit"> Wallbit</label>
-              </div>
-            </div>
-          </div>
-
-          <div class="field">
-            <button id="select-all-usdt-brokers" class="btn secondary">✅ Seleccionar todos</button>
-            <button id="deselect-all-usdt-brokers" class="btn secondary">❌ Deseleccionar todos</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- 🎨 INTERFAZ -->
-      <section class="card">
-        <div class="card-header" data-action="toggle-section">
-          <h2>🎨 Interfaz</h2>
-          <span class="toggle-icon">▼</span>
-        </div>
-        <div class="card-content">
-          <div class="field">
-            <label for="simulator-amount">Monto simulador (ARS)</label>
-            <div class="input-group">
-              <input type="number" id="simulator-amount" min="1000" max="10000000" step="1000" value="100000">
-              <span>ARS</span>
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="min-profit">Ganancia mínima (%)</label>
-            <div class="input-group">
-              <input type="number" id="min-profit" min="-10" max="20" step="0.1" value="-10">
-              <span>%</span>
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="max-routes">Máximo rutas</label>
-            <input type="number" id="max-routes" min="1" max="50" value="20">
-          </div>
-
-          <div class="field">
-            <label for="bank-display">Modo bancos</label>
-            <select id="bank-display">
-              <option value="best-only">Solo mejor</option>
-              <option value="top-3" selected>Top 3</option>
-              <option value="all">Todos</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="bank-interval">Actualización bancos (min)</label>
-            <div class="input-group">
-              <input type="number" id="bank-interval" min="1" max="60" value="10">
-              <span>min</span>
-            </div>
-          </div>
-
-          <div class="field">
-            <label class="switch">
-              <input type="checkbox" id="sort-profit" checked>
-              <span class="slider"></span>
-              Ordenar por ganancia
-            </label>
-          </div>
-
-          <div class="field">
-            <label class="switch">
-              <input type="checkbox" id="show-profitable">
-              <span class="slider"></span>
-              Solo rentables
-            </label>
-          </div>
-
-          <div class="field">
-            <label class="switch">
-              <input type="checkbox" id="profit-colors" checked>
-              <span class="slider"></span>
-              Colores ganancia
-            </label>
-          </div>
-
-          <div class="field">
-            <label class="switch">
-              <input type="checkbox" id="compact-view">
-              <span class="slider"></span>
-              Vista compacta
-            </label>
-          </div>
-
-          <div class="field">
-            <label class="switch">
-              <input type="checkbox" id="show-icons" checked>
-              <span class="slider"></span>
-              Íconos
-            </label>
-          </div>
-
-          <div class="field">
-            <label class="switch">
-              <input type="checkbox" id="show-timestamps">
-              <span class="slider"></span>
-              Timestamps
-            </label>
-          </div>
-
-          <div class="field">
-            <label class="switch">
-              <input type="checkbox" id="show-bank-prices" checked>
-              <span class="slider"></span>
-              Precios bancarios
-            </label>
-          </div>
-
-          <div class="field">
-            <label class="switch">
-              <input type="checkbox" id="prefer-same-exchange">
-              <span class="slider"></span>
-              Priorizar mismo broker
-            </label>
-          </div>
-        </div>
-      </section>
-
-      <!-- 💸 FEES -->
-      <section class="card">
-        <div class="card-header" data-action="toggle-section">
-          <h2>💸 Fees y Comisiones</h2>
-          <span class="toggle-icon">▼</span>
-        </div>
-        <div class="card-content">
-          <p class="section-description">Configura fees adicionales para cálculos precisos</p>
-
-          <div class="field">
-            <label for="trading-fee">Fee trading (%)</label>
-            <div class="input-group">
-              <input type="number" id="trading-fee" min="0" max="10" step="0.1" value="0">
-              <span>%</span>
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="withdrawal-fee">Fee retiro (%)</label>
-            <div class="input-group">
-              <input type="number" id="withdrawal-fee" min="0" max="10" step="0.1" value="0">
-              <span>%</span>
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="transfer-fee">Fee transferencia (USD)</label>
-            <div class="input-group">
-              <input type="number" id="transfer-fee" min="0" max="50" step="0.1" value="0">
-              <span>USD</span>
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="bank-fee">Comisión bancaria (%)</label>
-            <div class="input-group">
-              <input type="number" id="bank-fee" min="0" max="10" step="0.1" value="0">
-              <span>%</span>
-            </div>
-          </div>
-
-          <div class="info">
-            ℹ️ Estos fees se suman a los predeterminados
-          </div>
-
-          <div class="broker-fees-improved">
-            <h4>Fees por broker</h4>
-            <div class="add-broker-form">
-              <div class="field full">
-                <label for="broker-select">Broker</label>
-                <select id="broker-select">
-                  <option value="">Elegir...</option>
-                  <option value="lemon-cash">🍋 Lemon</option>
-                  <option value="fiwind">💰 Fiwind</option>
-                  <option value="buenbit">🪙 Buenbit</option>
-                  <option value="letsbit">⚡ Letsbit</option>
-                  <option value="other">🔧 Otro</option>
-                </select>
-              </div>
-              <div class="field full" id="custom-broker-field" style="display: none;">
-                <label for="custom-broker-name">Nombre</label>
-                <input type="text" id="custom-broker-name" placeholder="Nombre broker">
-              </div>
-              <div class="field">
-                <label for="broker-buy-fee">Fee Compra</label>
-                <div class="input-group">
-                  <input type="number" id="broker-buy-fee" min="0" max="10" step="0.01" placeholder="0.00">
-                  <span>%</span>
+            <div class="field full">
+              <label>Bancos a consultar</label>
+              <div class="banks-grid">
+                <div class="bank-group">
+                  <h4>Principales</h4>
+                  <label>
+                    <input type="checkbox" name="bank" value="bna" />
+                    Nación
+                  </label>
+                  <label>
+                    <input type="checkbox" name="bank" value="galicia" />
+                    Galicia
+                  </label>
+                  <label>
+                    <input type="checkbox" name="bank" value="santander" />
+                    Santander
+                  </label>
+                  <label>
+                    <input type="checkbox" name="bank" value="bbva" />
+                    BBVA
+                  </label>
+                  <label>
+                    <input type="checkbox" name="bank" value="icbc" />
+                    ICBC
+                  </label>
+                </div>
+                <div class="bank-group">
+                  <h4>Regionales</h4>
+                  <label>
+                    <input type="checkbox" name="bank" value="ciudad" />
+                    Ciudad
+                  </label>
+                  <label>
+                    <input type="checkbox" name="bank" value="provincia" />
+                    Provincia
+                  </label>
+                  <label>
+                    <input type="checkbox" name="bank" value="chaco" />
+                    Chaco
+                  </label>
+                  <label>
+                    <input type="checkbox" name="bank" value="pampa" />
+                    Pampa
+                  </label>
+                  <label>
+                    <input type="checkbox" name="bank" value="bancor" />
+                    Bancor
+                  </label>
+                </div>
+                <div class="bank-group">
+                  <h4>Otros</h4>
+                  <label>
+                    <input type="checkbox" name="bank" value="supervielle" />
+                    Supervielle
+                  </label>
+                  <label>
+                    <input type="checkbox" name="bank" value="patagonia" />
+                    Patagonia
+                  </label>
+                  <label>
+                    <input type="checkbox" name="bank" value="hipotecario" />
+                    Hipotecario
+                  </label>
+                  <label>
+                    <input type="checkbox" name="bank" value="comafi" />
+                    Comafi
+                  </label>
+                  <label>
+                    <input type="checkbox" name="bank" value="piano" />
+                    Piano
+                  </label>
+                  <label>
+                    <input type="checkbox" name="bank" value="bind" />
+                    Bind
+                  </label>
                 </div>
               </div>
-              <div class="field">
-                <label for="broker-sell-fee">Fee Venta</label>
-                <div class="input-group">
-                  <input type="number" id="broker-sell-fee" min="0" max="10" step="0.01" placeholder="0.00">
-                  <span>%</span>
+            </div>
+
+            <div class="field">
+              <label class="switch">
+                <input type="checkbox" id="best-bank-only" />
+                <span class="slider"></span>
+                Solo mejor precio bancario
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- 🔄 EXCHANGES P2P -->
+        <section class="card">
+          <div class="card-header" data-action="toggle-section">
+            <h2>🔄 Exchanges P2P</h2>
+            <span class="toggle-icon">▼</span>
+          </div>
+          <div class="card-content">
+            <p class="section-description">
+              Selecciona los exchanges P2P para cada paso del arbitraje. Puedes elegir diferentes exchanges para comprar USD, convertir a USDT, y vender USDT.
+            </p>
+            
+            <!-- PASO 2: USD → USDT -->
+            <div class="field full">
+              <h3>💵 Paso 2: USD → USDT (Compra USDT)</h3>
+              <p class="subsection-description">
+                Exchanges P2P para comprar USDT con USD
+              </p>
+              <div class="exchanges-grid">
+                <div class="exchange-group">
+                  <h4>Principales</h4>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-usdt-exchange" value="binancep2p" />
+                    Binance P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-usdt-exchange" value="bybitp2p" />
+                    Bybit P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-usdt-exchange" value="lemoncashp2p" />
+                    Lemon Cash P2P
+                  </label>
+                </div>
+                <div class="exchange-group">
+                  <h4>Secundarios</h4>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-usdt-exchange" value="okexp2p" />
+                    OKX P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-usdt-exchange" value="bitgetp2p" />
+                    Bitget P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-usdt-exchange" value="kucoinp2p" />
+                    KuCoin P2P
+                  </label>
+                </div>
+                <div class="exchange-group">
+                  <h4>Otros</h4>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-usdt-exchange" value="bingxp2p" />
+                    BingX P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-usdt-exchange" value="huobip2p" />
+                    Huobi P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-usdt-exchange" value="mexcp2p" />
+                    MEXC P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-usdt-exchange" value="weexp2p" />
+                    WeeX P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-usdt-exchange" value="coinexp2p" />
+                    CoinEx P2P
+                  </label>
                 </div>
               </div>
-              <div class="field">
-                <button id="add-broker-improved" class="btn btn-primary" disabled>➕ Agregar</button>
+            </div>
+            
+            <!-- PASO 3: USDT → ARS (Venta USDT) -->
+            <div class="field full">
+              <h3>💰 Paso 3: USDT → ARS (Venta USDT)</h3>
+              <p class="subsection-description">
+                Exchanges P2P para vender USDT por ARS
+              </p>
+              <div class="exchanges-grid">
+                <div class="exchange-group">
+                  <h4>Principales</h4>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-ars-exchange" value="binancep2p" />
+                    Binance P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-ars-exchange" value="bybitp2p" />
+                    Bybit P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-ars-exchange" value="lemoncashp2p" />
+                    Lemon Cash P2P
+                  </label>
+                </div>
+                <div class="exchange-group">
+                  <h4>Secundarios</h4>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-ars-exchange" value="okexp2p" />
+                    OKX P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-ars-exchange" value="bitgetp2p" />
+                    Bitget P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-ars-exchange" value="kucoinp2p" />
+                    KuCoin P2P
+                  </label>
+                </div>
+                <div class="exchange-group">
+                  <h4>Otros</h4>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-ars-exchange" value="bingxp2p" />
+                    BingX P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-ars-exchange" value="huobip2p" />
+                    Huobi P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-ars-exchange" value="mexcp2p" />
+                    MEXC P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-ars-exchange" value="weexp2p" />
+                    WeeX P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-usdt-ars-exchange" value="coinexp2p" />
+                    CoinEx P2P
+                  </label>
+                </div>
               </div>
             </div>
+            
+            <!-- SINCRONIZACIÓN -->
+            <div class="field full">
+              <h3>🔄 Sincronización (Paso 2 y 3)</h3>
+              <p class="subsection-description">
+                Exchanges P2P que se usarán en ambos pasos (compra y venta)
+              </p>
+              <div class="exchanges-grid">
+                <div class="exchange-group">
+                  <h4>Principales</h4>
+                  <label>
+                    <input type="checkbox" name="p2p-sync-exchange" value="binancep2p" />
+                    Binance P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-sync-exchange" value="bybitp2p" />
+                    Bybit P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-sync-exchange" value="lemoncashp2p" />
+                    Lemon Cash P2P
+                  </label>
+                </div>
+                <div class="exchange-group">
+                  <h4>Secundarios</h4>
+                  <label>
+                    <input type="checkbox" name="p2p-sync-exchange" value="okexp2p" />
+                    OKX P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-sync-exchange" value="bitgetp2p" />
+                    Bitget P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-sync-exchange" value="kucoinp2p" />
+                    KuCoin P2P
+                  </label>
+                </div>
+                <div class="exchange-group">
+                  <h4>Otros</h4>
+                  <label>
+                    <input type="checkbox" name="p2p-sync-exchange" value="bingxp2p" />
+                    BingX P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-sync-exchange" value="huobip2p" />
+                    Huobi P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-sync-exchange" value="mexcp2p" />
+                    MEXC P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-sync-exchange" value="weexp2p" />
+                    WeeX P2P
+                  </label>
+                  <label>
+                    <input type="checkbox" name="p2p-sync-exchange" value="coinexp2p" />
+                    CoinEx P2P
+                  </label>
+                </div>
+              </div>
+            </div>
+ 
+            <div class="field">
+              <label class="switch">
+                <input type="checkbox" id="filter-p2p-outliers" checked />
+                <span class="slider"></span>
+                Filtrar precios anómalos
+              </label>
+              <small class="field-hint">Excluye precios más del 15% alejados del promedio</small>
+            </div>
+          </div>
+        </section>
+
+        <!-- 🏛️ EXCHANGES TRADICIONALES -->
+        <section class="card">
+          <div class="card-header" data-action="toggle-section">
+            <h2>🏛️ Exchanges Tradicionales</h2>
+            <span class="toggle-icon">▼</span>
+          </div>
+          <div class="card-content">
+            <p class="section-description">
+              Selecciona los exchanges tradicionales (no P2P) a incluir en cálculos. Por defecto
+              todos están seleccionados.
+            </p>
+
+            <div class="field full">
+              <div class="exchanges-grid">
+                <div class="exchange-group">
+                  <h4>Principales</h4>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="binance" />
+                    Binance
+                  </label>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="bybit" />
+                    Bybit
+                  </label>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="buenbit" />
+                    Buenbit
+                  </label>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="ripio" />
+                    Ripio
+                  </label>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="satoshitango" />
+                    SatoshiTango
+                  </label>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="tiendacrypto" />
+                    TiendaCrypto
+                  </label>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="belo" />
+                    Belo
+                  </label>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="fiwind" />
+                    Fiwind
+                  </label>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="letsbit" />
+                    Letsbit
+                  </label>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="lemoncash" />
+                    Lemon Cash
+                  </label>
+                </div>
+                <div class="exchange-group">
+                  <h4>Secundarios</h4>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="ripioexchange" />
+                    Ripio Exchange
+                  </label>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="universalcoins" />
+                    Universal Coins
+                  </label>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="decrypto" />
+                    Decrypto
+                  </label>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="vitawallet" />
+                    Vita Wallet
+                  </label>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="saldo" />
+                    Saldo
+                  </label>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="astropay" />
+                    AstroPay
+                  </label>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="pluscrypto" />
+                    PlusCrypto
+                  </label>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="eluter" />
+                    Eluter
+                  </label>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="trubit" />
+                    Trubit
+                  </label>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="bitsoalpha" />
+                    Bitso Alpha
+                  </label>
+                </div>
+                <div class="exchange-group">
+                  <h4>Otros</h4>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="cocoscrypto" />
+                    Cocos Crypto
+                  </label>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="cryptomktpro" />
+                    CryptoMKT Pro
+                  </label>
+                  <label>
+                    <input type="checkbox" name="traditional-exchange" value="wallbit" />
+                    Wallbit
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 💎 EXCHANGES USDT PARA RUTAS -->
+        <section class="card">
+          <div class="card-header" data-action="toggle-section">
+            <h2>💎 Exchanges USDT para Rutas</h2>
+            <span class="toggle-icon">▼</span>
+          </div>
+          <div class="card-content">
+            <p class="section-description">
+              Selecciona qué exchanges USDT usar para calcular rutas de arbitraje. Por defecto todos
+              están seleccionados.
+            </p>
+            <p class="field-hint">
+              ℹ️ Solo se usarán los exchanges seleccionados para calcular rutas. Si no seleccionas
+              ninguno, se usarán todos.
+            </p>
+
+            <div class="field full">
+              <div class="exchanges-grid">
+                <div class="exchange-group">
+                  <h4>Principales</h4>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="binance" />
+                    Binance
+                  </label>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="bybit" />
+                    Bybit
+                  </label>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="buenbit" />
+                    Buenbit
+                  </label>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="ripio" />
+                    Ripio
+                  </label>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="satoshitango" />
+                    SatoshiTango
+                  </label>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="tiendacrypto" />
+                    TiendaCrypto
+                  </label>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="belo" />
+                    Belo
+                  </label>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="fiwind" />
+                    Fiwind
+                  </label>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="letsbit" />
+                    Letsbit
+                  </label>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="lemoncash" />
+                    Lemon Cash
+                  </label>
+                </div>
+                <div class="exchange-group">
+                  <h4>Secundarios</h4>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="ripioexchange" />
+                    Ripio Exchange
+                  </label>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="universalcoins" />
+                    Universal Coins
+                  </label>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="decrypto" />
+                    Decrypto
+                  </label>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="vitawallet" />
+                    Vita Wallet
+                  </label>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="saldo" />
+                    Saldo
+                  </label>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="astropay" />
+                    AstroPay
+                  </label>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="pluscrypto" />
+                    PlusCrypto
+                  </label>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="eluter" />
+                    Eluter
+                  </label>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="trubit" />
+                    Trubit
+                  </label>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="bitsoalpha" />
+                    Bitso Alpha
+                  </label>
+                </div>
+                <div class="exchange-group">
+                  <h4>Otros</h4>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="cocoscrypto" />
+                    Cocos Crypto
+                  </label>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="cryptomktpro" />
+                    CryptoMKT Pro
+                  </label>
+                  <label>
+                    <input type="checkbox" name="usdt-broker" value="wallbit" />
+                    Wallbit
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <button id="select-all-usdt-brokers" class="btn secondary">
+                ✅ Seleccionar todos
+              </button>
+              <button id="deselect-all-usdt-brokers" class="btn secondary">
+                ❌ Deseleccionar todos
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 🎨 INTERFAZ -->
+        <section class="card">
+          <div class="card-header" data-action="toggle-section">
+            <h2>🎨 Interfaz</h2>
+            <span class="toggle-icon">▼</span>
+          </div>
+          <div class="card-content">
+            <div class="field">
+              <label for="simulator-amount">Monto simulador (ARS)</label>
+              <div class="input-group">
+                <input
+                  type="number"
+                  id="simulator-amount"
+                  min="1000"
+                  max="10000000"
+                  step="1000"
+                  value="100000"
+                />
+                <span>ARS</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="min-profit">Ganancia mínima (%)</label>
+              <div class="input-group">
+                <input type="number" id="min-profit" min="-10" max="20" step="0.1" value="-10" />
+                <span>%</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="max-routes">Máximo rutas</label>
+              <input type="number" id="max-routes" min="1" max="50" value="20" />
+            </div>
+
+            <div class="field">
+              <label for="bank-display">Modo bancos</label>
+              <select id="bank-display">
+                <option value="best-only">Solo mejor</option>
+                <option value="top-3" selected>Top 3</option>
+                <option value="all">Todos</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="bank-interval">Actualización bancos (min)</label>
+              <div class="input-group">
+                <input type="number" id="bank-interval" min="1" max="60" value="10" />
+                <span>min</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="switch">
+                <input type="checkbox" id="sort-profit" checked />
+                <span class="slider"></span>
+                Ordenar por ganancia
+              </label>
+            </div>
+
+            <div class="field">
+              <label class="switch">
+                <input type="checkbox" id="show-profitable" />
+                <span class="slider"></span>
+                Solo rentables
+              </label>
+            </div>
+
+            <div class="field">
+              <label class="switch">
+                <input type="checkbox" id="profit-colors" checked />
+                <span class="slider"></span>
+                Colores ganancia
+              </label>
+            </div>
+
+            <div class="field">
+              <label class="switch">
+                <input type="checkbox" id="compact-view" />
+                <span class="slider"></span>
+                Vista compacta
+              </label>
+            </div>
+
+            <div class="field">
+              <label class="switch">
+                <input type="checkbox" id="show-icons" checked />
+                <span class="slider"></span>
+                Íconos
+              </label>
+            </div>
+
+            <div class="field">
+              <label class="switch">
+                <input type="checkbox" id="show-timestamps" />
+                <span class="slider"></span>
+                Timestamps
+              </label>
+            </div>
+
+            <div class="field">
+              <label class="switch">
+                <input type="checkbox" id="show-bank-prices" checked />
+                <span class="slider"></span>
+                Precios bancarios
+              </label>
+            </div>
+
+            <div class="field">
+              <label class="switch">
+                <input type="checkbox" id="prefer-same-exchange" />
+                <span class="slider"></span>
+                Priorizar mismo broker
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- 💸 FEES -->
+        <section class="card">
+          <div class="card-header" data-action="toggle-section">
+            <h2>💸 Fees y Comisiones</h2>
+            <span class="toggle-icon">▼</span>
+          </div>
+          <div class="card-content">
+            <p class="section-description">Configura fees adicionales para cálculos precisos</p>
+
+            <div class="field">
+              <label for="trading-fee">Fee trading (%)</label>
+              <div class="input-group">
+                <input type="number" id="trading-fee" min="0" max="10" step="0.1" value="0" />
+                <span>%</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="withdrawal-fee">Fee retiro (%)</label>
+              <div class="input-group">
+                <input type="number" id="withdrawal-fee" min="0" max="10" step="0.1" value="0" />
+                <span>%</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="transfer-fee">Fee transferencia (USD)</label>
+              <div class="input-group">
+                <input type="number" id="transfer-fee" min="0" max="50" step="0.1" value="0" />
+                <span>USD</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="bank-fee">Comisión bancaria (%)</label>
+              <div class="input-group">
+                <input type="number" id="bank-fee" min="0" max="10" step="0.1" value="0" />
+                <span>%</span>
+              </div>
+            </div>
+
+            <div class="info">ℹ️ Estos fees se suman a los predeterminados</div>
+
+            <div class="broker-fees-improved">
+              <h4>Fees por broker</h4>
+              <div class="add-broker-form">
+                <div class="field full">
+                  <label for="broker-select">Broker</label>
+                  <select id="broker-select">
+                    <option value="">Elegir...</option>
+                    <option value="lemon-cash">🍋 Lemon</option>
+                    <option value="fiwind">💰 Fiwind</option>
+                    <option value="buenbit">🪙 Buenbit</option>
+                    <option value="letsbit">⚡ Letsbit</option>
+                    <option value="other">🔧 Otro</option>
+                  </select>
+                </div>
+                <div class="field full" id="custom-broker-field" style="display: none">
+                  <label for="custom-broker-name">Nombre</label>
+                  <input type="text" id="custom-broker-name" placeholder="Nombre broker" />
+                </div>
+                <div class="field">
+                  <label for="broker-buy-fee">Fee Compra</label>
+                  <div class="input-group">
+                    <input
+                      type="number"
+                      id="broker-buy-fee"
+                      min="0"
+                      max="10"
+                      step="0.01"
+                      placeholder="0.00"
+                    />
+                    <span>%</span>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="broker-sell-fee">Fee Venta</label>
+                  <div class="input-group">
+                    <input
+                      type="number"
+                      id="broker-sell-fee"
+                      min="0"
+                      max="10"
+                      step="0.01"
+                      placeholder="0.00"
+                    />
+                    <span>%</span>
+                  </div>
+                </div>
+                <div class="field">
+                  <button id="add-broker-improved" class="btn btn-primary" disabled>
+                    ➕ Agregar
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div class="broker-fees-list">
@@ -463,187 +847,243 @@
             </div>
           </div>
 
-          <div class="broker-fees" style="display: none;">
-            <table id="broker-table"><thead><tr><th>Broker</th><th>Fee Compra</th><th>Fee Venta</th><th>Acciones</th></tr></thead><tbody id="broker-fees-body"></tbody></table>
+          <div class="broker-fees" style="display: none">
+            <table id="broker-table">
+              <thead>
+                <tr>
+                  <th>Broker</th>
+                  <th>Fee Compra</th>
+                  <th>Fee Venta</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="broker-fees-body"></tbody>
+            </table>
             <button id="add-broker" class="btn">➕ Agregar</button>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- 🔔 NOTIFICACIONES -->
-      <section class="card">
-        <div class="card-header" data-action="toggle-section">
-          <h2>🔔 Notificaciones</h2>
-          <span class="toggle-icon">▼</span>
-        </div>
-        <div class="card-content">
-          <div class="field">
-            <label class="switch">
-              <input type="checkbox" id="notify-enabled" checked>
-              <span class="slider"></span>
-              Habilitar notificaciones
-            </label>
+        <!-- 🔔 NOTIFICACIONES -->
+        <section class="card">
+          <div class="card-header" data-action="toggle-section">
+            <h2>🔔 Notificaciones</h2>
+            <span class="toggle-icon">▼</span>
           </div>
-
-          <div class="field">
-            <label for="alert-threshold">Umbral alerta (%)</label>
-            <div class="input-group">
-              <input type="number" id="alert-threshold" min="0.1" max="20" step="0.1" value="1.0">
-              <span>%</span>
+          <div class="card-content">
+            <div class="field">
+              <label class="switch">
+                <input type="checkbox" id="notify-enabled" checked />
+                <span class="slider"></span>
+                Habilitar notificaciones
+              </label>
             </div>
-          </div>
 
-          <div class="field">
-            <label for="notify-frequency">Frecuencia</label>
-            <select id="notify-frequency">
-              <option value="always">Sin límite</option>
-              <option value="5min">Cada 5 min</option>
-              <option value="15min" selected>Cada 15 min</option>
-              <option value="30min">Cada 30 min</option>
-              <option value="1hour">Cada hora</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label class="switch">
-              <input type="checkbox" id="sound-enabled" checked>
-              <span class="slider"></span>
-              Sonido
-            </label>
-          </div>
-
-          <div class="field">
-            <label class="switch">
-              <input type="checkbox" id="quiet-hours">
-              <span class="slider"></span>
-              Horario silencioso
-            </label>
-          </div>
-
-          <div class="quiet-config hidden" id="quiet-config">
-            <div class="time-inputs">
-              <label>Inicio <input type="time" id="quiet-start" value="22:00"></label>
-              <label>Fin <input type="time" id="quiet-end" value="08:00"></label>
-            </div>
-          </div>
-
-          <div class="field full">
-            <label>Exchanges</label>
-            <div class="exchange-grid">
-              <div class="exchange-group">
-                <h4>Directos</h4>
-                <div class="checkbox-grid">
-                  <label><input type="checkbox" name="notify-exchange" value="binance" checked> Binance</label>
-                  <label><input type="checkbox" name="notify-exchange" value="buenbit" checked> Buenbit</label>
-                  <label><input type="checkbox" name="notify-exchange" value="lemoncash" checked> Lemon</label>
-                  <label><input type="checkbox" name="notify-exchange" value="ripio" checked> Ripio</label>
-                  <label><input type="checkbox" name="notify-exchange" value="fiwind" checked> Fiwind</label>
-                </div>
-              </div>
-              <div class="exchange-group">
-                <h4>P2P</h4>
-                <div class="checkbox-grid">
-                  <label><input type="checkbox" name="notify-exchange" value="binancep2p"> Binance P2P</label>
-                  <label><input type="checkbox" name="notify-exchange" value="okexp2p"> OKX P2P</label>
-                  <label><input type="checkbox" name="notify-exchange" value="bybitp2p"> Bybit P2P</label>
-                </div>
+            <div class="field">
+              <label for="alert-threshold">Umbral alerta (%)</label>
+              <div class="input-group">
+                <input
+                  type="number"
+                  id="alert-threshold"
+                  min="0.1"
+                  max="20"
+                  step="0.1"
+                  value="1.0"
+                />
+                <span>%</span>
               </div>
             </div>
+
+            <div class="field">
+              <label for="notify-frequency">Frecuencia</label>
+              <select id="notify-frequency">
+                <option value="always">Sin límite</option>
+                <option value="5min">Cada 5 min</option>
+                <option value="15min" selected>Cada 15 min</option>
+                <option value="30min">Cada 30 min</option>
+                <option value="1hour">Cada hora</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label class="switch">
+                <input type="checkbox" id="sound-enabled" checked />
+                <span class="slider"></span>
+                Sonido
+              </label>
+            </div>
+
+            <div class="field">
+              <label class="switch">
+                <input type="checkbox" id="quiet-hours" />
+                <span class="slider"></span>
+                Horario silencioso
+              </label>
+            </div>
+
+            <div class="quiet-config hidden" id="quiet-config">
+              <div class="time-inputs">
+                <label>
+                  Inicio
+                  <input type="time" id="quiet-start" value="22:00" />
+                </label>
+                <label>
+                  Fin
+                  <input type="time" id="quiet-end" value="08:00" />
+                </label>
+              </div>
+            </div>
+
+            <div class="field full">
+              <label>Exchanges</label>
+              <div class="exchange-grid">
+                <div class="exchange-group">
+                  <h4>Directos</h4>
+                  <div class="checkbox-grid">
+                    <label>
+                      <input type="checkbox" name="notify-exchange" value="binance" checked />
+                      Binance
+                    </label>
+                    <label>
+                      <input type="checkbox" name="notify-exchange" value="buenbit" checked />
+                      Buenbit
+                    </label>
+                    <label>
+                      <input type="checkbox" name="notify-exchange" value="lemoncash" checked />
+                      Lemon
+                    </label>
+                    <label>
+                      <input type="checkbox" name="notify-exchange" value="ripio" checked />
+                      Ripio
+                    </label>
+                    <label>
+                      <input type="checkbox" name="notify-exchange" value="fiwind" checked />
+                      Fiwind
+                    </label>
+                  </div>
+                </div>
+                <div class="exchange-group">
+                  <h4>P2P</h4>
+                  <div class="checkbox-grid">
+                    <label>
+                      <input type="checkbox" name="notify-exchange" value="binancep2p" />
+                      Binance P2P
+                    </label>
+                    <label>
+                      <input type="checkbox" name="notify-exchange" value="okexp2p" />
+                      OKX P2P
+                    </label>
+                    <label>
+                      <input type="checkbox" name="notify-exchange" value="bybitp2p" />
+                      Bybit P2P
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button id="test-notification" class="btn">🔔 Probar</button>
           </div>
+        </section>
 
-          <button id="test-notification" class="btn">🔔 Probar</button>
-        </div>
-      </section>
-
-      <!-- 🔧 AVANZADO -->
-      <section class="card">
-        <div class="card-header" data-action="toggle-section">
-          <h2>🔧 Avanzado</h2>
-          <span class="toggle-icon">▼</span>
-        </div>
-        <div class="card-content">
-          <h4>🌐 APIs</h4>
-          <div class="field">
-            <label for="dolarapi-url">API Dólar</label>
-            <input type="url" id="dolarapi-url" value="https://dolarapi.com/v1/dolares/oficial">
+        <!-- 🔧 AVANZADO -->
+        <section class="card">
+          <div class="card-header" data-action="toggle-section">
+            <h2>🔧 Avanzado</h2>
+            <span class="toggle-icon">▼</span>
           </div>
+          <div class="card-content">
+            <h4>🌐 APIs</h4>
+            <div class="field">
+              <label for="dolarapi-url">API Dólar</label>
+              <input type="url" id="dolarapi-url" value="https://dolarapi.com/v1/dolares/oficial" />
+            </div>
 
-          <div class="field">
-            <label for="criptoya-ars-url">API USDT/ARS</label>
-            <input type="url" id="criptoya-ars-url" value="https://criptoya.com/api/usdt/ars/1">
-          </div>
+            <div class="field">
+              <label for="criptoya-ars-url">API USDT/ARS</label>
+              <input type="url" id="criptoya-ars-url" value="https://criptoya.com/api/usdt/ars/1" />
+            </div>
 
-          <div class="field">
-            <label for="criptoya-usd-url">API USDT/USD</label>
-            <input type="url" id="criptoya-usd-url" value="https://criptoya.com/api/usdt/usd/1">
-          </div>
+            <div class="field">
+              <label for="criptoya-usd-url">API USDT/USD</label>
+              <input type="url" id="criptoya-usd-url" value="https://criptoya.com/api/usdt/usd/1" />
+            </div>
 
-          <div class="field">
-            <label for="criptoya-banks-url">API Bancos</label>
-            <input type="url" id="criptoya-banks-url" value="https://criptoya.com/api/bancostodos">
-          </div>
+            <div class="field">
+              <label for="criptoya-banks-url">API Bancos</label>
+              <input
+                type="url"
+                id="criptoya-banks-url"
+                value="https://criptoya.com/api/bancostodos"
+              />
+            </div>
 
-          <h4>⏱️ Tiempos</h4>
-          <div class="field">
-            <label for="update-interval">Intervalo actualización (min)</label>
-            <div class="input-group">
-              <input type="number" id="update-interval" min="1" max="60" value="5">
-              <span>min</span>
+            <h4>⏱️ Tiempos</h4>
+            <div class="field">
+              <label for="update-interval">Intervalo actualización (min)</label>
+              <div class="input-group">
+                <input type="number" id="update-interval" min="1" max="60" value="5" />
+                <span>min</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="request-timeout">Timeout (seg)</label>
+              <div class="input-group">
+                <input type="number" id="request-timeout" min="5" max="120" step="5" value="10" />
+                <span>seg</span>
+              </div>
+            </div>
+
+            <h4>🛡️ Seguridad</h4>
+            <div class="field">
+              <label class="switch">
+                <input type="checkbox" id="freshness-warning" checked />
+                <span class="slider"></span>
+                Advertir datos obsoletos
+              </label>
+            </div>
+
+            <div class="field">
+              <label class="switch">
+                <input type="checkbox" id="risk-alerts" checked />
+                <span class="slider"></span>
+                Alertas riesgo
+              </label>
+            </div>
+
+            <div class="field">
+              <label class="switch">
+                <input type="checkbox" id="confirm-high-amount" checked />
+                <span class="slider"></span>
+                Confirmar montos altos
+              </label>
+            </div>
+
+            <div class="field">
+              <label for="high-threshold">Umbral monto alto (ARS)</label>
+              <div class="input-group">
+                <input
+                  type="number"
+                  id="high-threshold"
+                  min="10000"
+                  max="10000000"
+                  step="10000"
+                  value="500000"
+                />
+                <span>ARS</span>
+              </div>
             </div>
           </div>
+        </section>
+      </div>
 
-          <div class="field">
-            <label for="request-timeout">Timeout (seg)</label>
-            <div class="input-group">
-              <input type="number" id="request-timeout" min="5" max="120" step="5" value="10">
-              <span>seg</span>
-            </div>
-          </div>
-
-          <h4>🛡️ Seguridad</h4>
-          <div class="field">
-            <label class="switch">
-              <input type="checkbox" id="freshness-warning" checked>
-              <span class="slider"></span>
-              Advertir datos obsoletos
-            </label>
-          </div>
-
-          <div class="field">
-            <label class="switch">
-              <input type="checkbox" id="risk-alerts" checked>
-              <span class="slider"></span>
-              Alertas riesgo
-            </label>
-          </div>
-
-          <div class="field">
-            <label class="switch">
-              <input type="checkbox" id="confirm-high-amount" checked>
-              <span class="slider"></span>
-              Confirmar montos altos
-            </label>
-          </div>
-
-          <div class="field">
-            <label for="high-threshold">Umbral monto alto (ARS)</label>
-            <div class="input-group">
-              <input type="number" id="high-threshold" min="10000" max="10000000" step="10000" value="500000">
-              <span>ARS</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
+      <footer class="footer">
+        <button id="save-settings" class="btn primary">💾 Guardar</button>
+        <button id="reset-settings" class="btn secondary">🔄 Reset</button>
+        <div id="save-status"></div>
+      </footer>
     </div>
 
-    <footer class="footer">
-      <button id="save-settings" class="btn primary">💾 Guardar</button>
-      <button id="reset-settings" class="btn secondary">🔄 Reset</button>
-      <div id="save-status"></div>
-    </footer>
-  </div>
-
-  <script src="options.js"></script>
-</body>
+    <script src="options.js"></script>
+  </body>
 </html>

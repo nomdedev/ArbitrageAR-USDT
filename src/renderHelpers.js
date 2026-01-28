@@ -2,8 +2,7 @@
 // v6.0.0 - Diseño mejorado según plan estético
 
 // Universal Module Definition (UMD) pattern simplificado
-(function(root) {
-  
+(function (root) {
   // Obtener dependencia getProfitClasses
   let getProfitClasses;
   if (typeof require !== 'undefined') {
@@ -15,20 +14,24 @@
   }
 
   function renderArbitrageCard(arb, index) {
-    const { isNegative, profitClass, profitBadgeClass } = getProfitClasses(arb.profitPercentage || 0);
+    const { isNegative, profitClass, profitBadgeClass } = getProfitClasses(
+      arb.profitPercentage || 0
+    );
     const profitSymbol = isNegative ? '' : '+';
-    
+
     // Indicadores de estado
-    const statusIndicator = isNegative 
+    const statusIndicator = isNegative
       ? '<span class="status-indicator loss" title="Pérdida">⚠️</span>'
-      : arb.profitPercentage >= 2 
+      : arb.profitPercentage >= 2
         ? '<span class="status-indicator high" title="Alta ganancia">🔥</span>'
         : arb.profitPercentage >= 0.5
           ? '<span class="status-indicator ok" title="Ganancia moderada">✓</span>'
           : '<span class="status-indicator low" title="Ganancia baja">👁️</span>';
 
     const hasFees = arb.fees && arb.fees.total > 0;
-    const spread = arb.spread ? `<span class="card-spread">Spread: ${formatNumber(arb.spread)}%</span>` : '';
+    const spread = arb.spread
+      ? `<span class="card-spread">Spread: ${formatNumber(arb.spread)}%</span>`
+      : '';
 
     return `
       <div class="arbitrage-card ${profitClass}" data-index="${index}" role="article" aria-label="Oportunidad de arbitraje en ${escapeHtml(arb.broker || 'exchange')}">
@@ -55,11 +58,15 @@
                 <span class="price-value">$${formatNumber(arb.usdtArsBid)}</span>
               </div>
             </div>
-            ${hasFees ? `
+            ${
+              hasFees
+                ? `
             <div class="card-fees">
               <span class="fee-label">📊 Fees totales:</span>
               <span class="fee-value">${formatNumber(arb.fees.total)}%</span>
-            </div>` : ''}
+            </div>`
+                : ''
+            }
             ${spread ? `<div class="card-meta">${spread}</div>` : ''}
           </div>
         </div>
@@ -68,24 +75,33 @@
   }
 
   function renderRouteCard(route, index, displayMetrics) {
-    const { isNegative, profitClass, profitBadgeClass } = getProfitClasses(displayMetrics.percentage || 0);
+    const { isNegative, profitClass, profitBadgeClass } = getProfitClasses(
+      displayMetrics.percentage || 0
+    );
     const profitSymbol = isNegative ? '' : '+';
-    
+
     // Indicadores visuales
-    const profitLevel = isNegative ? 'loss' : displayMetrics.percentage >= 2 ? 'high' : displayMetrics.percentage >= 0.5 ? 'medium' : 'low';
-    
+    const profitLevel = isNegative
+      ? 'loss'
+      : displayMetrics.percentage >= 2
+        ? 'high'
+        : displayMetrics.percentage >= 0.5
+          ? 'medium'
+          : 'low';
+
     // Información adicional
     const routeDescription = getRouteDescription(route);
     const hasVolume = route.volume && route.volume > 0;
     const volumeDisplay = hasVolume ? `Vol: ${formatVolume(route.volume)}` : '';
-    
+
     // Determinar tipo de operación
-    const isP2P = route.requiresP2P || (route.buyExchange && route.buyExchange.toLowerCase().includes('p2p'));
+    const isP2P =
+      route.requiresP2P || (route.buyExchange && route.buyExchange.toLowerCase().includes('p2p'));
     const operationType = isP2P ? 'P2P' : 'DIRECT';
     const operationBadgeClass = isP2P ? 'p2p' : 'direct';
-    
+
     // Data para el click handler
-    const routeData = JSON.stringify({ ...route, displayMetrics }).replace(/'/g, "&apos;");
+    const routeData = JSON.stringify({ ...route, displayMetrics }).replace(/'/g, '&apos;');
 
     return `
       <div class="route-card ${profitClass} ${isP2P ? 'is-p2p' : 'is-direct'}" data-index="${index}" data-route='${routeData}' 
@@ -129,7 +145,10 @@
   // Helpers de formato reutilizados
   function formatNumber(num) {
     if (num === undefined || num === null || isNaN(num)) return '0.00';
-    return Number(num).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return Number(num).toLocaleString('es-AR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
   }
 
   function formatVolume(volume) {
@@ -141,7 +160,12 @@
 
   function escapeHtml(text) {
     if (typeof text !== 'string') return text;
-    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   function getRouteDescription(route) {
@@ -166,7 +190,14 @@
   }
 
   // Exportar
-  const exports = { renderArbitrageCard, renderRouteCard, formatNumber, formatVolume, escapeHtml, getRouteDescription };
+  const exports = {
+    renderArbitrageCard,
+    renderRouteCard,
+    formatNumber,
+    formatVolume,
+    escapeHtml,
+    getRouteDescription
+  };
 
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = exports;
@@ -174,5 +205,4 @@
     // Exponer globalmente en navegador
     Object.assign(root, exports);
   }
-
 })(typeof window !== 'undefined' ? window : this);
