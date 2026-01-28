@@ -51,6 +51,7 @@ const DEFAULT_SETTINGS = {
   selectedBanks: undefined, // undefined = usar bancos por defecto (bna, galicia, santander, bbva, icbc)
   selectedP2PExchanges: undefined, // undefined = usar todos los exchanges P2P
   selectedTraditionalExchanges: undefined, // undefined = usar todos los exchanges tradicionales
+  selectedUsdtBrokers: undefined, // undefined = usar TODOS los exchanges USDT disponibles
   filterP2POutliers: true // Filtrar precios anómalos por defecto
 };
 
@@ -222,6 +223,24 @@ async function loadSettings() {
       }
     });
 
+    // NUEVO: Configuración de exchanges USDT para rutas
+    const selectedUsdtBrokers = settings.selectedUsdtBrokers;
+    // Por defecto, incluir TODOS los exchanges USDT disponibles
+    const defaultUsdtBrokers = [
+      'binance', 'buenbit', 'lemoncash', 'ripio', 'fiwind', 'letsbit', 'belo', 'tiendacrypto', 'satoshitango',
+      'ripioexchange', 'universalcoins', 'decrypto', 'vitawallet', 'saldo', 'astropay', 'pluscrypto', 'eluter', 'trubit', 'bitsoalpha',
+      'cocoscrypto', 'cryptomktpro', 'wallbit'
+    ];
+
+    document.querySelectorAll('input[name="usdt-broker"]').forEach(cb => {
+      // Si no hay configuración guardada o está vacía, usar TODOS los exchanges por defecto
+      if (selectedUsdtBrokers === undefined || (Array.isArray(selectedUsdtBrokers) && selectedUsdtBrokers.length === 0)) {
+        cb.checked = defaultUsdtBrokers.includes(cb.value);
+      } else {
+        cb.checked = selectedUsdtBrokers.includes(cb.value);
+      }
+    });
+
     // NUEVO v5.0.53: URLs de APIs
     document.getElementById('dolarapi-url').value =
       settings.dolarApiUrl ?? 'https://dolarapi.com/v1/dolares/oficial';
@@ -290,6 +309,26 @@ function setupMainEventListeners() {
   dollarSourceRadios.forEach(radio => {
     radio.addEventListener('change', updateDollarPriceUI);
   });
+
+  // NUEVO: Event listeners para seleccionar/deseleccionar todos los brokers USDT
+  const selectAllUsdtBrokersBtn = document.getElementById('select-all-usdt-brokers');
+  const deselectAllUsdtBrokersBtn = document.getElementById('deselect-all-usdt-brokers');
+
+  if (selectAllUsdtBrokersBtn) {
+    selectAllUsdtBrokersBtn.addEventListener('click', () => {
+      document.querySelectorAll('input[name="usdt-broker"]').forEach(cb => {
+        cb.checked = true;
+      });
+    });
+  }
+
+  if (deselectAllUsdtBrokersBtn) {
+    deselectAllUsdtBrokersBtn.addEventListener('click', () => {
+      document.querySelectorAll('input[name="usdt-broker"]').forEach(cb => {
+        cb.checked = false;
+      });
+    });
+  }
 }
 
 // Inicializar nueva interfaz mejorada de fees por broker
@@ -605,6 +644,10 @@ function getCurrentSettings() {
   // NUEVO v5.0.85: Exchanges tradicionales seleccionados
   const selectedTraditionalCheckboxes = document.querySelectorAll('input[name="traditional-exchange"]:checked');
   settings.selectedTraditionalExchanges = Array.from(selectedTraditionalCheckboxes).map(cb => cb.value);
+
+  // NUEVO: Exchanges USDT seleccionados para rutas
+  const selectedUsdtBrokerCheckboxes = document.querySelectorAll('input[name="usdt-broker"]:checked');
+  settings.selectedUsdtBrokers = Array.from(selectedUsdtBrokerCheckboxes).map(cb => cb.value);
 
   // APIs
   settings.dolarApiUrl =

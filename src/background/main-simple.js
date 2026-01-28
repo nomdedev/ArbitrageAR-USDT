@@ -506,8 +506,23 @@ async function calculateInterBrokerRoutes(
   const routes = [];
   const officialPrice = oficial.venta;
 
+  // NUEVO: Filtrar exchanges según configuración del usuario
+  let filteredUsdt = usdt;
+  const selectedUsdtBrokers = userSettings.selectedUsdtBrokers;
+  
+  // Si el usuario seleccionó exchanges específicos, filtrar
+  if (selectedUsdtBrokers && Array.isArray(selectedUsdtBrokers) && selectedUsdtBrokers.length > 0) {
+    filteredUsdt = {};
+    selectedUsdtBrokers.forEach(broker => {
+      if (usdt[broker]) {
+        filteredUsdt[broker] = usdt[broker];
+      }
+    });
+    log(`🔄 [INTER-BROKER] Filtrando exchanges: ${selectedUsdtBrokers.length} seleccionados`);
+  }
+
   // Obtener exchanges válidos
-  const exchanges = Object.keys(usdt).filter(
+  const exchanges = Object.keys(filteredUsdt).filter(
     ex =>
       ex !== 'time' &&
       ex !== 'timestamp' &&
@@ -741,11 +756,26 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
   log(`🔍 [CALC] Aplicar fees: ${applyFees ? 'SÍ' : 'NO'}`);
   log(`🔍 [CALC] Procesando ${Object.keys(usdt).length} exchanges...`);
 
+  // NUEVO: Filtrar exchanges según configuración del usuario
+  let filteredUsdt = usdt;
+  const selectedUsdtBrokers = userSettings.selectedUsdtBrokers;
+  
+  // Si el usuario seleccionó exchanges específicos, filtrar
+  if (selectedUsdtBrokers && Array.isArray(selectedUsdtBrokers) && selectedUsdtBrokers.length > 0) {
+    filteredUsdt = {};
+    selectedUsdtBrokers.forEach(broker => {
+      if (usdt[broker]) {
+        filteredUsdt[broker] = usdt[broker];
+      }
+    });
+    log(`🔍 [CALC] Filtrando exchanges USDT: ${selectedUsdtBrokers.length} seleccionados`);
+  }
+
   // Iterar exchanges
   let processedCount = 0;
   let skippedCount = 0;
 
-  for (const [exchange, data] of Object.entries(usdt)) {
+  for (const [exchange, data] of Object.entries(filteredUsdt)) {
     // Validación básica
     if (!data || typeof data !== 'object' || !data.totalAsk || !data.totalBid) {
       log(`⚠️ [CALC] Exchange ${exchange} sin datos válidos:`, data);
@@ -2246,15 +2276,10 @@ updateGlobalConfig()
     console.error('❌ [BACKGROUND] Error cargando configuración:', error);
   });
 
-// Actualización periódica (se actualizará dinámicamente)
-let updateIntervalId = null;
+// Actualización periódica usando chrome.alarms (Manifest V3 compatible)
+const ALARM_NAME = 'updateDataAlarm';
 
 async function startPeriodicUpdates() {
-  // Limpiar intervalo anterior si existe
-  if (updateIntervalId) {
-    clearInterval(updateIntervalId);
-  }
-
   // Obtener configuración actual
   const result = await chrome.storage.local.get('notificationSettings');
   const userSettings = result.notificationSettings || {};
@@ -2263,13 +2288,32 @@ async function startPeriodicUpdates() {
 
   log(`⏰ Configurando actualización periódica cada ${intervalMinutes} minutos (${intervalMs}ms)`);
 
-  updateIntervalId = setInterval(() => {
-    log('⏰ Actualización periódica...');
-    updateData();
-    // Actualizar también datos de bancos
-    updateBanksData();
-  }, intervalMs);
+  // Crear alarma periódica usando chrome.alarms (Manifest V3 compatible)
+  // Las alarmas garantizan que el service worker se active incluso cuando está suspendido
+  try {
+    // Limpiar alarmas existentes
+    await chrome.alarms.clear(ALARM_NAME);
+    
+    // Crear nueva alarma periódica
+    await chrome.alarms.create(ALARM_NAME, {
+      periodInMinutes: intervalMinutes
+    });
+    
+    log(`✅ Alarma creada: ${ALARM_NAME} cada ${intervalMinutes} minutos`);
+  } catch (error) {
+    console.error('❌ Error creando alarma:', error);
+  }
 }
+
+// Listener para alarmas - Se ejecuta cuando la alarma se dispara
+chrome.alarms.onAlarm.addListener(async alarm => {
+  if (alarm.name === ALARM_NAME) {
+    log('⏰ Actualización periódica (desde alarma)...');
+    await updateData();
+    // Actualizar también datos de bancos
+    await updateBanksData();
+  }
+});
 
 // Iniciar actualizaciones periódicas
 startPeriodicUpdates();
