@@ -621,11 +621,35 @@ function populateExchangeFilter() {
 function applyAllFilters() {
   if (!allRoutes || allRoutes.length === 0) {
     console.warn('⚠️ No hay rutas para filtrar');
+    console.log('🔍 [DIAGNÓSTICO POPUP] applyAllFilters() - No hay rutas:', {
+      allRoutesIsNull: !allRoutes,
+      allRoutesLength: allRoutes?.length || 0,
+      currentFilter: currentFilter,
+      userSettings: userSettings ? {
+        interfaceMinProfitDisplay: userSettings.interfaceMinProfitDisplay,
+        interfaceMaxRoutesDisplay: userSettings.interfaceMaxRoutesDisplay
+      } : null
+    });
     return;
   }
 
   // Usar configuraciones de interfaz centralizadas en lugar de advancedFilters
   const interfaceSettings = userSettings || {};
+
+  // DIAGNÓSTICO: Loggear estado antes de filtrar
+  console.log('🔍 [DIAGNÓSTICO POPUP] applyAllFilters() - Estado inicial:', {
+    totalRoutes: allRoutes.length,
+    currentFilter: currentFilter,
+    interfaceSettings: {
+      interfaceMinProfitDisplay: interfaceSettings.interfaceMinProfitDisplay,
+      interfaceMaxRoutesDisplay: interfaceSettings.interfaceMaxRoutesDisplay,
+      interfaceSortByProfit: interfaceSettings.interfaceSortByProfit,
+      interfaceShowOnlyProfitable: interfaceSettings.interfaceShowOnlyProfitable,
+      interfacePreferSingleExchange: interfaceSettings.interfacePreferSingleExchange
+    },
+    muestraRutasP2P: allRoutes.filter(r => r.requiresP2P).length,
+    muestraRutasNoP2P: allRoutes.filter(r => !r.requiresP2P).length
+  });
 
   log('🔍 Aplicando filtros de interfaz:', {
     minProfit: interfaceSettings.interfaceMinProfitDisplay,
@@ -650,6 +674,14 @@ function applyAllFilters() {
       break;
   }
 
+  // DIAGNÓSTICO: Loggar resultado del filtro P2P
+  console.log('🔍 [DIAGNÓSTICO POPUP] applyAllFilters() - Después de filtro P2P:', {
+    currentFilter: currentFilter,
+    rutasDespuesFiltroP2P: filteredRoutes.length,
+    muestraP2P: currentFilter === 'p2p' || currentFilter === 'all',
+    muestraNoP2P: currentFilter === 'no-p2p' || currentFilter === 'all'
+  });
+
   log(`🔍 Después de filtro P2P: ${filteredRoutes.length} rutas`);
 
   // Paso 2: Filtro por profit mínimo de interfaz
@@ -660,9 +692,22 @@ function applyAllFilters() {
     log(`🔍 Después de filtro profit mínimo (${minProfit}%): ${filteredRoutes.length} rutas`);
   }
 
+  // DIAGNÓSTICO: Loggar resultado del filtro de profit mínimo
+  console.log('🔍 [DIAGNÓSTICO POPUP] applyAllFilters() - Después de filtro profit mínimo:', {
+    minProfit: minProfit,
+    rutasDespuesFiltroProfit: filteredRoutes.length,
+    rutasConProfitNegativo: allRoutes.filter(r => r.profitPercentage < minProfit).length
+  });
+
   // Paso 3: Mostrar solo rentables (si está activado)
   if (interfaceSettings.interfaceShowOnlyProfitable) {
+    const antesFiltro = filteredRoutes.length;
     filteredRoutes = filteredRoutes.filter(route => route.profitPercentage >= 0);
+    console.log('🔍 [DIAGNÓSTICO POPUP] applyAllFilters() - Después de filtro solo rentables:', {
+      rutasAntes: antesFiltro,
+      rutasDespues: filteredRoutes.length,
+      rutasEliminadas: antesFiltro - filteredRoutes.length
+    });
     log(`🔍 Después de mostrar solo rentables: ${filteredRoutes.length} rutas`);
   }
 
@@ -681,6 +726,17 @@ function applyAllFilters() {
     filteredRoutes = filteredRoutes.slice(0, maxRoutes);
     log(`🔍 Después de limitar a ${maxRoutes} rutas: ${filteredRoutes.length} rutas`);
   }
+
+  // DIAGNÓSTICO: Loggar resultado final antes de mostrar
+  console.log('🔍 [DIAGNÓSTICO POPUP] applyAllFilters() - Resultado final:', {
+    rutasFinales: filteredRoutes.length,
+    maxRoutes: interfaceSettings.interfaceMaxRoutesDisplay || 20,
+    vaAMostrar: filteredRoutes.length > 0,
+    currentData: currentData ? {
+      tieneOficial: !!currentData.oficial,
+      oficialCompra: currentData.oficial?.compra
+    } : null
+  });
 
   // Mostrar rutas
   if (currentData) {
@@ -1030,14 +1086,20 @@ async function fetchAndDisplay(retryCount = 0) {
         responseReceived = true;
         clearTimeout(timeoutId);
 
-        console.log('📥 [POPUP] Callback ejecutado - Datos recibidos del background:', {
+        // DIAGNÓSTICO: Loggear recepción completa de datos
+        console.log('🔍 [DIAGNÓSTICO POPUP] Datos recibidos del background:', {
           tieneData: !!data,
           oficialCompra: data?.oficial?.compra,
+          oficialVenta: data?.oficial?.venta,
           oficialSource: data?.oficial?.source,
+          oficialTimestamp: data?.oficial?.timestamp ? new Date(data.oficial.timestamp).toISOString() : 'N/A',
           rutasCount: data?.optimizedRoutes?.length || 0,
           lastUpdate: data?.lastUpdate ? new Date(data.lastUpdate).toLocaleString() : 'N/A',
           error: data?.error,
-          usingCache: data?.usingCache
+          usingCache: data?.usingCache,
+          dataKeys: data ? Object.keys(data) : [],
+          tieneOptimizedRoutes: !!data?.optimizedRoutes,
+          optimizedRoutesEsArray: Array.isArray(data?.optimizedRoutes)
         });
         console.log('📥 [POPUP] chrome.runtime.lastError:', chrome.runtime.lastError);
 
@@ -1059,10 +1121,21 @@ async function fetchAndDisplay(retryCount = 0) {
         loading.style.display = 'none';
 
         if (!data) {
-          console.error('❌ No se recibió data del background');
+          console.error('❌ [DIAGNÓSTICO POPUP] No se recibió data del background');
           handleNoData(container);
           return;
         }
+        
+        // DIAGNÓSTICO: Verificar estructura de datos
+        console.log('🔍 [DIAGNÓSTICO POPUP] Estructura de datos recibidos:', {
+          tieneOficial: !!data.oficial,
+          oficialKeys: data.oficial ? Object.keys(data.oficial) : [],
+          tieneOptimizedRoutes: !!data.optimizedRoutes,
+          optimizedRoutesLength: data.optimizedRoutes?.length || 0,
+          optimizedRoutesEsArray: Array.isArray(data.optimizedRoutes),
+          tieneError: !!data.error,
+          errorMessage: data.error
+        });
 
         // NUEVO: Manejar errores específicos del background
         if (data.timeout) {
@@ -1102,6 +1175,18 @@ async function fetchAndDisplay(retryCount = 0) {
         }
 
         console.log('📥 Data válida recibida, procesando...');
+
+        // DIAGNÓSTICO: Loggear estado de rutas
+        console.log('🔍 [DIAGNÓSTICO POPUP] Estado de rutas antes de procesar:', {
+          tieneRutas: !!data.optimizedRoutes,
+          cantidadRutas: data.optimizedRoutes?.length || 0,
+          esArray: Array.isArray(data.optimizedRoutes),
+          primeraRuta: data.optimizedRoutes?.[0] ? {
+            broker: data.optimizedRoutes[0].broker,
+            profitPercent: data.optimizedRoutes[0].profitPercent,
+            isSingleExchange: data.optimizedRoutes[0].isSingleExchange
+          } : null
+        });
 
         // Si está inicializando y aún no hay rutas, hacer retry automático
         if (data.error?.includes('Inicializando') && retryCount < maxRetries) {
@@ -1346,6 +1431,29 @@ function displayOptimizedRoutes(routes, official) {
   const container = document.getElementById('optimized-routes');
   console.log('🔍 [POPUP] container encontrado:', !!container);
 
+  // DIAGNÓSTICO: Loggear parámetros de entrada
+  console.log('🔍 [DIAGNÓSTICO POPUP] displayOptimizedRoutes() - Parámetros:', {
+    routes: routes ? {
+      esArray: Array.isArray(routes),
+      length: routes.length,
+      primeraRuta: routes[0] ? {
+        broker: routes[0].broker,
+        profitPercent: routes[0].profitPercent
+      } : null
+    } : null,
+    official: official ? {
+      compra: official.compra,
+      venta: official.venta,
+      source: official.source
+    } : null,
+    userSettings: userSettings ? {
+      interfaceMinProfitDisplay: userSettings.interfaceMinProfitDisplay,
+      interfaceMaxRoutesDisplay: userSettings.interfaceMaxRoutesDisplay,
+      interfaceSortByProfit: userSettings.interfaceSortByProfit,
+      interfaceShowOnlyProfitable: userSettings.interfaceShowOnlyProfitable
+    } : null
+  });
+
   // Obtener configuraciones de interfaz
   const interfaceSettings = userSettings || {};
   const showProfitColors = interfaceSettings.interfaceShowProfitColors !== false;
@@ -1355,6 +1463,12 @@ function displayOptimizedRoutes(routes, official) {
 
   if (!routes || routes.length === 0) {
     console.log('🔍 [POPUP] No hay rutas para mostrar, mostrando mensaje informativo');
+    console.log('🔍 [DIAGNÓSTICO POPUP] displayOptimizedRoutes() - No hay rutas:', {
+      routesIsNull: !routes,
+      routesLength: routes?.length || 0,
+      currentFilter: currentFilter,
+      allRoutesLength: allRoutes?.length || 0
+    });
     container.innerHTML = `
       <div class="market-status">
         <h3>📊 Estado del Mercado</h3>
@@ -1962,12 +2076,8 @@ function setSafeHTML(element, html) {
 }
 
 // Función helper para calcular clases de profit - Usa RouteRenderer
-const getProfitClasses = profitPercent =>
-  window.RouteRenderer?.getProfitClasses?.(profitPercent) || {
-    isNegative: profitPercent < 0,
-    profitClass: profitPercent < 0 ? 'negative-profit' : profitPercent > 5 ? 'high-profit' : '',
-    profitBadgeClass: profitPercent < 0 ? 'negative' : profitPercent > 5 ? 'high' : ''
-  };
+// NOTA: getProfitClasses está definida en utils.js y cargada globalmente en popup.html
+// Esta función delega a window.RouteRenderer si está disponible, usa utils.js como fallback
 
 // Calcular valores para la guía paso a paso
 function calculateGuideValues(arb) {

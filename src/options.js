@@ -19,7 +19,8 @@ const DEFAULT_SETTINGS = {
     'letsbit',
     'belo',
     'tiendacrypto',
-    'satoshitango'
+    'satoshitango',
+    'bybit'
   ],
   preferredExchanges: [],
   dataFreshnessWarning: true, // Alertar si datos tienen más de 5 min
@@ -222,7 +223,9 @@ async function loadSettings() {
       'bybitp2p',
       'bitgetp2p',
       'kucoinp2p',
-      'bingxp2p'
+      'bingxp2p',
+      'eldoradop2p',
+      'paydecep2p'
     ];
 
     document.querySelectorAll('input[name="p2p-usdt-usdt-exchange"]').forEach(cb => {
@@ -244,7 +247,9 @@ async function loadSettings() {
       'bybitp2p',
       'bitgetp2p',
       'kucoinp2p',
-      'bingxp2p'
+      'bingxp2p',
+      'eldoradop2p',
+      'paydecep2p'
     ];
 
     document.querySelectorAll('input[name="p2p-usdt-ars-exchange"]').forEach(cb => {
@@ -266,7 +271,9 @@ async function loadSettings() {
       'bybitp2p',
       'bitgetp2p',
       'kucoinp2p',
-      'bingxp2p'
+      'bingxp2p',
+      'eldoradop2p',
+      'paydecep2p'
     ];
 
     document.querySelectorAll('input[name="p2p-sync-exchange"]').forEach(cb => {
@@ -312,7 +319,20 @@ async function loadSettings() {
       'bitsoalpha',
       'cocoscrypto',
       'cryptomktpro',
-      'wallbit'
+      'wallbit',
+      'bitfinex',
+      'bitstamp',
+      'coinbase',
+      'kraken',
+      'gateio',
+      'gemini',
+      'cexio',
+      'okx',
+      'poloniex',
+      'bitso',
+      'banexcoin',
+      'xapo',
+      'x4t'
     ];
 
     document.querySelectorAll('input[name="traditional-exchange"]').forEach(cb => {
@@ -352,7 +372,20 @@ async function loadSettings() {
       'bitsoalpha',
       'cocoscrypto',
       'cryptomktpro',
-      'wallbit'
+      'wallbit',
+      'bitfinex',
+      'bitstamp',
+      'coinbase',
+      'kraken',
+      'gateio',
+      'gemini',
+      'cexio',
+      'okx',
+      'poloniex',
+      'bitso',
+      'banexcoin',
+      'xapo',
+      'x4t'
     ];
 
     document.querySelectorAll('input[name="usdt-broker"]').forEach(cb => {

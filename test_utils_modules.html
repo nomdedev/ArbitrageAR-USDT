@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prueba de Módulos Utils - ArbitrageAR</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin: 10px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .test-result {
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 4px;
+    }
+    .pass {
+      background: #d4edda;
+      color: #155724;
+      border-left: 4px solid #28a745;
+    }
+    .fail {
+      background: #f8d7da;
+      color: #721c24;
+      border-left: 4px solid #dc3545;
+    }
+    .info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border-left: 4px solid #17a2b8;
+    }
+    pre {
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+    .summary {
+      background: #e2e3e5;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Prueba de Módulos Utils - ArbitrageAR</h1>
+  <p>Verificando disponibilidad y funcionalidad de los módulos utils</p>
+
+  <div id="test-results"></div>
+  <div id="summary"></div>
+
+  <!-- Cargar módulos en el orden correcto -->
+  <script src="src/utils/stateManager.js"></script>
+  <script src="src/utils/formatters.js"></script>
+  <script src="src/utils/logger.js"></script>
+  <script src="src/ui/routeRenderer.js"></script>
+
+  <script>
+    const results = [];
+    const testResultsDiv = document.getElementById('test-results');
+    const summaryDiv = document.getElementById('summary');
+
+    function addTestResult(testName, passed, message, details = '') {
+      const result = { testName, passed, message, details };
+      results.push(result);
+
+      const div = document.createElement('div');
+      div.className = `test-result ${passed ? 'pass' : 'fail'}`;
+      div.innerHTML = `
+        <strong>${passed ? '✅' : '❌'} ${testName}</strong><br>
+        ${message}
+        ${details ? `<pre>${details}</pre>` : ''}
+      `;
+      testResultsDiv.appendChild(div);
+    }
+
+    function addInfo(title, content) {
+      const div = document.createElement('div');
+      div.className = 'test-result info';
+      div.innerHTML = `<strong>ℹ️ ${title}</strong><br>${content}`;
+      testResultsDiv.appendChild(div);
+    }
+
+    // Test 1: Verificar disponibilidad de módulos
+    function testModuleAvailability() {
+      addInfo('TEST 1: Disponibilidad de Módulos', 'Verificando que los módulos estén disponibles en window');
+
+      const modules = [
+        { name: 'StateManager', path: 'window.StateManager' },
+        { name: 'Formatters', path: 'window.Formatters' },
+        { name: 'Logger', path: 'window.Logger' },
+        { name: 'RouteRenderer', path: 'window.RouteRenderer' }
+      ];
+
+      modules.forEach(module => {
+        const isAvailable = eval(module.path) !== undefined;
+        const message = isAvailable
+          ? `${module.name} está disponible en ${module.path}`
+          : `${module.name} NO está disponible en ${module.path}`;
+        addTestResult(`Disponibilidad de ${module.name}`, isAvailable, message);
+      });
+    }
+
+    // Test 2: Probar StateManager
+    function testStateManager() {
+      addInfo('TEST 2: Funcionalidad de StateManager', 'Probando métodos del StateManager');
+
+      try {
+        // Test get()
+        const state = StateManager.get();
+        const hasCurrentData = 'currentData' in state;
+        const hasUserSettings = 'userSettings' in state;
+        addTestResult('StateManager.get()', hasCurrentData && hasUserSettings,
+          'get() devuelve el estado actual', JSON.stringify({ hasCurrentData, hasUserSettings }));
+
+        // Test set()
+        StateManager.set('test.value', 123);
+        const testValue = StateManager.get('test.value');
+        addTestResult('StateManager.set()', testValue === 123,
+          'set() establece valores correctamente', `test.value = ${testValue}`);
+
+        // Test subscribe()
+        let notified = false;
+        const unsubscribe = StateManager.subscribe('test.subscribe', (newValue) => {
+          notified = true;
+        });
+        StateManager.set('test.subscribe', 'test');
+        addTestResult('StateManager.subscribe()', notified,
+          'subscribe() notifica cambios correctamente');
+
+        unsubscribe();
+      } catch (error) {
+        addTestResult('StateManager', false, `Error: ${error.message}`, error.stack);
+      }
+    }
+
+    // Test 3: Probar Formatters
+    function testFormatters() {
+      addInfo('TEST 3: Funcionalidad de Formatters', 'Probando funciones de formateo');
+
+      try {
+        // Test formatARS
+        const ars = Formatters.formatARS(1234567.89);
+        addTestResult('Formatters.formatARS()', ars.includes('1234567,89'),
+          'Formatea montos en ARS', `Resultado: ${ars}`);
+
+        // Test formatUSD
+        const usd = Formatters.formatUSD(1234.56);
+        addTestResult('Formatters.formatUSD()', usd.includes('1234,56'),
+          'Formatea montos en USD', `Resultado: ${usd}`);
+
+        // Test formatProfitPercent
+        const profit = Formatters.formatProfitPercent(5.25);
+        addTestResult('Formatters.formatProfitPercent()', profit.includes('+5,25%'),
+          'Formatea porcentajes de ganancia', `Resultado: ${profit}`);
+
+        // Test formatTimeAgo
+        const timeAgo = Formatters.formatTimeAgo(Date.now() - 60000);
+        addTestResult('Formatters.formatTimeAgo()', timeAgo.includes('minuto'),
+          'Formatea tiempo relativo', `Resultado: ${timeAgo}`);
+
+        // Test getDollarSourceDisplay
+        const source = Formatters.getDollarSourceDisplay({ source: 'criptoya_banks', method: 'consenso' });
+        addTestResult('Formatters.getDollarSourceDisplay()', source.includes('Bancos CriptoYa'),
+          'Muestra fuente del dólar', `Resultado: ${source}`);
+      } catch (error) {
+        addTestResult('Formatters', false, `Error: ${error.message}`, error.stack);
+      }
+    }
+
+    // Test 4: Probar Logger
+    function testLogger() {
+      addInfo('TEST 4: Funcionalidad de Logger', 'Probando sistema de logging');
+
+      try {
+        // Test métodos de logging
+        Logger.info('Test info message');
+        Logger.warn('Test warn message');
+        Logger.error('Test error message');
+        Logger.debug('Test debug message');
+        Logger.success('Test success message');
+
+        // Test history
+        const history = Logger.getHistory();
+        const hasHistory = Array.isArray(history) && history.length > 0;
+
+        addTestResult('Logger métodos de logging', true,
+          'Todos los métodos de logging ejecutan sin errores');
+
+        addTestResult('Logger.getHistory()', hasHistory,
+          'getHistory() devuelve historial de logs', `Logs en historial: ${history.length}`);
+
+        // Test clearHistory
+        Logger.clearHistory();
+        const clearedHistory = Logger.getHistory();
+        addTestResult('Logger.clearHistory()', clearedHistory.length === 0,
+          'clearHistory() limpia el historial', `Logs después de limpiar: ${clearedHistory.length}`);
+      } catch (error) {
+        addTestResult('Logger', false, `Error: ${error.message}`, error.stack);
+      }
+    }
+
+    // Test 5: Probar RouteRenderer
+    function testRouteRenderer() {
+      addInfo('TEST 5: Funcionalidad de RouteRenderer', 'Probando funciones de renderizado');
+
+      try {
+        // Test getProfitClasses
+        const classesHigh = RouteRenderer.getProfitClasses(10);
+        const classesNegative = RouteRenderer.getProfitClasses(-5);
+        const classesNeutral = RouteRenderer.getProfitClasses(2);
+
+        addTestResult('RouteRenderer.getProfitClasses()',
+          classesHigh.profitClass === 'high-profit' &&
+          classesNegative.profitClass === 'negative-profit',
+          'Clasifica correctamente ganancias altas y negativas',
+          JSON.stringify({ high: classesHigh, negative: classesNegative, neutral: classesNeutral }));
+
+        // Test getExchangeIcon
+        const binanceIcon = RouteRenderer.getExchangeIcon('binance');
+        const lemonIcon = RouteRenderer.getExchangeIcon('lemoncash');
+        const defaultIcon = RouteRenderer.getExchangeIcon('unknown');
+
+        addTestResult('RouteRenderer.getExchangeIcon()',
+          binanceIcon === '🟡' && lemonIcon === '🍋',
+          'Devuelve iconos correctos para exchanges conocidos',
+          JSON.stringify({ binance: binanceIcon, lemon: lemonIcon, default: defaultIcon }));
+
+        // Test createRiskIndicator
+        const mockRoute = {
+          isP2P: false,
+          requiresP2P: false,
+          isSingleExchange: true
+        };
+        const risk = RouteRenderer.createRiskIndicator(mockRoute, 8);
+        const hasRiskObject = risk && typeof risk.level === 'string' && typeof risk.icon === 'string';
+
+        addTestResult('RouteRenderer.createRiskIndicator()', hasRiskObject,
+          'Crea indicadores de riesgo correctamente',
+          JSON.stringify(risk));
+      } catch (error) {
+        addTestResult('RouteRenderer', false, `Error: ${error.message}`, error.stack);
+      }
+    }
+
+    // Test 6: Verificar orden de carga de scripts
+    function testScriptLoadOrder() {
+      addInfo('TEST 6: Orden de Carga de Scripts', 'Verificando que los scripts se carguen en el orden correcto');
+
+      const scripts = document.querySelectorAll('script');
+      const scriptOrder = Array.from(scripts).map(s => s.src.split('/').pop());
+
+      const stateManagerIndex = scriptOrder.findIndex(s => s.includes('stateManager.js'));
+      const formattersIndex = scriptOrder.findIndex(s => s.includes('formatters.js'));
+      const loggerIndex = scriptOrder.findIndex(s => s.includes('logger.js'));
+      const routeRendererIndex = scriptOrder.findIndex(s => s.includes('routeRenderer.js'));
+
+      const correctOrder =
+        stateManagerIndex !== -1 &&
+        formattersIndex !== -1 &&
+        loggerIndex !== -1 &&
+        routeRendererIndex !== -1 &&
+        stateManagerIndex < routeRendererIndex; // StateManager debe cargarse antes de RouteRenderer
+
+      addTestResult('Orden de carga de scripts', correctOrder,
+        'Los scripts se cargan en el orden correcto',
+        `Índices: stateManager=${stateManagerIndex}, formatters=${formattersIndex}, logger=${loggerIndex}, routeRenderer=${routeRendererIndex}`);
+    }
+
+    // Test 7: Verificar dependencias entre módulos
+    function testModuleDependencies() {
+      addInfo('TEST 7: Dependencias entre Módulos', 'Verificando que RouteRenderer puede acceder a Formatters y StateManager');
+
+      try {
+        // RouteRenderer debería poder acceder a window.Formatters y window.StateManager
+        const routeRendererCanAccessFormatters = typeof RouteRenderer.getExchangeIcon === 'function';
+        const stateManagerAvailable = typeof StateManager.get === 'function';
+        const formattersAvailable = typeof Formatters.formatARS === 'function';
+
+        addTestResult('Dependencias de RouteRenderer',
+          routeRendererCanAccessFormatters && stateManagerAvailable && formattersAvailable,
+          'RouteRenderer puede acceder a sus dependencias',
+          JSON.stringify({
+            routeRendererFunctions: routeRendererCanAccessFormatters,
+            stateManagerAvailable,
+            formattersAvailable
+          }));
+      } catch (error) {
+        addTestResult('Dependencias entre módulos', false, `Error: ${error.message}`, error.stack);
+      }
+    }
+
+    // Ejecutar todos los tests
+    function runAllTests() {
+      testModuleAvailability();
+      testStateManager();
+      testFormatters();
+      testLogger();
+      testRouteRenderer();
+      testScriptLoadOrder();
+      testModuleDependencies();
+
+      // Generar resumen
+      const passed = results.filter(r => r.passed).length;
+      const failed = results.filter(r => !r.passed).length;
+      const total = results.length;
+
+      summaryDiv.innerHTML = `
+        <div class="summary">
+          <h2>📊 Resumen de Pruebas</h2>
+          <p><strong>Total:</strong> ${total} pruebas</p>
+          <p><strong>✅ Pasadas:</strong> ${passed}</p>
+          <p><strong>❌ Fallidas:</strong> ${failed}</p>
+          <p><strong>Porcentaje de éxito:</strong> ${((passed / total) * 100).toFixed(1)}%</p>
+          ${failed === 0 ? '<h3 style="color: #28a745;">🎉 TODAS LAS PRUEBAS PASARON</h3>' : '<h3 style="color: #dc3545;">⚠️ ALGUNAS PRUEBAS FALLARON</h3>'}
+        </div>
+      `;
+    }
+
+    // Ejecutar cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', runAllTests);
+  </script>
+</body>
+</html>

@@ -326,11 +326,14 @@ async function updateGlobalConfig() {
 // ============================================
 
 async function fetchWithRateLimit(url) {
+  console.log('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - INICIANDO para URL:', url);
+  
   // OPTIMIZADO v5.0.61: Rate limit opcional para mejorar performance
   if (ENABLE_RATE_LIMIT) {
     const now = Date.now();
     const delay = REQUEST_INTERVAL - (now - lastRequestTime);
     if (delay > 0) {
+      console.log('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - Rate limit activo, esperando', delay, 'ms');
       await new Promise(r => setTimeout(r, delay));
     }
     lastRequestTime = Date.now();
@@ -339,42 +342,78 @@ async function fetchWithRateLimit(url) {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+    console.log('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - Iniciando fetch, timeout:', REQUEST_TIMEOUT, 'ms');
+    
     const res = await fetch(url, { signal: controller.signal });
     clearTimeout(timeoutId);
+    
+    console.log('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - Respuesta recibida, status:', res.status, 'ok:', res.ok);
 
     if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
-    return await res.json();
+    
+    const json = await res.json();
+    console.log('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - ✅ JSON parseado exitosamente');
+    return json;
   } catch (e) {
+    console.error('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - ❌ ERROR en fetch:', url);
+    console.error('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - Error message:', e.message);
+    console.error('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - Error name:', e.name);
+    console.error('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - Error stack:', e.stack);
     console.warn('Fetch error:', url, e.message);
     return null;
   }
 }
 
 async function fetchDolarOficial(userSettings) {
-  const url = userSettings.criptoyaDolarOficialUrl || 'https://criptoya.com/api/dolar/oficial';
+  console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - INICIANDO');
+  const url = userSettings.criptoyaDolarOficialUrl || 'https://criptoya.com/api/dolar';
+  console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - URL:', url);
+  
   const data = await fetchWithRateLimit(url);
-  if (data && typeof data.compra === 'number' && typeof data.venta === 'number') {
-    // NUEVO v5.0.45: Agregar información de fuente para mostrar en UI
-    return {
-      ...data,
+  console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - Datos recibidos:', data);
+  
+  if (data && data.oficial) {
+    console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - data.oficial.ask:', data.oficial.ask, 'tipo:', typeof data.oficial.ask);
+    console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - data.oficial.bid:', data.oficial.bid, 'tipo:', typeof data.oficial.bid);
+  }
+  
+  if (data && data.oficial && typeof data.oficial.ask === 'number' && typeof data.oficial.bid === 'number') {
+    // Mapeo correcto según API de CriptoYa:
+    // - compra = bid (lo que el usuario RECIBE al vender)
+    // - venta = ask (lo que el usuario PAGA al comprar)
+    const result = {
+      compra: data.oficial.bid,
+      venta: data.oficial.ask,
       source: 'criptoya_oficial',
       timestamp: Date.now()
     };
+    console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - ✅ Devolviendo datos válidos:', result);
+    return result;
   }
+  
+  console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - ❌ Datos inválidos o nulos, devolviendo NULL');
   return null;
 }
 
 async function fetchAllDollarTypes(userSettings) {
+  console.log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - INICIANDO');
   const url = userSettings.criptoyaDolarUrl || 'https://criptoya.com/api/bancostodos';
+  console.log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - URL:', url);
   log('[BACKGROUND] 🔄 Fetching bancos from:', url);
   console.log('[FETCH] 🔄 Iniciando fetchAllDollarTypes desde:', url);
+  
   const data = await fetchWithRateLimit(url);
+  console.log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - Datos recibidos:', data);
+  console.log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - Tipo de datos:', typeof data);
+  
   log(
     '[BACKGROUND] 📊 Bancos data received:',
     data ? Object.keys(data).length + ' bancos' : 'null'
   );
   console.log('[FETCH] 📊 Datos crudos recibidos:', data);
+  
   if (data && typeof data === 'object') {
+    console.log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - Datos son objeto válido, procesando...');
     // Los datos de CriptoYa ya vienen en formato objeto
     const dollarTypes = {};
     let invalidBanks = [];
@@ -513,15 +552,25 @@ async function fetchBinanceP2P_USDT_USD(userSettings) {
 }
 
 async function fetchBankDollarRates(userSettings) {
+  console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - INICIANDO');
   const url = userSettings.criptoyaBanksUrl || 'https://criptoya.com/api/bancostodos';
+  console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - URL:', url);
+  
   const data = await fetchWithRateLimit(url);
+  console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - Datos recibidos:', data);
+  console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - Tipo de datos:', typeof data);
+  
   if (data && typeof data === 'object') {
-    return {
+    const result = {
       ...data,
       source: 'criptoya_banks',
       timestamp: Date.now()
     };
+    console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - ✅ Devolviendo datos válidos, keys:', Object.keys(data));
+    return result;
   }
+  
+  console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - ❌ Datos inválidos o nulos, devolviendo NULL');
   return null;
 }
 
@@ -850,7 +899,15 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
   log('🔍 [CALC] usdt:', usdt ? Object.keys(usdt).length + ' exchanges' : 'null');
   log('🔍 [CALC] usdtUsd:', usdtUsd ? Object.keys(usdtUsd).length + ' exchanges' : 'null');
 
+  // DIAGNÓSTICO: Verificar datos de entrada
+  console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Datos de entrada:', {
+    oficial: oficial ? { compra: oficial.compra, venta: oficial.venta } : null,
+    usdtExchanges: usdt ? Object.keys(usdt).filter(k => k !== 'time' && k !== 'timestamp') : [],
+    usdtUsdExchanges: usdtUsd ? Object.keys(usdtUsd).filter(k => k !== 'time' && k !== 'timestamp') : []
+  });
+
   if (!oficial || !usdt) {
+    console.error('❌ [DIAGNÓSTICO] calculateSimpleRoutes() - Faltan datos básicos:', { oficial: !!oficial, usdt: !!usdt });
     log('❌ [CALC] Faltan datos básicos');
     return [];
   }
@@ -892,6 +949,13 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
   let filteredUsdt = usdt;
   const selectedUsdtBrokers = userSettings.selectedUsdtBrokers;
 
+  // DIAGNÓSTICO: Loggear filtro de exchanges
+  console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Filtro de exchanges:', {
+    totalExchanges: Object.keys(usdt).filter(k => k !== 'time' && k !== 'timestamp').length,
+    selectedUsdtBrokers: selectedUsdtBrokers || [],
+    hasSelection: !!(selectedUsdtBrokers && Array.isArray(selectedUsdtBrokers) && selectedUsdtBrokers.length > 0)
+  });
+
   // Si el usuario seleccionó exchanges específicos, filtrar
   if (selectedUsdtBrokers && Array.isArray(selectedUsdtBrokers) && selectedUsdtBrokers.length > 0) {
     filteredUsdt = {};
@@ -901,6 +965,13 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
       }
     });
     log(`🔍 [CALC] Filtrando exchanges USDT: ${selectedUsdtBrokers.length} seleccionados`);
+    
+    // DIAGNÓSTICO: Loggear resultado del filtro
+    console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Después del filtro:', {
+      filteredExchanges: Object.keys(filteredUsdt).filter(k => k !== 'time' && k !== 'timestamp'),
+      found: selectedUsdtBrokers.filter(b => usdt[b]),
+      notFound: selectedUsdtBrokers.filter(b => !usdt[b])
+    });
   }
 
   // Iterar exchanges
@@ -1143,6 +1214,18 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
 
   // Ordenar TODAS las rutas por rentabilidad neta
   routes.sort((a, b) => b.profitPercent - a.profitPercent);
+
+  // DIAGNÓSTICO: Loggear resultado final del cálculo
+  console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Resultado final:', {
+    totalRoutes: routes.length,
+    intraBroker: processedCount,
+    interBroker: interBrokerRoutes.length,
+    top3Routes: routes.slice(0, 3).map(r => ({
+      broker: r.broker,
+      profitPercent: r.profitPercent,
+      isSingleExchange: r.isSingleExchange
+    }))
+  });
 
   log(
     `✅ [CALC] Rutas totales: ${routes.length} (Intra: ${processedCount}, Inter: ${interBrokerRoutes.length})`
@@ -1925,12 +2008,23 @@ let isFirstUpdate = true; // NUEVO: Bandera para evitar notificaciones en inicia
 // ============================================
 
 async function updateData() {
-  log('🔄 Actualizando datos...');
+  console.log('🔍 [DIAGNÓSTICO] updateData() - INICIANDO función de actualización de datos');
+  log('� Actualizando datos...');
 
   try {
     // NUEVO v5.0.48: Leer configuración del usuario ANTES de obtener datos
     const settingsResult = await chrome.storage.local.get('notificationSettings');
     const userSettings = settingsResult.notificationSettings || {};
+    
+    // DIAGNÓSTICO: Loggear configuración leída
+    console.log('🔍 [DIAGNÓSTICO] updateData() - Configuración leída:', {
+      dollarPriceSource: userSettings.dollarPriceSource,
+      manualDollarPrice: userSettings.manualDollarPrice,
+      preferredBank: userSettings.preferredBank,
+      selectedBanks: userSettings.selectedBanks,
+      selectedUsdtBrokers: userSettings.selectedUsdtBrokers,
+      routeType: userSettings.routeType
+    });
 
     log('⚙️ [BACKGROUND] Configuración LEÍDA desde storage:', {
       dollarPriceSource: userSettings.dollarPriceSource,
@@ -1942,8 +2036,13 @@ async function updateData() {
 
     // Decidir cómo obtener el precio del dólar oficial
     let oficial;
+    console.log('🔍 [DIAGNÓSTICO] updateData() - Decidiendo método para obtener dólar oficial...');
+    console.log('🔍 [DIAGNÓSTICO] dollarPriceSource:', userSettings.dollarPriceSource);
+    console.log('🔍 [DIAGNÓSTICO] preferredBank:', userSettings.preferredBank);
+    
     if (userSettings.dollarPriceSource === 'manual') {
       // Usar precio manual configurado por el usuario
+      console.log('🔍 [DIAGNÓSTICO] Rama: MODO MANUAL');
       const manualPrice = userSettings.manualDollarPrice || 1400;
       log(`💵 [BACKGROUND] MODO MANUAL: Usando precio manual: $${manualPrice}`);
       oficial = {
@@ -1953,29 +2052,41 @@ async function updateData() {
         timestamp: Date.now()
       };
       log('✅ [BACKGROUND] Oficial MANUAL creado:', oficial);
+      console.log('🔍 [DIAGNÓSTICO] Oficial MANUAL creado exitosamente:', oficial);
     } else {
       // Usar API automática - verificar si usar método de bancos
       const bankMethod = userSettings.preferredBank;
+      console.log('🔍 [DIAGNÓSTICO] Rama: MODO AUTO (dollarPriceSource !== "manual")');
+      console.log('🔍 [DIAGNÓSTICO] bankMethod:', bankMethod);
+      console.log('🔍 [DIAGNÓSTICO] ¿bankMethod existe y es diferente de "oficial"?:', !!(bankMethod && bankMethod !== 'oficial'));
 
       if (bankMethod && bankMethod !== 'oficial') {
         // Usar método estadístico de bancos
+        console.log('🔍 [DIAGNÓSTICO] Rama: MÉTODO DE BANCOS (bankMethod:', bankMethod, ')');
         log(`🏦 Obteniendo precio usando método: ${bankMethod}`);
 
         // Obtener datos de bancos y calcular precio según método
+        console.log('🔍 [DIAGNÓSTICO] Llamando fetchBankDollarRates()...');
         const bankData = await fetchBankDollarRates(userSettings);
+        console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() devolvió:', bankData ? 'DATOS' : 'NULL');
+        console.log('🔍 [DIAGNÓSTICO] bankData keys:', bankData ? Object.keys(bankData) : 'null');
+        
         const selectedBanks =
           userSettings.selectedBanks && userSettings.selectedBanks.length > 0
             ? userSettings.selectedBanks
             : ['bna', 'galicia', 'santander', 'bbva', 'icbc']; // Bancos principales por defecto
 
         log(`🏦 Usando ${selectedBanks.length} bancos para cálculo:`, selectedBanks);
+        console.log('🔍 [DIAGNÓSTICO] selectedBanks:', selectedBanks);
 
         if (bankData) {
+          console.log('🔍 [DIAGNÓSTICO] bankData existe, calculando precio con método:', bankMethod);
           const calculatedPrice = BANK_CALCULATIONS.calculateDollarPrice(
             bankData,
             bankMethod,
             selectedBanks
           );
+          console.log('🔍 [DIAGNÓSTICO] calculatedPrice:', calculatedPrice);
 
           if (calculatedPrice) {
             log(
@@ -1989,12 +2100,49 @@ async function updateData() {
               banksCount: calculatedPrice.banksCount,
               timestamp: Date.now()
             };
+            console.log('🔍 [DIAGNÓSTICO] Oficial desde BANCOS creado exitosamente:', oficial);
           } else {
+            console.log('🔍 [DIAGNÓSTICO] ❌ ERROR: calculatedPrice es NULL');
             log(
-              '⚠️ [BACKGROUND] No se pudo calcular precio de bancos, usando precio manual como fallback'
+              '⚠️ [BACKGROUND] No se pudo calcular precio de bancos, intentando API oficial como fallback...'
             );
             log('   selectedBanks:', selectedBanks);
             log('   bankData keys:', bankData ? Object.keys(bankData) : 'null');
+            
+            // ⭐ NUEVO: Intentar API oficial como fallback antes de usar manual
+            console.log('🔍 [DIAGNÓSTICO] Llamando fetchDolarOficial() como fallback...');
+            oficial = await fetchDolarOficial(userSettings);
+            console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() fallback devolvió:', oficial ? 'DATOS' : 'NULL');
+            
+            if (!oficial) {
+              console.log('🔍 [DIAGNÓSTICO] ❌ API oficial también falló, usando manual como último fallback');
+              const manualPrice = userSettings.manualDollarPrice || 1400;
+              oficial = {
+                compra: manualPrice,
+                venta: manualPrice,
+                source: 'manual_fallback',
+                timestamp: Date.now()
+              };
+              log('⚠️ [BACKGROUND] Oficial MANUAL_FALLBACK creado:', oficial);
+              console.log('🔍 [DIAGNÓSTICO] ⚠️ Oficial MANUAL_FALLBACK creado (porque API oficial también falló)');
+            } else {
+              log('✅ [BACKGROUND] Oficial desde API OFICIAL (fallback) creado:', oficial);
+              console.log('🔍 [DIAGNÓSTICO] ✅ Oficial desde API OFICIAL (fallback) creado exitosamente:', oficial);
+            }
+          }
+        } else {
+          console.log('🔍 [DIAGNÓSTICO] ❌ ERROR: bankData es NULL');
+          log(
+            '⚠️ [BACKGROUND] No se pudieron obtener datos de bancos, intentando API oficial como fallback...'
+          );
+          
+          // ⭐ NUEVO: Intentar API oficial como fallback antes de usar manual
+          console.log('🔍 [DIAGNÓSTICO] Llamando fetchDolarOficial() como fallback...');
+          oficial = await fetchDolarOficial(userSettings);
+          console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() fallback devolvió:', oficial ? 'DATOS' : 'NULL');
+          
+          if (!oficial) {
+            console.log('🔍 [DIAGNÓSTICO] ❌ API oficial también falló, usando manual como último fallback');
             const manualPrice = userSettings.manualDollarPrice || 1400;
             oficial = {
               compra: manualPrice,
@@ -2003,24 +2151,19 @@ async function updateData() {
               timestamp: Date.now()
             };
             log('⚠️ [BACKGROUND] Oficial MANUAL_FALLBACK creado:', oficial);
+            console.log('🔍 [DIAGNÓSTICO] ⚠️ Oficial MANUAL_FALLBACK creado (porque API oficial también falló)');
+          } else {
+            log('✅ [BACKGROUND] Oficial desde API OFICIAL (fallback) creado:', oficial);
+            console.log('🔍 [DIAGNÓSTICO] ✅ Oficial desde API OFICIAL (fallback) creado exitosamente:', oficial);
           }
-        } else {
-          log(
-            '⚠️ [BACKGROUND] No se pudieron obtener datos de bancos, usando precio manual como fallback'
-          );
-          const manualPrice = userSettings.manualDollarPrice || 1400;
-          oficial = {
-            compra: manualPrice,
-            venta: manualPrice,
-            source: 'manual_fallback',
-            timestamp: Date.now()
-          };
-          log('⚠️ [BACKGROUND] Oficial MANUAL_FALLBACK creado:', oficial);
         }
       } else {
         // Usar precio oficial estándar
+        console.log('🔍 [DIAGNÓSTICO] Rama: PRECIO OFICIAL ESTÁNDAR (DolarAPI)');
         log('🌐 Obteniendo precio oficial desde DolarAPI...');
         oficial = await fetchDolarOficial(userSettings);
+        console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() devolvió:', oficial ? 'DATOS' : 'NULL');
+        console.log('🔍 [DIAGNÓSTICO] oficial:', oficial);
       }
     }
 
@@ -2032,7 +2175,15 @@ async function updateData() {
 
     log('📊 Datos obtenidos:', { oficial: !!oficial, usdt: !!usdt, usdtUsd: !!usdtUsd });
 
+    // DIAGNÓSTICO: Loggear detalles de datos obtenidos
+    console.log('🔍 [DIAGNÓSTICO] updateData() - Datos obtenidos:', {
+      oficial: oficial ? { compra: oficial.compra, venta: oficial.venta, source: oficial.source } : null,
+      usdt: usdt ? Object.keys(usdt).length + ' exchanges' : null,
+      usdtUsd: usdtUsd ? Object.keys(usdtUsd).length + ' exchanges' : null
+    });
+
     if (!oficial || !usdt) {
+      console.error('❌ [DIAGNÓSTICO] updateData() - Faltan datos básicos:', { oficial: !!oficial, usdt: !!usdt });
       log('❌ Faltan datos básicos');
       return null;
     }
@@ -2043,6 +2194,16 @@ async function updateData() {
     const optimizedRoutes = await calculateAllRoutes(oficial, usdt, usdtUsd, {
       ...userSettings,
       routeType
+    });
+
+    // DIAGNÓSTICO: Loggear resultado del cálculo
+    console.log('🔍 [DIAGNÓSTICO] updateData() - Rutas calculadas:', {
+      routeType: userSettings.routeType || 'arbitrage',
+      totalRoutes: optimizedRoutes.length,
+      firstRoute: optimizedRoutes[0] ? {
+        broker: optimizedRoutes[0].broker,
+        profitPercent: optimizedRoutes[0].profitPercent
+      } : null
     });
 
     log(`✅ Datos actualizados: ${optimizedRoutes.length} rutas`);
@@ -2073,6 +2234,31 @@ async function updateData() {
     // NUEVO: Marcar que ya no es la primera actualización
     isFirstUpdate = false;
 
+    // DIAGNÓSTICO FINAL: Verificar estado de oficial antes de retornar
+    console.log('🔍 [DIAGNÓSTICO] updateData() - VERIFICACIÓN FINAL:', {
+      oficialIsNull: oficial === null,
+      oficialExists: !!oficial,
+      oficialCompra: oficial?.compra,
+      oficialVenta: oficial?.venta,
+      oficialSource: oficial?.source,
+      oficialMethod: oficial?.method,
+      configuracionFinal: {
+        dollarPriceSource: userSettings.dollarPriceSource,
+        manualDollarPrice: userSettings.manualDollarPrice,
+        preferredBank: userSettings.preferredBank
+      }
+    });
+
+    if (!oficial) {
+      console.error('🔍 [DIAGNÓSTICO] ❌ CRÍTICO: oficial es NULL al final de updateData()');
+      console.error('🔍 [DIAGNÓSTICO] Esto significa que NO se pudo obtener precio del dólar oficial');
+      console.error('🔍 [DIAGNÓSTICO] Configuración actual:', {
+        dollarPriceSource: userSettings.dollarPriceSource,
+        preferredBank: userSettings.preferredBank,
+        manualDollarPrice: userSettings.manualDollarPrice
+      });
+    }
+
     return data;
   } catch (error) {
     console.error('❌ Error en updateData:', error);
@@ -2096,6 +2282,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === 'getArbitrages') {
     log('[BACKGROUND] 📥 Mensaje getArbitrages recibido');
+    
+    // DIAGNÓSTICO: Loggear recepción del mensaje
+    console.log('🔍 [DIAGNÓSTICO] getArbitrages - Mensaje recibido:', {
+      hasCurrentData: !!currentData,
+      currentDataKeys: currentData ? Object.keys(currentData) : [],
+      optimizedRoutesCount: currentData?.optimizedRoutes?.length || 0,
+      oficial: currentData?.oficial ? { compra: currentData.oficial.compra, venta: currentData.oficial.venta } : null
+    });
 
     // Si hay datos en cache, devolverlos inmediatamente
     if (currentData) {
@@ -2108,9 +2302,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendResponse(currentData);
       return false; // CORREGIDO: Respuesta síncrona, no mantener canal
     } else {
+      // DIAGNÓSTICO: Loggear que no hay datos en cache
+      console.log('🔍 [DIAGNÓSTICO] getArbitrages - No hay datos en cache, actualizando...');
+      
       // Actualizar datos de forma asíncrona
       updateData()
         .then(data => {
+          // DIAGNÓSTICO: Loggear resultado de actualización
+          console.log('🔍 [DIAGNÓSTICO] getArbitrages - Datos frescos obtenidos:', {
+            hasData: !!data,
+            hasOficial: !!data?.oficial,
+            oficialCompra: data?.oficial?.compra,
+            oficialSource: data?.oficial?.source,
+            rutasCount: data?.optimizedRoutes?.length || 0,
+            hasError: !!data?.error,
+            error: data?.error
+          });
+          
           log('[BACKGROUND] 📤 Enviando datos FRESCOS al popup:', {
             oficialCompra: data?.oficial?.compra,
             oficialSource: data?.oficial?.source,
