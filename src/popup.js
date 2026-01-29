@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupFilterButtons(); // NUEVO: Configurar filtros P2P
   setupAdvancedSimulator(); // NUEVO v5.0.31: Configurar simulador sin rutas
   setupRouteDetailsModal(); // NUEVO: Configurar modal de detalles de ruta
-  checkForUpdates(); // NUEVO: Verificar actualizaciones disponibles
+  checkForUpdatesOnPopupLoad(); // NUEVO: Verificar actualizaciones al cargar el popup
   loadUserSettings(); // NUEVO v5.0.28: Cargar configuración del usuario
   setupCryptoArbitrageTab(); // NUEVO: Configurar pestaña de arbitraje cripto
   fetchAndDisplay();
@@ -118,14 +118,9 @@ function setupTabNavigation() {
 // ==========================================
 // FUNCIONES DE FORMATEO (delegadas a Formatters)
 // ==========================================
-// Nota: Estas funciones utilizan el módulo Formatters cargado globalmente.
-// El código de fallback fue eliminado para evitar duplicación.
-// Si Formatters no está disponible, estas funciones lanzarán error.
-
-const formatNumber = num => Fmt.formatNumber(num);
-const formatUsdUsdtRatio = num => Fmt.formatUsdUsdtRatio(num);
-const formatCommissionPercent = num => Fmt.formatCommissionPercent(num);
-const getDollarSourceDisplay = official => Fmt.getDollarSourceDisplay(official);
+// Nota: Estas funciones utilizan el módulo Formatters cargado globalmente (window.Formatters).
+// Se usa directamente Fmt.formatNumber, Fmt.formatUsdUsdtRatio, etc. donde se necesite.
+// No se redeclaran aquí para evitar conflictos de scope global.
 
 // ============================================
 // FUNCIONES DE VALIDACIÓN DE DATOS v5.0.74
@@ -1363,12 +1358,12 @@ function displayArbitrages(arbitrages, official) {
         <div class="card-header">
           <h3>🏦 ${arb.broker}</h3>
           ${negativeIndicator ? `<div class="broker-loss-indicator">${negativeIndicator}</div>` : ''}
-          <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${formatNumber(arb.profitPercentage)}% ${lowProfitIndicator}</div>
+          <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${Fmt.formatNumber(arb.profitPercentage)}% ${lowProfitIndicator}</div>
         </div>
         <div class="card-body">
           <div class="price-row">
             <span class="price-label">💵 Dólar Oficial</span>
-            <span class="price-value">$${formatNumber(arb.officialPrice)}</span>
+            <span class="price-value">$${Fmt.formatNumber(arb.officialPrice)}</span>
           </div>
           ${
             official?.source
@@ -1386,18 +1381,18 @@ function displayArbitrages(arbitrages, official) {
           </div>
           <div class="price-row">
             <span class="price-label">💸 USDT → ARS</span>
-            <span class="price-value highlight">$${formatNumber(arb.usdtArsBid)}</span>
+            <span class="price-value highlight">$${Fmt.formatNumber(arb.usdtArsBid)}</span>
           </div>
           ${
             hasFees
               ? `
           <div class="price-row fees-row">
             <span class="price-label">📊 Comisiones</span>
-            <span class="price-value fee-value">${formatNumber(arb.fees.total)}%</span>
+            <span class="price-value fee-value">${Fmt.formatNumber(arb.fees.total)}%</span>
           </div>
           <div class="price-row">
             <span class="price-label">✅ Ganancia Neta</span>
-            <span class="price-value net-profit">+${formatNumber(arb.profitPercentage)}%</span>
+            <span class="price-value net-profit">+${Fmt.formatNumber(arb.profitPercentage)}%</span>
           </div>
           `
               : ''
@@ -1561,7 +1556,7 @@ function displayOptimizedRoutes(routes, official) {
       <div class="route-card ${profitClass} ${routeType} ${compactClass}" data-index="${index}" data-route='${routeData.replace(/'/g, '&apos;')}'>
         <div class="route-header">
           <div class="route-title">
-            <h3>${getRouteIcon(routeType)} Ruta ${index + 1} ${exchangeIcon}</h3>
+            <h3>${getRouteIcon(routeType, route)} Ruta ${index + 1} ${exchangeIcon}</h3>
             ${negativeIndicator ? `<div class="route-loss-indicator">${negativeIndicator}</div>` : ''}
             <div class="route-badges">
               ${typeBadge}
@@ -1569,7 +1564,7 @@ function displayOptimizedRoutes(routes, official) {
             </div>
           </div>
           <div class="route-profit-section">
-            <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${formatNumber(displayMetrics.percentage)}%</div>
+            <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${Fmt.formatNumber(displayMetrics.percentage)}%</div>
           </div>
         </div>
 
@@ -1661,7 +1656,7 @@ function getRouteDisplayMetrics(route, routeType) {
 
       return {
         percentage: percentage,
-        mainValue: `$${formatNumber(arsReceived)} ARS`,
+        mainValue: `$${Fmt.formatNumber(arsReceived)} ARS`,
         secondaryInfo: `vendiendo ${usdtSold} USDT`
       };
     }
@@ -1673,7 +1668,7 @@ function getRouteDisplayMetrics(route, routeType) {
 
       return {
         percentage: (efficiency - 1) * 100, // Convertir efficiency a porcentaje
-        mainValue: `${formatNumber(usdtReceived)} USDT`,
+        mainValue: `${Fmt.formatNumber(usdtReceived)} USDT`,
         secondaryInfo: `por ${usdInvested} USD invertidos`
       };
     }
@@ -1686,8 +1681,8 @@ function getRouteDisplayMetrics(route, routeType) {
 
       return {
         percentage: profitPercentage,
-        mainValue: `${profitPercentage >= 0 ? '+' : ''}$${formatNumber(netProfit)} ARS`,
-        secondaryInfo: `sobre $${formatNumber(initial)} ARS`
+        mainValue: `${profitPercentage >= 0 ? '+' : ''}$${Fmt.formatNumber(netProfit)} ARS`,
+        secondaryInfo: `sobre $${Fmt.formatNumber(initial)} ARS`
       };
     }
   }
@@ -1726,14 +1721,14 @@ function getRouteDescription(route, routeType) {
   }
 }
 
-function getRouteIcon(routeType) {
+function getRouteIcon(routeType, route) {
   switch (routeType) {
     case 'direct_usdt_ars':
       return '💰';
     case 'usd_to_usdt':
       return '💎';
     default:
-      return route.isSingleExchange ? '🎯' : '🔀';
+      return route?.isSingleExchange ? '🎯' : '🔀';
   }
 }
 
@@ -1789,11 +1784,11 @@ function showDirectUsdtArsDetails(route) {
         </div>
         <div class="summary-item">
           <span class="label">ARS recibidos:</span>
-          <span class="value">$${formatNumber(arsReceived)}</span>
+          <span class="value">$${Fmt.formatNumber(arsReceived)}</span>
         </div>
         <div class="summary-item">
           <span class="label">Tasa de cambio:</span>
-          <span class="value">$${formatNumber(exchangeRate)} ARS/USDT</span>
+          <span class="value">$${Fmt.formatNumber(exchangeRate)} ARS/USDT</span>
         </div>
       </div>
 
@@ -1810,13 +1805,13 @@ function showDirectUsdtArsDetails(route) {
           <div class="step-number">2</div>
           <div class="step-content">
             <h4>Vende ${usdtAmount} USDT por ARS</h4>
-            <p>Coloca una orden de venta al precio de $${formatNumber(exchangeRate)} ARS por USDT</p>
+            <p>Coloca una orden de venta al precio de $${Fmt.formatNumber(exchangeRate)} ARS por USDT</p>
           </div>
         </div>
         <div class="step">
           <div class="step-number">3</div>
           <div class="step-content">
-            <h4>Recibe $${formatNumber(arsReceived)} ARS</h4>
+            <h4>Recibe $${Fmt.formatNumber(arsReceived)} ARS</h4>
             <p>Los pesos argentinos estarán disponibles en tu cuenta bancaria</p>
           </div>
         </div>
@@ -1828,11 +1823,11 @@ function showDirectUsdtArsDetails(route) {
       <div class="fees-info">
         <h4>Comisiones aplicadas:</h4>
         <div class="fee-breakdown">
-          ${fees.sell > 0 ? `<div>Comisión de venta: $${formatNumber(fees.sell)}</div>` : ''}
-          ${fees.withdrawal > 0 ? `<div>Comisión de retiro: $${formatNumber(fees.withdrawal)}</div>` : ''}
-          ${fees.transfer > 0 ? `<div>Comisión de transferencia: $${formatNumber(fees.transfer)}</div>` : ''}
-          ${fees.bank > 0 ? `<div>Comisión bancaria: $${formatNumber(fees.bank)}</div>` : ''}
-          <div class="fee-total">Total fees: $${formatNumber(fees.total)}</div>
+          ${fees.sell > 0 ? `<div>Comisión de venta: $${Fmt.formatNumber(fees.sell)}</div>` : ''}
+          ${fees.withdrawal > 0 ? `<div>Comisión de retiro: $${Fmt.formatNumber(fees.withdrawal)}</div>` : ''}
+          ${fees.transfer > 0 ? `<div>Comisión de transferencia: $${Fmt.formatNumber(fees.transfer)}</div>` : ''}
+          ${fees.bank > 0 ? `<div>Comisión bancaria: $${Fmt.formatNumber(fees.bank)}</div>` : ''}
+          <div class="fee-total">Total fees: $${Fmt.formatNumber(fees.total)}</div>
         </div>
       </div>
       `
@@ -1873,15 +1868,15 @@ function showUsdToUsdtDetails(route) {
         </div>
         <div class="summary-item">
           <span class="label">USDT recibidos:</span>
-          <span class="value">${formatNumber(usdtReceived)} USDT</span>
+          <span class="value">${Fmt.formatNumber(usdtReceived)} USDT</span>
         </div>
         <div class="summary-item">
           <span class="label">Tasa USD/USDT:</span>
-          <span class="value">${formatNumber(exchangeRate)}</span>
+          <span class="value">${Fmt.formatNumber(exchangeRate)}</span>
         </div>
         <div class="summary-item">
           <span class="label">Eficiencia:</span>
-          <span class="value">${formatNumber(efficiency * 100)}%</span>
+          <span class="value">${Fmt.formatNumber(efficiency * 100)}%</span>
         </div>
       </div>
 
@@ -1905,7 +1900,7 @@ function showUsdToUsdtDetails(route) {
           <div class="step-number">3</div>
           <div class="step-content">
             <h4>Compra USDT con USD</h4>
-            <p>Invierte $${usdAmount} USD para recibir ${formatNumber(usdtReceived)} USDT</p>
+            <p>Invierte $${usdAmount} USD para recibir ${Fmt.formatNumber(usdtReceived)} USDT</p>
           </div>
         </div>
         <div class="step">
@@ -1923,8 +1918,8 @@ function showUsdToUsdtDetails(route) {
       <div class="fees-info">
         <h4>Comisiones aplicadas:</h4>
         <div class="fee-breakdown">
-          ${fees.buy > 0 ? `<div>Comisión de compra: ${formatNumber(fees.buy)} USDT</div>` : ''}
-          <div class="fee-total">Total fees: ${formatNumber(fees.total)} USDT</div>
+          ${fees.buy > 0 ? `<div>Comisión de compra: ${Fmt.formatNumber(fees.buy)} USDT</div>` : ''}
+          <div class="fee-total">Total fees: ${Fmt.formatNumber(fees.total)} USDT</div>
         </div>
       </div>
       `
@@ -2141,7 +2136,7 @@ function generateGuideHeader(broker, profitPercentage) {
         <span class="profit-icon">${isProfitable ? '📈' : '📉'}</span>
         <span class="profit-text">
           ${isProfitable ? 'Ganancia' : 'Pérdida'}: 
-          <strong>${isProfitable ? '+' : ''}${formatNumber(profitPercentage)}%</strong>
+          <strong>${isProfitable ? '+' : ''}${Fmt.formatNumber(profitPercentage)}%</strong>
         </span>
       </div>
     </div>
@@ -2174,9 +2169,9 @@ function generateGuideSteps(values) {
           <p class="step-simple-text">Ve a tu banco y compra USD al precio oficial</p>
           <div class="step-simple-calc">
             <span class="calc-label">Precio:</span>
-            <span class="calc-value">$${formatNumber(officialPrice)}/USD</span>
+            <span class="calc-value">$${Fmt.formatNumber(officialPrice)}/USD</span>
             <span class="calc-arrow">→</span>
-            <span class="calc-result">Obtienes ${formatNumber(usdAmount)} USD</span>
+            <span class="calc-result">Obtienes ${Fmt.formatNumber(usdAmount)} USD</span>
           </div>
           <div class="step-simple-note">
             💡 Verifica los límites actuales con tu banco
@@ -2194,7 +2189,7 @@ function generateGuideSteps(values) {
             <span class="calc-label">Tasa:</span>
             <span class="calc-value">${formatUsdUsdtRatio(usdToUsdtRate)} USD = 1 USDT</span>
             <span class="calc-arrow">→</span>
-            <span class="calc-result">${formatNumber(usdtAfterFees)} USDT</span>
+            <span class="calc-result">${Fmt.formatNumber(usdtAfterFees)} USDT</span>
           </div>
           ${
             typeof usdToUsdtRate === 'number' && isFinite(usdToUsdtRate) && usdToUsdtRate > 1.005
@@ -2216,9 +2211,9 @@ function generateGuideSteps(values) {
           <p class="step-simple-text">Vende tus USDT en <strong>${sanitizeHTML(broker)}</strong> y recibe pesos</p>
           <div class="step-simple-calc highlight-profit">
             <span class="calc-label">Precio:</span>
-            <span class="calc-value big">$${formatNumber(usdtArsBid)}/USDT</span>
+            <span class="calc-value big">$${Fmt.formatNumber(usdtArsBid)}/USDT</span>
             <span class="calc-arrow">→</span>
-            <span class="calc-result big">$${formatNumber(arsFromSale)}</span>
+            <span class="calc-result big">$${Fmt.formatNumber(arsFromSale)}</span>
           </div>
           <div class="step-simple-success">
             ✅ Aquí está la ganancia: diferencia entre dólar oficial y USDT
@@ -2234,13 +2229,13 @@ function generateGuideSteps(values) {
           <p class="step-simple-text">Transfiere los pesos a tu cuenta bancaria</p>
           <div class="step-simple-calc final">
             <span class="calc-label">Después de comisiones:</span>
-            <span class="calc-result">$${formatNumber(finalAmount)}</span>
+            <span class="calc-result">$${Fmt.formatNumber(finalAmount)}</span>
           </div>
           <div class="profit-summary ${profit >= 0 ? 'positive' : 'negative'}">
             <div class="profit-main">
               <span class="profit-icon">${profit >= 0 ? '📈' : '📉'}</span>
-              <span class="profit-amount">${profit >= 0 ? '+' : ''}$${formatNumber(profit)}</span>
-              <span class="profit-percent">(${profit >= 0 ? '+' : ''}${formatNumber(profitPercentage)}%)</span>
+              <span class="profit-amount">${profit >= 0 ? '+' : ''}$${Fmt.formatNumber(profit)}</span>
+              <span class="profit-percent">(${profit >= 0 ? '+' : ''}${Fmt.formatNumber(profitPercentage)}%)</span>
             </div>
             <div class="profit-subtitle">
               ${profit >= 0 ? 'Ganancia neta' : 'Pérdida neta'}
@@ -2256,22 +2251,22 @@ function generateGuideSteps(values) {
       <div class="summary-flow">
         <div class="summary-item">
           <span class="summary-label">Inversión</span>
-          <span class="summary-value">$${formatNumber(estimatedInvestment)}</span>
+          <span class="summary-value">$${Fmt.formatNumber(estimatedInvestment)}</span>
         </div>
         <span class="summary-arrow">→</span>
         <div class="summary-item">
           <span class="summary-label">USD Oficial</span>
-          <span class="summary-value">${formatNumber(usdAmount)} USD</span>
+          <span class="summary-value">${Fmt.formatNumber(usdAmount)} USD</span>
         </div>
         <span class="summary-arrow">→</span>
         <div class="summary-item">
           <span class="summary-label">USDT</span>
-          <span class="summary-value">${formatNumber(usdtAfterFees)} USDT</span>
+          <span class="summary-value">${Fmt.formatNumber(usdtAfterFees)} USDT</span>
         </div>
         <span class="summary-arrow">→</span>
         <div class="summary-item highlight">
           <span class="summary-label">Resultado</span>
-          <span class="summary-value big">$${formatNumber(finalAmount)}</span>
+          <span class="summary-value big">$${Fmt.formatNumber(finalAmount)}</span>
         </div>
       </div>
     </div>
@@ -2558,7 +2553,7 @@ async function displayExchangeRates(exchangeRates) {
         displayRates = `
           <div class="exchange-rate">
             <span class="rate-label">ARS/USD:</span>
-            <span class="rate-value">$${formatNumber(rates.compra)} / $${formatNumber(rates.venta)}</span>
+            <span class="rate-value">$${Fmt.formatNumber(rates.compra)} / $${Fmt.formatNumber(rates.venta)}</span>
           </div>
         `;
         rateType = 'Oficial';
@@ -2566,7 +2561,7 @@ async function displayExchangeRates(exchangeRates) {
         displayRates = `
           <div class="exchange-rate">
             <span class="rate-label">USDT/ARS:</span>
-            <span class="rate-value">$${formatNumber(rates.compra)} / $${formatNumber(rates.venta)}</span>
+            <span class="rate-value">$${Fmt.formatNumber(rates.compra)} / $${Fmt.formatNumber(rates.venta)}</span>
           </div>
         `;
         rateType = 'USDT/ARS';
@@ -2574,7 +2569,7 @@ async function displayExchangeRates(exchangeRates) {
         displayRates = `
           <div class="exchange-rate">
             <span class="rate-label">USDT/USD:</span>
-            <span class="rate-value">$${formatNumber(usdRates.compra)} / $${formatNumber(usdRates.venta)}</span>
+            <span class="rate-value">$${Fmt.formatNumber(usdRates.compra)} / $${Fmt.formatNumber(usdRates.venta)}</span>
           </div>
         `;
         rateType = 'USDT/USD';
@@ -2585,11 +2580,11 @@ async function displayExchangeRates(exchangeRates) {
         displayRates = `
           <div class="exchange-rate">
             <span class="rate-label">USDT/ARS:</span>
-            <span class="rate-value">$${formatNumber(rates.compra)} / $${formatNumber(rates.venta)}</span>
+            <span class="rate-value">$${Fmt.formatNumber(rates.compra)} / $${Fmt.formatNumber(rates.venta)}</span>
           </div>
           <div class="exchange-rate">
             <span class="rate-label">USDT/USD:</span>
-            <span class="rate-value">$${formatNumber(usdRates.compra)} / $${formatNumber(usdRates.venta)}</span>
+            <span class="rate-value">$${Fmt.formatNumber(usdRates.compra)} / $${Fmt.formatNumber(usdRates.venta)}</span>
           </div>
         `;
         rateType = 'USDT/ARS + USD';
@@ -2664,7 +2659,7 @@ function setupExchangeFilters(allExchanges) {
                   displayRates = `
               <div class="exchange-rate">
                 <span class="rate-label">ARS/USD:</span>
-                <span class="rate-value">$${formatNumber(rates.compra)} / $${formatNumber(rates.venta)}</span>
+                <span class="rate-value">$${Fmt.formatNumber(rates.compra)} / $${Fmt.formatNumber(rates.venta)}</span>
               </div>
             `;
                   rateType = 'Oficial';
@@ -2672,7 +2667,7 @@ function setupExchangeFilters(allExchanges) {
                   displayRates = `
               <div class="exchange-rate">
                 <span class="rate-label">USDT/ARS:</span>
-                <span class="rate-value">$${formatNumber(rates.compra)} / $${formatNumber(rates.venta)}</span>
+                <span class="rate-value">$${Fmt.formatNumber(rates.compra)} / $${Fmt.formatNumber(rates.venta)}</span>
               </div>
             `;
                   rateType = 'USDT/ARS';
@@ -2680,7 +2675,7 @@ function setupExchangeFilters(allExchanges) {
                   displayRates = `
               <div class="exchange-rate">
                 <span class="rate-label">USDT/USD:</span>
-                <span class="rate-value">$${formatNumber(usdRates.compra)} / $${formatNumber(usdRates.venta)}</span>
+                <span class="rate-value">$${Fmt.formatNumber(usdRates.compra)} / $${Fmt.formatNumber(usdRates.venta)}</span>
               </div>
             `;
                   rateType = 'USDT/USD';
@@ -2690,11 +2685,11 @@ function setupExchangeFilters(allExchanges) {
                   displayRates = `
               <div class="exchange-rate">
                 <span class="rate-label">USDT/ARS:</span>
-                <span class="rate-value">$${formatNumber(rates.compra)} / $${formatNumber(rates.venta)}</span>
+                <span class="rate-value">$${Fmt.formatNumber(rates.compra)} / $${Fmt.formatNumber(rates.venta)}</span>
               </div>
               <div class="exchange-rate">
                 <span class="rate-label">USDT/USD:</span>
-                <span class="rate-value">$${formatNumber(usdRates.compra)} / $${formatNumber(usdRates.venta)}</span>
+                <span class="rate-value">$${Fmt.formatNumber(usdRates.compra)} / $${Fmt.formatNumber(usdRates.venta)}</span>
               </div>
             `;
                   rateType = 'USDT/ARS + USD';
@@ -3428,7 +3423,7 @@ async function generateRiskMatrix(useCustomParams = false) {
         cellClass = 'matrix-cell-neutral';
       }
 
-      tableHTML += `<td class="${cellClass}" title="Ganancia: $${formatNumber(profit)} ARS (${profitPercent.toFixed(2)}%)">${profitPercent.toFixed(2)}%</td>`;
+      tableHTML += `<td class="${cellClass}" title="Ganancia: $${Fmt.formatNumber(profit)} ARS (${profitPercent.toFixed(2)}%)">${profitPercent.toFixed(2)}%</td>`;
     });
 
     tableHTML += '</tr>';
@@ -3579,7 +3574,7 @@ function displayDollarInfo(officialData) {
   );
 
   // CORREGIDO v5.0.35: Después del fix de campos API, mostrar precio de COMPRA (lo que pagamos por comprar USD)
-  dollarPrice.textContent = `$${formatNumber(officialData.compra)}`;
+  dollarPrice.textContent = `$${Fmt.formatNumber(officialData.compra)}`;
   dollarSource.textContent = `Fuente: ${getDollarSourceDisplay(officialData)}`;
 
   console.log('✅ [DISPLAY] Display actualizado:', {
@@ -3644,172 +3639,100 @@ function openDollarConfiguration() {
 // SISTEMA DE NOTIFICACIÓN DE ACTUALIZACIONES
 // ==========================================
 
-// Verificar si hay actualizaciones disponibles
-async function checkForUpdates() {
-  try {
-    const result = await chrome.storage.local.get('updateAvailable');
-    const updateInfo = result.updateAvailable;
-
-    if (updateInfo && updateInfo.available) {
-      showUpdateBanner(updateInfo);
-    }
-  } catch (error) {
-    console.error('Error verificando actualizaciones:', error);
+/**
+ * Verificar actualizaciones al cargar el popup
+ */
+async function checkForUpdatesOnPopupLoad() {
+  const { pendingUpdate } = await chrome.storage.local.get('pendingUpdate');
+  
+  if (!pendingUpdate) {
+    console.log('✅ [UPDATE] No hay actualizaciones pendientes');
+    return;
   }
+  
+  // Verificar si la versión descartada expiró
+  const { dismissedUpdate } = await chrome.storage.local.get('dismissedUpdate');
+  if (dismissedUpdate && dismissedUpdate.expiresAt > Date.now()) {
+    if (dismissedUpdate.version === pendingUpdate.latestVersion) {
+      console.log('✅ [UPDATE] Actualización ya descartada');
+      return;
+    }
+  }
+  
+  // Mostrar banner
+  showUpdateBanner(pendingUpdate);
 }
 
-// Verificar actualizaciones desde GitHub
-async function checkGitHubForUpdates() {
-  try {
-    console.log('🔍 Verificando actualizaciones desde GitHub...');
-
-    // Obtener el último commit del repositorio
-    const response = await fetch(
-      'https://api.github.com/repos/nomdedev/ArbitrageAR-USDT/commits/main',
-      {
-        headers: {
-          Accept: 'application/vnd.github.v3+json',
-          'User-Agent': 'ArbitrageAR-USDT-Extension'
-        }
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`GitHub API error: ${response.status}`);
-    }
-
-    const commitData = await response.json();
-    const latestCommitSha = commitData.sha;
-    const latestCommitDate = new Date(commitData.commit.committer.date);
-    const commitMessage = commitData.commit.message;
-    const commitUrl = commitData.html_url;
-
-    // Obtener versión actual del manifest
-    const currentVersion = chrome.runtime.getManifest().version;
-
-    // Obtener información guardada anteriormente
-    const result = await chrome.storage.local.get(['lastCommitSha', 'dismissedVersion']);
-    const lastCommitSha = result.lastCommitSha;
-    const dismissedVersion = result.dismissedVersion;
-
-    console.log('📊 Info de versiones:', {
-      currentVersion,
-      latestCommitSha: latestCommitSha.substring(0, 7),
-      lastCommitSha: lastCommitSha ? lastCommitSha.substring(0, 7) : 'none',
-      dismissedVersion: dismissedVersion ? dismissedVersion.substring(0, 7) : 'none'
-    });
-
-    // Verificar si hay una nueva versión disponible
-    const hasNewVersion = !lastCommitSha || latestCommitSha !== lastCommitSha;
-    const isNotDismissed = !dismissedVersion || dismissedVersion !== latestCommitSha;
-
-    if (hasNewVersion && isNotDismissed) {
-      console.log('✨ Nueva versión disponible:', latestCommitSha.substring(0, 7));
-
-      // Preparar información de la actualización
-      const updateInfo = {
-        available: true,
-        version: latestCommitSha,
-        date: latestCommitDate.toISOString(),
-        message: commitMessage,
-        url: commitUrl,
-        lastCheck: Date.now()
-      };
-
-      // Guardar información de actualización
-      await chrome.storage.local.set({
-        updateAvailable: updateInfo,
-        updateInfo: { lastCheck: Date.now() }
-      });
-
-      // Mostrar banner inmediatamente
-      showUpdateBanner(updateInfo);
-    } else {
-      console.log('✅ Versión actualizada o ya notificada');
-
-      // Actualizar timestamp de última verificación
-      await chrome.storage.local.set({
-        updateInfo: { lastCheck: Date.now() }
-      });
-    }
-  } catch (error) {
-    console.error('❌ Error verificando GitHub:', error);
-
-    // En caso de error, actualizar timestamp para no verificar tan seguido
-    await chrome.storage.local.set({
-      updateInfo: { lastCheck: Date.now() }
-    });
-  }
-}
-
-// Mostrar banner de actualización
+/**
+ * Mostrar banner de actualización con información de versión
+ */
 function showUpdateBanner(updateInfo) {
   const banner = document.getElementById('update-banner');
-  const messageEl = document.getElementById('update-message');
+  const currentVersionEl = document.getElementById('current-version');
   const newVersionEl = document.getElementById('new-version');
-
-  if (!banner || !messageEl) return;
-
-  // Obtener versión actual del manifest
-  const currentVersion = chrome.runtime.getManifest().version;
-
-  // Actualizar mensaje del commit
-  const message = updateInfo.message || 'Nueva versión disponible';
-  messageEl.textContent = message.substring(0, 80) + (message.length > 80 ? '...' : '');
-
-  // Mostrar versión nueva (primeros 7 caracteres del SHA)
-  if (newVersionEl && updateInfo.version) {
-    const shortSha = updateInfo.version.substring(0, 7);
-    newVersionEl.textContent = `commit ${shortSha}`;
-  }
-
-  // Mostrar banner
+  const messageEl = document.getElementById('update-message');
+  const typeBadgeEl = document.getElementById('update-type');
+  
+  if (!banner) return;
+  
+  currentVersionEl.textContent = `v${updateInfo.currentVersion}`;
+  newVersionEl.textContent = `v${updateInfo.latestVersion}`;
+  messageEl.textContent = updateInfo.message || 'Nueva versión disponible';
+  
+  // Determinar tipo de actualización
+  const current = updateInfo.currentVersion.split('.').map(Number);
+  const latest = updateInfo.latestVersion.split('.').map(Number);
+  
+  let updateType = 'PATCH';
+  if (latest[0] > current[0]) updateType = 'MAJOR';
+  else if (latest[1] > current[1]) updateType = 'MINOR';
+  
+  typeBadgeEl.textContent = updateType;
+  banner.className = `update-banner type-${updateType.toLowerCase()}`;
   banner.style.display = 'flex';
-
+  
   // Configurar botones
   setupUpdateBannerButtons(updateInfo);
 }
 
-// Configurar botones del banner de actualización
-function setupUpdateBannerButtons(updateInfo) {
+/**
+ * Configurar botones del banner de actualización
+ */
+async function setupUpdateBannerButtons(updateInfo) {
   const viewBtn = document.getElementById('view-update');
   const dismissBtn = document.getElementById('dismiss-update');
-
+  
   if (viewBtn) {
-    viewBtn.onclick = () => {
-      // Abrir URL del commit en GitHub
-      if (updateInfo.url) {
-        chrome.tabs.create({ url: updateInfo.url });
-      }
-    };
+    viewBtn.addEventListener('click', () => {
+      chrome.tabs.create({ url: updateInfo.url });
+    });
   }
-
+  
   if (dismissBtn) {
-    dismissBtn.onclick = async () => {
-      // Ocultar banner
-      const banner = document.getElementById('update-banner');
-      if (banner) {
-        banner.style.display = 'none';
-      }
+    dismissBtn.addEventListener('click', async () => {
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + 7);
+      
+      await chrome.storage.local.set({
+        dismissedUpdate: {
+          version: updateInfo.latestVersion,
+          dismissedAt: Date.now(),
+          expiresAt: expiryDate.getTime()
+        }
+      });
+      
+      hideUpdateBanner();
+    });
+  }
+}
 
-      // Marcar como visto en storage
-      try {
-        await chrome.storage.local.set({
-          updateInfo: {
-            dismissedVersion: updateInfo.version,
-            lastCommitSha: updateInfo.version,
-            dismissedAt: Date.now()
-          },
-          updateAvailable: {
-            available: false
-          }
-        });
-
-        console.log('✅ Actualización marcada como vista');
-      } catch (error) {
-        console.error('Error descartando actualización:', error);
-      }
-    };
+/**
+ * Ocultar banner de actualización
+ */
+function hideUpdateBanner() {
+  const banner = document.getElementById('update-banner');
+  if (banner) {
+    banner.style.display = 'none';
   }
 }
 
@@ -4123,8 +4046,8 @@ function generateUSDOfficialTab(dollarTypes, sortPreference, userSettings = null
     html += `
       <div class="bank-row">
         <div class="bank-name">${bankName.toUpperCase()}</div>
-        <div class="bank-buy">$${formatNumber(buyPrice)}</div>
-        <div class="bank-sell">$${formatNumber(sellPrice)}</div>
+        <div class="bank-buy">$${Fmt.formatNumber(buyPrice)}</div>
+        <div class="bank-sell">$${Fmt.formatNumber(sellPrice)}</div>
       </div>
     `;
   });
@@ -4174,8 +4097,8 @@ function generateUSDTUSDTTab(usdtUsdData, sortPreference, userSettings = null) {
     html += `
       <div class="bank-row">
         <div class="bank-name">${exchangeName}</div>
-        <div class="bank-buy">$${formatNumber(bidPrice)}</div>
-        <div class="bank-sell">$${formatNumber(askPrice)}</div>
+        <div class="bank-buy">$${Fmt.formatNumber(bidPrice)}</div>
+        <div class="bank-sell">$${Fmt.formatNumber(askPrice)}</div>
       </div>
     `;
   });
@@ -4220,8 +4143,8 @@ function generateUSDTARSTab(usdtData, sortPreference, userSettings = null) {
     html += `
       <div class="bank-row">
         <div class="bank-name">${exchangeName}</div>
-        <div class="bank-buy">$${formatNumber(bidPrice)}</div>
-        <div class="bank-sell">$${formatNumber(askPrice)}</div>
+        <div class="bank-buy">$${Fmt.formatNumber(bidPrice)}</div>
+        <div class="bank-sell">$${Fmt.formatNumber(askPrice)}</div>
       </div>
     `;
   });
@@ -4650,7 +4573,7 @@ function createCryptoRouteCard(route, index) {
       <div class="profit-details">
         <span class="label">Ganancia estimada:</span>
         <span class="value ${route.netProfit >= 0 ? '' : 'negative'}">
-          $${formatNumber(Math.abs(route.netProfit))} ARS
+          $${Fmt.formatNumber(Math.abs(route.netProfit))} ARS
         </span>
       </div>
       <button class="btn-details" data-route-index="${index}">
@@ -4752,19 +4675,19 @@ function showCryptoRouteDetails(route) {
     ⚡ Velocidad: ${route.speed}
     🎯 Dificultad: ${route.difficulty}
     
-    💵 Inversión inicial: $${formatNumber(route.calculation?.initialAmount || 0)} ARS
+    💵 Inversión inicial: $${Fmt.formatNumber(route.calculation?.initialAmount || 0)} ARS
     🛒 Comprar: ${route.calculation?.cryptoPurchased?.toFixed(8) || 0} ${route.crypto}
-    💸 Precio compra: $${formatNumber(route.buyPriceARS)} ARS
+    💸 Precio compra: $${Fmt.formatNumber(route.buyPriceARS)} ARS
     
     📤 Transferir (después de fees): ${route.calculation?.cryptoAfterNetworkFee?.toFixed(8) || 0} ${route.crypto}
-    🌐 Network fee: ${route.calculation?.networkFee?.toFixed(8) || 0} ${route.crypto} ($${formatNumber(route.calculation?.networkFeeARS || 0)} ARS)
+    🌐 Network fee: ${route.calculation?.networkFee?.toFixed(8) || 0} ${route.crypto} ($${Fmt.formatNumber(route.calculation?.networkFeeARS || 0)} ARS)
     
-    💰 Vender por: $${formatNumber(route.calculation?.arsFromSale || 0)} ARS
-    💵 Precio venta: $${formatNumber(route.sellPriceARS)} ARS
+    💰 Vender por: $${Fmt.formatNumber(route.calculation?.arsFromSale || 0)} ARS
+    💵 Precio venta: $${Fmt.formatNumber(route.sellPriceARS)} ARS
     
-    ✅ Ganancia bruta: $${formatNumber(route.grossProfit)} ARS (${route.grossProfitPercent?.toFixed(2)}%)
-    💎 Ganancia neta: $${formatNumber(route.netProfit)} ARS (${route.profitPercent?.toFixed(2)}%)
-    💸 Total fees: $${formatNumber(route.fees?.total || 0)} ARS
+    ✅ Ganancia bruta: $${Fmt.formatNumber(route.grossProfit)} ARS (${route.grossProfitPercent?.toFixed(2)}%)
+    💎 Ganancia neta: $${Fmt.formatNumber(route.netProfit)} ARS (${route.profitPercent?.toFixed(2)}%)
+    💸 Total fees: $${Fmt.formatNumber(route.fees?.total || 0)} ARS
   `;
 
   alert(details);

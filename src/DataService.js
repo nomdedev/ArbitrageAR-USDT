@@ -624,6 +624,3 @@ const dataService = new DataService();
 if (typeof self !== 'undefined') {
   self.dataService = dataService;
 }
-
-// Exportar también la clase para poder crear nuevas instancias
-export { DataService };

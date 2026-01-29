@@ -193,7 +193,7 @@
   const exports = {
     renderArbitrageCard,
     renderRouteCard,
-    formatNumber,
+    // formatNumber - REMOVIDO: usar window.Formatters.formatNumber en su lugar
     formatVolume,
     escapeHtml,
     getRouteDescription

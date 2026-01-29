@@ -12,7 +12,7 @@ console.log('🔧 [BACKGROUND] Iniciando service worker...');
 // IMPORTAR MÓDULOS (compatibilidad con service worker)
 // ============================================
 try {
-  importScripts('apiClient.js', 'arbitrageCalculator.js');
+  importScripts('apiClient.js', 'arbitrageCalculator.js', '../DataService.js');
   console.log('✅ [BACKGROUND] Módulos importados correctamente');
 } catch (e) {
   console.warn('⚠️ [BACKGROUND] No se pudieron importar módulos:', e.message);
@@ -193,8 +193,8 @@ async function fetchUSDTtoUSD() {
     Object.entries(data).forEach(([exchange, info]) => {
       if (info && typeof info === 'object' && (info.ask > 0 || info.bid > 0)) {
         processedData[exchange] = {
-          bid: info.bid || info.totalBid || 0,
-          ask: info.ask || info.totalAsk || 0,
+          totalBid: info.bid || info.totalBid || 0,
+          totalAsk: info.ask || info.totalAsk || 0,
           volume: info.volume || 0
         };
       }
@@ -234,8 +234,8 @@ async function fetchUSDT() {
     Object.entries(data).forEach(([exchange, info]) => {
       if (info && typeof info === 'object' && (info.ask > 0 || info.bid > 0)) {
         processedData[exchange] = {
-          bid: info.bid || info.totalBid || 0,
-          ask: info.ask || info.totalAsk || 0,
+          totalBid: info.bid || info.totalBid || 0,
+          totalAsk: info.ask || info.totalAsk || 0,
           volume: info.volume || 0
         };
       }
@@ -949,9 +949,14 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
   let filteredUsdt = usdt;
   const selectedUsdtBrokers = userSettings.selectedUsdtBrokers;
 
+  // DIAGNÓSTICO: Loggear exchanges disponibles en usdt
+  const availableExchanges = Object.keys(usdt).filter(k => k !== 'time' && k !== 'timestamp');
+  console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Exchanges disponibles en usdt:', availableExchanges);
+  console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Exchanges en selectedUsdtBrokers:', selectedUsdtBrokers || []);
+
   // DIAGNÓSTICO: Loggear filtro de exchanges
   console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Filtro de exchanges:', {
-    totalExchanges: Object.keys(usdt).filter(k => k !== 'time' && k !== 'timestamp').length,
+    totalExchanges: availableExchanges.length,
     selectedUsdtBrokers: selectedUsdtBrokers || [],
     hasSelection: !!(selectedUsdtBrokers && Array.isArray(selectedUsdtBrokers) && selectedUsdtBrokers.length > 0)
   });
@@ -966,11 +971,20 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
     });
     log(`🔍 [CALC] Filtrando exchanges USDT: ${selectedUsdtBrokers.length} seleccionados`);
     
+    // DIAGNÓSTICO: Loggear exchanges encontrados y no encontrados
+    const foundExchanges = selectedUsdtBrokers.filter(b => usdt[b]);
+    const notFoundExchanges = selectedUsdtBrokers.filter(b => !usdt[b]);
+    console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Exchanges ENCONTRADOS:', foundExchanges);
+    console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Exchanges NO encontrados:', notFoundExchanges);
+    
     // DIAGNÓSTICO: Loggear resultado del filtro
+    const filteredExchanges = Object.keys(filteredUsdt).filter(k => k !== 'time' && k !== 'timestamp');
+    console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Resultado del filtro (filteredUsdt):', filteredExchanges);
     console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Después del filtro:', {
-      filteredExchanges: Object.keys(filteredUsdt).filter(k => k !== 'time' && k !== 'timestamp'),
-      found: selectedUsdtBrokers.filter(b => usdt[b]),
-      notFound: selectedUsdtBrokers.filter(b => !usdt[b])
+      filteredExchanges: filteredExchanges,
+      found: foundExchanges,
+      notFound: notFoundExchanges,
+      filteredCount: filteredExchanges.length
     });
   }
 
@@ -2601,6 +2615,88 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
 log('[BACKGROUND] Listener de storage registrado');
 
 // ============================================
+// SISTEMA DE ALERTAS DE ACTUALIZACIÓN v6.0
+// ============================================
+
+/**
+ * Verifica si hay una nueva versión disponible en GitHub
+ * Compara la versión actual del manifest con la versión del último commit
+ */
+async function checkForUpdatesInBackground() {
+  const currentVersion = chrome.runtime.getManifest().version;
+  
+  try {
+    const response = await fetch(
+      'https://api.github.com/repos/nomdedev/ArbitrageAR-USDT/commits/main',
+      {
+        headers: { 'Accept': 'application/vnd.github.v3+json' }
+      }
+    );
+    
+    if (!response.ok) {
+      console.warn('⚠️ [UPDATE] No se pudo verificar actualizaciones');
+      return;
+    }
+    
+    const data = await response.json();
+    
+    // Extraer versión del commit message
+    const versionMatch = data.commit.message.match(/v?(\d+\.\d+\.\d+)/);
+    const latestVersion = versionMatch ? versionMatch[1] : null;
+    
+    if (!latestVersion) {
+      console.warn('⚠️ [UPDATE] No se pudo extraer versión del commit');
+      return;
+    }
+    
+    // Comparar versiones
+    const hasUpdate = compareVersions(currentVersion, latestVersion);
+    
+    if (hasUpdate) {
+      // Guardar en storage
+      await chrome.storage.local.set({
+        pendingUpdate: {
+          currentVersion,
+          latestVersion,
+          message: data.commit.message,
+          url: data.html_url,
+          date: data.commit.author.date,
+          sha: data.sha.substring(0, 7)
+        }
+      });
+      
+      // Actualizar badge
+      chrome.action.setBadgeText({ text: '!' });
+      chrome.action.setBadgeBackgroundColor({ color: '#3b82f6' });
+      
+      console.log('✅ [UPDATE] Nueva versión disponible:', latestVersion);
+    } else {
+      console.log('✅ [UPDATE] Versión actualizada');
+    }
+  } catch (error) {
+    console.error('❌ [UPDATE] Error verificando actualizaciones:', error);
+  }
+}
+
+/**
+ * Compara dos versiones semánticas (major.minor.patch)
+ * @param {string} current - Versión actual
+ * @param {string} latest - Versión más reciente
+ * @returns {boolean} - true si latest > current
+ */
+function compareVersions(current, latest) {
+  const parse = (v) => v.replace('v', '').split('.').map(Number);
+  const [cMajor, cMinor, cPatch] = parse(current);
+  const [lMajor, lMinor, lPatch] = parse(latest);
+  
+  if (lMajor > cMajor) return true;
+  if (lMajor < cMajor) return false;
+  if (lMinor > cMinor) return true;
+  if (lMinor < cMinor) return false;
+  return lPatch > cPatch;
+}
+
+// ============================================
 // INICIALIZACIÓN
 // ============================================
 
@@ -2616,6 +2712,9 @@ updateGlobalConfig()
           .then(() => {
             log('[BACKGROUND] Datos de bancos inicializados');
             console.log('🏦 Datos de bancos inicializados correctamente');
+            
+            // Verificar actualizaciones al iniciar
+            checkForUpdatesInBackground();
           })
           .catch(error => {
             console.error('❌ [BACKGROUND] Error inicializando datos de bancos:', error);
@@ -2670,6 +2769,21 @@ chrome.alarms.onAlarm.addListener(async alarm => {
 
 // Iniciar actualizaciones periódicas
 startPeriodicUpdates();
+
+// ============================================
+// SISTEMA DE ALERTAS DE ACTUALIZACIÓN v6.0
+// ============================================
+
+// Crear alarma para verificación de actualizaciones
+chrome.alarms.create('checkUpdates', {
+  periodInMinutes: 60 // Verificar cada hora
+});
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === 'checkUpdates') {
+    checkForUpdatesInBackground();
+  }
+});
 
 // Listener para cambios en configuración del usuario
 chrome.storage.onChanged.addListener((changes, namespace) => {

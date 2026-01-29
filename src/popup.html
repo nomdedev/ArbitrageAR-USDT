@@ -31,22 +31,32 @@
       </header>
 
       <!-- Banner de Actualización Disponible -->
-      <div id="update-banner" class="update-banner" style="display: none">
+      <div id="update-banner" class="update-banner" role="alert" aria-live="polite">
+        <span class="update-type-badge" id="update-type">MAJOR</span>
+        
         <div class="update-content">
           <span class="update-icon">✨</span>
           <div class="update-text">
             <strong>Nueva actualización disponible</strong>
             <p class="update-version-info">
-              <span class="current-version">v6.0.0</span>
+              <span class="current-version" id="current-version">v5.0.83</span>
               <span class="version-arrow">→</span>
-              <span class="new-version" id="new-version">Nueva versión</span>
+              <span class="new-version" id="new-version">v6.0.0</span>
             </p>
-            <p id="update-message" class="update-commit-msg">Nueva versión con mejoras</p>
+            <p id="update-message" class="update-commit-msg">
+              Nueva versión con mejoras
+            </p>
           </div>
         </div>
+        
         <div class="update-actions">
-          <button id="view-update" class="btn-view-update">Ver cambios</button>
-          <button id="dismiss-update" class="btn-dismiss-update" title="Cerrar">✕</button>
+          <button id="view-update" class="btn-view-update">
+            Ver cambios
+          </button>
+          <button id="dismiss-update" class="btn-dismiss-update"
+                  aria-label="Cerrar notificación de actualización">
+            ✕
+          </button>
         </div>
       </div>
 

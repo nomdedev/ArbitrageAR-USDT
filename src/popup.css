@@ -58,7 +58,7 @@
   /* === COLORES DE TEXTO === */
   --color-text-primary: #f0f6fc;
   --color-text-secondary: #8b949e;
-  --color-text-muted: #6e7681;
+  --color-text-muted: #8b949e; /* Mejorado contraste WCAG AA - Era #6e7681 (3.2:1) */
   --color-text-inverse: #0d1117;
   --text-primary: #f0f6fc;
   --text-secondary: #8b949e;
@@ -71,9 +71,9 @@
   --color-border-emphasis: #8b949e;
 
   /* === TIPOGRAFÍA === */
-  --font-size-xs: 0.6875rem; /* 11px */
-  --font-size-sm: 0.75rem; /* 12px */
-  --font-size-base: 0.8125rem; /* 13px */
+  --font-size-xs: 0.75rem; /* 12px - Aumentado desde 0.6875rem (11px) */
+  --font-size-sm: 0.8125rem; /* 13px - Aumentado desde 0.75rem (12px) */
+  --font-size-base: 0.875rem; /* 14px - Aumentado desde 0.8125rem (13px) */
   --font-size-md: 0.875rem; /* 14px */
   --font-size-lg: 1rem; /* 16px */
   --font-size-xl: 1.125rem; /* 18px */
@@ -144,6 +144,37 @@
   --anim-easing: cubic-bezier(0.4, 0, 0.2, 1);
   --anim-easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
+  /* === DURACIONES DE ANIMACIÓN MEJORADAS (Fase 1) === */
+  --duration-instant: 50ms;
+  --duration-fast: 100ms;
+  --duration-normal: 150ms;
+  --duration-slow: 200ms;
+  --duration-slower: 300ms;
+
+  /* === EASING FUNCTIONS MEJORADAS (Fase 1) === */
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* === EASING FUNCTIONS ADICIONALES (Fase 1 Fundamentos UI/UX) === */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* === Z-INDEX SCALE (Fase 1 Fundamentos UI/UX) === */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+
   /* === INPUTS === */
   --input-bg: rgba(13, 17, 23, 0.8);
   --input-border: var(--color-border-default);
@@ -205,9 +236,11 @@
   outline: none;
 }
 
+/* Focus visible mejorado con transición suave (Fase 1) */
 :focus-visible {
   outline: 2px solid var(--color-brand-primary);
   outline-offset: 2px;
+  transition: outline-color var(--duration-fast) var(--ease-out);
 }
 
 /* Focus para botones */
@@ -422,7 +455,12 @@ a:focus-visible {
   animation: flashUpdate 0.5s ease-out;
 }
 
-/* Skeleton loader base */
+/* Skeleton loader base - Fase 2: Shimmer mejorado */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 .skeleton {
   background: linear-gradient(
     90deg,
@@ -431,7 +469,7 @@ a:focus-visible {
     var(--color-bg-tertiary) 100%
   );
   background-size: 200% 100%;
-  animation: skeletonPulse 1.5s ease-in-out infinite;
+  animation: shimmer 1.5s ease-in-out infinite;
   border-radius: var(--radius-md);
 }
 
@@ -630,6 +668,26 @@ header {
   font-size: 20px;
 }
 
+/* ==========================================
+   FASE 4: EFECTOS AVANZADOS - Parallax Sutil en Header
+   ========================================== */
+.header-content {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.header-content:hover {
+  animation: parallaxTilt 0.6s ease-out;
+}
+
+@keyframes parallaxTilt {
+  0% { transform: rotateX(0) rotateY(0); }
+  25% { transform: rotateX(2deg) rotateY(2deg); }
+  50% { transform: rotateX(-1deg) rotateY(-2deg); }
+  75% { transform: rotateX(1deg) rotateY(1deg); }
+  100% { transform: rotateX(0) rotateY(0); }
+}
+
 .dollar-details {
   display: flex;
   flex-direction: column;
@@ -711,13 +769,20 @@ main::-webkit-scrollbar-thumb:hover {
   background: #484f58;
 }
 
+/* Tab content con transiciones suaves - Fase 2 */
 .tab-content {
   display: none;
   padding: 12px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity var(--duration-normal) var(--ease-out),
+              transform var(--duration-normal) var(--ease-out);
 }
 
 .tab-content.active {
   display: block;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* ============================================
@@ -991,11 +1056,14 @@ main::-webkit-scrollbar-thumb:hover {
   min-height: 150px !important;
 }
 
+/* Hover lift mejorado con transiciones suaves (Fase 1) */
 .route-card:hover {
   border-color: #58a6ff;
   background: #1c2128;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(88, 166, 255, 0.15);
+  transition: transform var(--duration-normal) var(--ease-out),
+              box-shadow var(--duration-normal) var(--ease-out);
 }
 
 /* Indicador de ganancia izquierdo */
@@ -1031,9 +1099,162 @@ main::-webkit-scrollbar-thumb:hover {
   background: #3fb950;
 }
 
+/* Estado seleccionado para cards con border glow mejorado (Fase 1) */
+.route-card.selected {
+  border-color: var(--color-brand-primary);
+  background: linear-gradient(135deg, rgba(88, 166, 255, 0.1) 0%, rgba(22, 27, 34, 0.9) 100%);
+  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.3),
+              0 8px 24px rgba(88, 166, 255, 0.2);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+/* Navegación por teclado en cards */
+.route-card:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(88, 166, 255, 0.2);
+}
+
+/* Loading state en cards - Fase 2 */
+.route-card.loading {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.route-card.loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(88, 166, 255, 0.1) 50%,
+    transparent 100%
+  );
+  animation: loadingShimmer 1s ease-in-out infinite;
+}
+
+@keyframes loadingShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ==========================================
+   FASE 4: EFECTOS AVANZADOS - Particle Effects en Loading
+   ========================================== */
+.particle-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--color-brand-primary);
+  border-radius: 50%;
+  opacity: 0;
+  animation: particleFloat 3s ease-in-out infinite;
+}
+
+.particle:nth-child(1) { left: 10%; animation-delay: 0s; }
+.particle:nth-child(2) { left: 30%; animation-delay: 0.5s; }
+.particle:nth-child(3) { left: 50%; animation-delay: 1s; }
+.particle:nth-child(4) { left: 70%; animation-delay: 1.5s; }
+.particle:nth-child(5) { left: 90%; animation-delay: 2s; }
+
+@keyframes particleFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-10px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-40px) scale(0);
+  }
+}
+
+/* ==========================================
+   FASE 3: ANIMACIONES DE ENTRADA/SALIDA
+   Card Expand con Height Transition
+   ========================================== */
+.route-card.expanded {
+  max-height: 500px;
+  transition: max-height var(--duration-slow) var(--ease-out),
+              padding var(--duration-normal) var(--ease-out);
+}
+
+.route-card.collapsed {
+  max-height: 150px;
+  overflow: hidden;
+  transition: max-height var(--duration-slow) var(--ease-out),
+              padding var(--duration-normal) var(--ease-out);
+}
+
 /* ============================================
    FIAT ROUTE CARDS - Mismo estilo que crypto
    ============================================ */
+
+/* ==========================================
+   FASE 3: ANIMACIONES DE ENTRADA/SALIDA
+   Stagger animation para lista de cards
+   ========================================== */
+.routes-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.route-card {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: cardFadeIn var(--duration-normal) var(--ease-out) forwards;
+}
+
+.route-card:nth-child(1) { animation-delay: 0ms; }
+.route-card:nth-child(2) { animation-delay: 50ms; }
+.route-card:nth-child(3) { animation-delay: 100ms; }
+.route-card:nth-child(4) { animation-delay: 150ms; }
+.route-card:nth-child(5) { animation-delay: 200ms; }
+.route-card:nth-child(n+6) { animation-delay: 250ms; }
+
+@keyframes cardFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================
+   FASE 4: EFECTOS AVANZADOS - 3D Flip para Card Details
+   ========================================== */
+.route-card.flip {
+  perspective: 1000px;
+}
+
+.route-card.flip .card-front,
+.route-card.flip .card-back {
+  backface-visibility: hidden;
+  transition: transform var(--duration-slow) var(--ease-out);
+}
+
+.route-card.flip.flipped .card-front {
+  transform: rotateY(180deg);
+}
+
+.route-card.flip.flipped .card-back {
+  transform: rotateY(0deg);
+}
+
+.card-back {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+}
 
 /* Header de la tarjeta fiat */
 .route-card .fiat-card-header {
@@ -1237,6 +1458,26 @@ main::-webkit-scrollbar-thumb:hover {
   border: 1px solid rgba(88, 166, 255, 0.25);
 }
 
+/* ==========================================
+   FASE 4: EFECTOS AVANZADOS - Glow Pulsante para Profit Alto
+   ========================================== */
+.profit-badge.high {
+  animation: profitPulseGlow 2s ease-in-out infinite;
+}
+
+@keyframes profitPulseGlow {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(63, 185, 80, 0.4),
+                0 0 20px rgba(63, 185, 80, 0.2);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(63, 185, 80, 0),
+                0 0 30px rgba(63, 185, 80, 0.4);
+  }
+}
+
 /* ============================================
    PROFIT BADGES MODERNIZADOS v6.0.0
    ============================================ */
@@ -1267,6 +1508,25 @@ main::-webkit-scrollbar-thumb:hover {
   color: white;
   border: none;
   box-shadow: var(--shadow-glow-success);
+}
+
+/* ==========================================
+   FASE 4: EFECTOS AVANZADOS - Icon Morphing
+   ========================================== */
+.icon-morph {
+  transition: transform var(--duration-normal) var(--ease-bounce);
+}
+
+.icon-morph:hover {
+  animation: iconMorph 0.4s ease-out;
+}
+
+@keyframes iconMorph {
+  0% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.2) rotate(-10deg); }
+  50% { transform: scale(0.9) rotate(10deg); }
+  75% { transform: scale(1.1) rotate(-5deg); }
+  100% { transform: scale(1) rotate(0deg); }
 }
 
 .profit-badge.profit-negative,
@@ -1623,7 +1883,25 @@ main::-webkit-scrollbar-thumb:hover {
   animation: rotate 0.8s linear infinite;
 }
 
-/* @keyframes spin - Usar rotate (DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS) */
+/* Spinner con trail - Fase 2 */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes trail {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -280; }
+}
+
+.spinner {
+  animation: spin var(--duration-slower) linear infinite;
+}
+
+.spinner-trail {
+  stroke-dasharray: 70;
+  animation: trail 1s linear infinite;
+}
 
 .error-message {
   color: #f85149;
@@ -2232,6 +2510,12 @@ footer {
   background: #3fb950;
 }
 
+/* Click scale en botones de filtro (Fase 1) */
+.filter-btn:active {
+  transform: scale(0.97);
+  transition: transform var(--duration-fast) var(--ease-in);
+}
+
 /* ============================================
    ARBITRAJE CRIPTO - Estilos unificados
    ============================================ */
@@ -2686,6 +2970,37 @@ p.error {
   color: #93c5fd;
 }
 
+/* ==========================================
+   PROGRESS BARS - Fase 2: Transiciones y Loading States
+   ========================================== */
+
+/* Progress bar determinada */
+.progress-bar {
+  height: 4px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-brand-primary), var(--accent-cyan));
+  border-radius: var(--radius-full);
+  transition: width var(--duration-slow) var(--ease-out);
+}
+
+/* Progress bar indeterminada */
+.progress-bar-indeterminate .progress-bar-fill {
+  width: 30%;
+  animation: progressIndeterminate 1.5s ease-in-out infinite;
+}
+
+@keyframes progressIndeterminate {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(300%); }
+  100% { transform: translateX(-100%); }
+}
+
 /* ============================================
    INDICADORES DE ESTADO Y VALIDACIÓN v5.0.74
    ============================================ */
@@ -2854,6 +3169,10 @@ p.error {
    MODALES MODERNIZADOS v6.0.0
    ========================================== */
 
+/* ==========================================
+   FASE 3: ANIMACIONES DE ENTRADA/SALIDA
+   Modal Slide Mejorado
+   ========================================== */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -2866,16 +3185,12 @@ p.error {
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: modalFadeIn var(--duration-fast) var(--ease-default);
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-out);
 }
 
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+.modal-overlay.active {
+  opacity: 1;
 }
 
 .modal-content {
@@ -2889,18 +3204,15 @@ p.error {
   max-height: 85%;
   width: 360px;
   overflow: hidden;
-  animation: modalSlideIn var(--duration-normal) var(--ease-default);
+  opacity: 0;
+  transform: scale(0.95) translateY(20px);
+  transition: opacity var(--duration-normal) var(--ease-out),
+              transform var(--duration-normal) var(--ease-out);
 }
 
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+.modal-overlay.active .modal-content {
+  opacity: 1;
+  transform: scale(1) translateY(0);
 }
 
 .modal-header {
@@ -3044,6 +3356,53 @@ p.error {
 .no-routes-text {
   font-size: 16px;
   margin-bottom: 20px;
+}
+
+/* ==========================================
+   FASE 3: ANIMACIONES DE ENTRADA/SALIDA
+   Toast Notifications
+   ========================================== */
+.toast-container {
+  position: fixed;
+  bottom: var(--space-4);
+  right: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  z-index: 9999;
+}
+
+.toast {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  transform: translateX(100%);
+  animation: toastSlideIn var(--duration-normal) var(--ease-out) forwards;
+}
+
+.toast.removing {
+  animation: toastSlideOut var(--duration-fast) var(--ease-in) forwards;
+}
+
+@keyframes toastSlideIn {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toastSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
 }
 
 .btn-reset-filters {
@@ -4037,40 +4396,12 @@ p.error {
    Estilos para tarjetas de arbitraje crypto
    ============================================ */
 
+/* Crypto route card - Extiende de .route-card */
 .crypto-route-card {
-  display: flex !important;
-  flex-direction: column !important;
-  background: #161b22 !important;
-  border-radius: 8px !important;
-  padding: 14px !important;
-  margin-bottom: 10px !important;
-  cursor: pointer !important;
-  transition: all 0.15s ease;
-  border: 1px solid #30363d !important;
-  position: relative;
-  overflow: visible !important;
-  min-height: 150px !important;
+  /* Hereda todos los estilos de .route-card definido en línea 978 */
 }
 
-.crypto-route-card:hover {
-  border-color: #58a6ff;
-  background: #1c2128;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(88, 166, 255, 0.15);
-}
-
-/* Indicador lateral de ganancia */
-.crypto-route-card::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 8px;
-  bottom: 8px;
-  width: 3px;
-  background: #3fb950;
-  border-radius: 0 2px 2px 0;
-}
-
+/* Variantes específicas de profit para crypto */
 .crypto-route-card.profit-high::before {
   background: #3fb950;
   width: 4px;
@@ -4078,6 +4409,20 @@ p.error {
 
 .crypto-route-card.profit-negative::before {
   background: #f85149;
+}
+
+/* Estado seleccionado específico para crypto */
+.crypto-route-card.selected {
+  border-color: var(--color-brand-primary);
+  background: linear-gradient(135deg, rgba(88, 166, 255, 0.1) 0%, rgba(22, 27, 34, 0.9) 100%);
+  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.3), var(--shadow-lg);
+}
+
+/* Navegación por teclado para crypto */
+.crypto-route-card:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(88, 166, 255, 0.2);
 }
 
 /* Header de la tarjeta crypto */
