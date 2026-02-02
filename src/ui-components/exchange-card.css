@@ -1,0 +1,298 @@
+/* ==========================================
+   ARBITRAGEAR - EXCHANGE CARDS v7.0
+   Tarjetas de Exchange Premium con Animaciones
+   ========================================== */
+
+/* ==========================================
+   1. ESTRUCTURA DE LA TARJETA
+   ========================================== */
+
+.exchange-card {
+  position: relative;
+  background: var(--card-bg);
+  backdrop-filter: var(--backdrop-blur);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  border: var(--card-border);
+  box-shadow: var(--shadow-md);
+  transition: all var(--duration-normal) var(--ease-out-expo);
+  overflow: hidden;
+  animation: fadeInUp var(--duration-normal) var(--ease-out-expo) both;
+}
+
+/* ==========================================
+   2. INDICADOR LATERAL DE COLOR
+   ========================================== */
+
+.exchange-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: var(--space-3);
+  bottom: var(--space-3);
+  width: 3px;
+  background: var(--color-border-default);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+/* Estado best: glow verde + badge destacado */
+.exchange-card[data-best="true"]::before {
+  background: var(--color-success);
+  width: 4px;
+  box-shadow: 0 0 8px var(--color-success);
+}
+.exchange-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.exchange-name {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+/* Up: color verde, icono ▲ */
+.variation-badge[data-trend="up"] {
+  background: var(--color-success-muted);
+  color: var(--color-success);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* Down: color rojo, icono ▼ */
+.variation-badge[data-trend="down"] {
+  background: var(--color-danger-muted);
+  color: var(--color-danger);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+.trend-icon {
+  font-size: 10px;
+}
+.price-main {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+}
+.price-value {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-mono);
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+}
+.sparkline-chart {
+  width: 100%;
+  height: 100%;
+}
+/* ==========================================
+   7. FOOTER DE LA TARJETA
+   ========================================== */
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-muted);
+}
+/* Badge "MEJOR PRECIO" condicional */
+.best-price-badge {
+  display: none;
+  padding: var(--space-1) var(--space-2);
+  background: linear-gradient(135deg, var(--color-success) 0%, #059669 100%);
+  color: white;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+  animation: glowPulse 2s ease-in-out infinite;
+}
+/* ==========================================
+   8. ESTADOS VISUALES
+   ========================================== */
+
+/* Estado hover: elevación + shadow */
+.exchange-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-border-emphasis);
+}
+
+.exchange-card[data-best="true"]:hover {
+  box-shadow: 0 12px 40px rgba(16, 185, 129, 0.3);
+}
+
+/* Estado loading: skeleton shimmer */
+.exchange-card[data-loading="true"] {
+  pointer-events: none;
+  opacity: 0.6;
+}
+.exchange-card[data-loading="true"]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(59, 130, 246, 0.1) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ==========================================
+   9. ANIMACIONES
+   ========================================== */
+
+/* Animación de entrada con stagger */
+.exchange-card:nth-child(1) { animation-delay: 0ms; }
+.exchange-card:nth-child(2) { animation-delay: 50ms; }
+.exchange-card:nth-child(3) { animation-delay: 100ms; }
+.exchange-card:nth-child(4) { animation-delay: 150ms; }
+.exchange-card:nth-child(5) { animation-delay: 200ms; }
+.exchange-card:nth-child(n+6) { animation-delay: 250ms; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Shimmer para loading */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Glow pulsante para best price */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+  }
+}
+.price-value.updated-down {
+  animation: priceFlashDown 0.5s ease-out;
+}
+
+@keyframes priceFlashUp {
+  0% { background-color: transparent; }
+  50% { background-color: rgba(16, 185, 129, 0.2); }
+  100% { background-color: transparent; }
+}
+
+@keyframes priceFlashDown {
+  0% { background-color: transparent; }
+  50% { background-color: rgba(239, 68, 68, 0.2); }
+  100% { background-color: transparent; }
+}
+/* Grid layout para múltiples tarjetas */
+.exchange-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-3);
+}
+
+/* ==========================================
+   11. RESPONSIVE
+   ========================================== */
+
+@media (max-width: 480px) {
+.exchange-card {
+    padding: var(--space-3);
+  }
+.best-price-badge {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+  }
+}
+
+/* ==========================================
+   12. PREFERS-REDUCED-MOTION
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .exchange-card,
+  .exchange-card:hover {
+    transform: none !important;
+    animation: none !important;
+  }
+.exchange-card[data-loading="true"]::after {
+    animation: none !important;
+  }
+}
+
+/* ==========================================
+   13. EJEMPLO DE USO HTML
+   ========================================== */
+
+/*
+<div class="exchange-cards-container">
+  <div class="exchange-card" data-exchange="binance" data-best="true">
+    <div class="card-header">
+      <div class="exchange-info">
+        <div class="exchange-logo">🔷</div>
+        <span class="exchange-name">Binance</span>
+      </div>
+      <div class="variation-badge" data-trend="up">
+        <span class="trend-icon">▲</span>
+        <span class="variation-value">+2.4%</span>
+      </div>
+    </div>
+    
+    <div class="card-body">
+      <div class="price-main">
+        <span class="price-currency">$</span>
+        <span class="price-value">1.247,50</span>
+      </div>
+      <div class="price-sparkline">
+        <svg class="sparkline-chart" viewBox="0 0 100 32" preserveAspectRatio="none">
+          <path class="sparkline-path" d="M0,20 L20,15 L40,18 L60,10 L80,12 L100,5"/>
+        </svg>
+      </div>
+    </div>
+    
+    <div class="card-footer">
+      <span class="update-time">Actualizado: hace 2s</span>
+      <span class="best-price-badge">MEJOR PRECIO</span>
+    </div>
+  </div>
+  
+  <div class="exchange-card" data-exchange="lemon" data-loading="true">
+    <div class="card-header">
+      <div class="exchange-info">
+        <div class="exchange-logo">🍋</div>
+        <span class="exchange-name">Lemon Cash</span>
+      </div>
+      <div class="variation-badge" data-trend="down">
+        <span class="trend-icon">▼</span>
+        <span class="variation-value">-0.8%</span>
+      </div>
+    </div>
+    
+    <div class="card-body">
+      <div class="price-main">
+        <span class="price-currency">$</span>
+        <span class="price-value">1.235,00</span>
+      </div>
+    </div>
+    
+    <div class="card-footer">
+      <span class="update-time">Actualizado: hace 5s</span>
+    </div>
+  </div>
+</div>
+*/

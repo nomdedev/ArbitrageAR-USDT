@@ -1,0 +1,230 @@
+/* ==========================================
+   ARBITRAGEAR - ANIMATIONS v7.0
+   Sistema de Animaciones Completo
+   ========================================== */
+
+/* ==========================================
+   1. ANIMACIONES DE ENTRADA
+   ========================================== */
+
+/* Fade In Up - Aparece desde abajo */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade In Scale - Aparece con escala */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Slide In Right - Entra desde la derecha */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Slide In Left - Entra desde la izquierda */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.stagger-children > *:nth-child(1) { animation-delay: calc(var(--stagger-normal, 100ms) * 0); }
+.stagger-children > *:nth-child(3) { animation-delay: calc(var(--stagger-normal, 100ms) * 2); }
+.stagger-children > *:nth-child(5) { animation-delay: calc(var(--stagger-normal, 100ms) * 4); }
+/* Card Hover - Elevación + glow */
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+/* Tab Indicator - Slide */
+.tab-indicator {
+  transition: all var(--duration-normal) var(--ease-out-back);
+}
+@keyframes refreshSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ==========================================
+   3. ANIMACIONES DE DATOS
+   ========================================== */
+
+/* Price Flash Up - Flash verde */
+@keyframes priceFlashUp {
+  0% { background-color: transparent; }
+  50% { background-color: rgba(16, 185, 129, 0.2); }
+  100% { background-color: transparent; }
+}
+/* Price Flash Down - Flash rojo */
+@keyframes priceFlashDown {
+  0% { background-color: transparent; }
+  50% { background-color: rgba(239, 68, 68, 0.2); }
+  100% { background-color: transparent; }
+}
+/* Count Up - Números aumentando */
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Progress Ring - Animación SVG */
+@keyframes ringProgress {
+  from { stroke-dashoffset: 283; }
+  to { stroke-dashoffset: var(--progress-offset); }
+}
+
+.progress-ring-animated {
+  animation: ringProgress 1s var(--ease-out-expo) forwards;
+}
+
+/* Shimmer - Para skeleton loading */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.view-exit {
+  animation: slideInLeft var(--duration-slow) var(--ease-in-out-expo) both;
+}
+/* Modal Open - Abrir modal */
+.modal-open {
+  animation: fadeInScale var(--duration-normal) var(--ease-spring) both;
+}
+@keyframes fadeOutScale {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+.animate-fade-in-scale {
+  animation: fadeInScale var(--duration-normal) var(--ease-spring) both;
+}
+.animate-slide-in-left {
+  animation: slideInLeft var(--duration-normal) var(--ease-out-expo) both;
+}
+.animate-price-flash-down {
+  animation: priceFlashDown 0.5s ease-out;
+}
+/* Animaciones de microinteracciones */
+.animate-button-hover {
+  transition: all var(--duration-fast) var(--ease-out);
+}
+.animate-card-hover {
+  transition: all var(--duration-normal) var(--ease-out-expo);
+}
+/* ==========================================
+   6. UTILIDADES DE PERFORMANCE
+   ========================================== */
+
+/* will-change para optimizar animaciones */
+.will-change-transform {
+  will-change: transform;
+}
+.will-change-transform-opacity {
+  will-change: transform, opacity;
+}
+
+/* ==========================================
+   7. PREFERS-REDUCED-MOTION
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+.animate-button-hover,
+  .animate-card-hover {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* ==========================================
+   8. VARIABLES PARA STAGGER
+   ========================================== */
+
+:root {
+  --stagger-fast: 50ms;
+  --stagger-normal: 100ms;
+  --stagger-slow: 150ms;
+}
+
+/* ==========================================
+   9. EJEMPLO DE USO
+   ========================================== */
+
+/*
+  Animaciones de entrada:
+  <div class="animate-fade-in-up">Aparece desde abajo</div>
+  <div class="animate-fade-in-scale">Aparece con escala</div>
+  <div class="animate-slide-in-right">Entra desde la derecha</div>
+  
+  Stagger children:
+  <div class="stagger-children">
+    <div>Item 1</div>
+    <div>Item 2</div>
+    <div>Item 3</div>
+  </div>
+  
+  Microinteracciones:
+  <button class="animate-button-hover">Botón con hover</button>
+  <div class="animate-card-hover">Card con hover</div>
+  
+  Animaciones de datos:
+  <span class="animate-price-flash-up">$1.234,50</span>
+  <span class="animate-count-up">15.2%</span>
+  
+  Performance:
+  <div class="will-change-transform-opacity">Elemento optimizado</div>
+  
+  Clases disponibles:
+  - .animate-fade-in-up: Fade in desde abajo
+  - .animate-fade-in-scale: Fade in con escala
+  - .animate-slide-in-right/left: Slide desde derecha/izquierda
+  - .animate-price-flash-up/down: Flash de precio verde/rojo
+  - .animate-count-up: Contador animado
+  - .stagger-children: Stagger animation para hijos
+  - .will-change-transform/opacity: Optimización de performance
+*/

@@ -1,0 +1,3236 @@
+{
+  "timestamp": "2026-02-02T11:36:21.043Z",
+  "summary": {
+    "totalFiles": 8,
+    "totalKeyframes": 82,
+    "totalTransitions": 64,
+    "totalOptimizations": 42
+  },
+  "files": [
+    {
+      "filePath": "src/popup.css",
+      "keyframes": {
+        "total": 52,
+        "withReflow": 2,
+        "withRepaint": 11,
+        "withGPU": 40,
+        "list": [
+          {
+            "name": "bounce",
+            "steps": [
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateY(0)"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateY(-3px)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "tooltipFadeIn",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "scale(0.95) translateY(-4px)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "scale(1) translateY(0)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "tooltipFadeOut",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "scale(1) translateY(0)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "scale(0.95) translateY(-4px)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "pulse",
+            "steps": [
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "scale(1)"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0.7"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "scale(1.05)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "pulseGlow",
+            "steps": [
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "box-shadow",
+                    "value": "0 0 5px currentColor"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "box-shadow",
+                    "value": "0 0 15px currentColor,\n      0 0 30px currentColor"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": true,
+            "hasGPU": false
+          },
+          {
+            "name": "skeletonPulse",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "background-position",
+                    "value": "200% 0"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "background-position",
+                    "value": "-200% 0"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": true,
+            "hasGPU": false
+          },
+          {
+            "name": "flashUpdate",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "background",
+                    "value": "var(--color-success)"
+                  },
+                  {
+                    "property": "opacity",
+                    "value": "0.3"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "background",
+                    "value": "transparent"
+                  },
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "tabEnter",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateY(8px)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateY(0)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "fadeIn",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "slideIn",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateY(-10px)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateY(0)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "rotate",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "rotate(0deg)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "rotate(360deg)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "shake",
+            "steps": [
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateX(0)"
+                  }
+                ]
+              },
+              {
+                "percentage": "90%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateX(-5px)"
+                  }
+                ]
+              },
+              {
+                "percentage": "80%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateX(5px)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "slideDown",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateY(-10px)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateY(0)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "stepSlideIn",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateX(-20px)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateX(0)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "slideUp",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateY(20px)"
+                  },
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateY(0)"
+                  },
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "scaleIn",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(0.95)"
+                  },
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1)"
+                  },
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "staggerIn",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateY(15px)"
+                  },
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateY(0)"
+                  },
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "fadeOut",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "slideUpOut",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateY(0)"
+                  },
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateY(-20px)"
+                  },
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "scaleOut",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1)"
+                  },
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(0.95)"
+                  },
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "shimmer",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "background-position",
+                    "value": "-200% 0"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "background-position",
+                    "value": "200% 0"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": true,
+            "hasGPU": false
+          },
+          {
+            "name": "clickPulse",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1)"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(0.95)"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "loadingShimmer",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "background-position",
+                    "value": "-200% 0"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "background-position",
+                    "value": "200% 0"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": true,
+            "hasGPU": false
+          },
+          {
+            "name": "loadingSpin",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "rotate(0deg)"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "rotate(360deg)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "dotPulse",
+            "steps": [
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0.3"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "scale(0.8)"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "scale(1.2)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "successPulse",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1)"
+                  },
+                  {
+                    "property": "box-shadow",
+                    "value": "0 0 0 0 rgba(63, 185, 80, 0.4)"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1.05)"
+                  },
+                  {
+                    "property": "box-shadow",
+                    "value": "0 0 0 10px rgba(63, 185, 80, 0)"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1)"
+                  },
+                  {
+                    "property": "box-shadow",
+                    "value": "0 0 0 0 rgba(63, 185, 80, 0)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": true,
+            "hasGPU": true
+          },
+          {
+            "name": "errorShake",
+            "steps": [
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateX(0)"
+                  }
+                ]
+              },
+              {
+                "percentage": "90%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateX(-5px)"
+                  }
+                ]
+              },
+              {
+                "percentage": "80%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateX(5px)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "warningBlink",
+            "steps": [
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0.5"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "updateFlash",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "background-color",
+                    "value": "rgba(88, 166, 255, 0.3)"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "background-color",
+                    "value": "transparent"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": true,
+            "hasGPU": false
+          },
+          {
+            "name": "parallaxTilt",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "rotateX(0) rotateY(0)"
+                  }
+                ]
+              },
+              {
+                "percentage": "25%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "rotateX(2deg) rotateY(2deg)"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "rotateX(-1deg) rotateY(-2deg)"
+                  }
+                ]
+              },
+              {
+                "percentage": "75%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "rotateX(1deg) rotateY(1deg)"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "rotateX(0) rotateY(0)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "loadingShimmer",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateX(-100%)"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateX(100%)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "particleFloat",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateY(20px) scale(0)"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateY(-10px) scale(1)"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateY(-40px) scale(0)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "cardFadeIn",
+            "steps": [
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateY(0)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "profitPulseGlow",
+            "steps": [
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1)"
+                  },
+                  {
+                    "property": "box-shadow",
+                    "value": "0 0 0 0 rgba(63, 185, 80, 0.4),\n                0 0 20px rgba(63, 185, 80, 0.2)"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1.05)"
+                  },
+                  {
+                    "property": "box-shadow",
+                    "value": "0 0 0 8px rgba(63, 185, 80, 0),\n                0 0 30px rgba(63, 185, 80, 0.4)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": true,
+            "hasGPU": true
+          },
+          {
+            "name": "iconMorph",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1) rotate(0deg)"
+                  }
+                ]
+              },
+              {
+                "percentage": "25%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1.2) rotate(-10deg)"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(0.9) rotate(10deg)"
+                  }
+                ]
+              },
+              {
+                "percentage": "75%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1.1) rotate(-5deg)"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1) rotate(0deg)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "spin",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "rotate(0deg)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "rotate(360deg)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "trail",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "stroke-dashoffset",
+                    "value": "0"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "stroke-dashoffset",
+                    "value": "-280"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": false
+          },
+          {
+            "name": "progressIndeterminate",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateX(-100%)"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateX(300%)"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateX(-100%)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "toastSlideIn",
+            "steps": [
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateX(0)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "toastSlideOut",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateX(0)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateX(100%)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "iconSpin",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "rotate(0deg)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "rotate(360deg)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "bounceHover",
+            "steps": [
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateY(0)"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateY(-4px)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "counterPulse",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1)"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1.1)"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "glowPulse",
+            "steps": [
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "box-shadow",
+                    "value": "0 0 5px currentColor"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "box-shadow",
+                    "value": "0 0 20px currentColor, 0 0 30px currentColor"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": true,
+            "hasGPU": false
+          },
+          {
+            "name": "shimmerSlide",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "left",
+                    "value": "-100%"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "left",
+                    "value": "100%"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": true,
+            "hasRepaint": false,
+            "hasGPU": false
+          },
+          {
+            "name": "pulseBorder",
+            "steps": [
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "background-position",
+                    "value": "0% 50%"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "background-position",
+                    "value": "100% 50%"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": true,
+            "hasGPU": false
+          },
+          {
+            "name": "shakeHover",
+            "steps": [
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateX(0)"
+                  }
+                ]
+              },
+              {
+                "percentage": "25%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateX(-2px)"
+                  }
+                ]
+              },
+              {
+                "percentage": "75%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateX(2px)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "float",
+            "steps": [
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateY(0)"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateY(-5px)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "typing",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "width",
+                    "value": "0"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "width",
+                    "value": "100%"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": true,
+            "hasRepaint": false,
+            "hasGPU": false
+          },
+          {
+            "name": "blink",
+            "steps": [
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "border-color",
+                    "value": "transparent"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "border-color",
+                    "value": "var(--color-brand-primary)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": true,
+            "hasGPU": false
+          },
+          {
+            "name": "wave",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(0)"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1)"
+                  },
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "gradientShift",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "background-position",
+                    "value": "0% 50%"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "background-position",
+                    "value": "100% 50%"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "background-position",
+                    "value": "0% 50%"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": true,
+            "hasGPU": false
+          }
+        ]
+      },
+      "transitions": {
+        "total": 40,
+        "withReflow": 2,
+        "withRepaint": 2,
+        "withGPU": 17
+      },
+      "animations": {
+        "total": 32
+      },
+      "suggestions": {
+        "keyframes": [
+          {
+            "type": "keyframe_repaint",
+            "severity": "medium",
+            "keyframe": "pulseGlow",
+            "description": "La animación @keyframes pulseGlow usa propiedades que causan repaint",
+            "suggestion": "Considerar usar opacity o filter para mejor rendimiento",
+            "gpuAlternatives": [
+              "opacity",
+              "filter: blur()",
+              "filter: brightness()"
+            ]
+          },
+          {
+            "type": "keyframe_no_gpu",
+            "severity": "low",
+            "keyframe": "pulseGlow",
+            "description": "La animación @keyframes pulseGlow no usa propiedades aceleradas por GPU",
+            "suggestion": "Agregar will-change: transform, opacity antes de la animación",
+            "gpuAlternatives": [
+              "will-change: transform, opacity"
+            ]
+          },
+          {
+            "type": "keyframe_repaint",
+            "severity": "medium",
+            "keyframe": "skeletonPulse",
+            "description": "La animación @keyframes skeletonPulse usa propiedades que causan repaint",
+            "suggestion": "Considerar usar opacity o filter para mejor rendimiento",
+            "gpuAlternatives": [
+              "opacity",
+              "filter: blur()",
+              "filter: brightness()"
+            ]
+          },
+          {
+            "type": "keyframe_no_gpu",
+            "severity": "low",
+            "keyframe": "skeletonPulse",
+            "description": "La animación @keyframes skeletonPulse no usa propiedades aceleradas por GPU",
+            "suggestion": "Agregar will-change: transform, opacity antes de la animación",
+            "gpuAlternatives": [
+              "will-change: transform, opacity"
+            ]
+          },
+          {
+            "type": "keyframe_repaint",
+            "severity": "medium",
+            "keyframe": "shimmer",
+            "description": "La animación @keyframes shimmer usa propiedades que causan repaint",
+            "suggestion": "Considerar usar opacity o filter para mejor rendimiento",
+            "gpuAlternatives": [
+              "opacity",
+              "filter: blur()",
+              "filter: brightness()"
+            ]
+          },
+          {
+            "type": "keyframe_no_gpu",
+            "severity": "low",
+            "keyframe": "shimmer",
+            "description": "La animación @keyframes shimmer no usa propiedades aceleradas por GPU",
+            "suggestion": "Agregar will-change: transform, opacity antes de la animación",
+            "gpuAlternatives": [
+              "will-change: transform, opacity"
+            ]
+          },
+          {
+            "type": "keyframe_repaint",
+            "severity": "medium",
+            "keyframe": "loadingShimmer",
+            "description": "La animación @keyframes loadingShimmer usa propiedades que causan repaint",
+            "suggestion": "Considerar usar opacity o filter para mejor rendimiento",
+            "gpuAlternatives": [
+              "opacity",
+              "filter: blur()",
+              "filter: brightness()"
+            ]
+          },
+          {
+            "type": "keyframe_no_gpu",
+            "severity": "low",
+            "keyframe": "loadingShimmer",
+            "description": "La animación @keyframes loadingShimmer no usa propiedades aceleradas por GPU",
+            "suggestion": "Agregar will-change: transform, opacity antes de la animación",
+            "gpuAlternatives": [
+              "will-change: transform, opacity"
+            ]
+          },
+          {
+            "type": "keyframe_repaint",
+            "severity": "medium",
+            "keyframe": "updateFlash",
+            "description": "La animación @keyframes updateFlash usa propiedades que causan repaint",
+            "suggestion": "Considerar usar opacity o filter para mejor rendimiento",
+            "gpuAlternatives": [
+              "opacity",
+              "filter: blur()",
+              "filter: brightness()"
+            ]
+          },
+          {
+            "type": "keyframe_no_gpu",
+            "severity": "low",
+            "keyframe": "updateFlash",
+            "description": "La animación @keyframes updateFlash no usa propiedades aceleradas por GPU",
+            "suggestion": "Agregar will-change: transform, opacity antes de la animación",
+            "gpuAlternatives": [
+              "will-change: transform, opacity"
+            ]
+          },
+          {
+            "type": "keyframe_no_gpu",
+            "severity": "low",
+            "keyframe": "trail",
+            "description": "La animación @keyframes trail no usa propiedades aceleradas por GPU",
+            "suggestion": "Agregar will-change: transform, opacity antes de la animación",
+            "gpuAlternatives": [
+              "will-change: transform, opacity"
+            ]
+          },
+          {
+            "type": "keyframe_repaint",
+            "severity": "medium",
+            "keyframe": "glowPulse",
+            "description": "La animación @keyframes glowPulse usa propiedades que causan repaint",
+            "suggestion": "Considerar usar opacity o filter para mejor rendimiento",
+            "gpuAlternatives": [
+              "opacity",
+              "filter: blur()",
+              "filter: brightness()"
+            ]
+          },
+          {
+            "type": "keyframe_no_gpu",
+            "severity": "low",
+            "keyframe": "glowPulse",
+            "description": "La animación @keyframes glowPulse no usa propiedades aceleradas por GPU",
+            "suggestion": "Agregar will-change: transform, opacity antes de la animación",
+            "gpuAlternatives": [
+              "will-change: transform, opacity"
+            ]
+          },
+          {
+            "type": "keyframe_reflow",
+            "severity": "high",
+            "keyframe": "shimmerSlide",
+            "description": "La animación @keyframes shimmerSlide usa propiedades que causan reflow",
+            "suggestion": "Reemplazar width/height/top/left con transform: translate/scale",
+            "gpuAlternatives": [
+              "transform: translate()",
+              "transform: scale()",
+              "transform: rotate()"
+            ]
+          },
+          {
+            "type": "keyframe_no_gpu",
+            "severity": "low",
+            "keyframe": "shimmerSlide",
+            "description": "La animación @keyframes shimmerSlide no usa propiedades aceleradas por GPU",
+            "suggestion": "Agregar will-change: transform, opacity antes de la animación",
+            "gpuAlternatives": [
+              "will-change: transform, opacity"
+            ]
+          },
+          {
+            "type": "keyframe_repaint",
+            "severity": "medium",
+            "keyframe": "pulseBorder",
+            "description": "La animación @keyframes pulseBorder usa propiedades que causan repaint",
+            "suggestion": "Considerar usar opacity o filter para mejor rendimiento",
+            "gpuAlternatives": [
+              "opacity",
+              "filter: blur()",
+              "filter: brightness()"
+            ]
+          },
+          {
+            "type": "keyframe_no_gpu",
+            "severity": "low",
+            "keyframe": "pulseBorder",
+            "description": "La animación @keyframes pulseBorder no usa propiedades aceleradas por GPU",
+            "suggestion": "Agregar will-change: transform, opacity antes de la animación",
+            "gpuAlternatives": [
+              "will-change: transform, opacity"
+            ]
+          },
+          {
+            "type": "keyframe_reflow",
+            "severity": "high",
+            "keyframe": "typing",
+            "description": "La animación @keyframes typing usa propiedades que causan reflow",
+            "suggestion": "Reemplazar width/height/top/left con transform: translate/scale",
+            "gpuAlternatives": [
+              "transform: translate()",
+              "transform: scale()",
+              "transform: rotate()"
+            ]
+          },
+          {
+            "type": "keyframe_no_gpu",
+            "severity": "low",
+            "keyframe": "typing",
+            "description": "La animación @keyframes typing no usa propiedades aceleradas por GPU",
+            "suggestion": "Agregar will-change: transform, opacity antes de la animación",
+            "gpuAlternatives": [
+              "will-change: transform, opacity"
+            ]
+          },
+          {
+            "type": "keyframe_repaint",
+            "severity": "medium",
+            "keyframe": "blink",
+            "description": "La animación @keyframes blink usa propiedades que causan repaint",
+            "suggestion": "Considerar usar opacity o filter para mejor rendimiento",
+            "gpuAlternatives": [
+              "opacity",
+              "filter: blur()",
+              "filter: brightness()"
+            ]
+          },
+          {
+            "type": "keyframe_no_gpu",
+            "severity": "low",
+            "keyframe": "blink",
+            "description": "La animación @keyframes blink no usa propiedades aceleradas por GPU",
+            "suggestion": "Agregar will-change: transform, opacity antes de la animación",
+            "gpuAlternatives": [
+              "will-change: transform, opacity"
+            ]
+          },
+          {
+            "type": "keyframe_repaint",
+            "severity": "medium",
+            "keyframe": "gradientShift",
+            "description": "La animación @keyframes gradientShift usa propiedades que causan repaint",
+            "suggestion": "Considerar usar opacity o filter para mejor rendimiento",
+            "gpuAlternatives": [
+              "opacity",
+              "filter: blur()",
+              "filter: brightness()"
+            ]
+          },
+          {
+            "type": "keyframe_no_gpu",
+            "severity": "low",
+            "keyframe": "gradientShift",
+            "description": "La animación @keyframes gradientShift no usa propiedades aceleradas por GPU",
+            "suggestion": "Agregar will-change: transform, opacity antes de la animación",
+            "gpuAlternatives": [
+              "will-change: transform, opacity"
+            ]
+          }
+        ],
+        "transitions": [
+          {
+            "type": "transition_reflow",
+            "severity": "high",
+            "selector": ".route-card.collapsed",
+            "properties": [
+              "padding"
+            ],
+            "description": "Transición usa propiedades que causan reflow: padding",
+            "suggestion": "Reemplazar con transform para mejor rendimiento",
+            "gpuAlternatives": [
+              "transform: translate()",
+              "transform: scale()"
+            ]
+          },
+          {
+            "type": "transition_reflow",
+            "severity": "high",
+            "selector": ".progress-bar-fill",
+            "properties": [
+              "width"
+            ],
+            "description": "Transición usa propiedades que causan reflow: width",
+            "suggestion": "Reemplazar con transform para mejor rendimiento",
+            "gpuAlternatives": [
+              "transform: translate()",
+              "transform: scale()"
+            ]
+          }
+        ]
+      },
+      "totalOptimizations": 25
+    },
+    {
+      "filePath": "src/ui-components/design-system.css",
+      "keyframes": {
+        "total": 0,
+        "withReflow": 0,
+        "withRepaint": 0,
+        "withGPU": 0,
+        "list": []
+      },
+      "transitions": {
+        "total": 1,
+        "withReflow": 0,
+        "withRepaint": 0,
+        "withGPU": 0
+      },
+      "animations": {
+        "total": 0
+      },
+      "suggestions": {
+        "keyframes": [],
+        "transitions": []
+      },
+      "totalOptimizations": 0
+    },
+    {
+      "filePath": "src/ui-components/animations.css",
+      "keyframes": {
+        "total": 12,
+        "withReflow": 0,
+        "withRepaint": 2,
+        "withGPU": 9,
+        "list": [
+          {
+            "name": "fadeInUp",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateY(20px)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateY(0)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "fadeInScale",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "scale(0.95)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "scale(1)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "slideInRight",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateX(30px)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateX(0)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "slideInLeft",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateX(-30px)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateX(0)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "refreshSpin",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "rotate(0deg)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "rotate(360deg)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "statusPulse",
+            "steps": [
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0.5"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "priceFlashUp",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "background-color",
+                    "value": "transparent"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "background-color",
+                    "value": "rgba(16, 185, 129, 0.2)"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "background-color",
+                    "value": "transparent"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": true,
+            "hasGPU": false
+          },
+          {
+            "name": "priceFlashDown",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "background-color",
+                    "value": "transparent"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "background-color",
+                    "value": "rgba(239, 68, 68, 0.2)"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "background-color",
+                    "value": "transparent"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": true,
+            "hasGPU": false
+          },
+          {
+            "name": "countUp",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateY(10px)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateY(0)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "ringProgress",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "stroke-dashoffset",
+                    "value": "283"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "stroke-dashoffset",
+                    "value": "var(--progress-offset)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": false
+          },
+          {
+            "name": "shimmer",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateX(-100%)"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateX(100%)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "fadeOutScale",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "scale(1)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "scale(0.95)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          }
+        ]
+      },
+      "transitions": {
+        "total": 4,
+        "withReflow": 0,
+        "withRepaint": 0,
+        "withGPU": 0
+      },
+      "animations": {
+        "total": 6
+      },
+      "suggestions": {
+        "keyframes": [
+          {
+            "type": "keyframe_repaint",
+            "severity": "medium",
+            "keyframe": "priceFlashUp",
+            "description": "La animación @keyframes priceFlashUp usa propiedades que causan repaint",
+            "suggestion": "Considerar usar opacity o filter para mejor rendimiento",
+            "gpuAlternatives": [
+              "opacity",
+              "filter: blur()",
+              "filter: brightness()"
+            ]
+          },
+          {
+            "type": "keyframe_no_gpu",
+            "severity": "low",
+            "keyframe": "priceFlashUp",
+            "description": "La animación @keyframes priceFlashUp no usa propiedades aceleradas por GPU",
+            "suggestion": "Agregar will-change: transform, opacity antes de la animación",
+            "gpuAlternatives": [
+              "will-change: transform, opacity"
+            ]
+          },
+          {
+            "type": "keyframe_repaint",
+            "severity": "medium",
+            "keyframe": "priceFlashDown",
+            "description": "La animación @keyframes priceFlashDown usa propiedades que causan repaint",
+            "suggestion": "Considerar usar opacity o filter para mejor rendimiento",
+            "gpuAlternatives": [
+              "opacity",
+              "filter: blur()",
+              "filter: brightness()"
+            ]
+          },
+          {
+            "type": "keyframe_no_gpu",
+            "severity": "low",
+            "keyframe": "priceFlashDown",
+            "description": "La animación @keyframes priceFlashDown no usa propiedades aceleradas por GPU",
+            "suggestion": "Agregar will-change: transform, opacity antes de la animación",
+            "gpuAlternatives": [
+              "will-change: transform, opacity"
+            ]
+          },
+          {
+            "type": "keyframe_no_gpu",
+            "severity": "low",
+            "keyframe": "ringProgress",
+            "description": "La animación @keyframes ringProgress no usa propiedades aceleradas por GPU",
+            "suggestion": "Agregar will-change: transform, opacity antes de la animación",
+            "gpuAlternatives": [
+              "will-change: transform, opacity"
+            ]
+          }
+        ],
+        "transitions": []
+      },
+      "totalOptimizations": 5
+    },
+    {
+      "filePath": "src/ui-components/header.css",
+      "keyframes": {
+        "total": 4,
+        "withReflow": 0,
+        "withRepaint": 0,
+        "withGPU": 4,
+        "list": [
+          {
+            "name": "logoGlow",
+            "steps": [
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "filter",
+                    "value": "drop-shadow(0 0 8px rgba(59, 130, 246, 0.5))"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "filter",
+                    "value": "drop-shadow(0 0 16px rgba(59, 130, 246, 0.8))"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "statusPulse",
+            "steps": [
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1)"
+                  },
+                  {
+                    "property": "opacity",
+                    "value": "0.4"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1.5)"
+                  },
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "refreshSpin",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "rotate(0deg)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "rotate(360deg)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "fadeInUp",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateY(10px)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateY(0)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          }
+        ]
+      },
+      "transitions": {
+        "total": 2,
+        "withReflow": 0,
+        "withRepaint": 0,
+        "withGPU": 1
+      },
+      "animations": {
+        "total": 7
+      },
+      "suggestions": {
+        "keyframes": [],
+        "transitions": []
+      },
+      "totalOptimizations": 0
+    },
+    {
+      "filePath": "src/ui-components/exchange-card.css",
+      "keyframes": {
+        "total": 5,
+        "withReflow": 0,
+        "withRepaint": 3,
+        "withGPU": 2,
+        "list": [
+          {
+            "name": "fadeInUp",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateY(16px)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateY(0)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "shimmer",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateX(-100%)"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "translateX(100%)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "glowPulse",
+            "steps": [
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "box-shadow",
+                    "value": "0 0 12px rgba(16, 185, 129, 0.4)"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "box-shadow",
+                    "value": "0 0 20px rgba(16, 185, 129, 0.6)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": true,
+            "hasGPU": false
+          },
+          {
+            "name": "priceFlashUp",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "background-color",
+                    "value": "transparent"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "background-color",
+                    "value": "rgba(16, 185, 129, 0.2)"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "background-color",
+                    "value": "transparent"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": true,
+            "hasGPU": false
+          },
+          {
+            "name": "priceFlashDown",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "background-color",
+                    "value": "transparent"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "background-color",
+                    "value": "rgba(239, 68, 68, 0.2)"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "background-color",
+                    "value": "transparent"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": true,
+            "hasGPU": false
+          }
+        ]
+      },
+      "transitions": {
+        "total": 2,
+        "withReflow": 0,
+        "withRepaint": 0,
+        "withGPU": 0
+      },
+      "animations": {
+        "total": 6
+      },
+      "suggestions": {
+        "keyframes": [
+          {
+            "type": "keyframe_repaint",
+            "severity": "medium",
+            "keyframe": "glowPulse",
+            "description": "La animación @keyframes glowPulse usa propiedades que causan repaint",
+            "suggestion": "Considerar usar opacity o filter para mejor rendimiento",
+            "gpuAlternatives": [
+              "opacity",
+              "filter: blur()",
+              "filter: brightness()"
+            ]
+          },
+          {
+            "type": "keyframe_no_gpu",
+            "severity": "low",
+            "keyframe": "glowPulse",
+            "description": "La animación @keyframes glowPulse no usa propiedades aceleradas por GPU",
+            "suggestion": "Agregar will-change: transform, opacity antes de la animación",
+            "gpuAlternatives": [
+              "will-change: transform, opacity"
+            ]
+          },
+          {
+            "type": "keyframe_repaint",
+            "severity": "medium",
+            "keyframe": "priceFlashUp",
+            "description": "La animación @keyframes priceFlashUp usa propiedades que causan repaint",
+            "suggestion": "Considerar usar opacity o filter para mejor rendimiento",
+            "gpuAlternatives": [
+              "opacity",
+              "filter: blur()",
+              "filter: brightness()"
+            ]
+          },
+          {
+            "type": "keyframe_no_gpu",
+            "severity": "low",
+            "keyframe": "priceFlashUp",
+            "description": "La animación @keyframes priceFlashUp no usa propiedades aceleradas por GPU",
+            "suggestion": "Agregar will-change: transform, opacity antes de la animación",
+            "gpuAlternatives": [
+              "will-change: transform, opacity"
+            ]
+          },
+          {
+            "type": "keyframe_repaint",
+            "severity": "medium",
+            "keyframe": "priceFlashDown",
+            "description": "La animación @keyframes priceFlashDown usa propiedades que causan repaint",
+            "suggestion": "Considerar usar opacity o filter para mejor rendimiento",
+            "gpuAlternatives": [
+              "opacity",
+              "filter: blur()",
+              "filter: brightness()"
+            ]
+          },
+          {
+            "type": "keyframe_no_gpu",
+            "severity": "low",
+            "keyframe": "priceFlashDown",
+            "description": "La animación @keyframes priceFlashDown no usa propiedades aceleradas por GPU",
+            "suggestion": "Agregar will-change: transform, opacity antes de la animación",
+            "gpuAlternatives": [
+              "will-change: transform, opacity"
+            ]
+          }
+        ],
+        "transitions": []
+      },
+      "totalOptimizations": 6
+    },
+    {
+      "filePath": "src/ui-components/loading-states.css",
+      "keyframes": {
+        "total": 4,
+        "withReflow": 0,
+        "withRepaint": 1,
+        "withGPU": 3,
+        "list": [
+          {
+            "name": "spin",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "rotate(0deg)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "rotate(360deg)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "progressPulse",
+            "steps": [
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0.7"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "shimmer",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "background-position",
+                    "value": "-200% 0"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "background-position",
+                    "value": "200% 0"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": true,
+            "hasGPU": false
+          },
+          {
+            "name": "fadeIn",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          }
+        ]
+      },
+      "transitions": {
+        "total": 2,
+        "withReflow": 1,
+        "withRepaint": 0,
+        "withGPU": 0
+      },
+      "animations": {
+        "total": 10
+      },
+      "suggestions": {
+        "keyframes": [
+          {
+            "type": "keyframe_repaint",
+            "severity": "medium",
+            "keyframe": "shimmer",
+            "description": "La animación @keyframes shimmer usa propiedades que causan repaint",
+            "suggestion": "Considerar usar opacity o filter para mejor rendimiento",
+            "gpuAlternatives": [
+              "opacity",
+              "filter: blur()",
+              "filter: brightness()"
+            ]
+          },
+          {
+            "type": "keyframe_no_gpu",
+            "severity": "low",
+            "keyframe": "shimmer",
+            "description": "La animación @keyframes shimmer no usa propiedades aceleradas por GPU",
+            "suggestion": "Agregar will-change: transform, opacity antes de la animación",
+            "gpuAlternatives": [
+              "will-change: transform, opacity"
+            ]
+          }
+        ],
+        "transitions": [
+          {
+            "type": "transition_reflow",
+            "severity": "high",
+            "selector": ".progress-bar-fill",
+            "properties": [
+              "width"
+            ],
+            "description": "Transición usa propiedades que causan reflow: width",
+            "suggestion": "Reemplazar con transform para mejor rendimiento",
+            "gpuAlternatives": [
+              "transform: translate()",
+              "transform: scale()"
+            ]
+          }
+        ]
+      },
+      "totalOptimizations": 3
+    },
+    {
+      "filePath": "src/ui-components/tabs.css",
+      "keyframes": {
+        "total": 3,
+        "withReflow": 0,
+        "withRepaint": 0,
+        "withGPU": 3,
+        "list": [
+          {
+            "name": "badgeBounce",
+            "steps": [
+              {
+                "percentage": "0%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1)"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1.2)"
+                  }
+                ]
+              },
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "fadeInUp",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateY(8px)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "translateY(0)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "badgePulse",
+            "steps": [
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1)"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "transform",
+                    "value": "scale(1.3)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          }
+        ]
+      },
+      "transitions": {
+        "total": 6,
+        "withReflow": 1,
+        "withRepaint": 0,
+        "withGPU": 1
+      },
+      "animations": {
+        "total": 5
+      },
+      "suggestions": {
+        "keyframes": [],
+        "transitions": [
+          {
+            "type": "transition_reflow",
+            "severity": "high",
+            "selector": ".tab-indicator",
+            "properties": [
+              "left"
+            ],
+            "description": "Transición usa propiedades que causan reflow: left",
+            "suggestion": "Reemplazar con transform para mejor rendimiento",
+            "gpuAlternatives": [
+              "transform: translate()",
+              "transform: scale()"
+            ]
+          }
+        ]
+      },
+      "totalOptimizations": 1
+    },
+    {
+      "filePath": "src/ui-components/arbitrage-panel.css",
+      "keyframes": {
+        "total": 2,
+        "withReflow": 0,
+        "withRepaint": 1,
+        "withGPU": 1,
+        "list": [
+          {
+            "name": "fadeInScale",
+            "steps": [
+              {
+                "percentage": "from",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "0"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "scale(0.95)"
+                  }
+                ]
+              },
+              {
+                "percentage": "to",
+                "properties": [
+                  {
+                    "property": "opacity",
+                    "value": "1"
+                  },
+                  {
+                    "property": "transform",
+                    "value": "scale(1)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": false,
+            "hasGPU": true
+          },
+          {
+            "name": "panelGlow",
+            "steps": [
+              {
+                "percentage": "100%",
+                "properties": [
+                  {
+                    "property": "box-shadow",
+                    "value": "var(--shadow-md)"
+                  }
+                ]
+              },
+              {
+                "percentage": "50%",
+                "properties": [
+                  {
+                    "property": "box-shadow",
+                    "value": "0 0 20px rgba(16, 185, 129, 0.3)"
+                  }
+                ]
+              }
+            ],
+            "hasReflow": false,
+            "hasRepaint": true,
+            "hasGPU": false
+          }
+        ]
+      },
+      "transitions": {
+        "total": 7,
+        "withReflow": 0,
+        "withRepaint": 0,
+        "withGPU": 0
+      },
+      "animations": {
+        "total": 3
+      },
+      "suggestions": {
+        "keyframes": [
+          {
+            "type": "keyframe_repaint",
+            "severity": "medium",
+            "keyframe": "panelGlow",
+            "description": "La animación @keyframes panelGlow usa propiedades que causan repaint",
+            "suggestion": "Considerar usar opacity o filter para mejor rendimiento",
+            "gpuAlternatives": [
+              "opacity",
+              "filter: blur()",
+              "filter: brightness()"
+            ]
+          },
+          {
+            "type": "keyframe_no_gpu",
+            "severity": "low",
+            "keyframe": "panelGlow",
+            "description": "La animación @keyframes panelGlow no usa propiedades aceleradas por GPU",
+            "suggestion": "Agregar will-change: transform, opacity antes de la animación",
+            "gpuAlternatives": [
+              "will-change: transform, opacity"
+            ]
+          }
+        ],
+        "transitions": []
+      },
+      "totalOptimizations": 2
+    }
+  ]
+}

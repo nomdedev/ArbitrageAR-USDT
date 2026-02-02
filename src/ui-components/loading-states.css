@@ -1,0 +1,468 @@
+/* ==========================================
+   ARBITRAGEAR - LOADING STATES v7.0
+   Estados de Carga Premium
+   ========================================== */
+
+/* ==========================================
+   1. SKELETON SCREENS
+   ========================================== */
+
+.skeleton-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+/* Skeleton Header */
+.skeleton-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.skeleton-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-tertiary) 0%,
+    var(--color-bg-elevated) 50%,
+    var(--color-bg-tertiary) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton-lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.skeleton-line {
+  height: 12px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-tertiary) 0%,
+    var(--color-bg-elevated) 50%,
+    var(--color-bg-tertiary) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton-line.short {
+  width: 60%;
+}
+
+.skeleton-line.medium {
+  width: 80%;
+}
+
+/* Skeleton Card */
+.skeleton-card {
+  height: 100px;
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-muted);
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(59, 130, 246, 0.1) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Skeleton List Item */
+.skeleton-list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-secondary);
+}
+
+.skeleton-list-item .skeleton-circle {
+  width: 32px;
+  height: 32px;
+}
+
+/* ==========================================
+   2. SPINNER PREMIUM
+   ========================================== */
+
+.spinner-premium {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Tamaños diferentes */
+.spinner-premium.sm {
+  width: 20px;
+  height: 20px;
+}
+
+.spinner-premium.md {
+  width: 32px;
+  height: 32px;
+}
+
+.spinner-premium.lg {
+  width: 48px;
+  height: 48px;
+}
+
+/* Anillos múltiples */
+.spinner-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  animation: spin 1s linear infinite;
+}
+
+.spinner-ring:nth-child(1) {
+  inset: 0;
+  border-top-color: var(--color-brand-primary);
+  animation-duration: 1.5s;
+}
+
+.spinner-ring:nth-child(2) {
+  inset: 4px;
+  border-top-color: var(--color-brand-secondary);
+  animation-duration: 2s;
+  animation-direction: reverse;
+}
+
+.spinner-ring:nth-child(3) {
+  inset: 8px;
+  border-top-color: var(--color-brand-accent);
+  animation-duration: 2.5s;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==========================================
+   3. PROGRESS LOADING
+   ========================================== */
+
+.progress-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-6);
+}
+
+.progress-bar-container {
+  width: 100%;
+  max-width: 200px;
+  height: 4px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-brand-primary), var(--color-brand-accent));
+  border-radius: var(--radius-full);
+  transition: width var(--duration-normal) var(--ease-out);
+  animation: progressPulse 2s ease-in-out infinite;
+}
+
+@keyframes progressPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.progress-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.progress-percent {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+}
+
+/* ==========================================
+   4. EMPTY STATES
+   ========================================== */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  text-align: center;
+  gap: var(--space-4);
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  opacity: 0.5;
+  margin-bottom: var(--space-2);
+}
+
+.empty-state-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.empty-state-message {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  max-width: 280px;
+  line-height: var(--line-height-normal);
+}
+
+.empty-state-cta {
+  margin-top: var(--space-4);
+}
+
+/* ==========================================
+   5. ERROR STATES
+   ========================================== */
+
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  text-align: center;
+  gap: var(--space-4);
+  background: var(--color-danger-muted);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-lg);
+}
+
+.error-state-icon {
+  font-size: 40px;
+  color: var(--color-danger);
+  margin-bottom: var(--space-2);
+}
+
+.error-state-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-danger);
+  margin-bottom: var(--space-2);
+}
+
+.error-state-message {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  max-width: 280px;
+  line-height: var(--line-height-normal);
+}
+
+.error-state-cta {
+  margin-top: var(--space-2);
+}
+
+.btn-retry {
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-danger);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.btn-retry:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* ==========================================
+   6. ANIMACIONES
+   ========================================== */
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ==========================================
+   7. LOADING OVERLAY
+   ========================================== */
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 14, 26, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  z-index: var(--z-modal-backdrop);
+  animation: fadeIn var(--duration-fast) var(--ease-out);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ==========================================
+   8. RESPONSIVE
+   ========================================== */
+
+@media (max-width: 480px) {
+  .skeleton-container {
+    padding: var(--space-3);
+  }
+  
+  .empty-state,
+  .error-state {
+    padding: var(--space-5);
+  }
+  
+  .empty-state-icon,
+  .error-state-icon {
+    font-size: 36px;
+  }
+}
+
+/* ==========================================
+   9. PREFERS-REDUCED-MOTION
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-circle,
+  .skeleton-line,
+  .skeleton-card::after {
+    animation: none !important;
+  }
+  
+  .spinner-ring {
+    animation: none !important;
+  }
+  
+  .progress-bar-fill {
+    animation: none !important;
+  }
+  
+  .loading-overlay {
+    animation: none !important;
+  }
+}
+
+/* ==========================================
+   10. EJEMPLO DE USO HTML
+   ========================================== */
+
+/*
+=== SKELETON ===
+<div class="skeleton-container">
+  <div class="skeleton-header">
+    <div class="skeleton-circle"></div>
+    <div class="skeleton-lines">
+      <div class="skeleton-line short"></div>
+      <div class="skeleton-line"></div>
+    </div>
+  </div>
+  <div class="skeleton-card"></div>
+  <div class="skeleton-card"></div>
+</div>
+
+=== SPINNER ===
+<div class="spinner-premium md">
+  <div class="spinner-ring"></div>
+  <div class="spinner-ring"></div>
+  <div class="spinner-ring"></div>
+</div>
+
+=== PROGRESS ===
+<div class="progress-loading">
+  <div class="progress-bar-container">
+    <div class="progress-bar-fill" style="width: 60%"></div>
+  </div>
+  <span class="progress-text">Cargando datos...</span>
+  <span class="progress-percent">60%</span>
+</div>
+
+=== EMPTY STATE ===
+<div class="empty-state">
+  <div class="empty-state-icon">📊</div>
+  <h3 class="empty-state-title">Sin oportunidades</h3>
+  <p class="empty-state-message">
+    No hay oportunidades de arbitraje disponibles en este momento.
+    Intenta nuevamente más tarde.
+  </p>
+  <div class="empty-state-cta">
+    <button class="btn-primary">Actualizar</button>
+  </div>
+</div>
+
+=== ERROR STATE ===
+<div class="error-state">
+  <div class="error-state-icon">⚠️</div>
+  <h3 class="error-state-title">Error de conexión</h3>
+  <p class="error-state-message">
+    No se pudo conectar con el servidor. Verifica tu conexión a internet.
+  </p>
+  <div class="error-state-cta">
+    <button class="btn-retry">Reintentar</button>
+  </div>
+</div>
+
+=== LOADING OVERLAY ===
+<div class="loading-overlay">
+  <div class="spinner-premium lg">
+    <div class="spinner-ring"></div>
+    <div class="spinner-ring"></div>
+    <div class="spinner-ring"></div>
+  </div>
+  <span class="progress-text">Procesando...</span>
+</div>
+*/

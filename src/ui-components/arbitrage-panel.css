@@ -1,0 +1,414 @@
+/* ==========================================
+   ARBITRAGEAR - ARBITRAGE PANEL v7.0
+   Panel de Oportunidades de Arbitraje Premium
+   ========================================== */
+
+/* ==========================================
+   1. ESTRUCTURA DEL PANEL
+   ========================================== */
+
+.arbitrage-panel {
+  position: relative;
+  background: var(--card-bg);
+  backdrop-filter: var(--backdrop-blur);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  border: var(--card-border);
+  box-shadow: var(--shadow-md);
+  transition: all var(--duration-normal) var(--ease-out-expo);
+  animation: fadeInScale var(--duration-normal) var(--ease-spring) both;
+}
+
+/* ==========================================
+   2. HEADER DEL PANEL
+   ========================================== */
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+/* ==========================================
+   3. INDICADOR CIRCULAR DE RENTABILIDAD (SVG RING)
+   ========================================== */
+
+.profit-indicator {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.profit-ring {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.progress-ring {
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+.progress-ring-bg {
+  fill: none;
+  stroke: var(--color-bg-tertiary);
+  stroke-width: 6;
+}
+
+.progress-ring-fill {
+  fill: none;
+  stroke: var(--color-text-muted);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 283; /* 2 * PI * 45 */
+  stroke-dashoffset: 283;
+  transition: stroke-dashoffset 1s var(--ease-out-expo), stroke 0.3s ease;
+}
+
+/* Niveles de rentabilidad */
+.arbitrage-panel[data-profitability="low"] .progress-ring-fill {
+  stroke: #9ca3af; /* neutral */
+}
+
+.arbitrage-panel[data-profitability="medium"] .progress-ring-fill {
+  stroke: var(--color-warning);
+}
+
+.arbitrage-panel[data-profitability="high"] .progress-ring-fill {
+  stroke: var(--color-success);
+  filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.5));
+}
+
+.profit-percent {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+.profit-percent .value {
+  display: block;
+  font-size: var(--font-size-xl);
+  line-height: 1;
+}
+
+.profit-percent .label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+/* ==========================================
+   4. DETALLES DEL ARBITRAJE
+   ========================================== */
+
+.arbitrage-details {
+  flex: 1;
+}
+
+.arbitrage-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.arbitrage-route {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.route-arrow {
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-xs);
+}
+
+/* ==========================================
+   5. CUERPO DEL PANEL
+   ========================================== */
+
+.panel-body {
+  margin-bottom: var(--space-4);
+}
+
+.calculation-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) 0;
+  font-size: var(--font-size-sm);
+}
+
+.calculation-row:not(:last-child) {
+  border-bottom: 1px solid var(--color-border-muted);
+}
+
+.calc-label {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.calc-value {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+}
+
+.calc-value.highlight {
+  color: var(--color-success);
+  font-size: var(--font-size-base);
+}
+
+.calc-value.negative {
+  color: var(--color-danger);
+}
+
+/* ==========================================
+   6. ACCIONES DEL PANEL
+   ========================================== */
+
+.panel-actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.btn-action {
+  flex: 1;
+  padding: var(--space-3) var(--space-4);
+  background: linear-gradient(135deg, var(--color-success) 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.btn-action:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-details {
+  padding: var(--space-3) var(--space-4);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.btn-details:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--color-border-emphasis);
+}
+
+/* ==========================================
+   7. DETALLES EXPANDIBLES
+   ========================================== */
+
+.panel-details-expandable {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--duration-slow) var(--ease-out-expo);
+}
+
+.panel-details-expandable.expanded {
+  max-height: 500px;
+}
+
+.details-content {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-muted);
+}
+
+.detail-section {
+  margin-bottom: var(--space-3);
+}
+
+.detail-section:last-child {
+  margin-bottom: 0;
+}
+
+.detail-section-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+}
+
+.detail-item .label {
+  color: var(--color-text-secondary);
+}
+
+.detail-item .value {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+}
+
+/* ==========================================
+   8. ANIMACIONES
+   ========================================== */
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Glow pulsante para best opportunities */
+.arbitrage-panel[data-profitability="high"] {
+  animation: panelGlow 2s ease-in-out infinite;
+}
+
+@keyframes panelGlow {
+  0%, 100% {
+    box-shadow: var(--shadow-md);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+  }
+}
+
+/* Hover: elevación */
+.arbitrage-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ==========================================
+   9. CONTENEDOR DE PANELES
+   ========================================== */
+
+.arbitrage-panels-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ==========================================
+   10. RESPONSIVE
+   ========================================== */
+
+@media (max-width: 480px) {
+  .arbitrage-panel {
+    padding: var(--space-4);
+  }
+  
+  .panel-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .profit-ring {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .profit-percent {
+    font-size: var(--font-size-base);
+  }
+  
+  .panel-actions {
+    flex-direction: column;
+  }
+  
+  .btn-details {
+    width: 100%;
+  }
+}
+
+/* ==========================================
+   11. PREFERS-REDUCED-MOTION
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .arbitrage-panel,
+  .arbitrage-panel:hover {
+    transform: none !important;
+    animation: none !important;
+  }
+  
+  .progress-ring-fill {
+    transition: stroke-dashoffset 0.3s ease, stroke 0.3s ease;
+  }
+  
+  .panel-details-expandable {
+    transition: max-height 0.3s ease;
+  }
+}
+
+/* ==========================================
+   12. EJEMPLO DE USO HTML
+   ========================================== */
+
+/*
+  Uso básico:
+  <div class="arbitrage-panel" data-profitability="high">
+    <div class="panel-header">
+      <div class="profit-indicator">
+        <div class="profit-ring">
+          <svg class="progress-ring" viewBox="0 0 100 100">
+            <circle class="progress-ring-bg" cx="50" cy="50" r="45"/>
+            <circle class="progress-ring-fill" cx="50" cy="50" r="45"/>
+          </svg>
+        </div>
+        <div class="profit-percent">
+          <span class="value">15.2%</span>
+          <span class="label">Ganancia</span>
+        </div>
+      </div>
+      <div class="arbitrage-details">
+        <h3 class="arbitrage-title">Oportunidad Detectada</h3>
+        <p class="arbitrage-route">
+          Binance <span class="route-arrow">→</span> Lemon Cash
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  Niveles de rentabilidad:
+  - data-profitability="low": < 5% (color neutral)
+  - data-profitability="medium": 5-10% (color warning)
+  - data-profitability="high": > 10% (color success con glow)
+*/

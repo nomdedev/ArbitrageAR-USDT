@@ -1,0 +1,283 @@
+/* ==========================================
+   ARBITRAGEAR - TABS SYSTEM v7.0
+   Sistema de Tabs Premium con Indicador Deslizante
+   ========================================== */
+
+/* ==========================================
+   1. CONTENEDOR DE TABS
+   ========================================== */
+
+.tabs-nav {
+  position: relative;
+  display: flex;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-1);
+  margin-bottom: var(--space-4);
+  overflow: hidden;
+}
+
+/* ==========================================
+   2. INDICADOR DESLIZANTE
+   ========================================== */
+
+.tab-indicator {
+  position: absolute;
+  bottom: var(--space-1);
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-brand-primary) 0%, var(--color-brand-accent) 100%);
+  border-radius: var(--radius-full);
+  transition: all var(--duration-normal) var(--ease-out-back);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+/* ==========================================
+   3. TAB ITEMS
+   ========================================== */
+
+.tab-item {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  white-space: nowrap;
+  z-index: 1;
+}
+
+/* Tab icon */
+.tab-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  opacity: 0.7;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.tab-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: 2px;
+}
+
+/* Tab label */
+.tab-label {
+  flex: 1;
+  text-align: center;
+}
+
+/* Tab badge */
+.tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 var(--space-1);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+/* Badge con highlight */
+.tab-badge.highlight {
+  background: var(--color-brand-primary);
+  color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+  animation: badgeBounce 0.4s var(--ease-out-back);
+}
+
+@keyframes badgeBounce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* ==========================================
+   4. ESTADOS DEL TAB
+   ========================================== */
+
+/* Hover: background sutil */
+.tab-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-primary);
+}
+
+.tab-item:hover .tab-icon {
+  opacity: 1;
+}
+
+/* Active state destacado */
+.tab-item.active {
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.tab-item.active .tab-icon {
+  opacity: 1;
+}
+
+.tab-item.active .tab-badge {
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--color-brand-primary);
+}
+
+/* Focus visible para accesibilidad */
+.tab-item:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* ==========================================
+   5. CONTENIDO DE LOS TABS
+   ========================================== */
+
+.tabs-content {
+  position: relative;
+}
+
+.tab-panel {
+  display: none;
+  animation: fadeInUp var(--duration-normal) var(--ease-out-expo);
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================
+   6. ANIMACIONES
+   ========================================== */
+
+/* Badge: bounce al actualizar */
+.tab-badge.updating {
+  animation: badgePulse 0.6s ease-in-out;
+}
+
+@keyframes badgePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+}
+
+/* ==========================================
+   7. RESPONSIVE
+   ========================================== */
+
+@media (max-width: 480px) {
+  .tabs-nav {
+    padding: var(--space-1);
+    gap: var(--space-1);
+  }
+  
+  .tab-item {
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-1);
+    font-size: var(--font-size-xs);
+  }
+  
+  .tab-icon {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .tab-label {
+    display: none; /* Ocultar label en móviles pequeños */
+  }
+  
+  .tab-badge {
+    min-width: 18px;
+    height: 18px;
+    font-size: 0.65rem;
+  }
+}
+
+/* ==========================================
+   8. PREFERS-REDUCED-MOTION
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-indicator {
+    transition: left var(--duration-fast) linear;
+  }
+  
+  .tab-item,
+  .tab-item:hover {
+    transition: none;
+  }
+  
+  .tab-badge,
+  .tab-badge.highlight {
+    animation: none !important;
+  }
+  
+  .tab-panel {
+    animation: none;
+  }
+}
+
+/* ==========================================
+   9. EJEMPLO DE USO HTML
+   ========================================== */
+
+/*
+  Uso básico:
+  <nav class="tabs-nav" role="tablist">
+    <div class="tab-indicator"></div>
+    <button class="tab-item active" role="tab" aria-selected="true" data-tab="prices">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+      <span class="tab-label">Precios</span>
+      <span class="tab-badge">5</span>
+    </button>
+    <button class="tab-item" role="tab" aria-selected="false" data-tab="arbitrage">
+      <span class="tab-label">Arbitraje</span>
+      <span class="tab-badge highlight">2</span>
+    </button>
+  </nav>
+  
+  <div class="tabs-content">
+    <div class="tab-panel active" data-tab="prices">
+      Contenido de precios
+    </div>
+    <div class="tab-panel" data-tab="arbitrage">
+      Contenido de arbitraje
+    </div>
+  </div>
+  
+  Clases útiles:
+  - .tab-indicator: Indicador deslizante animado
+  - .tab-item.active: Tab activo
+  - .tab-badge.highlight: Badge con animación bounce
+  - .tab-panel.active: Panel visible
+*/

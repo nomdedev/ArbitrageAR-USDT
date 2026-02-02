@@ -1,0 +1,1176 @@
+{
+  "timestamp": "2026-02-02T11:28:10.833Z",
+  "summary": {
+    "totalFiles": 8,
+    "totalHighSpecificity": 7,
+    "totalLongSelectors": 75,
+    "totalSuggestions": 157
+  },
+  "files": [
+    {
+      "filePath": "src/popup.css",
+      "totalSelectors": 748,
+      "highSpecificityCount": 7,
+      "longSelectorsCount": 43,
+      "highSpecificity": [
+        {
+          "selector": "broker-info h3 (no usadas en templates actuales) */\n\n/* ============================================\n   GUIDE RESPONSIVE STYLES (Reducido)\n   ============================================ */\n\n#selected-arbitrage-guide",
+          "specificity": {
+            "a": 1,
+            "b": 0,
+            "c": 9
+          },
+          "score": 109,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (16 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (216 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "#crypto-routes-container .loading",
+          "specificity": {
+            "a": 1,
+            "b": 1,
+            "c": 0
+          },
+          "score": 110,
+          "suggestions": []
+        },
+        {
+          "selector": "/* Mensaje de no resultados */\n#crypto-routes-container .no-results",
+          "specificity": {
+            "a": 1,
+            "b": 1,
+            "c": 4
+          },
+          "score": 114,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (7 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            }
+          ]
+        },
+        {
+          "selector": ".filter-results #filter-count",
+          "specificity": {
+            "a": 1,
+            "b": 1,
+            "c": 0
+          },
+          "score": 110,
+          "suggestions": []
+        },
+        {
+          "selector": "/* Estado en header */\n#dataStatus",
+          "specificity": {
+            "a": 1,
+            "b": 0,
+            "c": 3
+          },
+          "score": 103,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (5 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            }
+          ]
+        },
+        {
+          "selector": "#dataStatus.moderate .age-text",
+          "specificity": {
+            "a": 1,
+            "b": 2,
+            "c": 0
+          },
+          "score": 120,
+          "suggestions": []
+        },
+        {
+          "selector": "/* Container de rutas crypto */\n#crypto-routes-container",
+          "specificity": {
+            "a": 1,
+            "b": 0,
+            "c": 4
+          },
+          "score": 104,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (6 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            }
+          ]
+        }
+      ],
+      "longSelectors": [
+        {
+          "selector": "/* ==========================================\n   ARBITRAGE AR - SISTEMA DE DISEÑO v6.0.0\n   Revisión Estética Completa - Dic 2025\n   ========================================== */\n\n/* ===========================================\n   🎯 SISTEMA DE ICONOS SVG (Fase 2)\n   =========================================== */\n\n/* Base de iconos */\n.icon",
+          "length": 341,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (33 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (341 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ===========================================\n   💬 SISTEMA DE TOOLTIPS (Fase 3)\n   =========================================== */\n\n/* Contenedor del tooltip */\n.tooltip-container",
+          "length": 180,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (15 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (180 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ===========================================\n   🎨 SISTEMA DE DISEÑO UNIFICADO\n   =========================================== */\n:root",
+          "length": 136,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (9 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (136 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ============================================\n   ACCESIBILIDAD GLOBAL v6.0.0\n   Focus states consistentes para todos los elementos\n   ============================================ */\n\n/* Focus visible para navegación por teclado */\n:focus",
+          "length": 239,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (22 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (239 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\n   FASE 4: ANIMACIONES BASE - MICRO-INTERACCIONES\n   ========================================== */\n\n/* Hover Lift - Efecto de elevación al hover */\n.hover-lift",
+          "length": 205,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (20 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (205 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "tab-button (no usadas en templates) */\n\n/* ESTILOS PARA PESTAÑAS DE BANCOS - .banks-tabs usado */\n.banks-tabs",
+          "length": 109,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (16 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (109 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ============================================\n   HEADER - Diseño Limpio y Funcional\n   ============================================ */\nheader",
+          "length": 143,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (10 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (143 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\n   FASE 4: EFECTOS AVANZADOS - Parallax Sutil en Header\n   ========================================== */\n.header-content",
+          "length": 166,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (13 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (166 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ============================================\n   PESTAÑAS - Diseño Pill Simple\n   ============================================ */\n.tabs",
+          "length": 137,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (9 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (137 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ============================================\n   ÁREA PRINCIPAL\n   ============================================ */\nmain",
+          "length": 121,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (6 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (121 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        }
+      ],
+      "topSuggestions": [
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (216 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (341 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (180 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (136 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (239 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        }
+      ]
+    },
+    {
+      "filePath": "src/ui-components/design-system.css",
+      "totalSelectors": 81,
+      "highSpecificityCount": 0,
+      "longSelectorsCount": 1,
+      "highSpecificity": [],
+      "longSelectors": [
+        {
+          "selector": "/* ==========================================\r\n   ARBITRAGEAR - DESIGN SYSTEM v7.0\r\n   Sistema de Diseño Premium Fintech\r\n   ========================================== */\r\n\r\n/* ==========================================\r\n   1. VARIABLES CSS COMPLETAS\r\n   ========================================== */\r\n\r\n:root",
+          "length": 309,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (22 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (309 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        }
+      ],
+      "topSuggestions": [
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (309 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "reduce_descendants",
+          "description": "Reducir profundidad de descendientes (22 niveles)",
+          "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+          "priority": "medium"
+        }
+      ]
+    },
+    {
+      "filePath": "src/ui-components/animations.css",
+      "totalSelectors": 48,
+      "highSpecificityCount": 0,
+      "longSelectorsCount": 2,
+      "highSpecificity": [],
+      "longSelectors": [
+        {
+          "selector": "/* ==========================================\r\n   6. UTILIDADES DE PERFORMANCE\r\n   ========================================== */\r\n\r\n/* will-change para optimizar animaciones */\r\n.will-change-transform",
+          "length": 200,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (14 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (200 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   8. VARIABLES PARA STAGGER\r\n   ========================================== */\r\n\r\n:root",
+          "length": 134,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (8 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (134 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        }
+      ],
+      "topSuggestions": [
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (200 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (134 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "reduce_descendants",
+          "description": "Reducir profundidad de descendientes (14 niveles)",
+          "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+          "priority": "medium"
+        },
+        {
+          "type": "reduce_descendants",
+          "description": "Reducir profundidad de descendientes (8 niveles)",
+          "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+          "priority": "medium"
+        }
+      ]
+    },
+    {
+      "filePath": "src/ui-components/header.css",
+      "totalSelectors": 32,
+      "highSpecificityCount": 0,
+      "longSelectorsCount": 4,
+      "highSpecificity": [],
+      "longSelectors": [
+        {
+          "selector": "/* ==========================================\r\n   2. LOGO ANIMADO CON GRADIENTE\r\n   ========================================== */\r\n\r\n.header-brand",
+          "length": 146,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (9 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (146 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   3. INDICADOR DE ESTADO DE CONEXIÓN\r\n   ========================================== */\r\n\r\n.header-status",
+          "length": 152,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (10 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (152 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   4. BOTONES DE ACCIÓN\r\n   ========================================== */\r\n\r\n.header-actions",
+          "length": 139,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (8 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (139 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   6. INDICADOR DE VERSIÓN\r\n   ========================================== */\r\n\r\n.version-indicator",
+          "length": 145,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (8 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (145 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        }
+      ],
+      "topSuggestions": [
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (146 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (152 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (139 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (145 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "reduce_descendants",
+          "description": "Reducir profundidad de descendientes (9 niveles)",
+          "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+          "priority": "medium"
+        }
+      ]
+    },
+    {
+      "filePath": "src/ui-components/exchange-card.css",
+      "totalSelectors": 45,
+      "highSpecificityCount": 0,
+      "longSelectorsCount": 5,
+      "highSpecificity": [],
+      "longSelectors": [
+        {
+          "selector": "/* ==========================================\r\n   ARBITRAGEAR - EXCHANGE CARDS v7.0\r\n   Tarjetas de Exchange Premium con Animaciones\r\n   ========================================== */\r\n\r\n/* ==========================================\r\n   1. ESTRUCTURA DE LA TARJETA\r\n   ========================================== */\r\n\r\n.exchange-card",
+          "length": 331,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (24 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (331 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   2. INDICADOR LATERAL DE COLOR\r\n   ========================================== */\r\n\r\n.exchange-card::before",
+          "length": 155,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (9 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (155 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   7. FOOTER DE LA TARJETA\r\n   ========================================== */\r\n\r\n.card-footer",
+          "length": 139,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (9 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (139 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   8. ESTADOS VISUALES\r\n   ========================================== */\r\n\r\n/* Estado hover: elevación + shadow */\r\n.exchange-card:hover",
+          "length": 183,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (14 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (183 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   9. ANIMACIONES\r\n   ========================================== */\r\n\r\n/* Animación de entrada con stagger */\r\n.exchange-card:nth-child(1)",
+          "length": 185,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (13 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (185 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        }
+      ],
+      "topSuggestions": [
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (331 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (155 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (139 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (183 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (185 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        }
+      ]
+    },
+    {
+      "filePath": "src/ui-components/loading-states.css",
+      "totalSelectors": 57,
+      "highSpecificityCount": 0,
+      "longSelectorsCount": 6,
+      "highSpecificity": [],
+      "longSelectors": [
+        {
+          "selector": "/* ==========================================\r\n   ARBITRAGEAR - LOADING STATES v7.0\r\n   Estados de Carga Premium\r\n   ========================================== */\r\n\r\n/* ==========================================\r\n   1. SKELETON SCREENS\r\n   ========================================== */\r\n\r\n.skeleton-container",
+          "length": 308,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (20 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (308 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   2. SPINNER PREMIUM\r\n   ========================================== */\r\n\r\n.spinner-premium",
+          "length": 138,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (7 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (138 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   3. PROGRESS LOADING\r\n   ========================================== */\r\n\r\n.progress-loading",
+          "length": 140,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (7 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (140 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   4. EMPTY STATES\r\n   ========================================== */\r\n\r\n.empty-state",
+          "length": 131,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (7 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (131 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   5. ERROR STATES\r\n   ========================================== */\r\n\r\n.error-state",
+          "length": 131,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (7 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (131 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   7. LOADING OVERLAY\r\n   ========================================== */\r\n\r\n.loading-overlay",
+          "length": 138,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (7 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (138 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        }
+      ],
+      "topSuggestions": [
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (308 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (138 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (140 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (131 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (131 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        }
+      ]
+    },
+    {
+      "filePath": "src/ui-components/tabs.css",
+      "totalSelectors": 37,
+      "highSpecificityCount": 0,
+      "longSelectorsCount": 6,
+      "highSpecificity": [],
+      "longSelectors": [
+        {
+          "selector": "/* ==========================================\r\n   ARBITRAGEAR - TABS SYSTEM v7.0\r\n   Sistema de Tabs Premium con Indicador Deslizante\r\n   ========================================== */\r\n\r\n/* ==========================================\r\n   1. CONTENEDOR DE TABS\r\n   ========================================== */\r\n\r\n.tabs-nav",
+          "length": 321,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (24 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (321 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   2. INDICADOR DESLIZANTE\r\n   ========================================== */\r\n\r\n.tab-indicator",
+          "length": 141,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (7 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (141 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   3. TAB ITEMS\r\n   ========================================== */\r\n\r\n.tab-item",
+          "length": 125,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (7 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (125 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   4. ESTADOS DEL TAB\r\n   ========================================== */\r\n\r\n/* Hover: background sutil */\r\n.tab-item:hover",
+          "length": 168,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (13 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (168 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   5. CONTENIDO DE LOS TABS\r\n   ========================================== */\r\n\r\n.tabs-content",
+          "length": 141,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (9 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (141 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   6. ANIMACIONES\r\n   ========================================== */\r\n\r\n/* Badge: bounce al actualizar */\r\n.tab-badge.updating",
+          "length": 172,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (12 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (172 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        }
+      ],
+      "topSuggestions": [
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (321 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (141 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (125 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (168 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (141 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        }
+      ]
+    },
+    {
+      "filePath": "src/ui-components/arbitrage-panel.css",
+      "totalSelectors": 58,
+      "highSpecificityCount": 0,
+      "longSelectorsCount": 8,
+      "highSpecificity": [],
+      "longSelectors": [
+        {
+          "selector": "/* ==========================================\r\n   ARBITRAGEAR - ARBITRAGE PANEL v7.0\r\n   Panel de Oportunidades de Arbitraje Premium\r\n   ========================================== */\r\n\r\n/* ==========================================\r\n   1. ESTRUCTURA DEL PANEL\r\n   ========================================== */\r\n\r\n.arbitrage-panel",
+          "length": 329,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (23 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (329 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   2. HEADER DEL PANEL\r\n   ========================================== */\r\n\r\n.panel-header",
+          "length": 136,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (8 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (136 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   3. INDICADOR CIRCULAR DE RENTABILIDAD (SVG RING)\r\n   ========================================== */\r\n\r\n.profit-indicator",
+          "length": 169,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (11 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (169 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   4. DETALLES DEL ARBITRAJE\r\n   ========================================== */\r\n\r\n.arbitrage-details",
+          "length": 147,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (8 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (147 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   5. CUERPO DEL PANEL\r\n   ========================================== */\r\n\r\n.panel-body",
+          "length": 134,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (8 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (134 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   6. ACCIONES DEL PANEL\r\n   ========================================== */\r\n\r\n.panel-actions",
+          "length": 139,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (8 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (139 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   7. DETALLES EXPANDIBLES\r\n   ========================================== */\r\n\r\n.panel-details-expandable",
+          "length": 152,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (7 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (152 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        },
+        {
+          "selector": "/* ==========================================\r\n   9. CONTENEDOR DE PANELES\r\n   ========================================== */\r\n\r\n.arbitrage-panels-container",
+          "length": 155,
+          "suggestions": [
+            {
+              "type": "reduce_descendants",
+              "description": "Reducir profundidad de descendientes (8 niveles)",
+              "suggestion": "Aplanar la estructura HTML o usar clases más específicas",
+              "priority": "medium"
+            },
+            {
+              "type": "shorten_selector",
+              "description": "Acortar selector (155 caracteres)",
+              "suggestion": "Crear una clase específica para este elemento",
+              "priority": "high"
+            }
+          ]
+        }
+      ],
+      "topSuggestions": [
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (329 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (136 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (169 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (147 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        },
+        {
+          "type": "shorten_selector",
+          "description": "Acortar selector (134 caracteres)",
+          "suggestion": "Crear una clase específica para este elemento",
+          "priority": "high"
+        }
+      ]
+    }
+  ]
+}

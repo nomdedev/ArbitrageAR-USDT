@@ -4,28 +4,332 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>arbitrarARS</title>
+    <!-- UI Components CSS - Design System -->
+    <link rel="stylesheet" href="ui-components/design-system.css" />
+    <!-- Skip Link Styles -->
+    <style>
+      .skip-link {
+        position: absolute;
+        top: -40px;
+        left: 0;
+        background: var(--color-brand-primary, #3b82f6);
+        color: white;
+        padding: 8px 16px;
+        z-index: 10000;
+        text-decoration: none;
+        font-weight: 500;
+        transition: top 0.3s ease;
+      }
+      .skip-link:focus {
+        top: 0;
+      }
+    </style>
+    <link rel="stylesheet" href="ui-components/animations.css" />
+    <link rel="stylesheet" href="ui-components/header.css" />
+    <link rel="stylesheet" href="ui-components/exchange-card.css" />
+    <link rel="stylesheet" href="ui-components/arbitrage-panel.css" />
+    <link rel="stylesheet" href="ui-components/tabs.css" />
+    <link rel="stylesheet" href="ui-components/loading-states.css" />
+    <!-- Main popup CSS -->
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
+    <!-- Skip Link para Accesibilidad -->
+    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+    
+    <!-- Icon Sprite Sheet -->
+    <svg style="display: none;">
+      <!-- ==========================================
+           ICONOS DE NAVEGACIÓN
+           ========================================== -->
+      
+      <!-- Logo/Brand - Bolsa de dinero / Trading -->
+      <symbol id="icon-logo" viewBox="0 0 24 24">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </symbol>
+      
+      <!-- Refresh - Flechas circulares -->
+      <symbol id="icon-refresh" viewBox="0 0 24 24">
+        <path d="M21 2v6h-6"/>
+        <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
+        <path d="M3 22v-6h6"/>
+        <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+      </symbol>
+      
+      <!-- Settings - Engranaje -->
+      <symbol id="icon-settings" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </symbol>
+      
+      <!-- Close - X -->
+      <symbol id="icon-close" viewBox="0 0 24 24">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </symbol>
+
+      <!-- ==========================================
+           ICONOS DE OPERACIONES
+           ========================================== -->
+      
+      <!-- Arbitraje Fiat - Rayo/Flecha circular -->
+      <symbol id="icon-arbitrage" viewBox="0 0 24 24">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      </symbol>
+      
+      <!-- Crypto Arbitraje - Moneda con símbolo -->
+      <symbol id="icon-crypto" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 6v12M8 10h6a2 2 0 0 1 0 4h-2M10 14h4a2 2 0 0 1 0 4H8"/>
+      </symbol>
+      
+      <!-- P2P - Dos personas/Handshake -->
+      <symbol id="icon-p2p" viewBox="0 0 24 24">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+      </symbol>
+      
+      <!-- Simulador - Gráfico de barras/Calculadora -->
+      <symbol id="icon-simulator" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+        <line x1="3" y1="9" x2="21" y2="9"/>
+        <line x1="9" y1="21" x2="9" y2="9"/>
+      </symbol>
+      
+      <!-- Exchanges - Edificio banco -->
+      <symbol id="icon-exchange" viewBox="0 0 24 24">
+        <rect x="4" y="2" width="16" height="20" rx="2" ry="2"/>
+        <path d="M9 22v-4h6v4"/>
+        <path d="M8 6h.01M8 10h.01M8 14h.01M16 6h.01M16 10h.01M16 14h.01"/>
+      </symbol>
+      
+      <!-- Guía - Lista/Documentos -->
+      <symbol id="icon-guide" viewBox="0 0 24 24">
+        <line x1="8" y1="6" x2="21" y2="6"/>
+        <line x1="8" y1="12" x2="21" y2="12"/>
+        <line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/>
+        <line x1="3" y1="12" x2="3.01" y2="12"/>
+        <line x1="3" y1="18" x2="3.01" y2="18"/>
+      </symbol>
+
+      <!-- ==========================================
+           ICONOS DE INFORMACIÓN
+           ========================================== -->
+      
+      <!-- Info - Círculo con i -->
+      <symbol id="icon-info" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="16" x2="12" y2="12"/>
+        <line x1="12" y1="8" x2="12.01" y2="8"/>
+      </symbol>
+      
+      <!-- Warning - Triángulo -->
+      <symbol id="icon-warning" viewBox="0 0 24 24">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </symbol>
+      
+      <!-- Success - Check -->
+      <symbol id="icon-success" viewBox="0 0 24 24">
+        <polyline points="20 6 9 17 4 12"/>
+      </symbol>
+      
+      <!-- Error - X en círculo -->
+      <symbol id="icon-error" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="15" y1="9" x2="9" y2="15"/>
+        <line x1="9" y1="9" x2="15" y2="15"/>
+      </symbol>
+      
+      <!-- Question - Signo ? -->
+      <symbol id="icon-question" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </symbol>
+      
+      <!-- Sparkle/Star - Para actualizaciones -->
+      <symbol id="icon-sparkle" viewBox="0 0 24 24">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </symbol>
+
+      <!-- ==========================================
+           ICONOS DE FILTROS
+           ========================================== -->
+      
+      <!-- Filter - Embudo -->
+      <symbol id="icon-filter" viewBox="0 0 24 24">
+        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+      </symbol>
+      
+      <!-- Bolt/Flash - Para filtros rápidos -->
+      <symbol id="icon-bolt" viewBox="0 0 24 24">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      </symbol>
+      
+      <!-- Target - Para "todos" -->
+      <symbol id="icon-target" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <circle cx="12" cy="12" r="6"/>
+        <circle cx="12" cy="12" r="2"/>
+      </symbol>
+      
+      <!-- Reset - Flecha circular -->
+      <symbol id="icon-reset" viewBox="0 0 24 24">
+        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+        <path d="M21 3v5h-5"/>
+        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+        <path d="M8 16H3v5"/>
+      </symbol>
+
+      <!-- ==========================================
+           ICONOS DE INFORMACIÓN FINANCIERA
+           ========================================== -->
+      
+      <!-- Dollar/Currency - Moneda -->
+      <symbol id="icon-dollar" viewBox="0 0 24 24">
+        <line x1="12" y1="1" x2="12" y2="23"/>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </symbol>
+      
+      <!-- Coins/Money - Variante con múltiples monedas -->
+      <symbol id="icon-coins" viewBox="0 0 24 24">
+        <circle cx="8" cy="8" r="6"/>
+        <path d="M18.09 10.37A6 6 0 1 1 10.34 18"/>
+        <path d="M7 6h1v4M7 10h1M16.5 13h1v4M16.5 17h1"/>
+      </symbol>
+      
+      <!-- Percent - Porcentaje -->
+      <symbol id="icon-percent" viewBox="0 0 24 24">
+        <line x1="19" y1="5" x2="5" y2="19"/>
+        <circle cx="6.5" cy="6.5" r="2.5"/>
+        <circle cx="17.5" cy="17.5" r="2.5"/>
+      </symbol>
+      
+      <!-- Clock - Tiempo -->
+      <symbol id="icon-clock" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </symbol>
+      
+      <!-- Chart - Gráfico de barras -->
+      <symbol id="icon-chart" viewBox="0 0 24 24">
+        <line x1="18" y1="20" x2="18" y2="10"/>
+        <line x1="12" y1="20" x2="12" y2="4"/>
+        <line x1="6" y1="20" x2="6" y2="14"/>
+      </symbol>
+      
+      <!-- Trend Chart - Gráfico de líneas -->
+      <symbol id="icon-trend" viewBox="0 0 24 24">
+        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+        <polyline points="17 6 23 6 23 12"/>
+      </symbol>
+
+      <!-- ==========================================
+           ICONOS DE CRIPTOMONEDAS
+           ========================================== -->
+      
+      <!-- USDT - Tether T -->
+      <symbol id="icon-usdt" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 7v10M8 10h8M8 14h8"/>
+      </symbol>
+      
+      <!-- BTC - Bitcoin B -->
+      <symbol id="icon-btc" viewBox="0 0 24 24">
+        <path d="M11.767 19.089c4.924.868 6.14-6.025 1.216-6.894m-1.216 6.894L5.86 18.047m5.908 1.042-.347 1.97m1.563-8.864c4.924.869 6.14-6.025 1.215-6.893m-1.215 6.893-3.94-.694m5.155-6.893c4.924.869 6.14-6.025 1.215-6.893m-1.215 6.893L6.598 4.5m5.908 1.042-.347 1.97"/>
+      </symbol>
+      
+      <!-- ETH - Ethereum -->
+      <symbol id="icon-eth" viewBox="0 0 24 24">
+        <polygon points="12 2 2 12 12 22 22 12 12 2"/>
+        <polygon points="12 12 2 12 12 22 22 12 12 12"/>
+      </symbol>
+      
+      <!-- USDC - USD Coin -->
+      <symbol id="icon-usdc" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <circle cx="12" cy="12" r="6"/>
+        <path d="M12 8v8M9 11h6M9 13h6"/>
+      </symbol>
+      
+      <!-- DAI - Diamante -->
+      <symbol id="icon-dai" viewBox="0 0 24 24">
+        <path d="M6 3h12l4 6-10 13L2 9l4-6z"/>
+        <path d="M12 22V9"/>
+      </symbol>
+
+      <!-- ==========================================
+           FLECHAS Y NAVEGACIÓN
+           ========================================== -->
+      
+      <!-- Arrow Right -->
+      <symbol id="icon-arrow-right" viewBox="0 0 24 24">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </symbol>
+      
+      <!-- Arrow Left -->
+      <symbol id="icon-arrow-left" viewBox="0 0 24 24">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/>
+      </symbol>
+      
+      <!-- Arrow Up -->
+      <symbol id="icon-arrow-up" viewBox="0 0 24 24">
+        <line x1="12" y1="19" x2="12" y2="5"/>
+        <polyline points="5 12 12 5 19 12"/>
+      </symbol>
+      
+      <!-- Arrow Down -->
+      <symbol id="icon-arrow-down" viewBox="0 0 24 24">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <polyline points="19 12 12 19 5 12"/>
+      </symbol>
+      
+      <!-- Chevron Right -->
+      <symbol id="icon-chevron-right" viewBox="0 0 24 24">
+        <polyline points="9 18 15 12 9 6"/>
+      </symbol>
+      
+      <!-- Chevron Down -->
+      <symbol id="icon-chevron-down" viewBox="0 0 24 24">
+        <polyline points="6 9 12 15 18 9"/>
+      </symbol>
+    </svg>
+    
     <div class="container">
-      <header>
+      <header class="fade-in">
         <div class="header-content">
-          <h1>
-            <span class="logo-icon">💰</span>
+          <h1 class="heading-2">
+            <span class="logo-icon icon icon-xl">
+              <svg><use href="#icon-logo"></use></svg>
+            </span>
             arbitrarARS
           </h1>
-          <p class="subtitle">Dólar Oficial → USDT</p>
+          <p class="subtitle body-small text-secondary">Dólar Oficial → USDT</p>
           <div id="dataStatus" class="data-status"></div>
         </div>
         <div class="header-buttons">
-          <span id="version-indicator" class="version-indicator" title="Versión instalada">
+          <span id="version-indicator" class="version-indicator" data-tooltip="Versión instalada&#10;Número de versión actual de la extensión">
             v5.0.80
           </span>
-          <button id="settings" class="btn-settings" title="Configurar notificaciones">
-            <span>⚙️</span>
+          <button id="settings" class="btn-settings"
+                  data-tooltip="Configuración&#10;Ajusta notificaciones y preferencias"
+                  aria-label="Abrir configuración">
+            <span class="icon icon-sm icon-white">
+              <svg><use href="#icon-settings"></use></svg>
+            </span>
           </button>
-          <button id="refresh" class="btn-refresh" title="Actualizar datos">
-            <span class="refresh-icon">⟳</span>
+          <button id="refresh" class="btn-refresh"
+                  data-tooltip="Actualizar datos&#10;Recarga las cotizaciones y rutas"
+                  aria-label="Actualizar datos">
+            <span class="icon icon-sm icon-white">
+              <svg><use href="#icon-refresh"></use></svg>
+            </span>
           </button>
         </div>
       </header>
@@ -35,15 +339,17 @@
         <span class="update-type-badge" id="update-type">MAJOR</span>
         
         <div class="update-content">
-          <span class="update-icon">✨</span>
+          <span class="update-icon icon icon-lg">
+            <svg><use href="#icon-sparkle"></use></svg>
+          </span>
           <div class="update-text">
-            <strong>Nueva actualización disponible</strong>
-            <p class="update-version-info">
-              <span class="current-version" id="current-version">v5.0.83</span>
+            <strong class="heading-4">Nueva actualización disponible</strong>
+            <p class="update-version-info body-small">
+              <span class="current-version text-mono" id="current-version">v5.0.83</span>
               <span class="version-arrow">→</span>
-              <span class="new-version" id="new-version">v6.0.0</span>
+              <span class="new-version text-mono" id="new-version">v6.0.0</span>
             </p>
-            <p id="update-message" class="update-commit-msg">
+            <p id="update-message" class="update-commit-msg body-xs text-secondary">
               Nueva versión con mejoras
             </p>
           </div>
@@ -55,7 +361,9 @@
           </button>
           <button id="dismiss-update" class="btn-dismiss-update"
                   aria-label="Cerrar notificación de actualización">
-            ✕
+            <span class="icon icon-sm">
+              <svg><use href="#icon-close"></use></svg>
+            </span>
           </button>
         </div>
       </div>
@@ -73,7 +381,9 @@
       <div id="dollar-info" class="dollar-info" style="display: none">
         <div class="dollar-info-content">
           <div class="dollar-price">
-            <span class="dollar-icon">💵</span>
+            <span class="dollar-icon icon icon-lg icon-warning">
+              <svg><use href="#icon-dollar"></use></svg>
+            </span>
             <div class="dollar-details">
               <span class="dollar-value" id="dollar-current-price">$950.00</span>
               <span class="dollar-source" id="dollar-source-text">Fuente: Manual</span>
@@ -83,14 +393,34 @@
       </div>
 
       <div class="tabs">
-        <button class="tab active" data-tab="routes">💵 Arbitraje Fiat</button>
-        <button class="tab" data-tab="crypto-arbitrage">🔄 Arbitraje Cripto</button>
-        <button class="tab" data-tab="simulator">🧮 Simulador</button>
-        <button class="tab" data-tab="banks">🏦 Exchanges</button>
-        <button class="tab" data-tab="guide" style="display: none">📋 Guía</button>
+        <button class="tab stagger-in hover-lift click-shrink magnetic-btn ripple-btn slide-up-reveal" style="animation-delay: 0ms" data-tab="routes"
+                data-tooltip="Arbitraje Fiat&#10;Oportunidades entre Dólar y USDT">
+          <span class="icon icon-sm"><svg><use href="#icon-dollar"></use></svg></span>
+          Arbitraje Fiat
+        </button>
+        <button class="tab stagger-in hover-lift click-shrink magnetic-btn ripple-btn slide-up-reveal" style="animation-delay: 50ms" data-tab="crypto-arbitrage"
+                data-tooltip="Arbitraje Cripto&#10;Oportunidades entre criptomonedas">
+          <span class="icon icon-sm"><svg><use href="#icon-crypto"></use></svg></span>
+          Arbitraje Cripto
+        </button>
+        <button class="tab stagger-in hover-lift click-shrink magnetic-btn ripple-btn slide-up-reveal" style="animation-delay: 100ms" data-tab="simulator"
+                data-tooltip="Simulador&#10;Calculadora de rentabilidad personalizada">
+          <span class="icon icon-sm"><svg><use href="#icon-simulator"></use></svg></span>
+          Simulador
+        </button>
+        <button class="tab stagger-in hover-lift click-shrink magnetic-btn ripple-btn slide-up-reveal" style="animation-delay: 150ms" data-tab="banks"
+                data-tooltip="Exchanges&#10;Cotizaciones de plataformas">
+          <span class="icon icon-sm"><svg><use href="#icon-exchange"></use></svg></span>
+          Exchanges
+        </button>
+        <button class="tab stagger-in hover-lift click-shrink magnetic-btn ripple-btn slide-up-reveal" style="animation-delay: 200ms; display: none" data-tab="guide"
+                data-tooltip="Guía&#10;Instrucciones paso a paso">
+          <span class="icon icon-sm"><svg><use href="#icon-guide"></use></svg></span>
+          Guía
+        </button>
       </div>
 
-      <main>
+      <main id="main-content">
         <!-- TAB: Guía Paso a Paso -->
         <section id="tab-guide" class="tab-content">
           <div id="selected-arbitrage-guide">
@@ -107,27 +437,36 @@
             <div class="filter-section">
               <div class="filter-buttons">
                 <button
-                  class="filter-btn active"
+                  class="filter-btn hover-lift click-shrink magnetic-btn ripple-btn icon-rotate"
                   data-filter="no-p2p"
-                  title="Mostrar solo rutas directas (sin P2P)"
+                  data-tooltip="Rutas Directas&#10;Sin intermediarios P2P&#10;Más rápidas y seguras"
+                  aria-label="Mostrar rutas directas"
                 >
-                  <span class="btn-icon">⚡</span>
+                  <span class="btn-icon icon icon-sm">
+                    <svg><use href="#icon-bolt"></use></svg>
+                  </span>
                   <span class="btn-count" id="count-no-p2p">0</span>
                 </button>
                 <button
-                  class="filter-btn"
+                  class="filter-btn hover-lift click-shrink magnetic-btn ripple-btn icon-rotate"
                   data-filter="p2p"
-                  title="Mostrar solo rutas P2P (persona a persona)"
+                  data-tooltip="Rutas P2P&#10;Con trading persona a persona&#10;Mayor rentabilidad potencial"
+                  aria-label="Mostrar rutas P2P"
                 >
-                  <span class="btn-icon">🤝</span>
+                  <span class="btn-icon icon icon-sm">
+                    <svg><use href="#icon-p2p"></use></svg>
+                  </span>
                   <span class="btn-count" id="count-p2p">0</span>
                 </button>
                 <button
-                  class="filter-btn"
+                  class="filter-btn hover-lift click-shrink magnetic-btn ripple-btn icon-rotate"
                   data-filter="all"
-                  title="Mostrar todas las rutas disponibles"
+                  data-tooltip="Todas las Rutas&#10;Muestra todas las oportunidades&#10;disponibles sin filtrar"
+                  aria-label="Mostrar todas las rutas"
                 >
-                  <span class="btn-icon">🎯</span>
+                  <span class="btn-icon icon icon-sm">
+                    <svg><use href="#icon-target"></use></svg>
+                  </span>
                   <span class="btn-count" id="count-all">0</span>
                 </button>
               </div>
@@ -148,7 +487,7 @@
           <!-- Selector de Criptomoneda -->
           <div class="crypto-selector">
             <label for="crypto-filter">Filtrar por cripto:</label>
-            <select id="crypto-filter" class="crypto-dropdown">
+            <select id="crypto-filter" class="crypto-dropdown focus-ring">
               <option value="all">Todas las criptos</option>
               <option value="BTC">Bitcoin (BTC)</option>
               <option value="ETH">Ethereum (ETH)</option>
@@ -168,21 +507,30 @@
           <div class="filter-controls">
             <div class="filter-buttons">
               <button
-                class="filter-btn-operation active"
+                class="filter-btn-operation hover-lift click-shrink magnetic-btn ripple-btn icon-rotate"
                 data-filter="all"
-                title="Mostrar todas las operaciones"
+                data-tooltip="Todas las Operaciones&#10;Muestra todos los tipos&#10;de arbitraje cripto"
+                aria-label="Mostrar todas las operaciones"
               >
-                <span>🎯 Todas</span>
+                <span class="icon icon-sm"><svg><use href="#icon-target"></use></svg></span>
+                <span>Todas</span>
               </button>
               <button
-                class="filter-btn-operation"
+                class="filter-btn-operation hover-lift click-shrink magnetic-btn ripple-btn icon-rotate"
                 data-filter="direct"
-                title="Solo operaciones directas (sin P2P)"
+                data-tooltip="Operaciones Directas&#10;Sin intermediarios P2P&#10;Entre exchanges"
+                aria-label="Mostrar operaciones directas"
               >
-                <span>⚡ Direct</span>
+                <span class="icon icon-sm"><svg><use href="#icon-bolt"></use></svg></span>
+                <span>Direct</span>
               </button>
-              <button class="filter-btn-operation" data-filter="p2p" title="Solo operaciones P2P">
-                <span>🤝 P2P</span>
+              <button
+                class="filter-btn-operation hover-lift click-shrink magnetic-btn ripple-btn icon-rotate"
+                data-filter="p2p"
+                data-tooltip="Operaciones P2P&#10;Trading persona a persona&#10;Mayor rentabilidad"
+                aria-label="Mostrar operaciones P2P">
+                <span class="icon icon-sm"><svg><use href="#icon-p2p"></use></svg></span>
+                <span>P2P</span>
               </button>
             </div>
           </div>
@@ -201,16 +549,16 @@
         <section id="tab-simulator" class="tab-content">
           <div class="simulator-container">
             <div class="simulator-header">
-              <h3>Calculadora de Arbitraje</h3>
-              <p>Configura los parámetros y analiza la matriz de rendimientos</p>
+              <h3 class="heading-3">Calculadora de Arbitraje</h3>
+              <p class="body text-secondary">Configura los parámetros y analiza la matriz de rendimientos</p>
             </div>
 
             <div class="simulator-input">
-              <label for="sim-amount">Monto de referencia (ARS):</label>
+              <label for="sim-amount" class="body-small text-emphasis">Monto de referencia (ARS):</label>
               <input
                 type="number"
                 id="sim-amount"
-                class="input-base"
+                class="input-base focus-ring"
                 value="1000000"
                 min="1000"
                 max="10000000"
@@ -220,21 +568,27 @@
 
             <!-- Configuración de Parámetros -->
             <div class="simulator-advanced-toggle">
-              <button id="toggle-advanced" class="btn-toggle-advanced">
-                ⚙️ Parámetros de Cálculo
+              <button id="toggle-advanced" class="btn-toggle-advanced"
+                      data-tooltip="Parámetros de Cálculo&#10;Configura precios, fees y&#10;comisiones personalizadas"
+                      aria-label="Expandir configuración avanzada">
+                <span class="icon icon-sm"><svg><use href="#icon-settings"></use></svg></span>
+                Parámetros de Cálculo
               </button>
             </div>
 
             <div id="advanced-config" class="advanced-config" style="display: none">
-              <div class="config-section">
-                <h4>💵 Precios del Dólar</h4>
+              <div class="config-section fade-in">
+                <h4 class="heading-4">
+                  <span class="icon icon-sm"><svg><use href="#icon-dollar"></use></svg></span>
+                  Precios del Dólar
+                </h4>
                 <div class="config-row">
                   <div class="config-input">
                     <label for="sim-usd-buy-price">Precio compra USD (ARS):</label>
                     <input
                       type="number"
                       id="sim-usd-buy-price"
-                      class="input-base"
+                      class="input-base focus-ring"
                       step="0.01"
                       placeholder="950.00"
                     />
@@ -244,7 +598,7 @@
                     <input
                       type="number"
                       id="sim-usd-sell-price"
-                      class="input-base"
+                      class="input-base focus-ring"
                       step="0.01"
                       placeholder="970.00"
                     />
@@ -252,15 +606,18 @@
                 </div>
               </div>
 
-              <div class="config-section">
-                <h4>💰 Fees y Comisiones</h4>
+              <div class="config-section fade-in" style="animation-delay: 100ms">
+                <h4 class="heading-4">
+                  <span class="icon icon-sm"><svg><use href="#icon-coins"></use></svg></span>
+                  Fees y Comisiones
+                </h4>
                 <div class="config-row">
                   <div class="config-input">
                     <label for="sim-buy-fee">Fee compra USDT (%):</label>
                     <input
                       type="number"
                       id="sim-buy-fee"
-                      class="input-base"
+                      class="input-base focus-ring"
                       step="0.01"
                       value="1.0"
                       min="0"
@@ -272,7 +629,7 @@
                     <input
                       type="number"
                       id="sim-sell-fee"
-                      class="input-base"
+                      class="input-base focus-ring"
                       step="0.01"
                       value="1.0"
                       min="0"
@@ -286,7 +643,7 @@
                     <input
                       type="number"
                       id="sim-transfer-fee-usd"
-                      class="input-base"
+                      class="input-base focus-ring"
                       step="0.01"
                       value="0"
                       min="0"
@@ -297,7 +654,7 @@
                     <input
                       type="number"
                       id="sim-bank-commission"
-                      class="input-base"
+                      class="input-base focus-ring"
                       step="0.01"
                       value="0"
                       min="0"
@@ -307,14 +664,18 @@
                 </div>
               </div>
 
-              <div class="config-section">
-                <h4>📊 Matriz de Rendimientos</h4>
+              <div class="config-section fade-in" style="animation-delay: 200ms">
+                <h4 class="heading-4">
+                  <span class="icon icon-sm"><svg><use href="#icon-chart"></use></svg></span>
+                  Matriz de Rendimientos
+                </h4>
                 <div class="config-row">
                   <div class="config-input">
                     <label for="matrix-min-percent">Rendimiento mínimo (%):</label>
                     <input
                       type="number"
                       id="matrix-min-percent"
+                      class="focus-ring"
                       step="0.1"
                       value="0"
                       min="-5"
@@ -326,6 +687,7 @@
                     <input
                       type="number"
                       id="matrix-max-percent"
+                      class="focus-ring"
                       step="0.1"
                       value="2"
                       min="-5"
@@ -337,6 +699,7 @@
                     <input
                       type="number"
                       id="matrix-step-percent"
+                      class="focus-ring"
                       step="0.1"
                       value="0.5"
                       min="0.1"
@@ -347,17 +710,28 @@
               </div>
 
               <div class="config-actions">
-                <button id="btn-calculate-matrix" class="btn-calculate-matrix">
-                  📊 Calcular Matriz
+                <button id="btn-calculate-matrix" class="btn-calculate-matrix hover-lift click-shrink"
+                        data-tooltip="Calcular Matriz&#10;Genera tabla de&#10;rendimientos"
+                        aria-label="Calcular matriz de rendimientos">
+                  <span class="icon icon-sm"><svg><use href="#icon-chart"></use></svg></span>
+                  Calcular Matriz
                 </button>
-                <button id="btn-reset-config" class="btn-reset-config">🔄 Reset</button>
+                <button id="btn-reset-config" class="btn-reset-config hover-lift click-shrink"
+                        data-tooltip="Resetear&#10;Restaura valores&#10;por defecto"
+                        aria-label="Resetear configuración">
+                  <span class="icon icon-sm"><svg><use href="#icon-reset"></use></svg></span>
+                  Reset
+                </button>
               </div>
             </div>
 
             <!-- Sección: Matriz de Riesgo/Rendimiento -->
             <div class="risk-matrix-section">
-              <h3>📊 Matriz de Análisis de Rentabilidad</h3>
-              <p>Visualiza la ganancia según diferentes escenarios de precios USD/USDT</p>
+              <h3 class="heading-3">
+                <span class="icon icon-lg"><svg><use href="#icon-chart"></use></svg></span>
+                Matriz de Análisis de Rentabilidad
+              </h3>
+              <p class="body text-secondary">Visualiza la ganancia según diferentes escenarios de precios USD/USDT</p>
 
               <div class="matrix-controls">
                 <div class="matrix-control-item">
@@ -365,6 +739,7 @@
                   <input
                     type="number"
                     id="matrix-usd-min"
+                    class="focus-ring"
                     step="10"
                     value="1400"
                     min="800"
@@ -377,6 +752,7 @@
                   <input
                     type="number"
                     id="matrix-usd-max"
+                    class="focus-ring"
                     step="10"
                     value="2100"
                     min="800"
@@ -389,6 +765,7 @@
                   <input
                     type="number"
                     id="matrix-usdt-min"
+                    class="focus-ring"
                     step="10"
                     value="1000"
                     min="900"
@@ -401,6 +778,7 @@
                   <input
                     type="number"
                     id="matrix-usdt-max"
+                    class="focus-ring"
                     step="10"
                     value="1100"
                     min="900"
@@ -408,21 +786,27 @@
                     placeholder="Auto"
                   />
                 </div>
-                <button id="generate-risk-matrix" class="matrix-generate-btn">
-                  � Regenerar con Parámetros
+                <button id="generate-risk-matrix" class="matrix-generate-btn hover-lift click-shrink"
+                        data-tooltip="Regenerar Matriz&#10;Actualiza la tabla con&#10;los nuevos parámetros"
+                        aria-label="Regenerar matriz de riesgo">
+                  ⚡ Regenerar con Parámetros
                 </button>
               </div>
 
               <div id="risk-matrix-result" style="display: none">
                 <!-- Filtros visuales -->
                 <div class="matrix-filters">
-                  <h4>🎯 Filtros de Rentabilidad</h4>
+                  <h4 class="heading-4">
+                    <span class="icon icon-sm"><svg><use href="#icon-target"></use></svg></span>
+                    Filtros de Rentabilidad
+                  </h4>
                   <div class="filter-controls-matrix">
                     <div class="filter-item">
                       <label for="filter-min-profit">Ganancia mínima (%):</label>
                       <input
                         type="number"
                         id="filter-min-profit"
+                        class="focus-ring"
                         step="0.5"
                         value="-5"
                         min="-10"
@@ -434,16 +818,21 @@
                       <input
                         type="number"
                         id="filter-max-profit"
+                        class="focus-ring"
                         step="0.5"
                         value="10"
                         min="-10"
                         max="20"
                       />
                     </div>
-                    <button id="apply-matrix-filter" class="btn-apply-filter">
+                    <button id="apply-matrix-filter" class="btn-apply-filter hover-lift click-shrink"
+                            data-tooltip="Aplicar Filtro&#10;Filtra por rango de&#10;ganancia seleccionado"
+                            aria-label="Aplicar filtro de matriz">
                       Aplicar Filtro
                     </button>
-                    <button id="reset-matrix-filter" class="btn-reset-filter">Resetear</button>
+                    <button id="reset-matrix-filter" class="btn-reset-filter hover-lift click-shrink"
+                            data-tooltip="Resetear Filtro&#10;Elimina los filtros&#10;aplicados"
+                            aria-label="Resetear filtro de matriz">Resetear</button>
                   </div>
                   <div class="filter-results" id="filter-results" style="display: none">
                     <span id="filter-count">0</span>
@@ -460,15 +849,15 @@
                 <div class="matrix-legend">
                   <div class="legend-item">
                     <div class="legend-color positive"></div>
-                    <span class="legend-label">Rentable (> 1%)</span>
+                    <span class="legend-label body-small">Rentable (> 1%)</span>
                   </div>
                   <div class="legend-item">
                     <div class="legend-color neutral"></div>
-                    <span class="legend-label">Marginal (0% - 1%)</span>
+                    <span class="legend-label body-small">Marginal (0% - 1%)</span>
                   </div>
                   <div class="legend-item">
                     <div class="legend-color negative"></div>
-                    <span class="legend-label">Pérdida (< 0%)</span>
+                    <span class="legend-label body-small">Pérdida (< 0%)</span>
                   </div>
                 </div>
               </div>
@@ -489,9 +878,14 @@
         </section>
       </main>
 
-      <footer>
-        <div id="last-update" class="timestamp"></div>
-        <div class="footer-note">⚠️ Los precios son referenciales. Verificar antes de operar.</div>
+      <footer class="fade-in">
+        <div id="last-update" class="timestamp data-status"></div>
+        <div class="footer-note body-small text-muted">
+          <span class="icon icon-sm icon-warning">
+            <svg><use href="#icon-warning"></use></svg>
+          </span>
+          Los precios son referenciales. Verificar antes de operar.
+        </div>
       </footer>
 
       <!-- MODAL DE DETALLES DE RUTA - Accesibilidad mejorada v6.0.0 -->
@@ -504,16 +898,18 @@
         aria-labelledby="modal-title"
         aria-describedby="modal-body"
       >
-        <div class="modal-content" role="document">
+        <div class="modal-content scale-in" role="document">
           <div class="modal-header">
             <h3 id="modal-title">Detalles de la Ruta</h3>
             <button
               id="modal-close"
               class="modal-close-btn"
-              title="Cerrar (Esc)"
+              data-tooltip="Cerrar modal (Esc)&#10;Cierra la ventana de detalles"
               aria-label="Cerrar modal"
             >
-              ✕
+              <span class="icon icon-sm">
+                <svg><use href="#icon-close"></use></svg>
+              </span>
             </button>
           </div>
           <div id="modal-body" class="modal-body">
@@ -522,14 +918,26 @@
         </div>
       </div>
     </div>
+    <!-- UI Components JS - Design System -->
+    <script src="ui-components/animations.js"></script>
+    <script src="ui-components/tabs.js"></script>
+    <script src="ui-components/arbitrage-panel.js"></script>
     <!-- Módulos Utils (cargados antes de popup.js) -->
     <script src="utils/stateManager.js"></script>
     <script src="utils/formatters.js"></script>
     <script src="utils/logger.js"></script>
     <script src="ui/routeRenderer.js"></script>
+    <script src="ui/tooltipSystem.js"></script>
     <script src="utils.js"></script>
     <script src="renderHelpers.js"></script>
     <script src="ValidationService.js"></script>
+    <!-- Módulos Refactorizados (FASE 2) -->
+    <script src="utils/commonUtils.js"></script>
+    <script src="modules/simulator.js"></script>
+    <script src="modules/routeManager.js"></script>
+    <script src="modules/filterManager.js"></script>
+    <script src="modules/modalManager.js"></script>
+    <script src="modules/notificationManager.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

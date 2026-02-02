@@ -1,0 +1,92 @@
+{
+  "timestamp": "2026-02-02T11:37:33.551Z",
+  "summary": {
+    "totalFiles": 8,
+    "totalOriginalSize": 145261,
+    "totalMinifiedSize": 88728,
+    "totalReduction": 56533,
+    "totalReductionPercent": "38.92"
+  },
+  "files": [
+    {
+      "filePath": "src/popup.css",
+      "outputPath": "dist\\css\\popup.css",
+      "stats": {
+        "originalSize": 85789,
+        "minifiedSize": 57277,
+        "reduction": 28512,
+        "reductionPercent": "33.24"
+      }
+    },
+    {
+      "filePath": "src/ui-components/design-system.css",
+      "outputPath": "dist\\css\\design-system.css",
+      "stats": {
+        "originalSize": 10792,
+        "minifiedSize": 7342,
+        "reduction": 3450,
+        "reductionPercent": "31.97"
+      }
+    },
+    {
+      "filePath": "src/ui-components/animations.css",
+      "outputPath": "dist\\css\\animations.css",
+      "stats": {
+        "originalSize": 6066,
+        "minifiedSize": 2697,
+        "reduction": 3369,
+        "reductionPercent": "55.54"
+      }
+    },
+    {
+      "filePath": "src/ui-components/header.css",
+      "outputPath": "dist\\css\\header.css",
+      "stats": {
+        "originalSize": 7806,
+        "minifiedSize": 3605,
+        "reduction": 4201,
+        "reductionPercent": "53.82"
+      }
+    },
+    {
+      "filePath": "src/ui-components/exchange-card.css",
+      "outputPath": "dist\\css\\exchange-card.css",
+      "stats": {
+        "originalSize": 8171,
+        "minifiedSize": 3855,
+        "reduction": 4316,
+        "reductionPercent": "52.82"
+      }
+    },
+    {
+      "filePath": "src/ui-components/loading-states.css",
+      "outputPath": "dist\\css\\loading-states.css",
+      "stats": {
+        "originalSize": 10309,
+        "minifiedSize": 5444,
+        "reduction": 4865,
+        "reductionPercent": "47.19"
+      }
+    },
+    {
+      "filePath": "src/ui-components/tabs.css",
+      "outputPath": "dist\\css\\tabs.css",
+      "stats": {
+        "originalSize": 6635,
+        "minifiedSize": 3068,
+        "reduction": 3567,
+        "reductionPercent": "53.76"
+      }
+    },
+    {
+      "filePath": "src/ui-components/arbitrage-panel.css",
+      "outputPath": "dist\\css\\arbitrage-panel.css",
+      "stats": {
+        "originalSize": 9693,
+        "minifiedSize": 5440,
+        "reduction": 4253,
+        "reductionPercent": "43.88"
+      }
+    }
+  ]
+}

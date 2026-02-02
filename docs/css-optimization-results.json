@@ -1,0 +1,51 @@
+{
+  "timestamp": "2026-02-02T11:13:09.505Z",
+  "summary": {
+    "totalRulesRemoved": 440,
+    "totalLinesRemoved": 3095,
+    "totalOriginalLines": 7888,
+    "totalReductionPercent": "39.2"
+  },
+  "files": [
+    {
+      "file": "popup.css",
+      "removed": 316,
+      "linesRemoved": 2480,
+      "originalLines": 6150,
+      "newLines": 3670,
+      "reductionPercent": "40.3"
+    },
+    {
+      "file": "design-system.css",
+      "removed": 74,
+      "linesRemoved": 240,
+      "originalLines": 562,
+      "newLines": 322,
+      "reductionPercent": "42.7"
+    },
+    {
+      "file": "animations.css",
+      "removed": 21,
+      "linesRemoved": 127,
+      "originalLines": 358,
+      "newLines": 231,
+      "reductionPercent": "35.5"
+    },
+    {
+      "file": "header.css",
+      "removed": 13,
+      "linesRemoved": 115,
+      "originalLines": 386,
+      "newLines": 271,
+      "reductionPercent": "29.8"
+    },
+    {
+      "file": "exchange-card.css",
+      "removed": 16,
+      "linesRemoved": 133,
+      "originalLines": 432,
+      "newLines": 299,
+      "reductionPercent": "30.8"
+    }
+  ]
+}

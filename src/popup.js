@@ -1,16 +1,25 @@
-// ==========================================
-// ARBITRAGE AR - POPUP PRINCIPAL v5.0.84
+﻿// ==========================================
+// ARBITRAGE AR - POPUP PRINCIPAL v6.0.0
 // ==========================================
 // Módulos utilizados (cargados en popup.html):
 // - window.StateManager (src/utils/stateManager.js)
 // - window.Formatters (src/utils/formatters.js)
 // - window.Logger (src/utils/logger.js)
 // - window.RouteRenderer (src/ui/routeRenderer.js)
+// - window.Simulator (src/modules/simulator.js)
+// - window.RouteManager (src/modules/routeManager.js)
+// - window.FilterManager (src/modules/filterManager.js)
+// - window.ModalManager (src/modules/modalManager.js)
+// - window.NotificationManager (src/modules/notificationManager.js)
+// - window.CommonUtils (src/utils/commonUtils.js)
 // ==========================================
-// REFACTORIZADO v5.0.84: Eliminado código duplicado
-// - formatNumber, formatUsdUsdtRatio, formatCommissionPercent, getDollarSourceDisplay
-//   ahora delegan completamente a módulo Formatters
-// - getProfitClasses, getExchangeIcon delegan a RouteRenderer
+// REFACTORIZADO v6.0.0: Integración de módulos especializados
+// - Simulator: Gestión del simulador y matriz de riesgo
+// - RouteManager: Gestión y visualización de rutas
+// - FilterManager: Gestión de filtros de rutas
+// - ModalManager: Gestión de modales y diálogos
+// - NotificationManager: Gestión de notificaciones y banners
+// - CommonUtils: Funciones utilitarias comunes
 // ==========================================
 
 // Verificar que los módulos estén cargados
@@ -23,11 +32,35 @@ if (typeof window.Formatters === 'undefined') {
 if (typeof window.Logger === 'undefined') {
   console.error('❌ Logger no está cargado');
 }
+if (typeof window.Simulator === 'undefined') {
+  console.error('❌ Simulator no está cargado');
+}
+if (typeof window.RouteManager === 'undefined') {
+  console.error('❌ RouteManager no está cargado');
+}
+if (typeof window.FilterManager === 'undefined') {
+  console.error('❌ FilterManager no está cargado');
+}
+if (typeof window.ModalManager === 'undefined') {
+  console.error('❌ ModalManager no está cargado');
+}
+if (typeof window.NotificationManager === 'undefined') {
+  console.error('❌ NotificationManager no está cargado');
+}
+if (typeof window.CommonUtils === 'undefined') {
+  console.error('❌ CommonUtils no está cargado');
+}
 
 // Aliases para compatibilidad con código legacy
 const State = window.StateManager;
 const Fmt = window.Formatters;
 const Log = window.Logger;
+const Sim = window.Simulator;
+const RteMgr = window.RouteManager;
+const FltMgr = window.FilterManager;
+const ModMgr = window.ModalManager;
+const NotifMgr = window.NotificationManager;
+const Utils = window.CommonUtils;
 
 // Estado global (legacy - sincronizado con StateManager)
 let currentData = null;
@@ -69,20 +102,223 @@ function log(...args) {
 }
 
 // Inicialización
-document.addEventListener('DOMContentLoaded', () => {
-  log('📄 DOM Content Loaded - Iniciando setup...');
-  setupTabNavigation();
-  setupRefreshButton();
-  setupFilterButtons(); // NUEVO: Configurar filtros P2P
-  setupAdvancedSimulator(); // NUEVO v5.0.31: Configurar simulador sin rutas
-  setupRouteDetailsModal(); // NUEVO: Configurar modal de detalles de ruta
-  checkForUpdatesOnPopupLoad(); // NUEVO: Verificar actualizaciones al cargar el popup
-  loadUserSettings(); // NUEVO v5.0.28: Cargar configuración del usuario
-  setupCryptoArbitrageTab(); // NUEVO: Configurar pestaña de arbitraje cripto
-  fetchAndDisplay();
-  setupStorageListener(); // NUEVO: Escuchar cambios en configuración
-  // loadBanksData(); // Ahora se carga solo cuando se activa la pestaña de bancos
+// REFACTORIZADO v6.0.0: Integración de módulos especializados
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('🚀 [INIT] DOM Content Loaded - Iniciando setup completo del popup...');
+  console.log('🔍 [INIT] document.readyState:', document.readyState);
+  
+  try {
+    // Verificar elementos críticos del DOM
+    const mainContent = document.getElementById('main-content');
+    const optimizedRoutes = document.getElementById('optimized-routes');
+    const loading = document.getElementById('loading');
+    
+    console.log(`🔍 [INIT] Elementos críticos del DOM:`);
+    console.log(`  - #main-content: ${!!mainContent}`);
+    console.log(`  - #optimized-routes: ${!!optimizedRoutes}`);
+    console.log(`  - #loading: ${!!loading}`);
+    
+    if (!mainContent || !optimizedRoutes || !loading) {
+      console.error('❌ [INIT] Faltan elementos críticos del DOM - el HTML puede estar corrupto');
+    }
+    
+    // Cargar configuración del usuario primero
+    console.log('🔧 [INIT] Cargando configuración del usuario...');
+    await loadUserSettings();
+    console.log('✅ [INIT] Configuración del usuario cargada');
+    
+    // NUEVO v6.0.0: Inicializar módulos especializados
+    console.log('🔧 [INIT] Inicializando módulos especializados...');
+    
+    // Inicializar Simulator con datos y configuración
+    Sim.init(currentData, userSettings);
+    console.log('✅ [INIT] Simulator inicializado');
+    
+    // Inicializar RouteManager (se actualizará cuando lleguen los datos)
+    RteMgr.init(currentData, userSettings);
+    console.log('✅ [INIT] RouteManager inicializado');
+    
+    // Inicializar FilterManager (se actualizará cuando lleguen las rutas)
+    FltMgr.init(userSettings, []);
+    console.log('✅ [INIT] FilterManager inicializado');
+    
+    // Inicializar ModalManager
+    ModMgr.init(userSettings);
+    console.log('✅ [INIT] ModalManager inicializado');
+    
+    // Inicializar NotificationManager
+    NotifMgr.init(userSettings);
+    console.log('✅ [INIT] NotificationManager inicializado');
+    
+    // Inicializar navegación de tabs
+    console.log('🔧 [INIT] Llamando setupTabNavigation()...');
+    setupTabNavigation();
+    console.log('✅ [INIT] setupTabNavigation() completado');
+    
+    // Inicializar botón de refresh
+    console.log('🔧 [INIT] Llamando setupRefreshButton()...');
+    setupRefreshButton();
+    console.log('✅ [INIT] setupRefreshButton() completado');
+    
+    // REEMPLAZO: Configurar botones de filtro usando FilterManager
+    console.log('🔧 [INIT] Configurando botones de filtro (FilterManager)...');
+    FltMgr.setupFilterButtons();
+    console.log('✅ [INIT] Botones de filtro configurados');
+    
+    // Configurar filtros avanzados usando FilterManager
+    console.log('🔧 [INIT] Configurando filtros avanzados (FilterManager)...');
+    FltMgr.setupAdvancedFilters();
+    console.log('✅ [INIT] Filtros avanzados configurados');
+    
+    // REEMPLAZO: Configurar simulador usando Simulator
+    console.log('🔧 [INIT] Configurando simulador (Simulator)...');
+    setupAdvancedSimulator();
+    console.log('✅ [INIT] Simulador configurado');
+    
+    // REEMPLAZO: ModalManager ya se inicializó arriba
+    console.log('✅ [INIT] Modal de detalles configurado por ModalManager');
+    
+    // REEMPLAZO: Verificar actualizaciones usando NotificationManager
+    console.log('🔧 [INIT] Verificando actualizaciones (NotificationManager)...');
+    NotifMgr.checkForUpdates();
+    console.log('✅ [INIT] Verificación de actualizaciones completada');
+    
+    // Configurar pestaña de arbitraje cripto
+    console.log('🔧 [INIT] Llamando setupCryptoArbitrageTab()...');
+    setupCryptoArbitrageTab();
+    console.log('✅ [INIT] setupCryptoArbitrageTab() completado');
+    
+    // Cargar y mostrar datos
+    console.log('🔧 [INIT] Llamando fetchAndDisplay()...');
+    fetchAndDisplay();
+    console.log('✅ [INIT] fetchAndDisplay() iniciado');
+    
+    // Configurar listener de cambios en storage
+    console.log('🔧 [INIT] Llamando setupStorageListener()...');
+    setupStorageListener();
+    console.log('✅ [INIT] setupStorageListener() completado');
+    
+    // NUEVO v6.0.0: Inicializar sistema de tooltips
+    if (typeof window.initTooltips === 'function') {
+      console.log('🔧 [INIT] Llamando window.initTooltips()...');
+      window.initTooltips();
+      console.log('✅ [INIT] Sistema de tooltips inicializado');
+    } else {
+      console.warn('⚠️ [INIT] initTooltips no está disponible - tooltipSystem.js no se cargó correctamente');
+    }
+    
+    // NUEVO FASE 8: Inicializar componentes UI del design system
+    console.log('🔧 [INIT] Llamando initUIComponents()...');
+    initUIComponents();
+    console.log('✅ [INIT] initUIComponents() completado');
+    
+    // NUEVO v6.0.1: Ejecutar diagnóstico de iconos SVG
+    console.log('🔧 [INIT] Llamando diagnoseSVGIcons()...');
+    diagnoseSVGIcons();
+    console.log('✅ [INIT] diagnoseSVGIcons() completado');
+    
+    console.log('🎉 [INIT] Setup completo del popup finalizado exitosamente');
+  } catch (error) {
+    console.error('❌ [INIT] Error crítico durante la inicialización del popup:', error);
+    console.error('❌ [INIT] Stack trace:', error.stack);
+    
+    // Mostrar error visual al usuario
+    const mainContent = document.getElementById('main-content');
+    if (mainContent) {
+      mainContent.innerHTML = `
+        <div class="critical-error" style="padding: 20px; text-align: center;">
+          <h2 style="color: #ef4444;">⚠️ Error al cargar la extensión</h2>
+          <p>La extensión no pudo inicializarse correctamente.</p>
+          <details style="margin-top: 10px; text-align: left;">
+            <summary>Detalles técnicos</summary>
+            <pre style="background: #1e293b; padding: 10px; border-radius: 4px; overflow: auto;">${error.message}\n${error.stack}</pre>
+          </details>
+          <button onclick="location.reload()" style="margin-top: 15px; padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            🔄 Reintentar
+          </button>
+        </div>
+      `;
+    }
+  }
 });
+
+/**
+ * NUEVO FASE 8: Inicializar componentes UI del design system
+ * CORREGIDO v6.0.1: Agregado manejo robusto de errores y logging extensivo
+ */
+function initUIComponents() {
+  console.log('🎨 [INIT UI] Inicializando componentes UI del design system...');
+  
+  try {
+    // Verificar que el DOM esté completamente cargado
+    if (document.readyState === 'loading') {
+      console.warn('⚠️ [INIT UI] DOM aún no está completamente cargado, reintentando...');
+      document.addEventListener('DOMContentLoaded', initUIComponents, { once: true });
+      return;
+    }
+    
+    // Verificar elementos críticos del DOM
+    const mainContent = document.getElementById('main-content');
+    if (!mainContent) {
+      console.error('❌ [INIT UI] Elemento crítico #main-content no encontrado');
+      return;
+    }
+    console.log('✅ [INIT UI] Elemento #main-content encontrado');
+    
+    // Inicializar ArbitragePanel si está disponible
+    if (typeof window.ArbitragePanel !== 'undefined') {
+      try {
+        const panels = document.querySelectorAll('.arbitrage-panel');
+        console.log(`🔍 [INIT UI] Encontrados ${panels.length} elementos .arbitrage-panel`);
+        panels.forEach((panel, index) => {
+          new window.ArbitragePanel(panel);
+          console.log(`✅ [INIT UI] ArbitragePanel inicializado para panel ${index + 1}`);
+        });
+      } catch (error) {
+        console.error('❌ [INIT UI] Error inicializando ArbitragePanel:', error);
+      }
+    } else {
+      console.warn('⚠️ [INIT UI] window.ArbitragePanel no está disponible - ui-components/arbitrage-panel.js no se cargó correctamente');
+    }
+    
+    // Inicializar TabSystem si está disponible
+    if (typeof window.TabSystem !== 'undefined') {
+      try {
+        const tabContainers = document.querySelectorAll('.tabs-nav');
+        console.log(`🔍 [INIT UI] Encontrados ${tabContainers.length} elementos .tabs-nav`);
+        tabContainers.forEach((container, index) => {
+          new window.TabSystem(container);
+          console.log(`✅ [INIT UI] TabSystem inicializado para contenedor ${index + 1}`);
+        });
+      } catch (error) {
+        console.error('❌ [INIT UI] Error inicializando TabSystem:', error);
+      }
+    } else {
+      console.warn('⚠️ [INIT UI] window.TabSystem no está disponible - ui-components/tabs.js no se cargó correctamente');
+    }
+    
+    // Inicializar AnimationUtils si está disponible
+    if (typeof window.AnimationUtils !== 'undefined') {
+      try {
+        // Aplicar animaciones de entrada a elementos con clase .animate-on-load
+        const animatedElements = document.querySelectorAll('.animate-on-load');
+        console.log(`🔍 [INIT UI] Encontrados ${animatedElements.length} elementos .animate-on-load`);
+        const container = document.querySelector('.stagger-container') || document.body;
+        window.AnimationUtils.stagger(container, 'fadeInUp', 100);
+        console.log('✅ [INIT UI] AnimationUtils inicializado');
+      } catch (error) {
+        console.error('❌ [INIT UI] Error inicializando AnimationUtils:', error);
+      }
+    } else {
+      console.warn('⚠️ [INIT UI] window.AnimationUtils no está disponible - ui-components/animations.js no se cargó correctamente');
+    }
+    
+    console.log('✅ [INIT UI] Componentes UI del design system inicializados correctamente');
+  } catch (error) {
+    console.error('❌ [INIT UI] Error crítico en inicialización de componentes UI:', error);
+    console.error('❌ [INIT UI] Stack trace:', error.stack);
+  }
+}
 
 /**
  * Configurar navegación de tabs principales
@@ -371,437 +607,102 @@ function displayMarketHealth(health) {
   `;
 }
 
-// NUEVO: Configurar botones de filtro P2P
+// REEMPLAZO v6.0.0: Configurar botones de filtro usando FilterManager
+// Esta función ahora delega a FilterManager.setupFilterButtons()
 function setupFilterButtons() {
-  const filterButtons = document.querySelectorAll('.filter-btn');
-
-  filterButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const filter = btn.dataset.filter;
-
-      // Actualizar estado activo
-      filterButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      // Aplicar filtro y sincronizar con StateManager
-      currentFilter = filter;
-      if (State) {
-        State.setFilter(filter);
-      }
-      applyP2PFilter();
-    });
-  });
-
-  // NUEVO: Marcar el filtro por defecto como activo visualmente
-  const defaultButton = document.querySelector(`[data-filter="${currentFilter}"]`);
-  if (defaultButton) {
-    defaultButton.classList.add('active');
-  }
+  // Delegar a FilterManager
+  return FltMgr.setupFilterButtons();
 }
 
-// CORREGIDO v5.0.7: Determinar si una ruta usa P2P basándose en datos del backend
+// REEMPLAZO v6.0.0: Verificar si una ruta usa P2P
+// Esta función ahora delega a RouteManager.isP2PRoute()
 function isP2PRoute(route) {
-  if (!route) return false;
-
-  const brokerName = route.broker?.toLowerCase() || '';
-  const buyName = route.buyExchange?.toLowerCase() || '';
-  const sellName = route.sellExchange?.toLowerCase() || '';
-
-  // Prioridad 1: Usar el campo requiresP2P calculado en backend
-  if (typeof route.requiresP2P === 'boolean') {
-    if (DEBUG_MODE) console.log(`🔍 ${route.broker}: requiresP2P=${route.requiresP2P} (backend)`);
-    return route.requiresP2P;
-  }
-
-  // Fallback 1: Verificar nombre del broker
-  if (brokerName.includes('p2p')) {
-    if (DEBUG_MODE) console.log(`🔍 ${route.broker}: P2P detectado por nombre del broker`);
-    return true;
-  }
-
-  // Fallback 2: Verificar nombres de exchanges
-  if (buyName.includes('p2p') || sellName.includes('p2p')) {
-    if (DEBUG_MODE) {
-      console.log(`🔍 ${route.broker}: P2P detectado por exchanges (${buyName}, ${sellName})`);
-    }
-    return true;
-  }
-
-  if (DEBUG_MODE) console.log(`🔍 ${route.broker}: Clasificado como NO-P2P`);
-  return false;
+  return RteMgr.isP2PRoute(route);
 }
 
-// CORREGIDO v5.0.12: Aplicar filtro P2P según selección del usuario
-// ACTUALIZADO v5.0.75: Ahora usa applyAllFilters para incluir filtros avanzados
+// REEMPLAZO v6.0.0: Aplicar filtro P2P según selección del usuario
+// Esta función ahora delega a FilterManager
 function applyP2PFilter() {
-  if (DEBUG_MODE) console.log('🔍 applyP2PFilter() llamado con filtro:', currentFilter);
-  if (DEBUG_MODE) console.log('🔍 allRoutes:', allRoutes?.length);
-
-  if (!allRoutes || allRoutes.length === 0) {
-    console.warn('⚠️ No hay rutas disponibles para filtrar');
-    return;
+  // Actualizar rutas en FilterManager
+  if (allRoutes && allRoutes.length > 0) {
+    FltMgr.updateRoutes(allRoutes);
   }
-
-  // NUEVO v5.0.75: Poblar exchanges y usar filtros avanzados
-  populateExchangeFilter();
-  applyAllFilters();
-  updateFilterCounts();
-  return;
-
-  // --- CÓDIGO ANTERIOR COMENTADO PARA REFERENCIA ---
-  /*
-
-  // Aplicar filtro P2P según selección
-  let filteredRoutes;
-  switch (currentFilter) {
-    case 'p2p':
-      filteredRoutes = allRoutes.filter(route => isP2PRoute(route));
-      if (DEBUG_MODE) console.log(`🔍 Filtro P2P: ${filteredRoutes.length} rutas P2P de ${allRoutes.length}`);
-      break;
-    case 'no-p2p':
-      filteredRoutes = allRoutes.filter(route => !isP2PRoute(route));
-      if (DEBUG_MODE) console.log(`🔍 Filtro No-P2P: ${filteredRoutes.length} rutas directas de ${allRoutes.length}`);
-      break;
-    case 'all':
-    default:
-      filteredRoutes = [...allRoutes];
-      if (DEBUG_MODE) console.log(`🔍 Filtro Todas: ${filteredRoutes.length} rutas totales`);
-      break;
+  
+  // Aplicar todos los filtros
+  const filteredRoutes = FltMgr.applyAllFilters();
+  
+  // Actualizar contadores
+  FltMgr.updateFilterCounts();
+  
+  // Mostrar rutas filtradas usando RouteManager
+  if (filteredRoutes && filteredRoutes.length > 0 && currentData) {
+    RteMgr.displayRoutes(filteredRoutes, 'optimized-routes');
+  } else if (filteredRoutes && filteredRoutes.length === 0) {
+    RteMgr.showEmptyState('optimized-routes', 'No se encontraron rutas que cumplan con tus criterios de filtrado.');
   }
-
-  // Aplicar filtros adicionales del usuario (negativas, max rutas, exchanges preferidos, etc.)
-  filteredRoutes = applyUserPreferences(filteredRoutes);
-  if (DEBUG_MODE) console.log('🔍 Después de applyUserPreferences:', filteredRoutes.length, 'rutas');
-
-  // Mostrar rutas filtradas
-  if (currentData) {
-    if (DEBUG_MODE) console.log('🔍 Llamando displayOptimizedRoutes con', filteredRoutes.length, 'rutas');
-    displayOptimizedRoutes(filteredRoutes, currentData.oficial);
-  } else {
-    console.warn('⚠️ currentData es null, no se puede mostrar rutas');
-  }
-
-  // Actualizar contadores en los botones
-  updateFilterCounts();
-  */
 }
 
-// NUEVO: Actualizar contadores de rutas en filtros
+// REEMPLAZO v6.0.0: Actualizar contadores de rutas en filtros
+// Esta función ahora delega a FilterManager.updateFilterCounts()
 function updateFilterCounts() {
-  const allCount = allRoutes.length;
-  const p2pCount = allRoutes.filter(route => isP2PRoute(route)).length;
-  const noP2pCount = allRoutes.filter(route => !isP2PRoute(route)).length;
-
-  const countAll = document.getElementById('count-all');
-  const countP2P = document.getElementById('count-p2p');
-  const countNoP2P = document.getElementById('count-no-p2p');
-
-  if (countAll) countAll.textContent = allCount;
-  if (countP2P) countP2P.textContent = p2pCount;
-  if (countNoP2P) countNoP2P.textContent = noP2pCount;
-
-  log(`📊 Contadores actualizados - Total: ${allCount}, P2P: ${p2pCount}, No P2P: ${noP2pCount}`);
+  return FltMgr.updateFilterCounts();
 }
 
 // ============================================
-// FILTROS AVANZADOS v5.0.75
+// FILTROS AVANZADOS v6.0.0 - REFACTORIZADO
 // ============================================
 
 /**
- * Configurar filtros avanzados
+ * REEMPLAZO v6.0.0: Configurar filtros avanzados
+ * Esta función ahora delega a FilterManager.setupAdvancedFilters()
  */
 function setupAdvancedFilters() {
-  // Toggle panel
-  const toggleBtn = document.getElementById('toggle-advanced-filters');
-  const panel = document.getElementById('advanced-filters-panel');
-
-  if (toggleBtn && panel) {
-    toggleBtn.addEventListener('click', () => {
-      const isVisible = panel.style.display !== 'none';
-      panel.style.display = isVisible ? 'none' : 'block';
-      const arrow = toggleBtn.querySelector('.toggle-arrow');
-      if (arrow) arrow.textContent = isVisible ? '▼' : '▲';
-    });
-  }
-
-  // Filtro de exchange - Poblar con exchanges únicos
-  populateExchangeFilter();
-
-  // Filtro de profit mínimo - Actualizar valor mostrado
-  const profitRange = document.getElementById('filter-profit-min');
-  const profitValue = document.getElementById('filter-profit-value');
-
-  if (profitRange && profitValue) {
-    profitRange.addEventListener('input', e => {
-      const value = parseFloat(e.target.value);
-      profitValue.textContent = `${value}%`;
-      advancedFilters.profitMin = value;
-    });
-  }
-
-  // Toggle ocultar negativas
-  const hideNegative = document.getElementById('filter-hide-negative');
-  if (hideNegative) {
-    hideNegative.addEventListener('change', e => {
-      advancedFilters.hideNegative = e.target.checked;
-    });
-  }
-
-  // Filtro de exchange
-  const exchangeSelect = document.getElementById('filter-exchange');
-  if (exchangeSelect) {
-    exchangeSelect.addEventListener('change', e => {
-      advancedFilters.exchange = e.target.value;
-    });
-  }
-
-  // Ordenar por
-  const sortSelect = document.getElementById('filter-sort');
-  if (sortSelect) {
-    sortSelect.addEventListener('change', e => {
-      advancedFilters.sortBy = e.target.value;
-    });
-  }
-
-  // Botón aplicar
-  const applyBtn = document.getElementById('apply-filters');
-  if (applyBtn) {
-    applyBtn.addEventListener('click', () => {
-      applyAllFilters();
-    });
-  }
-
-  // Botón resetear
-  const resetBtn = document.getElementById('reset-filters');
-  if (resetBtn) {
-    resetBtn.addEventListener('click', () => {
-      resetAdvancedFilters();
-    });
-  }
+  return FltMgr.setupAdvancedFilters();
 }
 
 /**
- * Poblar select de exchanges con opciones únicas
+ * REEMPLAZO v6.0.0: Poblar select de exchanges con opciones únicas
+ * Esta función ahora delega a FilterManager.populateExchangeFilter()
  */
 function populateExchangeFilter() {
-  const select = document.getElementById('filter-exchange');
-  if (!select || !allRoutes) return;
-
-  // Obtener exchanges únicos
-  const exchangesSet = new Set();
-  allRoutes.forEach(route => {
-    if (route.buyExchange) exchangesSet.add(route.buyExchange);
-    if (route.sellExchange) exchangesSet.add(route.sellExchange);
-  });
-
-  const exchanges = Array.from(exchangesSet).sort();
-
-  // Limpiar opciones existentes (excepto "Todos")
-  select.innerHTML = '<option value="all">Todos los exchanges</option>';
-
-  // Agregar opciones
-  exchanges.forEach(exchange => {
-    const option = document.createElement('option');
-    option.value = exchange;
-    option.textContent = exchange.charAt(0).toUpperCase() + exchange.slice(1);
-    select.appendChild(option);
-  });
-
-  log(`📊 Filtro de exchanges poblado con ${exchanges.length} opciones`);
+  return FltMgr.populateExchangeFilter();
 }
 
 /**
- * Aplicar todos los filtros (P2P + Avanzados)
+ * REEMPLAZO v6.0.0: Aplicar todos los filtros (P2P + Avanzados)
+ * Esta función ahora delega a FilterManager.applyAllFilters()
  */
 function applyAllFilters() {
-  if (!allRoutes || allRoutes.length === 0) {
-    console.warn('⚠️ No hay rutas para filtrar');
-    console.log('🔍 [DIAGNÓSTICO POPUP] applyAllFilters() - No hay rutas:', {
-      allRoutesIsNull: !allRoutes,
-      allRoutesLength: allRoutes?.length || 0,
-      currentFilter: currentFilter,
-      userSettings: userSettings ? {
-        interfaceMinProfitDisplay: userSettings.interfaceMinProfitDisplay,
-        interfaceMaxRoutesDisplay: userSettings.interfaceMaxRoutesDisplay
-      } : null
-    });
-    return;
+  // Actualizar rutas en FilterManager
+  if (allRoutes && allRoutes.length > 0) {
+    FltMgr.updateRoutes(allRoutes);
   }
-
-  // Usar configuraciones de interfaz centralizadas en lugar de advancedFilters
-  const interfaceSettings = userSettings || {};
-
-  // DIAGNÓSTICO: Loggear estado antes de filtrar
-  console.log('🔍 [DIAGNÓSTICO POPUP] applyAllFilters() - Estado inicial:', {
-    totalRoutes: allRoutes.length,
-    currentFilter: currentFilter,
-    interfaceSettings: {
-      interfaceMinProfitDisplay: interfaceSettings.interfaceMinProfitDisplay,
-      interfaceMaxRoutesDisplay: interfaceSettings.interfaceMaxRoutesDisplay,
-      interfaceSortByProfit: interfaceSettings.interfaceSortByProfit,
-      interfaceShowOnlyProfitable: interfaceSettings.interfaceShowOnlyProfitable,
-      interfacePreferSingleExchange: interfaceSettings.interfacePreferSingleExchange
-    },
-    muestraRutasP2P: allRoutes.filter(r => r.requiresP2P).length,
-    muestraRutasNoP2P: allRoutes.filter(r => !r.requiresP2P).length
-  });
-
-  log('🔍 Aplicando filtros de interfaz:', {
-    minProfit: interfaceSettings.interfaceMinProfitDisplay,
-    maxRoutes: interfaceSettings.interfaceMaxRoutesDisplay,
-    sortByProfit: interfaceSettings.interfaceSortByProfit,
-    showOnlyProfitable: interfaceSettings.interfaceShowOnlyProfitable,
-    preferSingleExchange: interfaceSettings.interfacePreferSingleExchange
-  });
-
-  // Paso 1: Filtro P2P (como antes)
-  let filteredRoutes;
-  switch (currentFilter) {
-    case 'p2p':
-      filteredRoutes = allRoutes.filter(route => isP2PRoute(route));
-      break;
-    case 'no-p2p':
-      filteredRoutes = allRoutes.filter(route => !isP2PRoute(route));
-      break;
-    case 'all':
-    default:
-      filteredRoutes = [...allRoutes];
-      break;
-  }
-
-  // DIAGNÓSTICO: Loggar resultado del filtro P2P
-  console.log('🔍 [DIAGNÓSTICO POPUP] applyAllFilters() - Después de filtro P2P:', {
-    currentFilter: currentFilter,
-    rutasDespuesFiltroP2P: filteredRoutes.length,
-    muestraP2P: currentFilter === 'p2p' || currentFilter === 'all',
-    muestraNoP2P: currentFilter === 'no-p2p' || currentFilter === 'all'
-  });
-
-  log(`🔍 Después de filtro P2P: ${filteredRoutes.length} rutas`);
-
-  // Paso 2: Filtro por profit mínimo de interfaz
-  const minProfit = interfaceSettings.interfaceMinProfitDisplay || -10;
-  if (minProfit > -100) {
-    // Solo filtrar si no es un valor muy bajo
-    filteredRoutes = filteredRoutes.filter(route => route.profitPercentage >= minProfit);
-    log(`🔍 Después de filtro profit mínimo (${minProfit}%): ${filteredRoutes.length} rutas`);
-  }
-
-  // DIAGNÓSTICO: Loggar resultado del filtro de profit mínimo
-  console.log('🔍 [DIAGNÓSTICO POPUP] applyAllFilters() - Después de filtro profit mínimo:', {
-    minProfit: minProfit,
-    rutasDespuesFiltroProfit: filteredRoutes.length,
-    rutasConProfitNegativo: allRoutes.filter(r => r.profitPercentage < minProfit).length
-  });
-
-  // Paso 3: Mostrar solo rentables (si está activado)
-  if (interfaceSettings.interfaceShowOnlyProfitable) {
-    const antesFiltro = filteredRoutes.length;
-    filteredRoutes = filteredRoutes.filter(route => route.profitPercentage >= 0);
-    console.log('🔍 [DIAGNÓSTICO POPUP] applyAllFilters() - Después de filtro solo rentables:', {
-      rutasAntes: antesFiltro,
-      rutasDespues: filteredRoutes.length,
-      rutasEliminadas: antesFiltro - filteredRoutes.length
-    });
-    log(`🔍 Después de mostrar solo rentables: ${filteredRoutes.length} rutas`);
-  }
-
-  // Paso 4: Aplicar preferencias de usuario (como antes)
-  filteredRoutes = applyUserPreferences(filteredRoutes);
-  log(`🔍 Después de preferencias usuario: ${filteredRoutes.length} rutas`);
-
-  // Paso 5: Ordenar según configuración de interfaz
-  const sortBy = interfaceSettings.interfaceSortByProfit ? 'profit-desc' : 'profit-asc';
-  filteredRoutes = sortRoutes(filteredRoutes, sortBy);
-  log(`🔍 Después de ordenar (${sortBy}): ${filteredRoutes.length} rutas`);
-
-  // Paso 6: Limitar cantidad máxima de rutas
-  const maxRoutes = interfaceSettings.interfaceMaxRoutesDisplay || 20;
-  if (filteredRoutes.length > maxRoutes) {
-    filteredRoutes = filteredRoutes.slice(0, maxRoutes);
-    log(`🔍 Después de limitar a ${maxRoutes} rutas: ${filteredRoutes.length} rutas`);
-  }
-
-  // DIAGNÓSTICO: Loggar resultado final antes de mostrar
-  console.log('🔍 [DIAGNÓSTICO POPUP] applyAllFilters() - Resultado final:', {
-    rutasFinales: filteredRoutes.length,
-    maxRoutes: interfaceSettings.interfaceMaxRoutesDisplay || 20,
-    vaAMostrar: filteredRoutes.length > 0,
-    currentData: currentData ? {
-      tieneOficial: !!currentData.oficial,
-      oficialCompra: currentData.oficial?.compra
-    } : null
-  });
-
-  // Mostrar rutas
+  
+  // Aplicar todos los filtros
+  const filteredRoutes = FltMgr.applyAllFilters();
+  
+  // Mostrar rutas filtradas usando RouteManager
   if (currentData) {
-    displayOptimizedRoutes(filteredRoutes, currentData.oficial);
+    RteMgr.displayRoutes(filteredRoutes, 'optimized-routes');
   }
+  
+  return filteredRoutes;
 }
 
 /**
- * Ordenar rutas según criterio
+ * REEMPLAZO v6.0.0: Ordenar rutas según criterio
+ * Esta función ahora delega a FilterManager.sortRoutes()
  */
 function sortRoutes(routes, sortBy) {
-  const sorted = [...routes];
-
-  switch (sortBy) {
-    case 'profit-desc':
-      sorted.sort((a, b) => b.profitPercentage - a.profitPercentage);
-      break;
-    case 'profit-asc':
-      sorted.sort((a, b) => a.profitPercentage - b.profitPercentage);
-      break;
-    case 'exchange-asc':
-      sorted.sort((a, b) => {
-        const nameA = (a.buyExchange || '').toLowerCase();
-        const nameB = (b.buyExchange || '').toLowerCase();
-        return nameA.localeCompare(nameB);
-      });
-      break;
-    case 'investment-desc':
-      sorted.sort((a, b) => {
-        const investA = a.calculation?.initialAmount || 0;
-        const investB = b.calculation?.initialAmount || 0;
-        return investB - investA;
-      });
-      break;
-    default:
-      // Por defecto: profit descendente
-      sorted.sort((a, b) => b.profitPercentage - a.profitPercentage);
-  }
-
-  return sorted;
+  return FltMgr.sortRoutes(routes, sortBy);
 }
 
 /**
- * Resetear filtros avanzados a valores por defecto
+ * REEMPLAZO v6.0.0: Resetear filtros avanzados a valores por defecto
+ * Esta función ahora delega a FilterManager.resetAdvancedFilters()
  */
 function resetAdvancedFilters() {
-  advancedFilters = {
-    exchange: 'all',
-    profitMin: 0,
-    hideNegative: false,
-    sortBy: 'profit-desc'
-  };
-
-  // Resetear UI
-  const exchangeSelect = document.getElementById('filter-exchange');
-  const profitRange = document.getElementById('filter-profit-min');
-  const profitValue = document.getElementById('filter-profit-value');
-  const hideNegative = document.getElementById('filter-hide-negative');
-  const sortSelect = document.getElementById('filter-sort');
-
-  if (exchangeSelect) exchangeSelect.value = 'all';
-  if (profitRange) profitRange.value = '0';
-  if (profitValue) profitValue.textContent = '0%';
-  if (hideNegative) hideNegative.checked = false;
-  if (sortSelect) sortSelect.value = 'profit-desc';
-
-  log('🔄 Filtros avanzados reseteados');
-
-  // Reaplicar filtros
-  applyAllFilters();
+  return FltMgr.resetAdvancedFilters();
 }
 
 // Navegación entre tabs (función auxiliar para casos especiales)
@@ -1370,14 +1271,14 @@ function displayArbitrages(arbitrages, official) {
               ? `
           <div class="price-row source-row">
             <span class="price-label">📍 Fuente</span>
-            <span class="price-value source-value">${getDollarSourceDisplay(official)}</span>
+            <span class="price-value source-value">${Fmt.getDollarSourceDisplay(official)}</span>
           </div>
           `
               : ''
           }
           <div class="price-row">
             <span class="price-label">💱 USD → USDT</span>
-            <span class="price-value">${formatUsdUsdtRatio(arb.usdToUsdtRate)} USD/USDT</span>
+            <span class="price-value">${Fmt.formatUsdUsdtRatio(arb.usdToUsdtRate)} USD/USDT</span>
           </div>
           <div class="price-row">
             <span class="price-label">💸 USDT → ARS</span>
@@ -1552,8 +1453,11 @@ function displayOptimizedRoutes(routes, official) {
       displayMetrics: displayMetrics
     });
 
+    // Escapar completamente el JSON usando encodeURIComponent para prevenir errores y vulnerabilidades
+    const escapedRouteData = encodeURIComponent(routeData);
+
     html += `
-      <div class="route-card ${profitClass} ${routeType} ${compactClass}" data-index="${index}" data-route='${routeData.replace(/'/g, '&apos;')}'>
+      <div class="route-card ${profitClass} ${routeType} ${compactClass}" data-index="${index}" data-route="${escapedRouteData}">
         <div class="route-header">
           <div class="route-title">
             <h3>${getRouteIcon(routeType, route)} Ruta ${index + 1} ${exchangeIcon}</h3>
@@ -1564,7 +1468,7 @@ function displayOptimizedRoutes(routes, official) {
             </div>
           </div>
           <div class="route-profit-section">
-            <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${Fmt.formatNumber(displayMetrics.percentage)}%</div>
+            <div class="profit-badge ${profitBadgeClass} text-underline-animated glow-pulse">${profitSymbol}${Fmt.formatNumber(displayMetrics.percentage)}%</div>
           </div>
         </div>
 
@@ -1587,10 +1491,23 @@ function displayOptimizedRoutes(routes, official) {
 
   container.innerHTML = html;
 
-  // CORREGIDO v5.0.64: Seleccionar route-cards del container correcto
+  // NUEVO v6.0.0: Aplicar animaciones de entrada a las tarjetas de rutas
   const routeCards = container.querySelectorAll('.route-card');
+  routeCards.forEach((card, index) => {
+    // Agregar clases de animación y micro-interacciones Fase 5
+    card.classList.add('stagger-in', 'hover-lift', 'click-shrink', 'magnetic-btn', 'ripple-btn', 'hover-scale-rotate');
+    // Aplicar delay escalonado para efecto stagger
+    card.style.animationDelay = `${index * 50}ms`;
+  });
+
+  // CORREGIDO v5.0.64: Seleccionar route-cards del container correcto
 
   console.log(`🔍 [POPUP] Agregando event listeners a ${routeCards.length} route-cards`);
+
+  // NUEVO Fase 5: Inicializar micro-interacciones para las nuevas tarjetas
+  if (typeof initMagneticButtons === 'function') {
+    initMagneticButtons();
+  }
 
   routeCards.forEach((card, idx) => {
     card.addEventListener('click', function (e) {
@@ -1598,6 +1515,7 @@ function displayOptimizedRoutes(routes, official) {
       e.stopPropagation();
 
       // CORREGIDO v5.0.72: Usar data-route en lugar de índice para obtener la ruta exacta
+      // CORREGIDO v6.0.1: Decodificar datos usando decodeURIComponent (Issue #1 - Alta severidad)
       const routeData = this.dataset.route;
       if (!routeData) {
         console.error('❌ [POPUP] No se encontró data-route en la tarjeta');
@@ -1605,7 +1523,7 @@ function displayOptimizedRoutes(routes, official) {
       }
 
       try {
-        const route = JSON.parse(routeData);
+        const route = JSON.parse(decodeURIComponent(routeData));
         console.log(
           `🖱️ [POPUP] Click en route-card tipo ${route.routeType}:`,
           route.broker || route.buyExchange
@@ -2042,32 +1960,28 @@ function selectArbitrage(index) {
   displayStepByStepGuide(selectedArbitrage);
 }
 
-// Función para crear elementos HTML de manera segura
+// REEMPLAZO v6.0.0: Función para crear elementos HTML de manera segura delegada a CommonUtils
 function createSafeElement(tag, content, className = '') {
-  const element = document.createElement(tag);
-  element.textContent = content;
-  if (className) element.className = className;
-  return element;
+  return Utils.createSafeElement(tag, content, className);
 }
 
-// Función para sanitizar HTML (previene XSS)
+// REEMPLAZO v6.0.0: Función para sanitizar HTML (previene XSS) delegada a CommonUtils
 function sanitizeHTML(text) {
-  if (typeof text !== 'string') {
-    return '';
-  }
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
+  return Utils.sanitizeHTML(text);
 }
 
-// Función para actualizar innerHTML de manera segura
+// REEMPLAZO v6.0.0: Función para actualizar innerHTML de manera segura delegada a CommonUtils
 function setSafeHTML(element, html) {
-  if (typeof html !== 'string') {
-    log('⚠️ setSafeHTML recibió contenido no string:', html);
-    element.innerHTML = '';
-    return;
-  }
-  element.innerHTML = html;
+  return Utils.setSafeHTML(element, html);
+}
+
+// Exportar funciones de seguridad para uso en otros módulos
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    createSafeElement,
+    sanitizeHTML,
+    setSafeHTML
+  };
 }
 
 // Función helper para calcular clases de profit - Usa RouteRenderer
@@ -2187,7 +2101,7 @@ function generateGuideSteps(values) {
           <p class="step-simple-text">Deposita tus USD en <strong>${sanitizeHTML(broker)}</strong> y cómpralos por USDT</p>
           <div class="step-simple-calc">
             <span class="calc-label">Tasa:</span>
-            <span class="calc-value">${formatUsdUsdtRatio(usdToUsdtRate)} USD = 1 USDT</span>
+            <span class="calc-value">${Fmt.formatUsdUsdtRatio(usdToUsdtRate)} USD = 1 USDT</span>
             <span class="calc-arrow">→</span>
             <span class="calc-result">${Fmt.formatNumber(usdtAfterFees)} USDT</span>
           </div>
@@ -2195,7 +2109,7 @@ function generateGuideSteps(values) {
             typeof usdToUsdtRate === 'number' && isFinite(usdToUsdtRate) && usdToUsdtRate > 1.005
               ? `
           <div class="step-simple-warning">
-            ⚠️ El exchange cobra ${formatCommissionPercent((usdToUsdtRate - 1) * 100)}% para esta conversión
+            ⚠️ El exchange cobra ${Fmt.formatCommissionPercent((usdToUsdtRate - 1) * 100)}% para esta conversión
           </div>
           `
               : ''
@@ -2273,17 +2187,9 @@ function generateGuideSteps(values) {
   `;
 }
 
-/* FUNCIONES ANTIGUAS COMENTADAS - Calculadora y Consideraciones detalladas
-// Generar HTML de la calculadora
-function generateCalculatorHTML(values) {
-  // ... código comentado ...
-}
-
-// Generar HTML de consideraciones importantes
-function generateConsiderationsHTML(fees) {
-  // ... código comentado ...
-}
-*/
+// Nota: Las funciones generateCalculatorHTML y generateConsiderationsHTML fueron eliminadas
+// en v5.0.0 al simplificar la guía paso a paso. Su funcionalidad fue reemplazada por
+// generateGuideSteps() que ahora incluye toda la información necesaria de forma más compacta.
 
 // Configurar animaciones y event listeners para la guía
 function setupGuideAnimations(container) {
@@ -2359,17 +2265,8 @@ function displayStepByStepGuide(arb) {
   console.log('✅ [POPUP] Guía paso a paso mostrada correctamente');
 }
 
-// Cargar datos de bancos (FUNCIÓN ANTIGUA ELIMINADA - botón refresh-banks removido)
-// function loadBanksDataOld() {
-//   // Configurar event listener para el botón de refresh
-//   const refreshBtn = document.getElementById('refresh-banks');
-//   if (refreshBtn) {
-//     refreshBtn.addEventListener('click', loadBankRates);
-//   }
-//
-//   // Cargar datos iniciales automáticamente cuando se abre la pestaña
-//   loadBankRates();
-// }
+// Nota: La función loadBanksDataOld() fue eliminada en v5.0.69
+// El botón refresh-banks fue removido y la funcionalidad se integró en loadBanksData()
 
 // Obtener datos de exchanges desde las APIs configuradas
 async function fetchExchangeRatesFromAPIs() {
@@ -2615,8 +2512,20 @@ async function displayExchangeRates(exchangeRates) {
     </div>
   `;
 
+  // NUEVO v6.0.0: Aplicar animaciones a las tarjetas de exchanges
+  const exchangeCards = container.querySelectorAll('.exchange-card');
+  exchangeCards.forEach((card, index) => {
+    card.classList.add('stagger-in', 'hover-lift', 'magnetic-btn', 'ripple-btn', 'hover-scale-rotate');
+    card.style.animationDelay = `${index * 30}ms`;
+  });
+
   // Configurar event listeners para filtros
   setupExchangeFilters(exchanges);
+
+  // NUEVO Fase 5: Inicializar micro-interacciones para las nuevas tarjetas de exchanges
+  if (typeof initMagneticButtons === 'function') {
+    initMagneticButtons();
+  }
 }
 
 // Configurar filtros de exchanges
@@ -2952,561 +2861,50 @@ const SIMULATOR_PRESETS = {
   }
 };
 
-// NUEVO v5.0.31: Configuración del simulador (sin rutas)
+// REEMPLAZO v6.0.0: Configuración del simulador delegada a Simulator
 function setupAdvancedSimulator() {
-  const toggleBtn = document.getElementById('toggle-advanced');
-  const advancedConfig = document.getElementById('advanced-config');
-  const resetConfigBtn = document.getElementById('btn-reset-config');
-
-  // Toggle configuración avanzada
-  toggleBtn.addEventListener('click', () => {
-    const isVisible = advancedConfig.style.display !== 'none';
-    advancedConfig.style.display = isVisible ? 'none' : 'block';
-    toggleBtn.textContent = isVisible ? '⚙️ Parámetros de Cálculo' : '🔽 Parámetros de Cálculo';
-  });
-
-  // NUEVO v5.0.82: Configurar presets
-  setupSimulatorPresets();
-
-  // Generar matriz de riesgo
-  const generateRiskMatrixBtn = document.getElementById('generate-risk-matrix');
-  if (generateRiskMatrixBtn) {
-    generateRiskMatrixBtn.addEventListener('click', generateRiskMatrix);
-  }
-
-  // Filtros de la matriz
-  const applyFilterBtn = document.getElementById('apply-matrix-filter');
-  const resetFilterBtn = document.getElementById('reset-matrix-filter');
-  if (applyFilterBtn) {
-    applyFilterBtn.addEventListener('click', applyMatrixFilter);
-  }
-  if (resetFilterBtn) {
-    resetFilterBtn.addEventListener('click', resetMatrixFilter);
-  }
-
-  // Reset configuración
-  resetConfigBtn.addEventListener('click', resetSimulatorConfig);
-
-  // Cargar valores por defecto al iniciar
-  loadDefaultSimulatorValues();
+  // Delegar configuración completa al módulo Simulator
+  return Sim.init(currentData, userSettings);
 }
 
-// NUEVO v5.0.82: Configurar botones de presets
+// REEMPLAZO v6.0.0: Configurar botones de presets delegada a Simulator
 function setupSimulatorPresets() {
-  const presetButtons = document.querySelectorAll('.btn-preset');
-
-  presetButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const presetName = btn.dataset.preset;
-      applySimulatorPreset(presetName);
-
-      // Actualizar estado activo de botones
-      presetButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    });
-  });
-
-  console.log('✅ Presets del simulador configurados');
+  return Sim.setupPresets();
 }
 
-// NUEVO v5.0.82: Aplicar preset al simulador
+// REEMPLAZO v6.0.0: Aplicar preset al simulador delegada a Simulator
 function applySimulatorPreset(presetName) {
-  const preset = SIMULATOR_PRESETS[presetName];
-  if (!preset) {
-    console.warn(`⚠️ Preset desconocido: ${presetName}`);
-    return;
-  }
-
-  const officialPrice = currentData?.dollarPrice || 950;
-
-  // Obtener elementos
-  const elements = {
-    usdBuy: document.getElementById('sim-usd-buy-price'),
-    usdSell: document.getElementById('sim-usd-sell-price'),
-    buyFee: document.getElementById('sim-buy-fee'),
-    sellFee: document.getElementById('sim-sell-fee'),
-    transferFee: document.getElementById('sim-transfer-fee-usd'),
-    bankCommission: document.getElementById('sim-bank-commission')
-  };
-
-  // Verificar elementos
-  const missing = Object.entries(elements)
-    .filter(([, el]) => !el)
-    .map(([k]) => k);
-  if (missing.length > 0) {
-    console.warn('⚠️ Elementos faltantes para preset:', missing);
-    return;
-  }
-
-  // Aplicar valores del preset
-  elements.usdBuy.value = officialPrice.toFixed(2);
-  elements.usdSell.value = (officialPrice * preset.spreadMultiplier).toFixed(2);
-  elements.buyFee.value = preset.buyFee.toFixed(2);
-  elements.sellFee.value = preset.sellFee.toFixed(2);
-  elements.transferFee.value = preset.transferFee.toFixed(2);
-  elements.bankCommission.value = preset.bankCommission.toFixed(2);
-
-  console.log(`✅ Preset "${preset.name}" aplicado:`, preset);
-
-  // Mostrar tooltip de confirmación
-  showPresetTooltip(preset.name, preset.description);
+  return Sim.applyPreset(presetName);
 }
 
-// Mostrar tooltip temporal del preset
+// REEMPLAZO v6.0.0: Mostrar tooltip temporal del preset delegada a Simulator
 function showPresetTooltip(name, description) {
-  // Remover tooltip existente
-  const existing = document.querySelector('.preset-tooltip');
-  if (existing) existing.remove();
-
-  const tooltip = document.createElement('div');
-  tooltip.className = 'preset-tooltip';
-  tooltip.innerHTML = `<strong>${name}</strong>: ${description}`;
-  tooltip.style.cssText = `
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(59, 130, 246, 0.95);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 0.85em;
-    z-index: 9999;
-    animation: fadeInUp 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  `;
-
-  document.body.appendChild(tooltip);
-
-  setTimeout(() => {
-    tooltip.style.opacity = '0';
-    tooltip.style.transition = 'opacity 0.3s ease';
-    setTimeout(() => tooltip.remove(), 300);
-  }, 2500);
+  return Sim.showPresetTooltip(name, description);
 }
 
+// REEMPLAZO v6.0.0: Cargar valores por defecto del simulador delegada a Simulator
 function loadDefaultSimulatorValues() {
-  // Cargar valores desde la configuración del usuario y datos actuales
-  const officialPrice = currentData?.dollarPrice || 950;
-
-  // Verificar que los elementos existan antes de asignar valores
-  const simAmountInput = document.getElementById('sim-amount');
-  const usdBuyInput = document.getElementById('sim-usd-buy-price');
-  const usdSellInput = document.getElementById('sim-usd-sell-price');
-  const buyFeeInput = document.getElementById('sim-buy-fee');
-  const sellFeeInput = document.getElementById('sim-sell-fee');
-  const transferFeeInput = document.getElementById('sim-transfer-fee-usd');
-  const bankCommissionInput = document.getElementById('sim-bank-commission');
-
-  if (
-    !usdBuyInput ||
-    !usdSellInput ||
-    !buyFeeInput ||
-    !sellFeeInput ||
-    !transferFeeInput ||
-    !bankCommissionInput
-  ) {
-    console.warn('⚠️ No se encontraron todos los inputs del simulador');
-    return;
-  }
-
-  // Monto por defecto desde configuración de interfaz
-  if (simAmountInput && userSettings?.simulatorDefaultAmount) {
-    simAmountInput.value = userSettings.simulatorDefaultAmount;
-  }
-
-  // Precios del dólar
-  usdBuyInput.value = officialPrice.toFixed(2);
-  usdSellInput.value = (officialPrice * 1.02).toFixed(2);
-
-  // Fees desde configuración
-  const buyFee = (userSettings?.extraTradingFee || 0) + 1.0; // 1% base + extra
-  const sellFee = (userSettings?.extraTradingFee || 0) + 1.0;
-  const transferFee = userSettings?.transferFeeUSD || 0;
-  const bankCommission = userSettings?.bankCommissionFee || 0;
-
-  buyFeeInput.value = buyFee.toFixed(2);
-  sellFeeInput.value = sellFee.toFixed(2);
-  transferFeeInput.value = transferFee.toFixed(2);
-  bankCommissionInput.value = bankCommission.toFixed(2);
-
-  console.log('✅ Valores por defecto cargados en simulador:', {
-    defaultAmount: userSettings?.simulatorDefaultAmount,
-    usdPrice: officialPrice,
-    buyFee,
-    sellFee,
-    transferFee,
-    bankCommission
-  });
+  return Sim.loadDefaultValues();
 }
 
+// REEMPLAZO v6.0.0: Resetear configuración del simulador delegada a Simulator
 function resetSimulatorConfig() {
-  // Verificar que los elementos existan
-  const elements = {
-    usdBuy: document.getElementById('sim-usd-buy-price'),
-    usdSell: document.getElementById('sim-usd-sell-price'),
-    buyFee: document.getElementById('sim-buy-fee'),
-    sellFee: document.getElementById('sim-sell-fee'),
-    transferFee: document.getElementById('sim-transfer-fee-usd'),
-    bankCommission: document.getElementById('sim-bank-commission'),
-    matrixMin: document.getElementById('matrix-min-percent'),
-    matrixMax: document.getElementById('matrix-max-percent'),
-    matrixStep: document.getElementById('matrix-step-percent')
-  };
-
-  // Verificar que todos existan
-  const missingElements = Object.entries(elements)
-    .filter(([key, value]) => !value)
-    .map(([key]) => key);
-
-  if (missingElements.length > 0) {
-    console.warn('⚠️ Elementos faltantes en resetSimulatorConfig:', missingElements);
-    return;
-  }
-
-  // Reset a valores por defecto
-  elements.usdBuy.value = '';
-  elements.usdSell.value = '';
-  elements.buyFee.value = '1.0';
-  elements.sellFee.value = '1.0';
-  elements.transferFee.value = '0';
-  elements.bankCommission.value = '0';
-  elements.matrixMin.value = '0';
-  elements.matrixMax.value = '2';
-  elements.matrixStep.value = '0.5';
-
-  // Recargar valores desde configuración
-  loadDefaultSimulatorValues();
-
-  console.log('✅ Configuración del simulador reseteada');
+  return Sim.resetConfig();
 }
 
-// NUEVO v5.0.31: Generar Matriz de Riesgo mejorada (sin rutas)
+// REEMPLAZO v6.0.0: Generar Matriz de Riesgo delegada a Simulator
 async function generateRiskMatrix(useCustomParams = false) {
-  console.log(
-    '🔍 [MATRIZ] Iniciando generateRiskMatrix...',
-    useCustomParams ? 'con parámetros personalizados' : 'con datos automáticos'
-  );
-  console.log('🔍 [MATRIZ] currentData:', currentData ? 'existe' : 'null');
-  console.log(
-    '🔍 [MATRIZ] currentData.banks:',
-    currentData?.banks ? Object.keys(currentData.banks).length + ' bancos' : 'no existe'
-  );
-  console.log(
-    '🔍 [MATRIZ] currentData.usdt:',
-    currentData?.usdt ? Object.keys(currentData.usdt).length + ' exchanges' : 'no existe'
-  );
-
-  const amountInput = document.getElementById('sim-amount');
-  const amount = parseFloat(amountInput?.value) || 1000000;
-
-  // Validar monto
-  if (!amount || amount < 1000) {
-    alert('⚠️ Ingresa un monto válido (mínimo $1,000 ARS)');
-    return;
-  }
-
-  const usdPrices = [];
-  let usdtPrices = [];
-
-  if (useCustomParams) {
-    // MODO PERSONALIZADO: Usar valores de los inputs
-    log('[MATRIZ] Usando parámetros personalizados del usuario');
-    const usdMinInput =
-      parseFloat(document.getElementById('matrix-usd-min')?.value) ||
-      currentData?.oficial?.compra ||
-      1000;
-    const usdMaxInput =
-      parseFloat(document.getElementById('matrix-usd-max')?.value) ||
-      currentData?.oficial?.compra * 1.5 ||
-      1500;
-    const usdtMinInput = parseFloat(document.getElementById('matrix-usdt-min')?.value) || 1000;
-    const usdtMaxInput = parseFloat(document.getElementById('matrix-usdt-max')?.value) || 1100;
-
-    // Validaciones de rangos para modo personalizado
-    if (usdMinInput >= usdMaxInput) {
-      alert('⚠️ El USD mínimo debe ser menor que el USD máximo');
-      return;
-    }
-    if (usdtMinInput >= usdtMaxInput) {
-      alert('⚠️ El USDT mínimo debe ser menor que el USDT máximo');
-      return;
-    }
-
-    // Generar valores equidistantes para modo personalizado
-    for (let i = 0; i < 5; i++) {
-      usdPrices.push(usdMinInput + ((usdMaxInput - usdMinInput) * i) / 4);
-      usdtPrices.push(usdtMinInput + ((usdtMaxInput - usdtMinInput) * i) / 4);
-    }
-
-    log(
-      '[MATRIZ] Parámetros personalizados - USD:',
-      usdPrices.map(p => p.toFixed(2)),
-      'USDT:',
-      usdtPrices.map(p => p.toFixed(2))
-    );
-  } else {
-    // MODO AUTOMÁTICO: Usar lógica dinámica con datos reales
-    log('[MATRIZ] Usando modo automático con datos dinámicos');
-
-    // Intentar obtener datos de bancos del consenso actual
-    if (!currentData || !currentData.banks || Object.keys(currentData.banks).length === 0) {
-      log('[MATRIZ] No hay datos de bancos, intentando cargar...');
-      try {
-        await loadBankRates();
-        // Pequeña pausa para asegurar que los datos se guarden
-        await new Promise(resolve => setTimeout(resolve, 500));
-        log(
-          '[MATRIZ] Datos de bancos cargados:',
-          currentData?.banks ? Object.keys(currentData.banks).length + ' bancos' : 'falló'
-        );
-      } catch (error) {
-        console.warn('[MATRIZ] Error cargando bancos:', error);
-      }
-    }
-
-    // Procesar datos de bancos para USD
-    if (currentData && currentData.banks) {
-      log('[MATRIZ] Procesando datos de bancos...');
-      const bankCompraPrices = Object.values(currentData.banks)
-        .filter(bank => bank.compra && bank.compra > 0)
-        .map(bank => bank.compra)
-        .sort((a, b) => a - b);
-
-      log('[MATRIZ] Precios de compra encontrados:', bankCompraPrices.length, 'bancos');
-
-      if (bankCompraPrices.length >= 1) {
-        // USD mínimo = menor precio de compra de bancos principales
-        // USD máximo = mínimo + 50%
-        const usdMin = Math.min(...bankCompraPrices);
-        const usdMax = usdMin * 1.5; // +50% sobre el mínimo
-
-        // Generar 5 puntos equidistantes entre min y max
-        for (let i = 0; i < 5; i++) {
-          usdPrices.push(usdMin + ((usdMax - usdMin) * i) / 4);
-        }
-
-        log(
-          '[MATRIZ] USD - Mínimo de bancos:',
-          usdMin.toFixed(2),
-          'Máximo (min+50%):',
-          usdMax.toFixed(2)
-        );
-        log('[MATRIZ] Precios USD generados:', usdPrices.length, 'valores');
-      }
-    }
-
-    // Si no hay datos de bancos, usar precio oficial o fallback
-    if (usdPrices.length === 0) {
-      const usdMin =
-        currentData?.oficial?.compra ||
-        parseFloat(document.getElementById('matrix-usd-min')?.value) ||
-        1000;
-      const usdMax = usdMin * 1.5;
-      for (let i = 0; i < 5; i++) {
-        usdPrices.push(usdMin + ((usdMax - usdMin) * i) / 4);
-      }
-      log('[MATRIZ] Usando precio oficial o fallback para USD:', usdMin.toFixed(2));
-    }
-
-    // Procesar datos de exchanges USDT
-    if (currentData && currentData.usdt) {
-      log('[MATRIZ] Procesando datos de USDT...');
-      const usdtSellPrices = Object.values(currentData.usdt)
-        .filter(exchange => exchange.venta && exchange.venta > 0)
-        .map(exchange => exchange.venta)
-        .sort((a, b) => b - a); // Orden descendente para tomar los más altos primero
-
-      log('[MATRIZ] Precios de venta USDT encontrados:', usdtSellPrices.length, 'exchanges');
-
-      if (usdtSellPrices.length >= 5) {
-        // Tomar exactamente los 5 precios más altos
-        usdtPrices = usdtSellPrices.slice(0, 5);
-        log('[MATRIZ] Usando los 5 precios USDT venta más altos');
-      } else if (usdtSellPrices.length >= 1) {
-        // Si hay menos de 5, usar todos los disponibles
-        usdtPrices = usdtSellPrices;
-        log('[MATRIZ] Usando todos los precios USDT disponibles:', usdtPrices.length);
-      }
-    }
-
-    // Si no hay datos de exchanges, usar valores por defecto
-    if (usdtPrices.length === 0) {
-      const usdtMin = parseFloat(document.getElementById('matrix-usdt-min')?.value) || 1000;
-      const usdtMax = parseFloat(document.getElementById('matrix-usdt-max')?.value) || 1100;
-      for (let i = 0; i < 5; i++) {
-        usdtPrices.push(usdtMin + ((usdtMax - usdtMin) * i) / 4);
-      }
-      log('[MATRIZ] Usando precios USDT por defecto');
-    }
-  }
-
-  // Validaciones finales de rangos
-  const finalUsdMin = Math.min(...usdPrices);
-  const finalUsdMax = Math.max(...usdPrices);
-  const finalUsdtMin = Math.min(...usdtPrices);
-  const finalUsdtMax = Math.max(...usdtPrices);
-
-  if (finalUsdMin >= finalUsdMax) {
-    alert('⚠️ Error: Los precios USD no son válidos');
-    return;
-  }
-  if (finalUsdtMin >= finalUsdtMax) {
-    alert('⚠️ Error: Los precios USDT no son válidos');
-    return;
-  }
-
-  // Obtener parámetros configurables
-  const buyFeePercent = parseFloat(document.getElementById('sim-buy-fee')?.value) || 1.0;
-  const sellFeePercent = parseFloat(document.getElementById('sim-sell-fee')?.value) || 1.0;
-  const transferFeeUSD = parseFloat(document.getElementById('sim-transfer-fee-usd')?.value) || 0;
-  const bankCommissionPercent =
-    parseFloat(document.getElementById('sim-bank-commission')?.value) || 0;
-
-  // Validaciones de parámetros
-  if (buyFeePercent < 0 || buyFeePercent > 10) {
-    alert('⚠️ El fee de compra debe estar entre 0% y 10%');
-    return;
-  }
-  if (sellFeePercent < 0 || sellFeePercent > 10) {
-    alert('⚠️ El fee de venta debe estar entre 0% y 10%');
-    return;
-  }
-
-  // Crear tabla HTML
-  let tableHTML = '<thead><tr><th>USD Compra \\ USDT Venta</th>';
-  usdtPrices.forEach(price => {
-    tableHTML += `<th>$${price.toFixed(0)}</th>`;
-  });
-  tableHTML += '</tr></thead><tbody>';
-
-  // Calcular rentabilidad para cada combinación
-  usdPrices.forEach(usdPrice => {
-    tableHTML += `<tr><td><strong>$${usdPrice.toFixed(0)}</strong></td>`;
-
-    usdtPrices.forEach(usdtPrice => {
-      // Calcular ganancia con estos precios
-      const bankCommissionARS = amount * (bankCommissionPercent / 100);
-      const amountAfterBankCommission = amount - bankCommissionARS;
-
-      // Paso 1: Comprar USD
-      const step1_usd = amountAfterBankCommission / usdPrice;
-
-      // Paso 2: Comprar USDT con USD (usando tasa de conversión)
-      const usdToUsdtRate = usdPrice / usdtPrice; // Tasa USD/USDT
-      const step2_usdt = step1_usd / usdToUsdtRate;
-
-      // Paso 3: Aplicar fee de compra
-      const buyFeeDecimal = buyFeePercent / 100;
-      const step2_usdtAfterFee = step2_usdt * (1 - buyFeeDecimal);
-
-      // Paso 4: Fee de transferencia (si aplica)
-      const transferFeeUSDT = transferFeeUSD / usdToUsdtRate;
-      const step3_usdtAfterTransfer = step2_usdtAfterFee - transferFeeUSDT;
-
-      // Paso 5: Vender USDT por ARS
-      const step4_ars = step3_usdtAfterTransfer * usdtPrice;
-
-      // Paso 6: Aplicar fee de venta
-      const sellFeeDecimal = sellFeePercent / 100;
-      const finalAmount = step4_ars * (1 - sellFeeDecimal);
-
-      // Calcular ganancia
-      const profit = finalAmount - amount;
-      const profitPercent = (profit / amount) * 100;
-
-      // Determinar clase CSS según rentabilidad
-      let cellClass = 'matrix-cell-negative';
-      if (profitPercent > 1.0) {
-        cellClass = 'matrix-cell-positive';
-      } else if (profitPercent >= 0) {
-        cellClass = 'matrix-cell-neutral';
-      }
-
-      tableHTML += `<td class="${cellClass}" title="Ganancia: $${Fmt.formatNumber(profit)} ARS (${profitPercent.toFixed(2)}%)">${profitPercent.toFixed(2)}%</td>`;
-    });
-
-    tableHTML += '</tr>';
-  });
-
-  tableHTML += '</tbody>';
-
-  // Mostrar matriz
-  const matrixTable = document.getElementById('risk-matrix-table');
-  const matrixResult = document.getElementById('risk-matrix-result');
-
-  if (!matrixTable || !matrixResult) {
-    alert('⚠️ Error: elementos de la matriz no encontrados');
-    return;
-  }
-
-  matrixTable.innerHTML = tableHTML;
-  matrixResult.style.display = 'block';
-
-  // Scroll hacia la matriz
-  matrixResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  return Sim.generateRiskMatrix(useCustomParams);
 }
 
-// NUEVO v5.0.31: Funciones de filtrado de matriz
+// REEMPLAZO v6.0.0: Aplicar filtro de matriz delegada a Simulator
 function applyMatrixFilter() {
-  const minProfit = parseFloat(document.getElementById('filter-min-profit').value) || -5;
-  const maxProfit = parseFloat(document.getElementById('filter-max-profit').value) || 10;
-
-  const matrixTable = document.getElementById('risk-matrix-table');
-  if (!matrixTable) return;
-
-  const cells = matrixTable.querySelectorAll('td');
-  let visibleCount = 0;
-  let totalCells = 0;
-
-  cells.forEach(cell => {
-    // Skip header cells
-    if (cell.tagName === 'TH' || cell.querySelector('strong')) return;
-
-    const text = cell.textContent.trim();
-    if (text.endsWith('%')) {
-      totalCells++;
-      const profitValue = parseFloat(text.replace('%', ''));
-
-      if (profitValue >= minProfit && profitValue <= maxProfit) {
-        cell.style.opacity = '1';
-        cell.style.backgroundColor = '';
-        visibleCount++;
-      } else {
-        cell.style.opacity = '0.2';
-        cell.style.backgroundColor = '#333';
-      }
-    }
-  });
-
-  // Mostrar contador
-  const filterResults = document.getElementById('filter-results');
-  const filterCount = document.getElementById('filter-count');
-  if (filterResults && filterCount) {
-    filterCount.textContent = visibleCount;
-    filterResults.style.display = 'block';
-  }
+  return Sim.applyMatrixFilter();
 }
 
+// REEMPLAZO v6.0.0: Resetear filtro de matriz delegada a Simulator
 function resetMatrixFilter() {
-  const matrixTable = document.getElementById('risk-matrix-table');
-  if (!matrixTable) return;
-
-  const cells = matrixTable.querySelectorAll('td');
-  cells.forEach(cell => {
-    cell.style.opacity = '1';
-    cell.style.backgroundColor = '';
-  });
-
-  // Ocultar contador
-  const filterResults = document.getElementById('filter-results');
-  if (filterResults) {
-    filterResults.style.display = 'none';
-  }
-
-  // Reset valores de filtro
-  document.getElementById('filter-min-profit').value = '-5';
-  document.getElementById('filter-max-profit').value = '10';
+  return Sim.resetMatrixFilter();
 }
 
 // NUEVO: Configurar controles del precio del dólar
@@ -3518,36 +2916,9 @@ function setupDollarPriceControls() {
   }
 }
 
-/**
- * Configurar modal de detalles de ruta
- */
+// REEMPLAZO v6.0.0: Configurar modal de detalles de ruta delegada a ModalManager
 function setupRouteDetailsModal() {
-  console.log('📱 [POPUP] Configurando modal de detalles de ruta');
-
-  // Event listener para cerrar modal
-  const modalClose = document.getElementById('modal-close');
-  if (modalClose) {
-    modalClose.addEventListener('click', closeRouteDetailsModal);
-  }
-
-  // Event listener para cerrar modal al hacer click en el overlay
-  const modalOverlay = document.getElementById('route-details-modal');
-  if (modalOverlay) {
-    modalOverlay.addEventListener('click', e => {
-      if (e.target === modalOverlay) {
-        closeRouteDetailsModal();
-      }
-    });
-  }
-
-  // Event listener para cerrar modal con tecla Escape
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && modalOverlay && modalOverlay.style.display === 'flex') {
-      closeRouteDetailsModal();
-    }
-  });
-
-  console.log('✅ [POPUP] Modal de detalles configurado');
+  return ModMgr.setupRouteDetailsModal();
 }
 
 // Mostrar información del precio del dólar
@@ -3575,7 +2946,7 @@ function displayDollarInfo(officialData) {
 
   // CORREGIDO v5.0.35: Después del fix de campos API, mostrar precio de COMPRA (lo que pagamos por comprar USD)
   dollarPrice.textContent = `$${Fmt.formatNumber(officialData.compra)}`;
-  dollarSource.textContent = `Fuente: ${getDollarSourceDisplay(officialData)}`;
+  dollarSource.textContent = `Fuente: ${Fmt.getDollarSourceDisplay(officialData)}`;
 
   console.log('✅ [DISPLAY] Display actualizado:', {
     precioMostrado: dollarPrice.textContent,
@@ -3639,164 +3010,38 @@ function openDollarConfiguration() {
 // SISTEMA DE NOTIFICACIÓN DE ACTUALIZACIONES
 // ==========================================
 
-/**
- * Verificar actualizaciones al cargar el popup
- */
+// REEMPLAZO v6.0.0: Verificar actualizaciones al cargar el popup delegada a NotificationManager
 async function checkForUpdatesOnPopupLoad() {
-  const { pendingUpdate } = await chrome.storage.local.get('pendingUpdate');
-  
-  if (!pendingUpdate) {
-    console.log('✅ [UPDATE] No hay actualizaciones pendientes');
-    return;
-  }
-  
-  // Verificar si la versión descartada expiró
-  const { dismissedUpdate } = await chrome.storage.local.get('dismissedUpdate');
-  if (dismissedUpdate && dismissedUpdate.expiresAt > Date.now()) {
-    if (dismissedUpdate.version === pendingUpdate.latestVersion) {
-      console.log('✅ [UPDATE] Actualización ya descartada');
-      return;
-    }
-  }
-  
-  // Mostrar banner
-  showUpdateBanner(pendingUpdate);
+  return NotifMgr.checkForUpdates();
 }
 
-/**
- * Mostrar banner de actualización con información de versión
- */
+// REEMPLAZO v6.0.0: Mostrar banner de actualización delegada a NotificationManager
 function showUpdateBanner(updateInfo) {
-  const banner = document.getElementById('update-banner');
-  const currentVersionEl = document.getElementById('current-version');
-  const newVersionEl = document.getElementById('new-version');
-  const messageEl = document.getElementById('update-message');
-  const typeBadgeEl = document.getElementById('update-type');
-  
-  if (!banner) return;
-  
-  currentVersionEl.textContent = `v${updateInfo.currentVersion}`;
-  newVersionEl.textContent = `v${updateInfo.latestVersion}`;
-  messageEl.textContent = updateInfo.message || 'Nueva versión disponible';
-  
-  // Determinar tipo de actualización
-  const current = updateInfo.currentVersion.split('.').map(Number);
-  const latest = updateInfo.latestVersion.split('.').map(Number);
-  
-  let updateType = 'PATCH';
-  if (latest[0] > current[0]) updateType = 'MAJOR';
-  else if (latest[1] > current[1]) updateType = 'MINOR';
-  
-  typeBadgeEl.textContent = updateType;
-  banner.className = `update-banner type-${updateType.toLowerCase()}`;
-  banner.style.display = 'flex';
-  
-  // Configurar botones
-  setupUpdateBannerButtons(updateInfo);
+  return NotifMgr.showUpdateBanner(updateInfo);
 }
 
-/**
- * Configurar botones del banner de actualización
- */
+// REEMPLAZO v6.0.0: Configurar botones del banner de actualización delegada a NotificationManager
 async function setupUpdateBannerButtons(updateInfo) {
-  const viewBtn = document.getElementById('view-update');
-  const dismissBtn = document.getElementById('dismiss-update');
-  
-  if (viewBtn) {
-    viewBtn.addEventListener('click', () => {
-      chrome.tabs.create({ url: updateInfo.url });
-    });
-  }
-  
-  if (dismissBtn) {
-    dismissBtn.addEventListener('click', async () => {
-      const expiryDate = new Date();
-      expiryDate.setDate(expiryDate.getDate() + 7);
-      
-      await chrome.storage.local.set({
-        dismissedUpdate: {
-          version: updateInfo.latestVersion,
-          dismissedAt: Date.now(),
-          expiresAt: expiryDate.getTime()
-        }
-      });
-      
-      hideUpdateBanner();
-    });
-  }
+  return NotifMgr.setupUpdateBannerButtons(updateInfo);
 }
 
-/**
- * Ocultar banner de actualización
- */
+// REEMPLAZO v6.0.0: Ocultar banner de actualización delegada a NotificationManager
 function hideUpdateBanner() {
-  const banner = document.getElementById('update-banner');
-  if (banner) {
-    banner.style.display = 'none';
-  }
+  return NotifMgr.hideUpdateBanner();
 }
 
 // ==========================================
 // FUNCIONES DE MODAL Y UI
 // ==========================================
 
-/**
- * Abrir modal con detalles de la ruta
- */
+// REEMPLAZO v6.0.0: Abrir modal con detalles de la ruta delegada a ModalManager
 function openRouteDetailsModal(arbitrage) {
-  console.log('📱 [POPUP] Abriendo modal de detalles para:', arbitrage);
-
-  // Calcular valores usando función auxiliar
-  const values = calculateGuideValues(arbitrage);
-  console.log('📊 [POPUP] Valores calculados para el modal:', values);
-
-  // Actualizar título del modal
-  const modalTitle = document.getElementById('modal-title');
-  if (modalTitle) {
-    modalTitle.textContent = `Ruta: ${values.broker}`;
-  }
-
-  // Generar HTML del modal usando funciones auxiliares
-  const modalHtml = `
-    <div class="guide-container-simple">
-      ${generateGuideHeader(values.broker, values.profitPercentage)}
-      ${generateGuideSteps(values)}
-    </div>
-  `;
-
-  // Insertar contenido en el modal
-  const modalBody = document.getElementById('modal-body');
-  if (modalBody) {
-    modalBody.innerHTML = modalHtml;
-    console.log('✅ [POPUP] Contenido insertado en el modal');
-
-    // Configurar animaciones
-    setupGuideAnimations(modalBody);
-  } else {
-    console.error('❌ [POPUP] No se encontró el body del modal');
-  }
-
-  // Mostrar modal
-  const modal = document.getElementById('route-details-modal');
-  if (modal) {
-    modal.style.display = 'flex';
-    console.log('✅ [POPUP] Modal mostrado');
-  } else {
-    console.error('❌ [POPUP] No se encontró el modal');
-  }
+  return ModMgr.openRouteDetailsModal(arbitrage);
 }
 
-/**
- * Cerrar modal de detalles de ruta
- */
+// REEMPLAZO v6.0.0: Cerrar modal de detalles de ruta delegada a ModalManager
 function closeRouteDetailsModal() {
-  console.log('📱 [POPUP] Cerrando modal de detalles');
-
-  const modal = document.getElementById('route-details-modal');
-  if (modal) {
-    modal.style.display = 'none';
-    console.log('✅ [POPUP] Modal cerrado');
-  }
+  return ModMgr.closeModal();
 }
 
 /**
@@ -3815,40 +3060,9 @@ function resetAllFilters() {
   resetAdvancedFilters();
 }
 
-// Función auxiliar para mostrar notificaciones toast
+// REEMPLAZO v6.0.0: Función auxiliar para mostrar notificaciones toast delegada a NotificationManager
 function showToast(message, type = 'info') {
-  // Crear elemento toast si no existe
-  let toast = document.getElementById('toast-notification');
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.id = 'toast-notification';
-    toast.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
-      color: white;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      z-index: 10000;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      animation: toastSlideIn 0.3s ease-out;
-    `;
-    document.body.appendChild(toast);
-  }
-
-  toast.textContent = message;
-  toast.style.background =
-    type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6';
-
-  // Auto-remover después de 3 segundos
-  setTimeout(() => {
-    if (toast.parentNode) {
-      toast.remove();
-    }
-  }, 3000);
+  return NotifMgr.showToast(message, type);
 }
 
 // Event listener global para botones de retry
@@ -4039,12 +3253,12 @@ function generateUSDOfficialTab(dollarTypes, sortPreference, userSettings = null
   // Ordenar bancos según preferencia
   const sortedBanks = applySortingToData(Object.entries(dollarTypes), sortPreference).slice(0, 12); // Mostrar hasta 12 bancos
 
-  sortedBanks.forEach(([bankName, bankData]) => {
+  sortedBanks.forEach(([bankName, bankData], index) => {
     const buyPrice = bankData.compra || bankData.bid || bankData.price || 0;
     const sellPrice = bankData.venta || bankData.ask || bankData.price || 0;
 
     html += `
-      <div class="bank-row">
+      <div class="bank-row stagger-in hover-lift" style="animation-delay: ${index * 30}ms">
         <div class="bank-name">${bankName.toUpperCase()}</div>
         <div class="bank-buy">$${Fmt.formatNumber(buyPrice)}</div>
         <div class="bank-sell">$${Fmt.formatNumber(sellPrice)}</div>
@@ -4090,12 +3304,12 @@ function generateUSDTUSDTTab(usdtUsdData, sortPreference, userSettings = null) {
     12
   ); // Mostrar hasta 12 exchanges
 
-  sortedExchanges.forEach(([exchangeName, exchangeData]) => {
+  sortedExchanges.forEach(([exchangeName, exchangeData], index) => {
     const bidPrice = exchangeData.bid || exchangeData.price || 0;
     const askPrice = exchangeData.ask || exchangeData.price || 0;
 
     html += `
-      <div class="bank-row">
+      <div class="bank-row stagger-in hover-lift" style="animation-delay: ${index * 30}ms">
         <div class="bank-name">${exchangeName}</div>
         <div class="bank-buy">$${Fmt.formatNumber(bidPrice)}</div>
         <div class="bank-sell">$${Fmt.formatNumber(askPrice)}</div>
@@ -4136,12 +3350,12 @@ function generateUSDTARSTab(usdtData, sortPreference, userSettings = null) {
   // Ordenar exchanges según preferencia
   const sortedExchanges = applySortingToData(Object.entries(usdtData), sortPreference).slice(0, 12); // Mostrar hasta 12 exchanges
 
-  sortedExchanges.forEach(([exchangeName, exchangeData]) => {
+  sortedExchanges.forEach(([exchangeName, exchangeData], index) => {
     const bidPrice = exchangeData.bid || exchangeData.price || 0;
     const askPrice = exchangeData.ask || exchangeData.price || 0;
 
     html += `
-      <div class="bank-row">
+      <div class="bank-row stagger-in hover-lift" style="animation-delay: ${index * 30}ms">
         <div class="bank-name">${exchangeName}</div>
         <div class="bank-buy">$${Fmt.formatNumber(bidPrice)}</div>
         <div class="bank-sell">$${Fmt.formatNumber(askPrice)}</div>
@@ -4521,6 +3735,11 @@ function renderCryptoRoutes(routes) {
     container.appendChild(card);
   });
 
+  // NUEVO Fase 5: Inicializar micro-interacciones para las nuevas tarjetas crypto
+  if (typeof initMagneticButtons === 'function') {
+    initMagneticButtons();
+  }
+
   console.log(`✅ Renderizadas ${routes.length} crypto routes`);
 }
 
@@ -4530,6 +3749,10 @@ function renderCryptoRoutes(routes) {
 function createCryptoRouteCard(route, index) {
   const card = document.createElement('div');
   card.className = 'crypto-route-card';
+
+  // NUEVO v6.0.0: Agregar clases de animación y micro-interacciones Fase 5
+  card.classList.add('stagger-in', 'hover-lift', 'click-shrink', 'magnetic-btn', 'ripple-btn', 'hover-scale-rotate');
+  card.style.animationDelay = `${index * 50}ms`;
 
   // Agregar clase de profit
   if (route.profitPercent > 2) {
@@ -4550,7 +3773,7 @@ function createCryptoRouteCard(route, index) {
         <span class="crypto-icon">${getCryptoIcon(route.crypto)}</span>
         <span class="crypto-name">${route.crypto}</span>
       </div>
-      <div class="profit-badge ${route.profitPercent >= 0 ? 'profit-positive' : 'profit-negative'}">
+      <div class="profit-badge ${route.profitPercent >= 0 ? 'profit-positive' : 'profit-negative'} text-underline-animated glow-pulse">
         ${route.profitPercent >= 0 ? '+' : ''}${route.profitPercent.toFixed(2)}%
       </div>
     </div>
@@ -4721,4 +3944,396 @@ function showCryptoEmpty(message) {
       <div class="empty-state-text">${message || 'No hay oportunidades de arbitraje disponibles'}</div>
     </div>
   `;
+}
+
+// ==========================================
+// FASE 5: MICRO-INTERACCIONES AVANZADAS
+// ==========================================
+
+/**
+ * Efecto Ripple en botones
+ * Crea un efecto de onda expansiva al hacer click
+ */
+function createRipple(event, element) {
+  const circle = document.createElement('span');
+  const diameter = Math.max(element.clientWidth, element.clientHeight);
+  const radius = diameter / 2;
+
+  const rect = element.getBoundingClientRect();
+  
+  circle.style.width = circle.style.height = `${diameter}px`;
+  circle.style.left = `${event.clientX - rect.left - radius}px`;
+  circle.style.top = `${event.clientY - rect.top - radius}px`;
+  circle.classList.add('ripple');
+
+  // Remover ripple existente si hay uno
+  const existingRipple = element.querySelector('.ripple');
+  if (existingRipple) {
+    existingRipple.remove();
+  }
+
+  element.appendChild(circle);
+
+  // Remover el ripple después de la animación
+  setTimeout(() => {
+    circle.remove();
+  }, 600);
+}
+
+/**
+ * Inicializar botones magnéticos
+ * Los botones siguen ligeramente el cursor
+ * OPTIMIZADO: Usa requestAnimationFrame y passive event listeners
+ */
+function initMagneticButtons() {
+  // Verificar si es dispositivo táctil
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  
+  if (isTouchDevice) {
+    // En dispositivos táctiles, no aplicar efecto magnético
+    return;
+  }
+
+  const magneticButtons = document.querySelectorAll('.magnetic-btn');
+  
+  // Mapa para almacenar RAF IDs por botón (para cancelar si es necesario)
+  const rafIds = new WeakMap();
+  
+  magneticButtons.forEach(button => {
+    // Variables para almacenar la última posición calculada
+    let lastX = 0;
+    let lastY = 0;
+    let animationFrameId = null;
+    
+    // OPTIMIZACIÓN: Usar passive event listener para mejor rendimiento
+    button.addEventListener('mousemove', (e) => {
+      const rect = button.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      
+      // Guardar valores para el próximo frame
+      lastX = x;
+      lastY = y;
+      
+      // OPTIMIZACIÓN: Usar requestAnimationFrame para debouncing
+      // Cancelar el RAF anterior si existe
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      
+      // Programar la actualización para el próximo frame de animación
+      animationFrameId = requestAnimationFrame(() => {
+        // Movimiento sutil (máximo 10px)
+        const moveX = lastX * 0.2;
+        const moveY = lastY * 0.2;
+        
+        // Aplicar transformación usando willChange para optimización
+        button.style.willChange = 'transform';
+        button.style.transform = `translate(${moveX}px, ${moveY}px)`;
+        
+        // Limpiar RAF ID
+        animationFrameId = null;
+      });
+    }, { passive: true }); // OPTIMIZACIÓN: Event listener pasivo
+    
+    button.addEventListener('mouseleave', () => {
+      // Cancelar cualquier RAF pendiente
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+      
+      // Resetear transformación
+      button.style.transform = 'translate(0, 0)';
+      
+      // Limpiar willChange después de la transición
+      setTimeout(() => {
+        button.style.willChange = '';
+      }, 300);
+    }, { passive: true }); // OPTIMIZACIÓN: Event listener pasivo
+    
+    // Limpieza: Cancelar RAF si el elemento se remueve del DOM
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList' || mutation.type === 'removedNodes') {
+          if (animationFrameId && !document.contains(button)) {
+            cancelAnimationFrame(animationFrameId);
+          }
+        }
+      });
+    });
+    
+    observer.observe(button.parentNode, { childList: true, subtree: true });
+  });
+}
+
+/**
+ * Animar contador numérico
+ * Anima un valor de 0 al valor final
+ */
+function animateCounter(element, endValue, duration = 1000, decimals = 0) {
+  if (!element) return;
+  
+  const startValue = 0;
+  const startTime = performance.now();
+  
+  // Verificar prefers-reduced-motion
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReducedMotion) {
+    element.textContent = endValue.toFixed(decimals);
+    return;
+  }
+  
+  function updateCounter(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    
+    // Easing function para suavidad
+    const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+    const currentValue = startValue + (endValue - startValue) * easeOutQuart;
+    
+    element.textContent = currentValue.toFixed(decimals);
+    
+    if (progress < 1) {
+      requestAnimationFrame(updateCounter);
+    }
+  }
+  
+  requestAnimationFrame(updateCounter);
+}
+
+/**
+ * Establecer progreso en un anillo circular
+ * @param {string} elementId - ID del elemento SVG del anillo
+ * @param {number} percentage - Porcentaje de progreso (0-100)
+ */
+function setProgressRing(elementId, percentage) {
+  const circle = document.getElementById(elementId);
+  if (!circle) return;
+  
+  const radius = circle.r.baseVal.value;
+  const circumference = radius * 2 * Math.PI;
+  
+  // Clamp percentage between 0 and 100
+  const clampedPercentage = Math.max(0, Math.min(100, percentage));
+  const offset = circumference - (clampedPercentage / 100) * circumference;
+  
+  circle.style.strokeDasharray = `${circumference} ${circumference}`;
+  circle.style.strokeDashoffset = offset;
+  
+  // Agregar clase para animación
+  circle.classList.add('progress-ring-animated');
+}
+
+/**
+ * Scroll suave hacia un elemento
+ * @param {string|HTMLElement} target - Selector CSS o elemento DOM
+ * @param {number} offset - Offset adicional desde el top
+ */
+function smoothScrollTo(target, offset = 0) {
+  const element = typeof target === 'string' ? document.querySelector(target) : target;
+  if (!element) return;
+  
+  // Verificar prefers-reduced-motion
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  
+  const targetPosition = element.getBoundingClientRect().top + window.pageYOffset - offset;
+  
+  if (prefersReducedMotion) {
+    // Scroll instantáneo si el usuario prefiere reducción de movimiento
+    window.scrollTo(0, targetPosition);
+  } else {
+    window.scrollTo({
+      top: targetPosition,
+      behavior: 'smooth'
+    });
+  }
+}
+
+/**
+ * Inicializar todas las micro-interacciones de la Fase 5
+ */
+function initMicroInteractions() {
+  console.log('🎬 Inicializando micro-interacciones avanzadas...');
+  
+  // Inicializar botones magnéticos
+  initMagneticButtons();
+  
+  // Agregar efecto ripple a botones con clase ripple-btn
+  const rippleButtons = document.querySelectorAll('.ripple-btn');
+  rippleButtons.forEach(button => {
+    button.addEventListener('click', (e) => createRipple(e, button));
+  });
+  
+  // Inicializar contadores con clase counter-animate
+  const counters = document.querySelectorAll('.counter-animate');
+  counters.forEach(counter => {
+    const targetValue = parseFloat(counter.dataset.target) || 0;
+    const decimals = parseInt(counter.dataset.decimals) || 0;
+    const duration = parseInt(counter.dataset.duration) || 1000;
+    
+    // Usar IntersectionObserver para animar solo cuando sea visible
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          animateCounter(entry.target, targetValue, duration, decimals);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    
+    observer.observe(counter);
+  });
+  
+  console.log('✅ Micro-interacciones avanzadas inicializadas');
+}
+
+/**
+ * DIAGNÓSTICO v6.0.1: Verificar que el sprite sheet SVG esté cargado correctamente
+ * PROBLEMA 3: Imágenes/iconos faltantes - Síntoma: Sprites SVG no referenciados correctamente
+ */
+function diagnoseSVGIcons() {
+  console.log('🔍 [SVG DIAGNOSIS] Iniciando diagnóstico de iconos SVG...');
+  
+  try {
+    // 1. Verificar que el SVG sprite sheet existe en el DOM
+    const svgSprite = document.querySelector('svg[style*="display: none"]');
+    console.log(`🔍 [SVG DIAGNOSIS] Sprite sheet SVG encontrado: ${!!svgSprite}`);
+    
+    if (!svgSprite) {
+      console.error('❌ [SVG DIAGNOSIS] No se encontró el sprite sheet SVG en el DOM');
+      return;
+    }
+    
+    // 2. Contar y listar todos los symbol IDs definidos
+    const symbols = svgSprite.querySelectorAll('symbol');
+    console.log(`🔍 [SVG DIAGNOSIS] Símbolos SVG definidos: ${symbols.length}`);
+    
+    const symbolIds = [];
+    symbols.forEach(symbol => {
+      const id = symbol.id;
+      if (id) {
+        symbolIds.push(id);
+      }
+    });
+    
+    console.log('📋 [SVG DIAGNOSIS] IDs de símbolos definidos:', symbolIds);
+    
+    // 3. Verificar que iconos críticos están definidos
+    const criticalIcons = [
+      'icon-refresh',
+      'icon-settings',
+      'icon-close',
+      'icon-crypto',
+      'icon-p2p',
+      'icon-simulator',
+      'icon-exchange',
+      'icon-guide',
+      'icon-info',
+      'icon-warning',
+      'icon-error',
+      'icon-question',
+      'icon-bolt',
+      'icon-target',
+      'icon-reset',
+      'icon-dollar',
+      'icon-coins',
+      'icon-percent',
+      'icon-clock',
+      'icon-chart',
+      'icon-trend',
+      'icon-usdt',
+      'icon-btc',
+      'icon-eth',
+      'icon-usdc',
+      'icon-dai',
+      'icon-arrow-right',
+      'icon-arrow-left',
+      'icon-arrow-up',
+      'icon-arrow-down'
+    ];
+    
+    console.log('🔍 [SVG DIAGNOSIS] Verificando iconos críticos...');
+    const missingIcons = [];
+    criticalIcons.forEach(iconId => {
+      const exists = symbolIds.includes(iconId);
+      if (!exists) {
+        missingIcons.push(iconId);
+        console.warn(`⚠️ [SVG DIAGNOSIS] Icono crítico faltante: ${iconId}`);
+      } else {
+        console.log(`✅ [SVG DIAGNOSIS] Icono encontrado: ${iconId}`);
+      }
+    });
+    
+    if (missingIcons.length > 0) {
+      console.error(`❌ [SVG DIAGNOSIS] Faltan ${missingIcons.length} iconos críticos:`, missingIcons);
+    } else {
+      console.log('✅ [SVG DIAGNOSIS] Todos los iconos críticos están definidos');
+    }
+    
+    // 4. Verificar referencias de iconos en botones de filtro
+    console.log('🔍 [SVG DIAGNOSIS] Verificando referencias en botones de filtro...');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    console.log(`🔍 [SVG DIAGNOSIS] Botones de filtro encontrados: ${filterButtons.length}`);
+    
+    filterButtons.forEach((btn, index) => {
+      const svgIcon = btn.querySelector('svg use');
+      if (svgIcon) {
+        const href = svgIcon.getAttribute('href') || svgIcon.getAttribute('xlink:href');
+        console.log(`🔍 [SVG DIAGNOSIS] Botón ${index + 1}: referencia SVG = "${href}"`);
+        
+        if (href) {
+          // Extraer el ID del icono (formato: #icon-name o /path/to/sprite.svg#icon-name)
+          const iconId = href.includes('#') ? href.split('#').pop() : href.replace('#', '');
+          const exists = symbolIds.includes(iconId);
+          
+          if (!exists) {
+            console.error(`❌ [SVG DIAGNOSIS] Botón ${index + 1} referencia icono inexistente: ${iconId}`);
+          } else {
+            console.log(`✅ [SVG DIAGNOSIS] Botón ${index + 1} referencia válida: ${iconId}`);
+          }
+        } else {
+          console.warn(`⚠️ [SVG DIAGNOSIS] Botón ${index + 1} no tiene referencia SVG`);
+        }
+      } else {
+        console.warn(`⚠️ [SVG DIAGNOSIS] Botón ${index + 1} no tiene elemento SVG use`);
+      }
+    });
+    
+    // 5. Verificar referencias en botones de header
+    console.log('🔍 [SVG DIAGNOSIS] Verificando referencias en botones de header...');
+    const headerButtons = document.querySelectorAll('.btn-settings, .btn-refresh');
+    console.log(`🔍 [SVG DIAGNOSIS] Botones de header encontrados: ${headerButtons.length}`);
+    
+    headerButtons.forEach((btn, index) => {
+      const svgIcon = btn.querySelector('svg use');
+      if (svgIcon) {
+        const href = svgIcon.getAttribute('href') || svgIcon.getAttribute('xlink:href');
+        console.log(`🔍 [SVG DIAGNOSIS] Botón header ${index + 1}: referencia SVG = "${href}"`);
+        
+        if (href) {
+          const iconId = href.includes('#') ? href.split('#').pop() : href.replace('#', '');
+          const exists = symbolIds.includes(iconId);
+          
+          if (!exists) {
+            console.error(`❌ [SVG DIAGNOSIS] Botón header ${index + 1} referencia icono inexistente: ${iconId}`);
+          } else {
+            console.log(`✅ [SVG DIAGNOSIS] Botón header ${index + 1} referencia válida: ${iconId}`);
+          }
+        }
+      }
+    });
+    
+    console.log('✅ [SVG DIAGNOSIS] Diagnóstico de iconos SVG completado');
+  } catch (error) {
+    console.error('❌ [SVG DIAGNOSIS] Error durante el diagnóstico:', error);
+    console.error('❌ [SVG DIAGNOSIS] Stack trace:', error.stack);
+  }
+}
+
+// Inicializar micro-interacciones cuando el DOM esté listo
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initMicroInteractions);
+} else {
+  initMicroInteractions();
 }
