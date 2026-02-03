@@ -218,55 +218,55 @@
   --info: #58a6ff;
 
   /* === COLORES DE TEXTO === */
-  /* color-text-primary: #f0f6fc - DEFINIDO EN design-system.css */
-  /* color-text-secondary: #8b949e - DEFINIDO EN design-system.css */
-  /* color-text-muted: #8b949e - DEFINIDO EN design-system.css (valor diferente en popup: #6e7681) */
-  /* color-text-inverse: #0d1117 - DEFINIDO EN design-system.css (valor diferente: #0a0e1a) */
+  --color-text-primary: #f0f6fc;
+  --color-text-secondary: #8b949e;
+  --color-text-muted: #8b949e; /* Mejorado contraste WCAG AA - Era #6e7681 (3.2:1) */
+  --color-text-inverse: #0d1117;
   --text-primary: #f0f6fc;
   --text-secondary: #8b949e;
   --text-muted: #6e7681;
   --text-dim: #484f58;
 
   /* === COLORES DE BORDE === */
-  /* color-border-default: #30363d - DEFINIDO EN design-system.css */
-  /* color-border-muted: #21262d - DEFINIDO EN design-system.css */
-  /* color-border-emphasis: #8b949e - DEFINIDO EN design-system.css */
+  --color-border-default: #30363d;
+  --color-border-muted: #21262d;
+  --color-border-emphasis: #8b949e;
 
   /* === TIPOGRAFÍA === */
-  /* font-size-xs: 0.75rem - DEFINIDO EN design-system.css */
-  /* font-size-sm: 0.8125rem - DEFINIDO EN design-system.css */
-  /* font-size-base: 0.875rem - DEFINIDO EN design-system.css */
-  /* font-size-md: 0.875rem - DEFINIDO EN design-system.css */
-  /* font-size-lg: 1rem - DEFINIDO EN design-system.css */
-  /* font-size-xl: 1.125rem - DEFINIDO EN design-system.css */
-  /* font-size-2xl: 1.25rem - DEFINIDO EN design-system.css */
-  /* font-weight-normal: 400 - DEFINIDO EN design-system.css */
-  /* font-weight-medium: 500 - DEFINIDO EN design-system.css */
-  /* font-weight-semibold: 600 - DEFINIDO EN design-system.css */
-  /* font-weight-bold: 700 - DEFINIDO EN design-system.css */
-  /* line-height-tight: 1.25 - DEFINIDO EN design-system.css */
-  /* line-height-normal: 1.5 - DEFINIDO EN design-system.css */
-  /* line-height-relaxed: 1.75 - DEFINIDO EN design-system.css */
+  --font-size-xs: 0.75rem; /* 12px - Aumentado desde 0.6875rem (11px) */
+  --font-size-sm: 0.8125rem; /* 13px - Aumentado desde 0.75rem (12px) */
+  --font-size-base: 0.875rem; /* 14px - Aumentado desde 0.8125rem (13px) */
+  --font-size-md: 0.875rem; /* 14px */
+  --font-size-lg: 1rem; /* 16px */
+  --font-size-xl: 1.125rem; /* 18px */
+  --font-size-2xl: 1.25rem; /* 20px */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
 
   /* === ESPACIADO (Base 4px) === */
-  /* space-0: 0 - DEFINIDO EN design-system.css */
-  /* space-1: 0.25rem - DEFINIDO EN design-system.css */
-  /* space-2: 0.5rem - DEFINIDO EN design-system.css */
-  /* space-3: 0.75rem - DEFINIDO EN design-system.css */
-  /* space-4: 1rem - DEFINIDO EN design-system.css */
-  /* space-5: 1.25rem - DEFINIDO EN design-system.css */
-  /* space-6: 1.5rem - DEFINIDO EN design-system.css */
-  /* space-8: 2rem - DEFINIDO EN design-system.css */
+  --space-0: 0;
+  --space-1: 0.25rem; /* 4px */
+  --space-2: 0.5rem; /* 8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.25rem; /* 20px */
+  --space-6: 1.5rem; /* 24px */
+  --space-8: 2rem; /* 32px */
   /* Compatibilidad */
   /* ELIMINADO: Variables --spacing-* - Usar --space-* en su lugar */
 
   /* === BORDES === */
-  /* radius-sm: 4px - DEFINIDO EN design-system.css */
-  /* radius-md: 6px - DEFINIDO EN design-system.css */
-  /* radius-lg: 8px - DEFINIDO EN design-system.css */
-  /* radius-xl: 12px - DEFINIDO EN design-system.css */
-  /* radius-2xl: 16px - DEFINIDO EN design-system.css */
-  /* radius-full: 9999px - DEFINIDO EN design-system.css */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
   /* Compatibilidad */
   --border-radius-sm: 6px;
   --border-radius-md: 8px;
@@ -275,48 +275,48 @@
   --border-radius: 8px;
 
   /* === SOMBRAS === */
-  /* shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3) - DEFINIDO EN design-system.css (valor diferente) */
-  /* shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4) - DEFINIDO EN design-system.css (valor diferente) */
-  /* shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5) - DEFINIDO EN design-system.css (valor diferente) */
-  /* shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.6) - DEFINIDO EN design-system.css (valor diferente) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.6);
   --shadow-glow-success: 0 0 12px rgba(63, 185, 80, 0.4);
   --shadow-glow-danger: 0 0 12px rgba(248, 81, 73, 0.4);
   --shadow-glow-green: 0 0 16px var(--profit-green-glow);
   --shadow-glow-red: 0 0 16px var(--loss-red-glow);
 
   /* === EASING FUNCTIONS ADICIONALES (Fase 1 Fundamentos UI/UX) === */
-  /* ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1) - NO ESTÁ EN design-system.css */
-  /* ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1) - DEFINIDO EN design-system.css */
-  /* ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1) - NO ESTÁ EN design-system.css */
-  /* ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1) - DEFINIDO EN design-system.css */
-  /* ease-smooth: cubic-bezier(0.4, 0, 0.2, 1) - NO ESTÁ EN design-system.css */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 
   /* === Z-INDEX SCALE (Fase 1 Fundamentos UI/UX) === */
-  /* z-base: 1 - DEFINIDO EN design-system.css */
-  /* z-dropdown: 100 - DEFINIDO EN design-system.css */
-  /* z-sticky: 200 - DEFINIDO EN design-system.css */
-  /* z-fixed: 300 - DEFINIDO EN design-system.css */
-  /* z-modal-backdrop: 400 - DEFINIDO EN design-system.css */
-  /* z-modal: 500 - DEFINIDO EN design-system.css */
-  /* z-popover: 600 - DEFINIDO EN design-system.css */
-  /* z-tooltip: 700 - DEFINIDO EN design-system.css */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
 
   /* === INPUTS === */
-  /* input-bg: rgba(13, 17, 23, 0.8) - DEFINIDO EN design-system.css (valor diferente: rgba(10, 14, 26, 0.8)) */
-  /* input-border: var(--color-border-default) - DEFINIDO EN design-system.css */
-  /* input-border-focus: var(--primary-blue) - DEFINIDO EN design-system.css (valor diferente: var(--color-brand-primary)) */
-  /* input-shadow-focus: 0 0 0 3px rgba(88, 166, 255, 0.2) - DEFINIDO EN design-system.css (valor diferente: rgba(59, 130, 246, 0.2)) */
-  /* input-radius: var(--radius-md) - DEFINIDO EN design-system.css */
-  /* input-padding: 8px 12px - DEFINIDO EN design-system.css */
-  /* input-transition: all var(--duration-fast) var(--ease-default) - NO ESTÁ EN design-system.css */
+  --input-bg: rgba(13, 17, 23, 0.8);
+  --input-border: var(--color-border-default);
+  --input-border-focus: var(--primary-blue);
+  --input-shadow-focus: 0 0 0 3px rgba(88, 166, 255, 0.2);
+  --input-radius: var(--radius-md);
+  --input-padding: 8px 12px;
+  --input-transition: all var(--duration-fast) var(--ease-default);
 
   /* === CARDS === */
-  /* card-bg: linear-gradient(135deg, rgba(22, 27, 34, 0.9) 0%, rgba(33, 38, 45, 0.7) 100%) - DEFINIDO EN design-system.css */
-  /* card-bg-hover: linear-gradient(135deg, rgba(22, 27, 34, 1) 0%, rgba(33, 38, 45, 0.9) 100%) - DEFINIDO EN design-system.css */
-  /* card-border: 1px solid var(--color-border-default) - DEFINIDO EN design-system.css */
-  /* card-border-hover: 1px solid var(--color-border-emphasis) - DEFINIDO EN design-system.css */
-  /* shadow-card: var(--shadow-md) - DEFINIDO EN design-system.css */
-  /* shadow-card-hover: var(--shadow-lg) - DEFINIDO EN design-system.css */
+  --card-bg: linear-gradient(135deg, rgba(22, 27, 34, 0.9) 0%, rgba(33, 38, 45, 0.7) 100%);
+  --card-bg-hover: linear-gradient(135deg, rgba(22, 27, 34, 1) 0%, rgba(33, 38, 45, 0.9) 100%);
+  --card-border: 1px solid var(--color-border-default);
+  --card-border-hover: 1px solid var(--color-border-emphasis);
+  --shadow-card: var(--shadow-md);
+  --shadow-card-hover: var(--shadow-lg);
   --border-card: 1px solid rgba(48, 54, 61, 0.8);
   --border-card-hover: 1px solid rgba(88, 166, 255, 0.4);
   --backdrop-blur: blur(12px);
@@ -324,15 +324,15 @@
   --hover-lift: translateY(-2px);
 
   /* === INDICADORES DE PROFIT === */
-  /* indicator-width: 3px - NO ESTÁ EN design-system.css */
-  /* indicator-width-high: 4px - NO ESTÁ EN design-system.css */
-  /* indicator-opacity: 0.9 - NO ESTÁ EN design-system.css */
-  /* indicator-opacity-hover: 1 - NO ESTÁ EN design-system.css */
-  /* profit-positive: var(--color-success) - DEFINIDO EN design-system.css */
-  /* profit-negative: var(--color-danger) - DEFINIDO EN design-system.css */
-  /* profit-high: var(--color-success) - DEFINIDO EN design-system.css */
-  /* profit-low: var(--color-warning) - DEFINIDO EN design-system.css */
-  /* border-hover: var(--color-border-emphasis) - DEFINIDO EN design-system.css */
+  --indicator-width: 3px;
+  --indicator-width-high: 4px;
+  --indicator-opacity: 0.9;
+  --indicator-opacity-hover: 1;
+  --profit-positive: var(--color-success);
+  --profit-negative: var(--color-danger);
+  --profit-high: var(--color-success);
+  --profit-low: var(--color-warning);
+  --border-hover: var(--color-border-emphasis);
 
   /* === GRADIENTES === */
   --gradient-primary: linear-gradient(135deg, #1f6feb 0%, #58a6ff 100%);
@@ -537,8 +537,29 @@ a:focus-visible {
    FASE 4: ANIMACIONES BASE - ENTRADA
    ========================================== */
 
-/* slideUp - DEFINIDO EN animations.css como fadeInUp */
-/* Scale In - DEFINIDO EN animations.css como fadeInScale */
+/* Slide Up - Aparece desde abajo */
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Scale In - Aparece con escala */
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
 
 /* Stagger In - Para listas con delay */
 @keyframes staggerIn {
@@ -552,7 +573,7 @@ a:focus-visible {
   }
 }
 .scale-in {
-  animation: fadeInScale var(--duration-normal) var(--ease-spring);
+  animation: scaleIn var(--duration-normal) var(--ease-spring);
   animation-fill-mode: both;
 }
 
@@ -721,7 +742,17 @@ a:focus-visible {
     transform: rotate(360deg);
   }
 }
-/* dotPulse - DEFINIDO EN animations.css */
+/* Dot Pulse - Para indicadores de carga con puntos */
+@keyframes dotPulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
 .loading-dots span {
   width: 8px;
   height: 8px;
@@ -1577,7 +1608,11 @@ main::-webkit-scrollbar-thumb:hover {
   font-size: 13px;
   margin-top: 12px;
 }
-/* spin - DEFINIDO EN animations.css como refreshSpin */
+/* Spinner con trail - Fase 2 */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 
 @keyframes trail {
   0% { stroke-dashoffset: 0; }
@@ -1736,7 +1771,9 @@ footer {
 }
 
 /* UTILITY */
-/* hidden - DEFINIDO EN design-system.css */
+.hidden {
+  display: none !important;
+}
 .simulator-header h3 {
   color: var(--color-brand-primary);
   font-size: var(--font-size-xl);
@@ -3250,8 +3287,46 @@ p.error {
    SISTEMA DE TIPOGRAFÍA - Jerarquía Visual
    ========================================== */
 
-/* heading-1, heading-2, heading-3, heading-4 - DEFINIDOS EN design-system.css */
-/* .body - DEFINIDO EN design-system.css como .body-text */
+/* Títulos - Nivel 1 (Más prominente) */
+.heading-1 {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+}
+
+/* Títulos - Nivel 2 */
+.heading-2 {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
+}
+
+/* Títulos - Nivel 3 */
+.heading-3 {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--color-text-primary);
+}
+
+/* Títulos - Nivel 4 */
+.heading-4 {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+}
+/* Texto del cuerpo - Normal */
+.body {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+}
 
 /* Texto del cuerpo - Pequeño */
 .body-small {
@@ -3269,23 +3344,40 @@ p.error {
   color: var(--color-text-secondary);
 }
 
-/* text-secondary - DEFINIDO EN design-system.css */
-/* text-muted - DEFINIDO EN design-system.css */
+/* Texto secundario */
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+/* Texto muted */
+.text-muted {
+  color: var(--color-text-muted);
+}
 
 /* Texto con énfasis */
 .text-emphasis {
   font-weight: 600;
   color: var(--color-text-primary);
 }
-/* text-success - DEFINIDO EN design-system.css */
-/* text-warning - DEFINIDO EN design-system.css */
+/* Texto con color de éxito */
+.text-success {
+  color: var(--color-success);
+}
+/* Texto con color de advertencia */
+.text-warning {
+  color: var(--color-warning);
+}
 
 /* Monospace para números/code */
 .text-mono {
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
   font-size: 0.9em;
 }
-/* text-line-through - DEFINIDO EN design-system.css como .line-through */
+/* Texto con línea a través */
+.text-line-through {
+  text-decoration: line-through;
+  color: var(--color-text-secondary);
+}
 /* ==========================================
    SISTEMA DE ESPACIADO VISUAL
    ========================================== */
@@ -3440,7 +3532,9 @@ footer .data-status {
   --color-border-subtle: rgba(48, 54, 61, 0.5);
   --color-primary: var(--color-brand-primary);
 }
-/* text-secondary - DEFINIDO EN design-system.css (duplicado interno eliminado) */
+.text-secondary {
+  color: var(--color-text-secondary); /* #8b949e sobre #161b22 - verificar contraste */
+}
 /* Profit con mejor contraste */
 .profit-positive {
   color: var(--color-success);

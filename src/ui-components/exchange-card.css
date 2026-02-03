@@ -84,6 +84,32 @@
   width: 100%;
   height: 100%;
 }
+
+/* Sparkline path con animación */
+.sparkline-path {
+  fill: none;
+  stroke: var(--color-success);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1000;
+  animation: drawLine 1s var(--ease-out-expo) forwards;
+}
+
+@keyframes drawLine {
+  from { stroke-dashoffset: 1000; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* Sparkline con tendencia bajista */
+.sparkline-path.trend-down {
+  stroke: var(--color-danger);
+}
+
+/* Sparkline con tendencia neutra */
+.sparkline-path.trend-neutral {
+  stroke: var(--color-warning);
+}
 /* ==========================================
    7. FOOTER DE LA TARJETA
    ========================================== */
@@ -199,11 +225,252 @@
   50% { background-color: rgba(239, 68, 68, 0.2); }
   100% { background-color: transparent; }
 }
-/* Grid layout para múltiples tarjetas */
+/* ==========================================
+   10. VARIANTES DE TARJETAS
+   ========================================== */
+
+/* Variante compacta - Más pequeña y densa */
+.exchange-card.card-compact {
+  padding: var(--space-2) var(--space-3);
+}
+
+.exchange-card.card-compact .card-header {
+  margin-bottom: var(--space-2);
+}
+
+.exchange-card.card-compact .price-value {
+  font-size: var(--font-size-xl);
+}
+
+.exchange-card.card-compact .card-footer {
+  padding-top: var(--space-2);
+}
+
+/* Variante detallada - Más información */
+.exchange-card.card-detailed {
+  padding: var(--space-5);
+}
+
+.exchange-card.card-detailed .card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.exchange-card.card-detailed .price-sparkline {
+  height: 40px;
+}
+
+/* Variante expandida - Máxima información */
+.exchange-card.card-expanded {
+  padding: var(--space-6);
+}
+
+.exchange-card.card-expanded .card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.exchange-card.card-expanded .price-sparkline {
+  height: 60px;
+}
+
+.exchange-card.card-expanded .exchange-name {
+  font-size: var(--font-size-lg);
+}
+
+/* ==========================================
+   11. BADGES ADICIONALES
+   ========================================== */
+
+/* Badge de volumen */
+.volume-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-0-5) var(--space-2);
+  background: var(--color-info-muted);
+  color: var(--color-info);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.volume-badge.high {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--color-success);
+}
+
+.volume-badge.low {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--color-danger);
+}
+
+/* Badge de liquidez */
+.liquidity-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-0-5) var(--space-2);
+  background: var(--color-warning-muted);
+  color: var(--color-warning);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Badge de spread */
+.spread-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-0-5) var(--space-2);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.spread-badge.tight {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--color-success);
+}
+
+.spread-badge.wide {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--color-danger);
+}
+
+/* ==========================================
+   12. ANIMACIONES DE ACTUALIZACIÓN
+   ========================================== */
+
+/* Animación de actualización de precio */
+.price-value.updating {
+  animation: priceUpdatePulse 0.6s ease-out;
+}
+
+@keyframes priceUpdatePulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Animación de precio subiendo */
+.price-value.updated-up {
+  animation: priceFlashUp 0.5s ease-out;
+}
+
+/* Animación de precio bajando */
+.price-value.updated-down {
+  animation: priceFlashDown 0.5s ease-out;
+}
+
+/* Animación de conteo para números */
+.price-value.counting {
+  animation: countUp 0.3s var(--ease-out-expo);
+}
+
+/* ==========================================
+   13. ESTADOS DE FOCUS
+   ========================================== */
+
+/* Estado focus: outline + elevación */
+.exchange-card:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md), 0 0 0 4px rgba(59, 130, 246, 0.2);
+}
+
+/* Estado focus con best price */
+.exchange-card[data-best="true"]:focus-visible {
+  outline-color: var(--color-success);
+  box-shadow: var(--shadow-md), 0 0 0 4px rgba(16, 185, 129, 0.3);
+}
+
+/* ==========================================
+   14. ESTADOS DE CARGA ESPECÍFICOS
+   ========================================== */
+
+/* Estado de carga skeleton */
+.exchange-card.skeleton-loading {
+  pointer-events: none;
+  user-select: none;
+}
+
+.exchange-card.skeleton-loading .price-value,
+.exchange-card.skeleton-loading .exchange-name,
+.exchange-card.skeleton-loading .variation-value {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-tertiary) 0%,
+    var(--color-bg-elevated) 50%,
+    var(--color-bg-tertiary) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  color: transparent;
+  border-radius: var(--radius-sm);
+}
+
+/* Estado de carga con spinner */
+.exchange-card.spinner-loading .card-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60px;
+}
+
+.exchange-card.spinner-loading .card-body::after {
+  content: '';
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--color-border-muted);
+  border-top-color: var(--color-brand-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ==========================================
+   15. GRID LAYOUT PARA MÚLTIPLES TARJETAS
+   ========================================== */
+
 .exchange-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: var(--space-3);
+}
+
+/* Grid responsive */
+@media (max-width: 640px) {
+  .exchange-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Grid compacto */
+.exchange-cards-grid.grid-compact {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-2);
+}
+
+/* Grid expandido */
+.exchange-cards-grid.grid-expanded {
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--space-4);
 }
 
 /* ==========================================

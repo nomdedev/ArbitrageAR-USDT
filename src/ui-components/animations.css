@@ -54,9 +54,82 @@
     transform: translateX(0);
   }
 }
+/* Stagger Children - Animación escalonada para hijos */
+.stagger-children > * {
+  animation: fadeInUp var(--duration-normal) var(--ease-out-expo) both;
+}
+
 .stagger-children > *:nth-child(1) { animation-delay: calc(var(--stagger-normal, 100ms) * 0); }
+.stagger-children > *:nth-child(2) { animation-delay: calc(var(--stagger-normal, 100ms) * 1); }
 .stagger-children > *:nth-child(3) { animation-delay: calc(var(--stagger-normal, 100ms) * 2); }
+.stagger-children > *:nth-child(4) { animation-delay: calc(var(--stagger-normal, 100ms) * 3); }
 .stagger-children > *:nth-child(5) { animation-delay: calc(var(--stagger-normal, 100ms) * 4); }
+.stagger-children > *:nth-child(6) { animation-delay: calc(var(--stagger-normal, 100ms) * 5); }
+
+/* Zoom In - Entrada con zoom */
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Flip In - Entrada con volteo */
+@keyframes flipInX {
+  from {
+    opacity: 0;
+    transform: perspective(400px) rotateX(90deg);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(400px) rotateX(0deg);
+  }
+}
+
+@keyframes flipInY {
+  from {
+    opacity: 0;
+    transform: perspective(400px) rotateY(90deg);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(400px) rotateY(0deg);
+  }
+}
+
+/* Rotate In - Entrada con rotación */
+@keyframes rotateIn {
+  from {
+    opacity: 0;
+    transform: rotate(-180deg) scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+/* Bounce In - Entrada con rebote */
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
 /* Card Hover - Elevación + glow */
 .card-hover:hover {
   transform: translateY(-4px);
@@ -189,10 +262,528 @@
   --stagger-fast: 50ms;
   --stagger-normal: 100ms;
   --stagger-slow: 150ms;
+  --stagger-slower: 200ms;
 }
 
 /* ==========================================
-   9. EJEMPLO DE USO
+   9. ANIMACIONES DE SALIDA
+   ========================================== */
+
+/* Fade Out Up - Sale hacia arriba */
+@keyframes fadeOutUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* Fade Out Down - Sale hacia abajo */
+@keyframes fadeOutDown {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+/* Slide Out Right - Sale hacia la derecha */
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+}
+
+/* Slide Out Left - Sale hacia la izquierda */
+@keyframes slideOutLeft {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+}
+
+/* Zoom Out - Salida con zoom */
+@keyframes zoomOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+/* Bounce Out - Salida con rebote */
+@keyframes bounceOut {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+}
+
+/* ==========================================
+   10. MICROINTERACCIONES DE SCROLL
+   ========================================== */
+
+/* Reveal - Revelación al scroll */
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reveal Left - Revelación desde la izquierda */
+@keyframes revealLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Reveal Right - Revelación desde la derecha */
+@keyframes revealRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ==========================================
+   11. ANIMACIONES DE CARGA ADICIONALES
+   ========================================== */
+
+/* Pulse Ring - Anillo pulsante para carga */
+@keyframes pulseRing {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+}
+
+/* Dot Pulse - Punto pulsante */
+@keyframes dotPulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* Wave - Onda para loaders */
+@keyframes wave {
+  0%, 100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.5);
+  }
+}
+
+/* ==========================================
+   12. EFECTOS DE TRANSICIÓN COMPLEJOS
+   ========================================== */
+
+/* Shake - Vibración */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
+}
+
+/* Swing - Balanceo */
+@keyframes swing {
+  20% {
+    transform: rotate(15deg);
+  }
+  40% {
+    transform: rotate(-10deg);
+  }
+  60% {
+    transform: rotate(5deg);
+  }
+  80% {
+    transform: rotate(-5deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+/* ==========================================
+   13. ANIMACIONES DE NOTIFICACIONES
+   ========================================== */
+
+/* Slide In Top - Entra desde arriba */
+@keyframes slideInTop {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide In Bottom - Entra desde abajo */
+@keyframes slideInBottom {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Bounce In Down - Rebote desde arriba */
+@keyframes bounceInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(10px);
+  }
+  70% {
+    transform: translateY(-5px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Bounce In Up - Rebote desde abajo */
+@keyframes bounceInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-10px);
+  }
+  70% {
+    transform: translateY(5px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================
+   14. ANIMACIONES DE MODAL ELABORADAS
+   ========================================== */
+
+/* Modal Slide In - Modal deslizante */
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Modal Backdrop Fade - Fondo del modal */
+@keyframes modalBackdropFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ==========================================
+   15. CLASES DE UTILIDAD ADICIONALES
+   ========================================== */
+
+/* Animaciones de entrada */
+.animate-zoom-in {
+  animation: zoomIn var(--duration-normal) var(--ease-out-back) both;
+}
+
+.animate-flip-in-x {
+  animation: flipInX var(--duration-slow) var(--ease-out-expo) both;
+}
+
+.animate-flip-in-y {
+  animation: flipInY var(--duration-slow) var(--ease-out-expo) both;
+}
+
+.animate-rotate-in {
+  animation: rotateIn var(--duration-slow) var(--ease-spring) both;
+}
+
+.animate-bounce-in {
+  animation: bounceIn var(--duration-slow) var(--ease-spring) both;
+}
+
+/* Animaciones de salida */
+.animate-fade-out-up {
+  animation: fadeOutUp var(--duration-fast) var(--ease-in) both;
+}
+
+.animate-fade-out-down {
+  animation: fadeOutDown var(--duration-fast) var(--ease-in) both;
+}
+
+.animate-slide-out-right {
+  animation: slideOutRight var(--duration-fast) var(--ease-in) both;
+}
+
+.animate-slide-out-left {
+  animation: slideOutLeft var(--duration-fast) var(--ease-in) both;
+}
+
+.animate-zoom-out {
+  animation: zoomOut var(--duration-fast) var(--ease-in) both;
+}
+
+.animate-bounce-out {
+  animation: bounceOut var(--duration-normal) var(--ease-in) both;
+}
+
+/* Animaciones de scroll */
+.animate-reveal {
+  animation: reveal var(--duration-slow) var(--ease-out-expo) both;
+}
+
+.animate-reveal-left {
+  animation: revealLeft var(--duration-slow) var(--ease-out-expo) both;
+}
+
+.animate-reveal-right {
+  animation: revealRight var(--duration-slow) var(--ease-out-expo) both;
+}
+
+/* Animaciones de carga */
+.animate-pulse-ring {
+  animation: pulseRing 1.5s ease-in-out infinite;
+}
+
+.animate-dot-pulse {
+  animation: dotPulse 1s ease-in-out infinite;
+}
+
+.animate-wave {
+  animation: wave 1s ease-in-out infinite;
+}
+
+/* Efectos de transición */
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.animate-swing {
+  animation: swing 1s ease-in-out;
+}
+
+/* Animaciones de notificaciones */
+.animate-slide-in-top {
+  animation: slideInTop var(--duration-normal) var(--ease-out-back) both;
+}
+
+.animate-slide-in-bottom {
+  animation: slideInBottom var(--duration-normal) var(--ease-out-back) both;
+}
+
+.animate-bounce-in-down {
+  animation: bounceInDown var(--duration-slow) var(--ease-spring) both;
+}
+
+.animate-bounce-in-up {
+  animation: bounceInUp var(--duration-slow) var(--ease-spring) both;
+}
+
+/* Animaciones de modal */
+.animate-modal-slide-in {
+  animation: modalSlideIn var(--duration-slow) var(--ease-out-expo) both;
+}
+
+.animate-modal-backdrop {
+  animation: modalBackdropFade var(--duration-normal) var(--ease-out) both;
+}
+
+/* ==========================================
+   16. CLASES DE MICROINTERACCIÓN FASE 5
+   ========================================== */
+
+/* Magnetic Button Effect */
+/* Botón con efecto magnético que sigue sutilmente el cursor */
+.magnetic-btn {
+  position: relative;
+  transition: transform var(--duration-normal) var(--ease-out-expo);
+}
+
+.magnetic-btn:hover {
+  transform: scale(1.05);
+}
+
+.magnetic-btn::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  background: radial-gradient(circle at center, var(--color-brand-primary) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-out-expo);
+  z-index: -1;
+}
+
+.magnetic-btn:hover::before {
+  opacity: 0.3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .magnetic-btn:hover {
+    transform: none;
+  }
+  .magnetic-btn::before {
+    display: none;
+  }
+}
+
+/* Ripple Button Effect */
+/* Botón con efecto de onda expansiva al hacer click */
+.ripple-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width var(--duration-slow) var(--ease-out-expo),
+              height var(--duration-slow) var(--ease-out-expo);
+}
+
+.ripple-btn:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ripple-btn::after {
+    display: none;
+  }
+}
+
+/* Hover Scale and Rotate Effect */
+/* Efecto hover con escala y rotación sutil */
+.hover-scale-rotate {
+  transition: transform var(--duration-normal) var(--ease-out-back);
+}
+
+.hover-scale-rotate:hover {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.hover-scale-rotate:active {
+  transform: scale(0.98) rotate(0deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hover-scale-rotate:hover {
+    transform: none;
+  }
+}
+
+/* High Profit Styling */
+/* Estilo para ganancias altas con efecto de brillo pulsante */
+.profit-high {
+  color: var(--color-success);
+  font-weight: var(--font-weight-bold);
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+  animation: profitGlow 2s ease-in-out infinite;
+}
+
+@keyframes profitGlow {
+  0%, 100% {
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(16, 185, 129, 0.7), 0 0 30px rgba(16, 185, 129, 0.4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profit-high {
+    animation: none;
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+  }
+}
+
+/* ==========================================
+   17. EJEMPLO DE USO
    ========================================== */
 
 /*

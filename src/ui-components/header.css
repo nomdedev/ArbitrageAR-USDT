@@ -1,3 +1,37 @@
+/* ==========================================
+   ARBITRAGEAR - HEADER PREMIUM v7.0
+   Header con Animaciones y Microinteracciones
+   ========================================== */
+
+/* ==========================================
+   1. ESTRUCTURA DEL HEADER
+   ========================================== */
+
+.header-premium {
+  background: linear-gradient(135deg, #1f6feb 0%, #0d419d 100%);
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efecto de glassmorphism */
+.header-premium::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  z-index: 0;
+}
+
+.header-premium > * {
+  position: relative;
+  z-index: 1;
+}
 
 /* ==========================================
    2. LOGO ANIMADO CON GRADIENTE
@@ -10,6 +44,7 @@
   animation: fadeInUp var(--duration-normal) var(--ease-out-expo) both;
   animation-delay: 100ms;
 }
+
 .logo-icon {
   font-size: 24px;
   filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
@@ -25,6 +60,7 @@
     filter: drop-shadow(0 0 16px rgba(59, 130, 246, 0.8));
   }
 }
+
 .brand-title {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
@@ -36,6 +72,13 @@
   background-clip: text;
   line-height: 1.2;
 }
+
+.brand-tagline {
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: var(--font-weight-medium);
+}
+
 /* ==========================================
    3. INDICADOR DE ESTADO DE CONEXIÓN
    ========================================== */
@@ -51,6 +94,15 @@
   animation: fadeInUp var(--duration-normal) var(--ease-out-expo) both;
   animation-delay: 150ms;
 }
+
+.status-dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  background: var(--color-success);
+  border-radius: 50%;
+}
+
 /* Animación pulse infinita para el status dot */
 .status-dot::before {
   content: '';
@@ -72,14 +124,52 @@
     opacity: 0;
   }
 }
+
+.status-text {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-success);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 /* Estado desconectado */
 .header-status[data-status="disconnected"] {
   background: rgba(239, 68, 68, 0.1);
   border-color: rgba(239, 68, 68, 0.3);
 }
+
+.header-status[data-status="disconnected"] .status-dot {
+  background: var(--color-danger);
+}
+
 .header-status[data-status="disconnected"] .status-dot::before {
   background: var(--color-danger);
 }
+
+.header-status[data-status="disconnected"] .status-text {
+  color: var(--color-danger);
+}
+
+/* Estado de carga */
+.header-status[data-status="loading"] {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.header-status[data-status="loading"] .status-dot {
+  background: var(--color-warning);
+}
+
+.header-status[data-status="loading"] .status-dot::before {
+  background: var(--color-warning);
+  animation: statusPulse 1s ease-in-out infinite;
+}
+
+.header-status[data-status="loading"] .status-text {
+  color: var(--color-warning);
+}
+
 /* ==========================================
    4. BOTONES DE ACCIÓN
    ========================================== */
@@ -126,7 +216,81 @@
   stroke-width: 2px;
 }
 
-/* Tooltip nativo con data attribute */
+/* ==========================================
+   5. ESTADOS DE HOVER ADICIONALES
+   ========================================== */
+
+/* Hover con glow para botones */
+.btn-icon:hover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at center, rgba(59, 130, 246, 0.2), transparent 70%);
+  opacity: 0;
+  animation: buttonGlow 0.6s ease-out;
+}
+
+@keyframes buttonGlow {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+/* Hover con ripple effect */
+.btn-icon::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  transform: scale(0);
+  opacity: 0;
+  transition: transform 0.6s var(--ease-out), opacity 0.6s var(--ease-out);
+}
+
+.btn-icon:active::after {
+  transform: scale(2);
+  opacity: 1;
+  transition: 0s;
+}
+
+/* ==========================================
+   6. ESTADOS DE FOCUS MEJORADOS
+   ========================================== */
+
+/* Focus visible mejorado */
+.btn-icon:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+}
+
+/* Focus para botón de refresh */
+.btn-icon.btn-refresh:focus-visible {
+  outline-color: var(--color-success);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+}
+
+/* Focus para botón de settings */
+.btn-icon.btn-settings:focus-visible {
+  outline-color: var(--color-brand-accent);
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+}
+
+/* ==========================================
+   7. TOOLTIP NATIVO
+   ========================================== */
+
 .btn-icon[data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
@@ -149,6 +313,11 @@
 .btn-icon[data-tooltip]:hover::after {
   opacity: 1;
 }
+
+/* ==========================================
+   8. ANIMACIÓN DE REFRESH
+   ========================================== */
+
 @keyframes refreshSpin {
   from {
     transform: rotate(0deg);
@@ -158,8 +327,66 @@
   }
 }
 
+/* Estado refresh con animación */
+.btn-icon.refreshing svg {
+  animation: refreshSpin 1s linear infinite;
+}
+
+.btn-icon.refreshing {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
 /* ==========================================
-   6. INDICADOR DE VERSIÓN
+   9. VARIANTES DE ANIMACIÓN DEL LOGO
+   ========================================== */
+
+/* Logo con bounce */
+.logo-icon.bounce {
+  animation: logoBounce 2s ease-in-out infinite;
+}
+
+@keyframes logoBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* Logo con pulse */
+.logo-icon.pulse {
+  animation: logoPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
+  }
+  50% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 16px rgba(59, 130, 246, 0.8));
+  }
+}
+
+/* Logo con rotate */
+.logo-icon.rotate {
+  animation: logoRotate 10s linear infinite;
+}
+
+@keyframes logoRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==========================================
+   10. INDICADOR DE VERSIÓN
    ========================================== */
 
 .version-indicator {
@@ -174,8 +401,59 @@
   animation: fadeInUp var(--duration-normal) var(--ease-out-expo) both;
   animation-delay: 250ms;
 }
+
+/* Version badge con actualización */
+.version-indicator.update-available {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.3) 100%);
+  border-color: rgba(16, 185, 129, 0.5);
+  animation: versionPulse 2s ease-in-out infinite;
+}
+
+@keyframes versionPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+  }
+}
+
 /* ==========================================
-   8. ANIMACIONES DE ENTRADA
+   11. VARIANTES DE TEMA
+   ========================================== */
+
+/* Light mode */
+.header-premium.light-mode {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-bottom: 1px solid #cbd5e1;
+}
+
+.header-premium.light-mode .brand-title {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header-premium.light-mode .btn-icon {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #1f2937;
+}
+
+.header-premium.light-mode .btn-icon:hover {
+  background: rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Dark mode (default) */
+.header-premium.dark-mode {
+  background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+  border-bottom: 1px solid #30363d;
+}
+
+/* ==========================================
+   12. ANIMACIONES DE ENTRADA ELABORADAS
    ========================================== */
 
 @keyframes fadeInUp {
@@ -189,25 +467,143 @@
   }
 }
 
-/* ==========================================
-   9. RESPONSIVE
-   ========================================== */
+/* Staggered entrance para elementos del header */
+.header-brand {
+  animation: fadeInUp var(--duration-normal) var(--ease-out-expo) both;
+  animation-delay: 100ms;
+}
 
-@media (max-width: 480px) {
-.brand-title {
-    font-size: var(--font-size-lg);
-  }
 .header-status {
-    display: none; /* Ocultar en móviles pequeños */
+  animation: fadeInUp var(--duration-normal) var(--ease-out-expo) both;
+  animation-delay: 150ms;
+}
+
+.header-actions {
+  animation: fadeInUp var(--duration-normal) var(--ease-out-expo) both;
+  animation-delay: 200ms;
+}
+
+.version-indicator {
+  animation: fadeInUp var(--duration-normal) var(--ease-out-expo) both;
+  animation-delay: 250ms;
+}
+
+/* Entrance con slide */
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
   }
-  
-  .version-indicator {
-    display: none; /* Ocultar en móviles pequeños */
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Entrance con scale */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
 /* ==========================================
-   10. PREFERS-REDUCED-MOTION
+   13. MICROINTERACCIONES ADICIONALES
+   ========================================== */
+
+/* Efecto de parallax en header */
+.header-premium:hover .logo-icon {
+  transform: translateY(-2px);
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+
+/* Efecto de tilt en header */
+.header-premium:hover .brand-title {
+  transform: scale(1.02);
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+/* Efecto de glow en status dot */
+.header-status:hover .status-dot::before {
+  animation: statusPulse 1s ease-in-out infinite;
+  transform: scale(2);
+}
+
+/* Efecto de elevación en botones */
+.btn-icon:hover {
+  transform: translateY(-2px);
+}
+
+/* Efecto de ripple en botones */
+.btn-icon:active::after {
+  transform: scale(2);
+  opacity: 1;
+  transition: 0s;
+}
+
+/* ==========================================
+   14. RESPONSIVE BREAKPOINTS ADICIONALES
+   ========================================== */
+
+/* Tablet */
+@media (max-width: 768px) {
+  .brand-title {
+    font-size: var(--font-size-lg);
+  }
+  
+  .btn-icon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .btn-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Mobile pequeño */
+@media (max-width: 480px) {
+  .brand-title {
+    font-size: var(--font-size-base);
+  }
+  
+  .header-status {
+    display: none;
+  }
+  
+  .version-indicator {
+    display: none;
+  }
+  
+  .btn-icon {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Mobile muy pequeño */
+@media (max-width: 360px) {
+  .header-brand {
+    gap: var(--space-2);
+  }
+  
+  .logo-icon {
+    font-size: 20px;
+  }
+  
+  .header-actions {
+    gap: var(--space-1);
+  }
+}
+
+/* ==========================================
+   15. PREFERS-REDUCED-MOTION
    ========================================== */
 
 @media (prefers-reduced-motion: reduce) {
@@ -220,14 +616,24 @@
   .btn-icon:hover {
     transform: none !important;
   }
+  
+  .header-premium:hover .logo-icon,
+  .header-premium:hover .brand-title {
+    transform: none !important;
+  }
+  
+  .btn-icon:hover::before,
+  .btn-icon:hover::after {
+    animation: none !important;
+  }
 }
 
 /* ==========================================
-   11. EJEMPLO DE USO HTML
+   16. EJEMPLO DE USO HTML
    ========================================== */
 
 /*
-<header class="header-premium">
+<header class="header-premium dark-mode">
   <div class="header-brand">
     <div class="logo-container">
       <span class="logo-icon">💰</span>
@@ -249,7 +655,7 @@
             aria-label="Abrir configuración">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
         <circle cx="12" cy="12" r="3"/>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
       </svg>
     </button>
     
