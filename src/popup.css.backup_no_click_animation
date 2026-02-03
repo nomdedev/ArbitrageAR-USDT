@@ -552,16 +552,14 @@ a:focus-visible {
 }
 
 /* Click Shrink - Efecto de encogimiento al click */
-/* ELIMINADO: Animación de click desagradable - usuario solicitó eliminarla */
 .click-shrink {
-  /* transition: transform var(--duration-fast) var(--ease-in); */
+  transition: transform var(--duration-fast) var(--ease-in);
 }
 
 .click-shrink:active {
-  /* transform: scale(0.97); */
-  transform: none;
+  transform: scale(0.97);
 }
-/* @keyframes clickPulse {
+@keyframes clickPulse {
   0% {
     transform: scale(1);
   }
@@ -571,7 +569,7 @@ a:focus-visible {
   100% {
     transform: scale(1);
   }
-} */
+}
 
 /* Focus Ring - Anillo de focus mejorado */
 .focus-ring:focus-visible {

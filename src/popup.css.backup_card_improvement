@@ -552,16 +552,14 @@ a:focus-visible {
 }
 
 /* Click Shrink - Efecto de encogimiento al click */
-/* ELIMINADO: Animación de click desagradable - usuario solicitó eliminarla */
 .click-shrink {
-  /* transition: transform var(--duration-fast) var(--ease-in); */
+  transition: transform var(--duration-fast) var(--ease-in);
 }
 
 .click-shrink:active {
-  /* transform: scale(0.97); */
-  transform: none;
+  transform: scale(0.97);
 }
-/* @keyframes clickPulse {
+@keyframes clickPulse {
   0% {
     transform: scale(1);
   }
@@ -571,7 +569,7 @@ a:focus-visible {
   100% {
     transform: scale(1);
   }
-} */
+}
 
 /* Focus Ring - Anillo de focus mejorado */
 .focus-ring:focus-visible {
@@ -1105,65 +1103,23 @@ main::-webkit-scrollbar-thumb:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(100, 116, 139, 0.4);
 }
-/* ==========================================
-   ESTADOS HOVER Y ESPECIALES - TARJETAS DE RUTA
-   ========================================== */
-
-/* Hover mejorado para route-card */
+/* Hover lift mejorado con transiciones suaves (Fase 1) */
 .route-card:hover {
-  border-color: var(--color-border-emphasis);
-  background: var(--card-bg-hover);
+  border-color: #58a6ff;
+  background: #1c2128;
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 4px 12px rgba(88, 166, 255, 0.15);
+  transition: transform var(--duration-normal) var(--ease-out),
+              box-shadow var(--duration-normal) var(--ease-out);
 }
-
-/* Hover mejorado para crypto-route-card */
-.crypto-route-card:hover {
-  border-color: var(--color-border-emphasis);
-  background: var(--card-bg-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+.route-card.negative-profit::before {
+  background: #f85149;
 }
-
-/* Indicadores de color según tipo de ruta */
-.route-card.negative-profit,
-.crypto-route-card.profit-negative {
-  border-left-color: var(--color-danger);
+.route-card.low-profit::before {
+  background: #d29922;
 }
-
-.route-card.negative-profit:hover,
-.crypto-route-card.profit-negative:hover {
-  box-shadow: var(--shadow-glow-danger);
-}
-
-.route-card.low-profit,
-.crypto-route-card.profit-low {
-  border-left-color: var(--color-warning);
-}
-
-.route-card.low-profit:hover,
-.crypto-route-card.profit-low:hover {
-  box-shadow: var(--shadow-glow-warning);
-}
-
-.route-card.is-direct,
-.route-card.high-profit,
-.crypto-route-card.profit-high {
-  border-left-color: var(--color-success);
-}
-
-.route-card.is-direct:hover,
-.route-card.high-profit:hover,
-.crypto-route-card.profit-high:hover {
-  box-shadow: var(--shadow-glow-success);
-}
-
-/* Estado activo/focus para tarjetas */
-.route-card:focus-visible,
-.crypto-route-card:focus-visible {
-  outline: 2px solid var(--color-brand-primary);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(88, 166, 255, 0.2);
+.route-card.is-direct::before {
+  background: #3fb950;
 }
 /* Navegación por teclado en cards */
 .route-card:focus-visible {
@@ -1213,70 +1169,7 @@ main::-webkit-scrollbar-thumb:hover {
   transition: max-height var(--duration-slow) var(--ease-out),
               padding var(--duration-normal) var(--ease-out);
 }
-
-/* ==========================================
-   TARJETAS DE RUTA - BASE (v7.0)
-   Mejora de delimitación visual
-   ========================================== */
-
 .route-card {
-  /* Estructura base */
-  position: relative;
-  background: var(--card-bg);
-  backdrop-filter: var(--backdrop-blur);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
-  margin-bottom: var(--space-3);
-  
-  /* Delimitación visual mejorada */
-  border: var(--card-border);
-  box-shadow: var(--shadow-md);
-  
-  /* Indicador lateral de color */
-  padding-left: calc(var(--space-4) + 4px);
-  border-left: 4px solid var(--color-border-default);
-  
-  /* Transiciones */
-  transition: transform var(--duration-normal) var(--ease-out),
-              box-shadow var(--duration-normal) var(--ease-out),
-              border-color var(--duration-normal) var(--ease-out),
-              background var(--duration-normal) var(--ease-out);
-  
-  /* Animación de entrada */
-  opacity: 0;
-  transform: translateY(16px);
-  animation: cardFadeIn var(--duration-normal) var(--ease-out) forwards;
-}
-
-/* ==========================================
-   TARJETAS DE RUTA CRYPTO - BASE (v7.0)
-   Mejora de delimitación visual
-   ========================================== */
-
-.crypto-route-card {
-  /* Estructura base */
-  position: relative;
-  background: var(--card-bg);
-  backdrop-filter: var(--backdrop-blur);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
-  margin-bottom: var(--space-3);
-  
-  /* Delimitación visual mejorada */
-  border: var(--card-border);
-  box-shadow: var(--shadow-md);
-  
-  /* Indicador lateral de color */
-  padding-left: calc(var(--space-4) + 4px);
-  border-left: 4px solid var(--color-border-default);
-  
-  /* Transiciones */
-  transition: transform var(--duration-normal) var(--ease-out),
-              box-shadow var(--duration-normal) var(--ease-out),
-              border-color var(--duration-normal) var(--ease-out),
-              background var(--duration-normal) var(--ease-out);
-  
-  /* Animación de entrada */
   opacity: 0;
   transform: translateY(16px);
   animation: cardFadeIn var(--duration-normal) var(--ease-out) forwards;
@@ -1994,53 +1887,23 @@ footer {
   align-items: center;
   gap: 4px;
 }
-/* ==========================================
-   CONTENEDORES DE RUTAS - MEJORAS DE ESPACIADO
-   ========================================== */
-
-/* Contenedor de rutas optimizadas */
-#optimized-routes {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-2);
-}
-
-/* Contenedor de rutas crypto */
-#crypto-routes-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  max-height: 400px;
-  overflow-y: auto;
-  padding: var(--space-2);
-}
-
-/* Loading states */
-#crypto-routes-container .loading,
-#optimized-routes .loading {
+#crypto-routes-container .loading {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--space-8) var(--space-4);
-  color: var(--color-text-muted);
+  padding: 40px 20px;
+  color: #8b949e;
 }
-
 /* Mensaje de no resultados */
 #crypto-routes-container .no-results,
-#optimized-routes .no-results,
 .no-opportunities {
   text-align: center;
-  padding: var(--space-8) var(--space-4);
-  color: var(--color-text-muted);
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px dashed var(--color-border-muted);
+  padding: 40px 20px;
+  color: #8b949e;
 }
-
 .no-opportunities p {
-  font-size: var(--font-size-sm);
+  font-size: 13px;
   margin: 0;
 }
 .route-card.is-direct {

@@ -335,10 +335,10 @@
     filtered = applyPreferredExchangesFilter(filtered, userSettings?.preferredExchanges);
 
     // Ordenar rutas
-    filtered = applySorting(filtered, userSettings.preferSingleExchange, userSettings.sortByProfit);
+    filtered = applySorting(filtered, userSettings?.preferSingleExchange, userSettings?.sortByProfit);
 
     // Limitar cantidad
-    const maxDisplay = userSettings.maxRoutesDisplay || 20;
+    const maxDisplay = userSettings?.maxRoutesDisplay || 20;
     filtered = applyLimit(filtered, maxDisplay);
 
     return filtered;

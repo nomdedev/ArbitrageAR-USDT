@@ -1664,9 +1664,42 @@ function showRouteDetailsByType(route) {
     case 'usd_to_usdt':
       showUsdToUsdtDetails(route);
       break;
-    default:
-      showRouteGuideFromData(route);
+    default: {
+      // CORREGIDO v6.0.2: Usar ModalManager para mostrar detalles en un modal
+      // en lugar de redirigir a la pestaña guía (que está oculta)
+      console.log('📱 [POPUP] Mostrando detalles de arbitraje en modal...');
+      
+      // Convertir ruta a formato de arbitraje para ModalManager
+      const arbitrage = {
+        broker: route.isSingleExchange
+          ? route.buyExchange
+          : `${route.buyExchange} → ${route.sellExchange}`,
+        buyExchange: route.buyExchange || 'N/A',
+        sellExchange: route.sellExchange || route.buyExchange || 'N/A',
+        isSingleExchange: route.isSingleExchange || false,
+        profitPercentage: route.profitPercentage || 0,
+        officialPrice: route.officialPrice || 0,
+        usdToUsdtRate:
+          typeof route.usdToUsdtRate === 'number' && isFinite(route.usdToUsdtRate)
+            ? route.usdToUsdtRate
+            : null,
+        usdtArsBid: route.usdtArsBid || 0,
+        sellPrice: route.usdtArsBid || 0,
+        transferFeeUSD: route.transferFeeUSD || 0,
+        calculation: route.calculation || {},
+        fees: route.fees || { trading: 0, withdrawal: 0 }
+      };
+      
+      // Usar ModalManager para abrir el modal de detalles
+      if (typeof ModMgr !== 'undefined' && ModMgr.openRouteDetailsModal) {
+        ModMgr.openRouteDetailsModal(arbitrage);
+      } else {
+        console.error('❌ [POPUP] ModalManager no disponible - usando fallback');
+        // Fallback: usar la función original si ModalManager no está disponible
+        showRouteGuideFromData(route);
+      }
       break;
+    }
   }
 }
 

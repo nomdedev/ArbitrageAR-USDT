@@ -2529,11 +2529,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       return false;
     }
 
-    // Obtener lista de criptos activas
-    dataService
-      .getActiveCryptos()
-      .then(async activeCryptos => {
+    // Obtener configuración del usuario y lista de criptos activas
+    Promise.all([
+      chrome.storage.local.get('notificationSettings'),
+      dataService.getActiveCryptos()
+    ])
+      .then(async ([settingsResult, activeCryptos]) => {
         try {
+          const userSettings = settingsResult.notificationSettings || {};
+
           log(`[CRYPTO-ARB] Obteniendo datos para ${activeCryptos.length} criptos activas`);
 
           // Obtener datos de todas las criptos activas
@@ -2551,7 +2555,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           const routes = await calculateCryptoArbitrageRoutes(
             cryptoData,
             currentData.oficial,
-            userSettings || {}
+            userSettings
           );
 
           log(`[CRYPTO-ARB] ✅ ${routes.length} rutas calculadas exitosamente`);
