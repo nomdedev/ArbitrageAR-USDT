@@ -207,32 +207,97 @@
     transform: scale(0.95);
   }
 }
+/* ==========================================
+   5. CLASES DE ANIMACIÓN UTILITARIAS
+   ========================================== */
+
+/* Animaciones de entrada */
+.animate-fade-in-up {
+  animation: fadeInUp var(--duration-normal, 250ms) var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1)) both;
+}
+
 .animate-fade-in-scale {
-  animation: fadeInScale var(--duration-normal) var(--ease-spring) both;
+  animation: fadeInScale var(--duration-normal, 250ms) var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
 }
+
+.animate-slide-in-right {
+  animation: slideInRight var(--duration-normal, 250ms) var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1)) both;
+}
+
 .animate-slide-in-left {
-  animation: slideInLeft var(--duration-normal) var(--ease-out-expo) both;
+  animation: slideInLeft var(--duration-normal, 250ms) var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1)) both;
 }
+
+/* Animaciones de precio */
+.animate-price-flash-up {
+  animation: priceFlashUp 0.5s ease-out;
+}
+
 .animate-price-flash-down {
   animation: priceFlashDown 0.5s ease-out;
 }
+
+.animate-count-up {
+  animation: countUp var(--duration-normal, 250ms) var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1)) both;
+}
+
 /* Animaciones de microinteracciones */
 .animate-button-hover {
-  transition: all var(--duration-fast) var(--ease-out);
+  transition: all var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1));
 }
 .animate-card-hover {
   transition: all var(--duration-normal) var(--ease-out-expo);
 }
+
 /* ==========================================
    6. UTILIDADES DE PERFORMANCE
    ========================================== */
 
-/* will-change para optimizar animaciones */
+/* 
+ * NOTA IMPORTANTE SOBRE will-change:
+ * - Solo usar en elementos que REALMENTE se van a animar
+ * - Aplicar justo antes de la animación y remover después
+ * - El uso excesivo puede DEGRADAR el rendimiento
+ * - Preferir aplicar via JavaScript antes de animaciones complejas
+ */
+
+/* will-change para optimizar animaciones de transform */
 .will-change-transform {
   will-change: transform;
 }
+
+/* will-change para animaciones que combinan transform y opacity */
 .will-change-transform-opacity {
   will-change: transform, opacity;
+}
+
+/* will-change para scroll suave (solo cuando sea necesario) */
+.will-change-scroll {
+  will-change: scroll-position;
+}
+
+/* Clase para remover will-change después de la animación */
+.will-change-auto {
+  will-change: auto;
+}
+
+/* GPU Acceleration helper - usar con cuidado */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Contain para mejorar performance de repaint */
+.contain-layout {
+  contain: layout;
+}
+
+.contain-paint {
+  contain: paint;
+}
+
+.contain-strict {
+  contain: strict;
 }
 
 /* ==========================================
@@ -247,9 +312,26 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-.animate-button-hover,
+
+  .animate-button-hover,
   .animate-card-hover {
     transition: none !important;
+    transform: none !important;
+  }
+
+  /* Deshabilitar animaciones específicas */
+  .stagger-children > * {
+    animation: none !important;
+  }
+
+  .animate-fade-in-up,
+  .animate-fade-in-scale,
+  .animate-slide-in-right,
+  .animate-slide-in-left,
+  .animate-zoom-in,
+  .animate-bounce-in {
+    animation: none !important;
+    opacity: 1 !important;
     transform: none !important;
   }
 }
@@ -258,11 +340,13 @@
    8. VARIABLES PARA STAGGER
    ========================================== */
 
+/* NOTA: Las variables de stagger ya están definidas en design-system.css
+   Estas declaraciones solo sirven como fallback si design-system.css no está cargado */
 :root {
-  --stagger-fast: 50ms;
-  --stagger-normal: 100ms;
-  --stagger-slow: 150ms;
-  --stagger-slower: 200ms;
+  --stagger-fast: var(--stagger-fast, 50ms);
+  --stagger-normal: var(--stagger-normal, 100ms);
+  --stagger-slow: var(--stagger-slow, 150ms);
+  --stagger-slower: var(--stagger-slower, 200ms);
 }
 
 /* ==========================================
@@ -783,39 +867,296 @@
 }
 
 /* ==========================================
-   17. EJEMPLO DE USO
+   17. MICROINTERACCIONES UI/UX MEJORADAS
+   ========================================== */
+
+/* === HOVER EFFECTS === */
+
+/* Hover Lift - Elevación sutil al pasar el mouse */
+.hover-lift {
+  transition: transform var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1)),
+              box-shadow var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1));
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md, 0 4px 6px rgba(0, 0, 0, 0.4));
+}
+
+/* Hover Scale - Escala sutil */
+.hover-scale {
+  transition: transform var(--duration-fast, 150ms) var(--ease-out-back, cubic-bezier(0.34, 1.56, 0.64, 1));
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+/* Hover Glow - Brillo sutil */
+.hover-glow {
+  transition: box-shadow var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1));
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 16px rgba(59, 130, 246, 0.3);
+}
+
+/* Hover Glow Success - Para elementos de ganancia */
+.hover-glow-success:hover {
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+}
+
+/* Hover Glow Danger - Para elementos de pérdida */
+.hover-glow-danger:hover {
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);
+}
+
+/* === ACTIVE/CLICK EFFECTS === */
+
+/* Active Press - Efecto de presión */
+.active-press {
+  transition: transform var(--duration-instant, 75ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1));
+}
+
+.active-press:active {
+  transform: scale(0.98);
+}
+
+/* Active Sink - Hundimiento más pronunciado */
+.active-sink:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+/* === FOCUS EFFECTS === */
+
+/* Focus Ring Animated */
+.focus-ring-animated:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-bg-primary, #0a0e1a),
+              0 0 0 4px var(--color-brand-primary, #3b82f6);
+  animation: focusPulse 2s ease-in-out infinite;
+}
+
+@keyframes focusPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 2px var(--color-bg-primary, #0a0e1a),
+                0 0 0 4px var(--color-brand-primary, #3b82f6);
+  }
+  50% {
+    box-shadow: 0 0 0 2px var(--color-bg-primary, #0a0e1a),
+                0 0 0 6px rgba(59, 130, 246, 0.4);
+  }
+}
+
+/* === LOADING STATES === */
+
+/* Pulse Soft - Pulso suave para loading */
+.pulse-soft {
+  animation: pulseSoft 2s ease-in-out infinite;
+}
+
+@keyframes pulseSoft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* === DATA UPDATE EFFECTS === */
+
+/* Flash Success - Para actualizaciones positivas */
+.flash-success {
+  animation: flashSuccess 0.6s ease-out;
+}
+
+@keyframes flashSuccess {
+  0% {
+    background-color: rgba(16, 185, 129, 0.3);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* Flash Danger - Para actualizaciones negativas */
+.flash-danger {
+  animation: flashDanger 0.6s ease-out;
+}
+
+@keyframes flashDanger {
+  0% {
+    background-color: rgba(239, 68, 68, 0.3);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* Flash Info - Para actualizaciones informativas */
+.flash-info {
+  animation: flashInfo 0.6s ease-out;
+}
+
+@keyframes flashInfo {
+  0% {
+    background-color: rgba(59, 130, 246, 0.3);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* === COUNTER ANIMATIONS === */
+
+/* Number Update - Para cambios de números */
+.number-update {
+  display: inline-block;
+  animation: numberBounce 0.3s var(--ease-out-back, cubic-bezier(0.34, 1.56, 0.64, 1));
+}
+
+@keyframes numberBounce {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* === TOOLTIP ANIMATIONS === */
+
+/* Tooltip Appear */
+.tooltip-appear {
+  animation: tooltipAppear var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1)) both;
+}
+
+@keyframes tooltipAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* === CARD INTERACTIONS === */
+
+/* Card Interactive - Combinación de efectos para cards */
+.card-interactive {
+  transition: transform var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1)),
+              box-shadow var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1)),
+              border-color var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1));
+}
+
+.card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg, 0 10px 15px rgba(0, 0, 0, 0.5));
+  border-color: var(--color-border-emphasis, #8b949e);
+}
+
+.card-interactive:active {
+  transform: translateY(0);
+}
+
+/* === BUTTON INTERACTIONS === */
+
+/* Button Primary Interactive */
+.btn-interactive {
+  transition: all var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1));
+}
+
+.btn-interactive:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-glow-brand, 0 0 16px rgba(59, 130, 246, 0.4));
+}
+
+.btn-interactive:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: none;
+}
+
+/* ==========================================
+   18. EJEMPLO DE USO ACTUALIZADO
    ========================================== */
 
 /*
-  Animaciones de entrada:
+  ANIMACIONES DE ENTRADA:
   <div class="animate-fade-in-up">Aparece desde abajo</div>
   <div class="animate-fade-in-scale">Aparece con escala</div>
   <div class="animate-slide-in-right">Entra desde la derecha</div>
   
-  Stagger children:
+  STAGGER CHILDREN:
   <div class="stagger-children">
     <div>Item 1</div>
     <div>Item 2</div>
     <div>Item 3</div>
   </div>
   
-  Microinteracciones:
-  <button class="animate-button-hover">Botón con hover</button>
-  <div class="animate-card-hover">Card con hover</div>
+  MICROINTERACCIONES:
+  <button class="btn-interactive">Botón interactivo</button>
+  <div class="card-interactive">Card con hover</div>
+  <div class="hover-lift">Elemento que se eleva</div>
+  <div class="hover-scale">Elemento que escala</div>
+  <div class="hover-glow">Elemento con brillo</div>
+  <button class="active-press">Botón con press</button>
   
-  Animaciones de datos:
+  ANIMACIONES DE DATOS:
   <span class="animate-price-flash-up">$1.234,50</span>
-  <span class="animate-count-up">15.2%</span>
+  <span class="flash-success">Dato actualizado</span>
+  <span class="number-update">15.2%</span>
+  
+  ESTADOS DE CARGA:
+  <div class="pulse-soft">Cargando...</div>
+  
+  PERFORMANCE:
+  <div class="will-change-transform-opacity">Elemento optimizado</div>
+  <div class="gpu-accelerated">GPU acceleration</div>
+  
+  CLASES DISPONIBLES:
+  
+  Entrada:
+  - .animate-fade-in-up
+  - .animate-fade-in-scale
+  - .animate-slide-in-right/left
+  - .animate-zoom-in
+  - .animate-bounce-in
+  
+  Hover:
+  - .hover-lift
+  - .hover-scale
+  - .hover-glow
+  - .hover-glow-success
+  - .hover-glow-danger
+  
+  Active:
+  - .active-press
+  - .active-sink
+  
+  Data:
+  - .flash-success
+  - .flash-danger
+  - .flash-info
+  - .number-update
+  
+  Cards/Buttons:
+  - .card-interactive
+  - .btn-interactive
+  
+  Loading:
+  - .pulse-soft
   
   Performance:
-  <div class="will-change-transform-opacity">Elemento optimizado</div>
-  
-  Clases disponibles:
-  - .animate-fade-in-up: Fade in desde abajo
-  - .animate-fade-in-scale: Fade in con escala
-  - .animate-slide-in-right/left: Slide desde derecha/izquierda
-  - .animate-price-flash-up/down: Flash de precio verde/rojo
-  - .animate-count-up: Contador animado
-  - .stagger-children: Stagger animation para hijos
-  - .will-change-transform/opacity: Optimización de performance
+  - .will-change-transform
+  - .will-change-transform-opacity
+  - .gpu-accelerated
+  - .contain-layout
+  - .contain-paint
 */

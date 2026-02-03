@@ -68,7 +68,7 @@ let selectedArbitrage = null;
 let userSettings = null; // NUEVO v5.0: Configuración del usuario
 let currentFilter = 'no-p2p'; // CORREGIDO v5.0.12: Volver a 'no-p2p' pero con debug forzado
 let allRoutes = []; // NUEVO: Cache de todas las rutas sin filtrar
-const filteredRoutes = []; // NUEVO: Cache de rutas filtradas para navegación
+// NOTA: filteredRoutes eliminada - solo se usa como variable local en funciones
 
 // Estado global para filtros avanzados
 let advancedFilters = {
@@ -83,16 +83,8 @@ const DEBUG_MODE = false; // PRODUCCIÓN: Desactivado después de diagnosticar p
 
 console.log('🚀 Popup.js cargado correctamente');
 
-// Importar util para entornos CommonJS (tests Node) y hacer fallback para navegador
-try {
-  // En Node esto exportará la función
-  const utils = require('./utils.js');
-  if (utils && typeof utils.getProfitClasses === 'function') {
-    global.getProfitClasses = utils.getProfitClasses;
-  }
-} catch (e) {
-  // En navegador 'require' no está definido: dejamos que getProfitClasses esté definido en el scope global cuando se cargue desde <script>
-}
+// NOTA: Código CommonJS eliminado - require() no existe en el navegador
+// getProfitClasses se carga globalmente desde utils.js vía <script> tag en popup.html
 
 // Función de logging condicional
 function log(...args) {

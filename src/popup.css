@@ -100,6 +100,7 @@
   opacity: 1;
   pointer-events: auto;
   transform: scale(1);
+  animation: tooltipFadeIn var(--duration-normal) var(--ease-out);
 }
 /* Flecha indicadora */
 .tooltip-arrow {
@@ -149,111 +150,73 @@
   }
 }
 
-/* Tooltip con animación de entrada */
-.tooltip-container.tooltip-visible {
-  animation: tooltipFadeIn var(--duration-normal) var(--ease-out);
-}
-
 /* ===========================================
-   🎨 SISTEMA DE DISEÑO UNIFICADO
+   🎨 SISTEMA DE DISEÑO - EXTENSIONES
+   Variables específicas de popup que extienden design-system.css
    =========================================== */
 :root {
-  /* === COLORES BASE (GitHub Dark Style) === */
-  --color-bg-primary: #0d1117;
-  --color-bg-secondary: #161b22;
-  --color-bg-tertiary: #21262d;
-  --color-bg-elevated: #30363d;
-  --color-bg-canvas: #010409;
-
-  /* Gradientes de fondo */
-  --bg-primary: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
-  --bg-secondary: linear-gradient(135deg, #161b22 0%, #21262d 100%);
-  --bg-tertiary: #21262d;
-  --bg-dark: #0d1117;
-  --bg-darker: #010409;
-
-  /* === COLORES DE MARCA === */
-  --color-brand-primary: #58a6ff;
-  --color-brand-secondary: #79c0ff;
-  --primary-blue: #58a6ff;
+  /* === COLORES HEREDADOS (compatibilidad legacy) === */
+  /* NOTA: Los colores base están en design-system.css */
+  /* Estas variables son aliases para compatibilidad con código existente */
+  
+  /* Aliases de marca */
+  --primary-blue: var(--color-brand-primary);
   --primary-blue-dark: #1f6feb;
-  --primary-blue-light: #79c0ff;
+  --primary-blue-light: var(--color-brand-secondary);
   --accent-cyan: #56d4dd;
-  --accent-purple: #bc8cff;
+  --accent-purple: var(--color-brand-accent);
 
-  /* === COLORES SEMÁNTICOS === */
-  --color-success: #3fb950;
-  --color-success-muted: #238636;
-  --color-success-subtle: rgba(63, 185, 80, 0.15);
-  --color-danger: #f85149;
-  --color-danger-muted: #da3633;
-  --color-danger-subtle: rgba(248, 81, 73, 0.15);
-  --color-warning: #d29922;
-  --color-warning-muted: #9e6a03;
-  --color-warning-subtle: rgba(210, 153, 34, 0.15);
-  --color-info: #58a6ff;
-
-  /* Compatibilidad con nombres anteriores */
-  --profit-green: #3fb950;
+  /* Aliases semánticos para trading */
+  --profit-green: var(--color-success);
   --profit-green-dark: #238636;
   --profit-green-light: #56d364;
-  --profit-green-glow: rgba(63, 185, 80, 0.4);
-  --loss-red: #f85149;
+  --profit-green-glow: rgba(16, 185, 129, 0.4);
+  --loss-red: var(--color-danger);
   --loss-red-dark: #da3633;
-  --loss-red-glow: rgba(248, 81, 73, 0.4);
-  --success: #3fb950;
-  --warning: #d29922;
-  --error: #f85149;
-  --info: #58a6ff;
+  --loss-red-glow: rgba(239, 68, 68, 0.4);
+  
+  /* Aliases cortos */
+  --success: var(--color-success);
+  --warning: var(--color-warning);
+  --error: var(--color-danger);
+  --info: var(--color-info);
 
-  /* === COLORES DE TEXTO === */
-  /* color-text-primary: #f0f6fc - DEFINIDO EN design-system.css */
-  /* color-text-secondary: #8b949e - DEFINIDO EN design-system.css */
-  /* color-text-muted: #8b949e - DEFINIDO EN design-system.css (valor diferente en popup: #6e7681) */
-  /* color-text-inverse: #0d1117 - DEFINIDO EN design-system.css (valor diferente: #0a0e1a) */
-  --text-primary: #f0f6fc;
-  --text-secondary: #8b949e;
-  --text-muted: #6e7681;
+  /* === ALIASES DE TEXTO (compatibilidad) === */
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --text-muted: var(--color-text-muted);
   --text-dim: #484f58;
 
-  /* === COLORES DE BORDE === */
-  /* color-border-default: #30363d - DEFINIDO EN design-system.css */
-  /* color-border-muted: #21262d - DEFINIDO EN design-system.css */
-  /* color-border-emphasis: #8b949e - DEFINIDO EN design-system.css */
+  /* === BORDES (Compatibilidad con nombres anteriores) === */
+  --border-radius-sm: var(--radius-sm);
+  --border-radius-md: var(--radius-md);
+  --border-radius-lg: var(--radius-lg);
+  --border-radius-xl: var(--radius-xl);
+  --border-radius: var(--radius-md);
 
-  /* === BORDES (Compatibilidad) === */
-  --border-radius-sm: 6px;
-  --border-radius-md: 8px;
-  --border-radius-lg: 12px;
-  --border-radius-xl: 16px;
-  --border-radius: 8px;
+  /* === SOMBRAS ESPECÍFICAS DE TRADING === */
+  --shadow-glow-green: var(--shadow-glow-success);
+  --shadow-glow-red: var(--shadow-glow-danger);
 
-  /* === SOMBRAS ESPECÍFICAS === */
-  --shadow-glow-green: 0 0 16px var(--profit-green-glow);
-  --shadow-glow-red: 0 0 16px var(--loss-red-glow);
-
-  /* === VARIABLES ESPECÍFICAS === */
-  --border-card: 1px solid rgba(48, 54, 61, 0.8);
-  --border-card-hover: 1px solid rgba(88, 166, 255, 0.4);
+  /* === VARIABLES ESPECÍFICAS DEL POPUP === */
+  --border-card: 1px solid var(--color-border-default);
+  --border-card-hover: 1px solid var(--color-brand-primary);
   --transition-fast: all var(--duration-fast) var(--ease-default);
   --hover-lift: translateY(-2px);
 
-  /* === GRADIENTES === */
-  --gradient-primary: linear-gradient(135deg, #1f6feb 0%, #58a6ff 100%);
-  --gradient-primary-hover: linear-gradient(135deg, #58a6ff 0%, #79c0ff 100%);
-  --gradient-success: linear-gradient(135deg, #238636 0%, #3fb950 100%);
-  --gradient-success-hover: linear-gradient(135deg, #3fb950 0%, #56d364 100%);
-  --gradient-warning: linear-gradient(135deg, #9e6a03 0%, #d29922 100%);
-  --gradient-error: linear-gradient(135deg, #da3633 0%, #f85149 100%);
-  --gradient-info: linear-gradient(135deg, #1f6feb 0%, #58a6ff 100%);
-  --gradient-info-hover: linear-gradient(135deg, #388bfd 0%, #58a6ff 100%);
-  --gradient-neutral: linear-gradient(135deg, #6e7681 0%, #484f58 100%);
-  --gradient-neutral-hover: linear-gradient(135deg, #484f58 0%, #30363d 100%);
-  --gradient-profit: linear-gradient(180deg, #3fb950 0%, #238636 100%);
-  --gradient-profit-high: linear-gradient(180deg, #56d364 0%, #3fb950 100%);
-  --gradient-loss: linear-gradient(180deg, #f85149 0%, #da3633 100%);
-  --gradient-bg-dark: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
-  --gradient-bg-darker: linear-gradient(180deg, #010409 0%, #0d1117 100%);
+  /* === GRADIENTES DE TRADING === */
+  --gradient-primary: linear-gradient(135deg, #1f6feb 0%, var(--color-brand-primary) 100%);
+  --gradient-primary-hover: linear-gradient(135deg, var(--color-brand-primary) 0%, var(--color-brand-secondary) 100%);
+  --gradient-success: linear-gradient(135deg, #059669 0%, var(--color-success) 100%);
+  --gradient-success-hover: linear-gradient(135deg, var(--color-success) 0%, #34d399 100%);
+  --gradient-warning: linear-gradient(135deg, #d97706 0%, var(--color-warning) 100%);
+  --gradient-error: linear-gradient(135deg, #dc2626 0%, var(--color-danger) 100%);
+  --gradient-info: linear-gradient(135deg, #0891b2 0%, var(--color-info) 100%);
+  --gradient-info-hover: linear-gradient(135deg, var(--color-info) 0%, #22d3ee 100%);
+  --gradient-neutral: linear-gradient(135deg, var(--color-text-muted) 0%, #484f58 100%);
+  --gradient-profit: linear-gradient(180deg, var(--color-success) 0%, #059669 100%);
+  --gradient-profit-high: linear-gradient(180deg, #34d399 0%, var(--color-success) 100%);
+  --gradient-loss: linear-gradient(180deg, var(--color-danger) 0%, #dc2626 100%);
 }
 
 /* ============================================
@@ -321,59 +284,142 @@ a:focus-visible {
   }
 }
 
+/* ============================================
+   BOTONES BASE - Estilos fundamentales que faltaban
+   ============================================ */
+
+/* Botón genérico */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  user-select: none;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--color-bg-elevated);
+  border-color: var(--color-border-emphasis);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* Botón primario */
+.btn-primary {
+  background: var(--gradient-primary);
+  border-color: transparent;
+  color: white;
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Botón secundario */
+.btn-secondary {
+  background: transparent;
+  border-color: var(--color-border-default);
+  color: var(--color-text-primary);
+}
+
+/* Botón ghost (sin borde) */
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--color-text-secondary);
+}
+
+/* Botón pequeño */
+.btn-sm {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+}
+
+/* ============================================
+   BOTONES DEL HEADER - Settings y Refresh
+   ============================================ */
+
+.btn-settings,
+.btn-refresh {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.btn-settings .icon,
+.btn-refresh .icon {
+  color: white;
+}
+
+/* ============================================
+   BOTONES DE FILTRO
+   ============================================ */
+
+.filter-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-width: 60px;
+  padding: var(--space-2);
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  user-select: none;
+}
+
+.filter-btn .btn-icon {
+  font-size: 18px;
+}
+
+.filter-btn .btn-count {
+  background: #21262d;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 20px;
+  text-align: center;
+}
+
+.filter-btn.active {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: var(--color-brand-primary);
+}
+
+.filter-btn.active .btn-count {
+  background: #3fb950;
+  color: white;
+}
+
 /* ==========================================
-   🎬 ANIMACIONES CONSOLIDADAS
+   🎬 ANIMACIONES - Referencias a animations.css
    ========================================== */
 
-/* Pulse - Animación universal para indicadores activos */
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.7;
-    transform: scale(1.05);
-  }
-}
+/* NOTA: Las animaciones base están definidas en ui-components/animations.css
+   Aquí solo se definen animaciones específicas del popup que no están en el sistema */
 
-/* Pulse Glow - Con efecto de brillo */
-@keyframes pulseGlow {
-  0%,
-  100% {
-    box-shadow: 0 0 5px currentColor;
-  }
-  50% {
-    box-shadow:
-      0 0 15px currentColor,
-      0 0 30px currentColor;
-  }
-}
-
-/* Skeleton Loader - Para estados de carga */
-@keyframes skeletonPulse {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-/* Flash Update - Para datos actualizados */
-@keyframes flashUpdate {
-  0% {
-    background: var(--color-success);
-    opacity: 0.3;
-  }
-  100% {
-    background: transparent;
-    opacity: 1;
-  }
-}
-
-/* Tab Enter - Transición de pestañas */
+/* Tab Enter - Transición de pestañas (específico de popup) */
 @keyframes tabEnter {
   from {
     opacity: 0;
@@ -385,66 +431,7 @@ a:focus-visible {
   }
 }
 
-/* Fade In */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Slide In */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Rotate - Para spinners */
-/* ELIMINADO: @keyframes rotate - Duplicado de loadingSpin (líneas 768-775) */
-
-/* Shake - Para errores */
-/* ELIMINADO: @keyframes shake - Duplicado de errorShake (líneas 817-827) */
-
-/* Slide Down - Para elementos que aparecen desde arriba */
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Step Slide In - Para pasos de guía */
-@keyframes stepSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* ==========================================
-   FASE 4: ANIMACIONES BASE - ENTRADA
-   ========================================== */
-
-/* slideUp - DEFINIDO EN animations.css como fadeInUp */
-/* Scale In - DEFINIDO EN animations.css como fadeInScale */
-
-/* Stagger In - Para listas con delay */
+/* Stagger In - Para listas con delay (específico de popup) */
 @keyframes staggerIn {
   from {
     transform: translateY(15px);
@@ -453,6 +440,28 @@ a:focus-visible {
   to {
     transform: translateY(0);
     opacity: 1;
+  }
+}
+
+/* Flash Update - Para datos actualizados (específico de trading) */
+@keyframes flashUpdate {
+  0% {
+    background: var(--color-success);
+    opacity: 0.3;
+  }
+  100% {
+    background: transparent;
+    opacity: 1;
+  }
+}
+
+/* Skeleton Pulse - Para estados de carga */
+@keyframes skeletonPulse {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }
 .scale-in {
@@ -511,12 +520,8 @@ a:focus-visible {
   animation: slideUpOut var(--duration-fast) var(--ease-in);
   animation-fill-mode: forwards;
 }
-/* Skeleton loader base - Fase 2: Shimmer mejorado */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
 
+/* Skeleton loader - usa shimmer de animations.css */
 .skeleton {
   background: linear-gradient(
     90deg,
@@ -551,27 +556,10 @@ a:focus-visible {
   box-shadow: 0 0 12px rgba(88, 166, 255, 0.3);
 }
 
-/* Click Shrink - Efecto de encogimiento al click */
-/* ELIMINADO: Animación de click desagradable - usuario solicitó eliminarla */
-.click-shrink {
-  /* transition: transform var(--duration-fast) var(--ease-in); */
-}
-
+/* Click Shrink - Deshabilitado por solicitud del usuario */
 .click-shrink:active {
-  /* transform: scale(0.97); */
   transform: none;
 }
-/* @keyframes clickPulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(0.95);
-  }
-  100% {
-    transform: scale(1);
-  }
-} */
 
 /* Focus Ring - Anillo de focus mejorado */
 .focus-ring:focus-visible {
@@ -944,90 +932,237 @@ main::-webkit-scrollbar-thumb:hover {
 }
 
 /* ============================================
-   BANNER DE ACTUALIZACIÓN
+   MODAL DE ACTUALIZACIÓN
    ============================================ */
-.update-banner {
+
+/* Dialog nativo */
+.update-modal-dialog {
+  border: none;
+  padding: 0;
+  background: transparent;
+  max-width: 500px;
+  width: 90%;
+}
+
+.update-modal-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+/* Contenedor del modal */
+.update-modal {
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  animation: modalSlideIn var(--duration-normal) var(--ease-out);
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Header del modal */
+.update-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 12px 16px;
-  margin: 0;
-  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-  border-bottom: 2px solid #34d399;
-  animation: slideDown 0.3s ease;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  padding: var(--space-4) var(--space-5);
+  background: var(--gradient-success);
+  position: relative;
 }
 
-.update-content {
+.update-type-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.btn-dismiss-update {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: var(--space-1-5);
+  cursor: pointer;
+  color: white;
+  transition: all var(--duration-fast) var(--ease-out);
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex: 1;
+  justify-content: center;
 }
 
-.update-icon {
-  font-size: 1.5em;
-  animation: pulse 2s ease-in-out infinite;
+.btn-dismiss-update:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: rotate(90deg);
 }
 
-/* @keyframes pulse - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
-
-.update-text {
+/* Cuerpo del modal */
+.update-modal-body {
+  padding: var(--space-6);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  text-align: center;
 }
 
-.update-text strong {
-  font-size: 0.95em;
-  color: #ffffff;
-  font-weight: 600;
+.update-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-4);
 }
+
+.update-modal-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-4) 0;
+}
+
+.update-versions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
 .current-version {
-  background: rgba(255, 255, 255, 0.2);
-  color: #d1fae5;
-  padding: 2px 8px;
-  border-radius: 4px;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
   font-family: 'Courier New', monospace;
+  font-size: var(--font-size-sm);
 }
+
 .new-version {
-  background: rgba(255, 255, 255, 0.3);
-  color: #ffffff;
-  padding: 2px 8px;
-  border-radius: 4px;
+  background: var(--gradient-success);
+  color: white;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
   font-family: 'Courier New', monospace;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.version-arrow {
+  color: var(--color-success);
+}
+
+.update-description {
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0 0 var(--space-4) 0;
+  max-width: 400px;
+}
+
+/* Features del update */
+.update-features {
+  width: 100%;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  text-align: left;
+}
+
+.update-features-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.update-features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.update-features-list li {
+  padding: var(--space-1-5) 0;
+  padding-left: var(--space-5);
+  position: relative;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.update-features-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--color-success);
   font-weight: bold;
 }
 
-.update-commit-msg {
-  font-size: 0.8em;
-  color: #d1fae5;
-  margin: 0;
-  line-height: 1.3;
-  opacity: 0.9;
+/* Acciones del modal */
+.update-modal-actions {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-top: 1px solid var(--color-border-default);
+  background: var(--color-bg-secondary);
 }
 
-.update-text p {
-  font-size: 0.85em;
-  color: #d1fae5;
-  margin: 0;
-  line-height: 1.3;
-}
-
-.update-actions {
+.btn-download {
+  flex: 1;
+  background: var(--gradient-success);
+  color: white;
+  border: none;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: var(--space-2);
 }
-.btn-view-update:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+.btn-download:hover {
+  background: var(--gradient-success-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow-success);
 }
-.btn-dismiss-update:hover {
-  color: white;
-  background: rgba(255, 255, 255, 0.1);
+
+.btn-secondary {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-default);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.btn-secondary:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-emphasis);
+}
+
+/* Variantes de tipo de actualización */
+.update-modal-dialog.type-major .update-modal-header {
+  background: var(--gradient-error);
+}
+
+.update-modal-dialog.type-minor .update-modal-header {
+  background: var(--gradient-info);
+}
+
+.update-modal-dialog.type-patch .update-modal-header {
+  background: var(--gradient-warning);
 }
 
 /* ============================================

@@ -100,13 +100,13 @@ const RouteRenderer = (() => {
     const formatNumber = fmt.formatNumber || (n => n?.toFixed(2) || '0.00');
     const formatARS = fmt.formatARS || (n => `$${formatNumber(n)}`);
 
-    const profitPercent = route.profitPercentage || route.profit || 0;
-    const { profitClass, profitBadgeClass, isNegative } = getProfitClasses(profitPercent);
+    const profitPercentage = route.profitPercentage || route.profit || 0;
+    const { profitClass, profitBadgeClass, isNegative } = getProfitClasses(profitPercentage);
 
     const exchangeName = route.broker || route.exchange || 'Exchange';
     const exchangeIcon = getExchangeIcon(exchangeName);
 
-    const risk = createRiskIndicator(route, profitPercent);
+    const risk = createRiskIndicator(route, profitPercentage);
 
     // Determinar si es P2P
     const isP2P = route.isP2P || route.requiresP2P || exchangeName.toLowerCase().includes('p2p');

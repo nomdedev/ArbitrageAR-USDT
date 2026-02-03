@@ -459,8 +459,13 @@
 
     console.log('🔄 [FilterManager] Filtros avanzados reseteados');
 
-    // Reaplicar filtros
-    applyAllFilters();
+    // CORREGIDO: Reaplicar filtros y actualizar la UI con los resultados
+    const filteredRoutes = applyAllFilters();
+    if (filteredRoutes && filteredRoutes.length > 0) {
+      if (window.RouteManager?.displayRoutes) {
+        window.RouteManager.displayRoutes(filteredRoutes, 'optimized-routes');
+      }
+    }
   }
 
   /**

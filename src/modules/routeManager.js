@@ -94,7 +94,7 @@
       case ROUTE_TYPES.DIRECT_USDT_ARS: {
         const arsReceived = route.arsReceived || 0;
         const usdtSold = route.usdtSold || route.calculation?.initialUsdtAmount || 1000;
-        const percentage = route.profitPercent || 0;
+        const percentage = route.profitPercentage || 0;
 
         return {
           percentage,

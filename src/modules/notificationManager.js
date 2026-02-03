@@ -292,14 +292,14 @@
   }
 
   /**
-   * Mostrar banner de actualización
+   * Mostrar modal de actualización
    * @public
    * @param {Object} updateInfo - Información de actualización
    */
   function showUpdateBanner(updateInfo) {
-    const banner = document.getElementById('update-banner');
-    if (!banner) {
-      console.warn('⚠️ [NotificationManager] Banner #update-banner no encontrado');
+    const modal = document.getElementById('update-modal');
+    if (!modal) {
+      console.warn('⚠️ [NotificationManager] Modal #update-modal no encontrado');
       return;
     }
 
@@ -307,10 +307,11 @@
     const newVersionEl = document.getElementById('new-version');
     const messageEl = document.getElementById('update-message');
     const typeBadgeEl = document.getElementById('update-type');
+    const featuresListEl = document.getElementById('update-features-list');
 
     if (currentVersionEl) currentVersionEl.textContent = `v${updateInfo.currentVersion}`;
     if (newVersionEl) newVersionEl.textContent = `v${updateInfo.latestVersion}`;
-    if (messageEl) messageEl.textContent = updateInfo.message || 'Nueva versión disponible';
+    if (messageEl) messageEl.textContent = updateInfo.message || 'Nueva versión con mejoras de rendimiento y nuevas funcionalidades.';
 
     // Determinar tipo de actualización
     const updateType = determineUpdateType(
@@ -322,24 +323,55 @@
       typeBadgeEl.textContent = updateType;
     }
 
-    banner.className = `update-banner type-${updateType.toLowerCase()}`;
-    banner.style.display = 'flex';
+    // Actualizar características si están disponibles
+    if (featuresListEl && updateInfo.features) {
+      featuresListEl.innerHTML = updateInfo.features
+        .map(feature => `<li>${feature}</li>`)
+        .join('');
+    }
+
+    // Configurar clase de tipo
+    modal.className = `update-modal-dialog type-${updateType.toLowerCase()}`;
+
+    // Mostrar modal usando el API nativo de dialog
+    modal.showModal();
     activeBanner = updateInfo;
 
     // Configurar botones
     setupUpdateBannerButtons(updateInfo);
 
-    console.log(`📢 [NotificationManager] Banner de actualización mostrado: ${updateType}`);
+    console.log(`📢 [NotificationManager] Modal de actualización mostrado: ${updateType}`);
   }
 
   /**
-   * Configurar botones del banner de actualización
+   * Configurar botones del modal de actualización
    * @private
    * @param {Object} updateInfo - Información de actualización
    */
   function setupUpdateBannerButtons(updateInfo) {
+    const downloadBtn = document.getElementById('download-update');
     const viewBtn = document.getElementById('view-update');
     const dismissBtn = document.getElementById('dismiss-update');
+
+    if (downloadBtn) {
+      // Remover listener anterior si existe
+      const newDownloadBtn = downloadBtn.cloneNode(true);
+      downloadBtn.parentNode.replaceChild(newDownloadBtn, downloadBtn);
+
+      newDownloadBtn.addEventListener('click', () => {
+        console.log('🖱️ [NotificationManager] Click en "Descargar actualización"');
+        if (updateInfo?.downloadUrl) {
+          // Abrir URL de descarga en nueva pestaña
+          chrome.tabs.create({ url: updateInfo.downloadUrl });
+        } else if (updateInfo?.url) {
+          // Fallback a la URL general si no hay URL de descarga específica
+          chrome.tabs.create({ url: updateInfo.url });
+        } else {
+          // Si no hay URL, mostrar un toast con instrucciones
+          showToast('Visita la Chrome Web Store para actualizar', 'info');
+        }
+      });
+    }
 
     if (viewBtn) {
       // Remover listener anterior si existe
@@ -347,7 +379,7 @@
       viewBtn.parentNode.replaceChild(newViewBtn, viewBtn);
 
       newViewBtn.addEventListener('click', () => {
-        console.log('🖱️ [NotificationManager] Click en "Ver cambios"');
+        console.log('🖱️ [NotificationManager] Click en "Ver más detalles"');
         if (updateInfo?.url) {
           chrome.tabs.create({ url: updateInfo.url });
         }
@@ -379,25 +411,40 @@
         hideUpdateBanner();
       });
     }
+
+    // Cerrar al hacer clic en el backdrop
+    const modal = document.getElementById('update-modal');
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        const rect = modal.querySelector('.update-modal').getBoundingClientRect();
+        const isInDialog = (rect.top <= e.clientY && e.clientY <= rect.top + rect.height &&
+          rect.left <= e.clientX && e.clientX <= rect.left + rect.width);
+        if (!isInDialog) {
+          hideUpdateBanner();
+        }
+      });
+    }
   }
 
   /**
-   * Ocultar banner de actualización
+   * Ocultar modal de actualización
    * @public
    */
   function hideUpdateBanner() {
-    const banner = document.getElementById('update-banner');
-    if (!banner) {
-      console.warn('⚠️ [NotificationManager] Banner #update-banner no encontrado para ocultar');
+    const modal = document.getElementById('update-modal');
+    if (!modal) {
+      console.warn('⚠️ [NotificationManager] Modal #update-modal no encontrado para ocultar');
       return;
     }
 
-    banner.style.display = 'none';
-    banner.classList.add('hidden');
-    banner.setAttribute('aria-hidden', 'true');
+    // Cerrar usando el API nativo de dialog
+    if (modal.open) {
+      modal.close();
+    }
+
     activeBanner = null;
 
-    console.log('🔽 [NotificationManager] Banner de actualización oculto');
+    console.log('🔽 [NotificationManager] Modal de actualización oculto');
   }
 
   /**

@@ -1,8 +1,8 @@
 // Utilidades compartidas entre popup y tests
 
-function getProfitClasses(profitPercent) {
-  const isNegative = profitPercent < 0;
-  const isHighProfit = profitPercent > 5;
+function getProfitClasses(profitPercentage) {
+  const isNegative = profitPercentage < 0;
+  const isHighProfit = profitPercentage > 5;
 
   let profitClass;
   if (isNegative) {

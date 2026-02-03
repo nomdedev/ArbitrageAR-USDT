@@ -505,21 +505,21 @@
       tableHTML += `<tr><td><strong>$${usdPrice.toFixed(0)}</strong></td>`;
 
       usdtPrices.forEach(usdtPrice => {
-        const profitPercent = calculateProfitPercent(
-          amount, usdPrice, usdtPrice, buyFeePercent, sellFeePercent, 
+        const profitPercentage = calculateProfitPercent(
+          amount, usdPrice, usdtPrice, buyFeePercent, sellFeePercent,
           transferFeeUSD, bankCommissionPercent
         );
 
         // Determinar clase CSS según rentabilidad
         let cellClass = 'matrix-cell-negative';
-        if (profitPercent > 1.0) {
+        if (profitPercentage > 1.0) {
           cellClass = 'matrix-cell-positive';
-        } else if (profitPercent >= 0) {
+        } else if (profitPercentage >= 0) {
           cellClass = 'matrix-cell-neutral';
         }
 
-        const profit = (amount * profitPercent) / 100;
-        tableHTML += `<td class="${cellClass}" title="Ganancia: $${Fmt.formatNumber(profit)} ARS (${profitPercent.toFixed(2)}%)">${profitPercent.toFixed(2)}%</td>`;
+        const profit = (amount * profitPercentage) / 100;
+        tableHTML += `<td class="${cellClass}" title="Ganancia: $${Fmt.formatNumber(profit)} ARS (${profitPercentage.toFixed(2)}%)">${profitPercentage.toFixed(2)}%</td>`;
       });
 
       tableHTML += '</tr>';
@@ -542,7 +542,7 @@
    * @returns {number} Porcentaje de ganancia
    */
   function calculateProfitPercent(
-    amount, usdPrice, usdtPrice, buyFeePercent, sellFeePercent, 
+    amount, usdPrice, usdtPrice, buyFeePercent, sellFeePercent,
     transferFeeUSD, bankCommissionPercent
   ) {
     // Paso 1: Aplicar comisión bancaria
@@ -573,9 +573,9 @@
 
     // Calcular ganancia
     const profit = finalAmount - amount;
-    const profitPercent = (profit / amount) * 100;
+    const profitPercentage = (profit / amount) * 100;
 
-    return profitPercent;
+    return profitPercentage;
   }
 
   /**

@@ -299,6 +299,13 @@
       <symbol id="icon-chevron-down" viewBox="0 0 24 24">
         <polyline points="6 9 12 15 18 9"/>
       </symbol>
+
+      <!-- Download -->
+      <symbol id="icon-download" viewBox="0 0 24 24">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </symbol>
     </svg>
     
     <div class="container">
@@ -334,39 +341,63 @@
         </div>
       </header>
 
-      <!-- Banner de Actualización Disponible -->
-      <div id="update-banner" class="update-banner" role="alert" aria-live="polite">
-        <span class="update-type-badge" id="update-type">MAJOR</span>
-        
-        <div class="update-content">
-          <span class="update-icon icon icon-lg">
-            <svg><use href="#icon-sparkle"></use></svg>
-          </span>
-          <div class="update-text">
-            <strong class="heading-4">Nueva actualización disponible</strong>
-            <p class="update-version-info body-small">
+      <!-- Modal de Actualización Disponible -->
+      <dialog id="update-modal" class="update-modal-dialog" aria-labelledby="update-title">
+        <div class="update-modal">
+          <div class="update-modal-header">
+            <span class="update-type-badge" id="update-type">MAJOR</span>
+            <button id="dismiss-update" class="btn-dismiss-update"
+                    aria-label="Cerrar notificación de actualización">
+              <span class="icon icon-sm">
+                <svg><use href="#icon-close"></use></svg>
+              </span>
+            </button>
+          </div>
+
+          <div class="update-modal-body">
+            <div class="update-icon-wrapper">
+              <span class="update-icon icon icon-xl icon-pulse">
+                <svg><use href="#icon-sparkle"></use></svg>
+              </span>
+            </div>
+
+            <h2 id="update-title" class="update-modal-title">¡Nueva versión disponible!</h2>
+
+            <div class="update-versions">
               <span class="current-version text-mono" id="current-version">v5.0.83</span>
-              <span class="version-arrow">→</span>
+              <span class="version-arrow icon icon-sm">
+                <svg><use href="#icon-arrow-right"></use></svg>
+              </span>
               <span class="new-version text-mono" id="new-version">v6.0.0</span>
+            </div>
+
+            <p id="update-message" class="update-description body-small text-secondary">
+              Nueva versión con mejoras de rendimiento y nuevas funcionalidades.
             </p>
-            <p id="update-message" class="update-commit-msg body-xs text-secondary">
-              Nueva versión con mejoras
-            </p>
+
+            <div class="update-features" id="update-features">
+              <h3 class="update-features-title">Novedades principales:</h3>
+              <ul class="update-features-list" id="update-features-list">
+                <li>Mejoras en la interfaz de usuario</li>
+                <li>Nuevas funcionalidades de arbitraje</li>
+                <li>Corrección de bugs y optimizaciones</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="update-modal-actions">
+            <button id="download-update" class="btn btn-primary btn-download">
+              <span class="icon icon-sm">
+                <svg><use href="#icon-download"></use></svg>
+              </span>
+              Descargar actualización
+            </button>
+            <button id="view-update" class="btn btn-secondary">
+              Ver más detalles
+            </button>
           </div>
         </div>
-        
-        <div class="update-actions">
-          <button id="view-update" class="btn-view-update">
-            Ver cambios
-          </button>
-          <button id="dismiss-update" class="btn-dismiss-update"
-                  aria-label="Cerrar notificación de actualización">
-            <span class="icon icon-sm">
-              <svg><use href="#icon-close"></use></svg>
-            </span>
-          </button>
-        </div>
-      </div>
+      </dialog>
 
       <!-- Indicador de Salud del Mercado -->
       <div id="marketHealth" class="market-health"></div>

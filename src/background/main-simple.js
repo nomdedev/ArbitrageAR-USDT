@@ -1227,7 +1227,7 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
   routes.push(...interBrokerRoutes);
 
   // Ordenar TODAS las rutas por rentabilidad neta
-  routes.sort((a, b) => b.profitPercent - a.profitPercent);
+  routes.sort((a, b) => (b.profitPercentage || b.profitPercent || 0) - (a.profitPercentage || a.profitPercent || 0));
 
   // DIAGNÓSTICO: Loggear resultado final del cálculo
   console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Resultado final:', {
@@ -1236,7 +1236,7 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
     interBroker: interBrokerRoutes.length,
     top3Routes: routes.slice(0, 3).map(r => ({
       broker: r.broker,
-      profitPercent: r.profitPercent,
+      profitPercentage: r.profitPercentage || r.profitPercent,
       isSingleExchange: r.isSingleExchange
     }))
   });
@@ -1726,13 +1726,14 @@ async function calculateCryptoArbitrageRoutes(cryptoData, fiatRef, userSettings 
   }
 
   // Ordenar por ganancia neta (mejores primero)
-  routes.sort((a, b) => b.profitPercent - a.profitPercent);
+  routes.sort((a, b) => (b.profitPercentage || b.profitPercent || 0) - (a.profitPercentage || a.profitPercent || 0));
 
   log(`✅ [CRYPTO-ARB] Completado: ${routes.length} rutas de arbitraje crypto-to-crypto generadas`);
   log('🏆 [CRYPTO-ARB] Top 3 oportunidades:');
   routes.slice(0, 3).forEach((route, i) => {
+    const profitPct = route.profitPercentage || route.profitPercent || 0;
     log(
-      `   ${i + 1}. ${route.crypto} ${route.broker}: ${route.profitPercent.toFixed(2)}% - $${route.netProfit.toFixed(0)} ARS (${route.operationType})`
+      `   ${i + 1}. ${route.crypto} ${route.broker}: ${profitPct.toFixed(2)}% - $${route.netProfit.toFixed(0)} ARS (${route.operationType})`
     );
   });
 
@@ -1792,7 +1793,10 @@ async function calculateAllRoutes(oficial, usdt, usdtUsd, userSettings = {}) {
 
       // Dentro de cada categoría, ordenar por rentabilidad
       if (a.routeCategory === b.routeCategory) {
-        return (b.profitPercent || b.efficiency || 0) - (a.profitPercent || a.efficiency || 0);
+        return (
+          (b.profitPercentage || b.profitPercent || b.efficiency || 0) -
+          (a.profitPercentage || a.profitPercent || a.efficiency || 0)
+        );
       }
 
       return 0;
@@ -1866,10 +1870,11 @@ async function shouldSendNotification(settings, arbitrage) {
   // 4. Verificar umbral de ganancia usando alertThreshold (configurado en options)
   // CORREGIDO: Usar alertThreshold directamente en lugar del sistema de tipos
   const threshold = settings.alertThreshold ?? 1.0;
+  const profitPct = arbitrage.profitPercentage || arbitrage.profitPercent || 0;
 
-  if (arbitrage.profitPercent < threshold) {
+  if (profitPct < threshold) {
     console.log(
-      `[NOTIF] ❌ Ganancia ${arbitrage.profitPercent.toFixed(2)}% < umbral ${threshold}%`
+      `[NOTIF] ❌ Ganancia ${profitPct.toFixed(2)}% < umbral ${threshold}%`
     );
     return false;
   }
@@ -1890,14 +1895,14 @@ async function shouldSendNotification(settings, arbitrage) {
   }
 
   // 6. Verificar si ya notificamos este arbitraje recientemente
-  const arbKey = `${arbitrage.broker}_${Math.floor(arbitrage.profitPercent)}`; // Redondear para evitar spam
+  const arbKey = `${arbitrage.broker}_${Math.floor(profitPct)}`; // Redondear para evitar spam
   if (notifiedArbitrages.has(arbKey)) {
     console.log(`[NOTIF] ❌ Arbitraje ya notificado recientemente: ${arbKey}`);
     return false;
   }
 
   console.log(
-    `[NOTIF] ✅ Notificación aprobada: ${arbitrage.broker} ${arbitrage.profitPercent.toFixed(2)}%`
+    `[NOTIF] ✅ Notificación aprobada: ${arbitrage.broker} ${profitPct.toFixed(2)}%`
   );
   return true;
 }
@@ -1906,7 +1911,7 @@ async function sendNotification(arbitrage, settings) {
   try {
     const notificationId = `arbitrage_${Date.now()}`;
     const broker = arbitrage.broker || arbitrage.exchange || 'Exchange';
-    const profit = arbitrage.profitPercent || 0;
+    const profit = arbitrage.profitPercentage || arbitrage.profitPercent || 0;
 
     // Determinar el ícono según la ganancia
     const iconLevel =
@@ -1945,7 +1950,7 @@ async function sendNotification(arbitrage, settings) {
     lastNotificationTime = Date.now();
 
     // Agregar a notificados (limpiar después de 1 hora)
-    const arbKey = `${arbitrage.broker}_${arbitrage.profitPercent.toFixed(2)}`;
+    const arbKey = `${arbitrage.broker}_${profit.toFixed(2)}`;
     notifiedArbitrages.add(arbKey);
     setTimeout(
       () => {
@@ -2216,7 +2221,7 @@ async function updateData() {
       totalRoutes: optimizedRoutes.length,
       firstRoute: optimizedRoutes[0] ? {
         broker: optimizedRoutes[0].broker,
-        profitPercent: optimizedRoutes[0].profitPercent
+        profitPercentage: optimizedRoutes[0].profitPercentage || optimizedRoutes[0].profitPercent
       } : null
     });
 

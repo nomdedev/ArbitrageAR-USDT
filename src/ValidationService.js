@@ -54,18 +54,18 @@ class ValidationService {
    * Calcular nivel de riesgo de una ruta
    * @returns {Object} { level: 'low'|'medium'|'high', score, reasons[], color }
    */
-  calculateRouteRiskLevel(route, profitPercent, params = {}) {
+  calculateRouteRiskLevel(route, profitPercentage, params = {}) {
     const risks = [];
     let riskScore = 0;
 
     // 1. Rentabilidad muy baja o negativa
-    if (profitPercent < 0) {
+    if (profitPercentage < 0) {
       risks.push('Operación con pérdida');
       riskScore += 40;
-    } else if (profitPercent < this.MIN_PROFIT_THRESHOLD) {
+    } else if (profitPercentage < this.MIN_PROFIT_THRESHOLD) {
       risks.push('Rentabilidad muy baja (< 0.5%)');
       riskScore += 25;
-    } else if (profitPercent < 1.0) {
+    } else if (profitPercentage < 1.0) {
       risks.push('Rentabilidad marginal');
       riskScore += 10;
     }
@@ -215,7 +215,7 @@ class ValidationService {
   /**
    * Verificar si se requiere confirmación para una operación
    */
-  requiresConfirmation(amount, profitPercent, settings) {
+  requiresConfirmation(amount, profitPercentage, settings) {
     if (!settings || !settings.requireConfirmHighAmount) {
       return false;
     }
@@ -226,7 +226,7 @@ class ValidationService {
     }
 
     // Confirmar si hay pérdida
-    if (profitPercent < 0) {
+    if (profitPercentage < 0) {
       return true;
     }
 
@@ -236,22 +236,22 @@ class ValidationService {
   /**
    * Mostrar diálogo de confirmación
    */
-  async showConfirmation(amount, profitPercent, route) {
-    const profitSign = profitPercent >= 0 ? '+' : '';
-    const profitColor = profitPercent >= 0 ? 'verde' : 'rojo';
+  async showConfirmation(amount, profitPercentage, route) {
+    const profitSign = profitPercentage >= 0 ? '+' : '';
+    const profitColor = profitPercentage >= 0 ? 'verde' : 'rojo';
 
     let message = '⚠️ CONFIRMACIÓN REQUERIDA\n\n';
     message += `Monto: $${this.formatNumber(amount)} ARS\n`;
-    message += `Ganancia estimada: ${profitSign}${profitPercent.toFixed(2)}%\n`;
+    message += `Ganancia estimada: ${profitSign}${profitPercentage.toFixed(2)}%\n`;
     message += `Ruta: ${route.buyExchange} → ${route.sellExchange}\n\n`;
 
     if (amount > this.HIGH_AMOUNT_THRESHOLD) {
       message += '⚠️ Este es un monto considerable.\n';
     }
 
-    if (profitPercent < 0) {
+    if (profitPercentage < 0) {
       message += '⚠️ Esta operación resultaría en PÉRDIDA.\n';
-    } else if (profitPercent < this.MIN_PROFIT_THRESHOLD) {
+    } else if (profitPercentage < this.MIN_PROFIT_THRESHOLD) {
       message += '⚠️ La rentabilidad es muy baja.\n';
     }
 
