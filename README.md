@@ -4,100 +4,121 @@
 [![Tests](https://img.shields.io/badge/tests-passing-green.svg)](tests/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Extensión profesional para navegadores Chromium que detecta oportunidades de arbitraje entre el Dólar Oficial argentino y USDT en exchanges locales. Sistema completamente probado y validado para uso en producción.
+Extensión profesional para navegadores Chromium que detecta oportunidades de arbitraje entre el Dólar Oficial argentino y USDT en exchanges locales e internacionales.
+
+---
+
+## 📸 Capturas de Pantalla
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="screenshots/popup-main.png" alt="Popup Principal" width="300"/><br/>
+      <b>Rutas de Arbitraje</b><br/>
+      <sub>Oportunidades en tiempo real con % de ganancia</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="screenshots/popup-cripto.png" alt="Arbitraje Cripto" width="300"/><br/>
+      <b>Arbitraje Cripto</b><br/>
+      <sub>BTC, ETH, USDC y más entre exchanges</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="screenshots/popup-sim.png" alt="Simulador" width="300"/><br/>
+      <b>Simulador</b><br/>
+      <sub>Calcula ganancias con tu monto y fees</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="screenshots/popup-exchanges.png" alt="Exchanges" width="300"/><br/>
+      <b>Exchanges</b><br/>
+      <sub>Precios de compra/venta de cada plataforma</sub>
+    </td>
+  </tr>
+</table>
+
+---
 
 ## ✨ Características Principales
 
-- 🎯 **Detección Inteligente**: Algoritmos avanzados para identificar oportunidades rentables
-- ⚙️ **Configuración Avanzada**: Configuración completa del precio del dólar (automático/manual)
-- 🔔 **Notificaciones Smart**: Alertas configurables por umbral y exchange
-- 📊 **Múltiples Exchanges**: Soporte para Binance, Buenbit, Lemon Cash y más
-- 🏦 **Datos Bancarios**: Integración con múltiples bancos para precios precisos
-- 📈 **Simulador**: Herramientas avanzadas para calcular ganancias potenciales
-- 🔧 **Precio Manual**: Configuración manual del precio del dólar para escenarios específicos
-- 🛠️ **Sistema de Diagnóstico**: Herramientas avanzadas de debugging y troubleshooting
+- 🎯 **Detección Inteligente**: Algoritmos optimizados para identificar oportunidades rentables en tiempo real
+- ⚙️ **Configuración Avanzada**: Control total sobre fuentes de datos (automático/manual)
+- 🔔 **Notificaciones Inteligentes**: Alertas cada 1 minuto con niveles configurables por umbral
+- 📊 **Múltiples Exchanges**: Binance, Buenbit, Lemon Cash, Ripio, Fiwind, LetsBit y más
+- 🏦 **Datos Bancarios Precisos**: Integración con BNA, Galicia, Santander, BBVA, ICBC
+- 📈 **Simulador Profesional**: Calcula ganancias con fees y comisiones personalizables
+- 🔧 **Modo Manual**: Configura tu propio precio del dólar para escenarios específicos
+- 🎨 **UI Moderna**: Interfaz oscura profesional con animaciones suaves
+- 📱 **Indicador de Conexión**: Estado en tiempo real de la sincronización con APIs
+- 🆕 **Indicador de Actualización**: Badge no invasivo que te avisa cuando hay nuevas versiones
 
-## 🆕 Mejoras Recientes (v6.0.0)
+## 🆕 Novedades v6.0.0 (2026)
+
+### 🎯 Sistema de Notificaciones Mejorado
+- ✅ **Frecuencia de 1 minuto por defecto** - Las notificaciones más rápidas del mercado
+- ✅ **Mensajes más amigables** - Notificaciones de Windows con formato legible
+- ✅ **Configuración granular** - Control por exchange, umbral y horarios
+
+### 🔔 Indicador de Actualización No Invasivo
+- 🟢 **Badge discreto** - Indicador verde pulsante en la versión
+- 💬 **Tooltip informativo** - Información al pasar el mouse
+- 📥 **Click para descargar** - Acceso directo a la última versión de GitHub
+- 📢 **Modal solo para actualizaciones MAJOR** - Sin interrupciones innecesarias
+
+### 📊 Indicador de Estado Simplificado
+- 🟢 **Online** - Punto verde con animación cuando todo funciona
+- 🟡 **Datos antiguos** - Punto amarillo si los datos tienen >5 min
+- 🔴 **Sin conexión** - Punto rojo si hay error de API
+- ⏰ **Hora precisa** - Timestamp de última actualización
 
 ### ✅ Auditoría Completa 2026
-- **Correcciones críticas de funcionalidad**: 7 problemas resueltos
-- **Mejoras de CSS y accesibilidad**: Reducción de 43.5% en CSS (6,363 → 3,598 líneas)
-- **Sistema de animaciones completo**: 4 fases implementadas (microinteracciones, loading, entrada/salida, efectos avanzados)
-- **Auditoría exhaustiva**: Análisis completo de arquitectura, código, UI/UX, rendimiento, seguridad y testing
-- **Testing mejorado**: 47 tests implementados con Jest (cobertura ~35%)
-- **Tooling profesional**: ESLint, Prettier, GitHub Actions configurados
-- **Documentación completa**: API_INTERNA.md y documentación técnica actualizada
-- **Módulos refactorizados**: 8+ módulos independientes creados
-- **CI/CD implementado**: GitHub Actions para lint, test, build y release
+- **Correcciones críticas**: 7 problemas funcionales resueltos
+- **Optimización CSS**: Reducción de 43.5% en CSS (6,363 → 3,598 líneas)
+- **Sistema de animaciones**: 4 fases implementadas profesionalmente
+- **Testing mejorado**: 47 tests con Jest (cobertura ~35%)
+- **CI/CD completo**: GitHub Actions para lint, test, build y release
+- **Documentación técnica**: API_INTERNA.md y guías completas
 
-### 📊 Métricas de Mejora v6.0.0
+### 📊 Métricas de Mejora
 | Categoría | Antes | Después | Mejora |
 |-----------|-------|---------|--------|
 | **Puntuación General** | 5.9/10 | 8.1/10 | +37% |
 | **Tests Activos** | 1 | 47 | +4600% |
 | **Líneas popup.js** | 4,746 | 4,062 | -14.4% |
 | **Líneas popup.css** | 6,374 | 3,598 | -43.5% |
-| **Líneas main-simple.js** | 2,214 | 1,998 | -9.8% |
 | **Módulos JS** | 2 | 8+ | +300% |
-| **Accesibilidad** | 🔴 | 🟢 | Implementada |
-| **Tooling** | 🔴 | ✅ | Completo |
-| **CI/CD** | 🔴 | ✅ | GitHub Actions |
+| **Accesibilidad** | 🔴 | 🟢 | Completa |
+| **Tooling** | 🔴 | ✅ | Profesional |
 
-## 🆕 Últimas Mejoras (v5.0.0)
-
-### ✅ Precio Manual del Dólar
-- **Configuración flexible**: Opción para usar precio automático (bancos) o manual
-- **Actualización en tiempo real**: Los cambios se reflejan inmediatamente en el popup
-- **Persistencia**: Configuración guardada automáticamente en Chrome Storage
-- **Validación**: Verificación de sintaxis y comunicación background-options
-
-### ✅ Reorganización del Proyecto
-- **Estructura limpia**: Archivos organizados en carpetas lógicas
-- **Carpeta diagnostics**: Scripts de diagnóstico y debugging centralizados
-- **Documentación**: README actualizado con estructura actual
-- **Limpieza**: Eliminación de archivos temporales y código obsoleto
-
-### ✅ Sistema de Comunicación Mejorado
-- **Mensajes bidireccionales**: Comunicación robusta entre options y background
-- **Invalidación de cache**: Actualización automática de datos al cambiar configuración
-- **Logging detallado**: Sistema de debugging para troubleshooting
+---
 
 ## 📁 Estructura del Proyecto
 
 ```
 ArbitrageAR-USDT/
-├── diagnostics/           # 🆕 Archivos de diagnóstico y debugging
-│   ├── diagnostico_completo_config.js
-│   ├── diagnostico_completo_problema.js
-│   ├── diagnostico_dolar_config.js
-│   ├── diagnostico_popup_background.js
-│   └── README.md
+├── diagnostics/           # Scripts de diagnóstico y debugging
 ├── docs/                  # Documentación completa
-│   ├── changelog/         # Historial de versiones
-│   ├── ANALISIS_ERRORES_ESTETICOS.md
-│   ├── ANALISIS_SIMULADOR_COMPLETO.md
-│   ├── ARQUITECTURA_TECNICA.md
+│   ├── API_INTERNA.md     # Documentación de la API
+│   ├── AUDITORIA_2026_NUEVA.md
 │   ├── DEPLOYMENT_GUIDE.md
-│   ├── GUIA_USO.md
-│   ├── INSTALACION.md
-│   ├── TESTING_INSTRUCTIONS.md
 │   └── *.md
 ├── icons/                 # Iconos de la extensión
-│   ├── icon16.png
-│   ├── icon32.png
-│   ├── icon48.png
-│   └── icon128.png
+├── screenshots/           # 🆕 Capturas de pantalla
 ├── scripts/               # Scripts de automatización
-│   ├── fix_profit_threshold.bat
-│   ├── subir-a-github.bat
-│   └── subir-a-github.ps1
 ├── src/                   # Código fuente principal
-│   ├── background/        # Service Worker y lógica backend
-│   │   └── main-simple.js # Lógica principal del background
-│   ├── DataService.js     # Servicio de datos
-│   ├── options.html/js/css # Página de configuración
-│   ├── popup.html/js/css   # Interfaz del popup
-│   ├── renderHelpers.js   # Helpers de renderizado
+│   ├── background/        # Service Worker
+│   │   └── main-simple.js
+│   ├── modules/           # 🆕 Módulos independientes
+│   │   ├── filterManager.js
+│   │   ├── notificationManager.js
+│   │   ├── routeManager.js
+│   │   └── simulator.js
+│   ├── ui-components/     # 🆕 Componentes UI
+│   ├── DataService.js
+│   ├── ValidationService.js
+│   ├── options.html/js/css
+│   └── popup.html/js/css
+└── tests/                 # 🆕 Suite de tests completa
 │   ├── utils.js           # Utilidades generales
 │   ├── ValidationService.js # Servicio de validación
 │   └── utils/             # Utilidades específicas
@@ -205,11 +226,11 @@ node -c src/background/main-simple.js
 
 ## 📊 APIs Utilizadas
 
-- **CriptoYa API**: Precios de exchanges locales (USDT/ARS)
-- **DolarAPI**: Cotizaciones del dólar oficial argentino
+- **CriptoYa API**: Precios de exchanges locales (USDT/ARS) - 30+ exchanges
+- **DolarAPI**: Cotizaciones del dólar oficial argentino en tiempo real
 - **Chrome Storage API**: Persistencia de configuración de usuario
 - **Chrome Runtime API**: Comunicación entre componentes de la extensión
-- **Chrome Notifications API**: Alertas del sistema operativo
+- **Chrome Notifications API**: Sistema de alertas de Windows nativas
 
 ## 🔒 Seguridad
 

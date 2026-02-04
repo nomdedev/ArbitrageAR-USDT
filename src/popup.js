@@ -80,9 +80,6 @@ let advancedFilters = {
 
 // Modo debug para reducir logs excesivos
 const DEBUG_MODE = false; // PRODUCCIÓN: Desactivado después de diagnosticar problema
-
-console.log('🚀 Popup.js cargado correctamente');
-
 // NOTA: Código CommonJS eliminado - require() no existe en el navegador
 // getProfitClasses se carga globalmente desde utils.js vía <script> tag en popup.html
 
@@ -96,16 +93,11 @@ function log(...args) {
 // Inicialización
 // REFACTORIZADO v6.0.0: Integración de módulos especializados
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('🚀 [INIT] DOM Content Loaded - Iniciando setup completo del popup...');
-  console.log('🔍 [INIT] document.readyState:', document.readyState);
-  
   try {
     // Verificar elementos críticos del DOM
     const mainContent = document.getElementById('main-content');
     const optimizedRoutes = document.getElementById('optimized-routes');
     const loading = document.getElementById('loading');
-    
-    console.log(`🔍 [INIT] Elementos críticos del DOM:`);
     console.log(`  - #main-content: ${!!mainContent}`);
     console.log(`  - #optimized-routes: ${!!optimizedRoutes}`);
     console.log(`  - #loading: ${!!loading}`);
@@ -115,101 +107,57 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     // Cargar configuración del usuario primero
-    console.log('🔧 [INIT] Cargando configuración del usuario...');
     await loadUserSettings();
-    console.log('✅ [INIT] Configuración del usuario cargada');
-    
     // NUEVO v6.0.0: Inicializar módulos especializados
-    console.log('🔧 [INIT] Inicializando módulos especializados...');
-    
     // Inicializar Simulator con datos y configuración
     Sim.init(currentData, userSettings);
-    console.log('✅ [INIT] Simulator inicializado');
-    
     // Inicializar RouteManager (se actualizará cuando lleguen los datos)
     RteMgr.init(currentData, userSettings);
-    console.log('✅ [INIT] RouteManager inicializado');
-    
     // Inicializar FilterManager (se actualizará cuando lleguen las rutas)
     FltMgr.init(userSettings, []);
-    console.log('✅ [INIT] FilterManager inicializado');
-    
     // Inicializar ModalManager
     ModMgr.init(userSettings);
-    console.log('✅ [INIT] ModalManager inicializado');
-    
     // Inicializar NotificationManager
     NotifMgr.init(userSettings);
-    console.log('✅ [INIT] NotificationManager inicializado');
-    
     // Inicializar navegación de tabs
-    console.log('🔧 [INIT] Llamando setupTabNavigation()...');
     setupTabNavigation();
-    console.log('✅ [INIT] setupTabNavigation() completado');
-    
     // Inicializar botón de refresh
-    console.log('🔧 [INIT] Llamando setupRefreshButton()...');
     setupRefreshButton();
-    console.log('✅ [INIT] setupRefreshButton() completado');
-    
     // REEMPLAZO: Configurar botones de filtro usando FilterManager
-    console.log('🔧 [INIT] Configurando botones de filtro (FilterManager)...');
     FltMgr.setupFilterButtons();
-    console.log('✅ [INIT] Botones de filtro configurados');
-    
     // Configurar filtros avanzados usando FilterManager
-    console.log('🔧 [INIT] Configurando filtros avanzados (FilterManager)...');
     FltMgr.setupAdvancedFilters();
-    console.log('✅ [INIT] Filtros avanzados configurados');
-    
     // REEMPLAZO: Configurar simulador usando Simulator
-    console.log('🔧 [INIT] Configurando simulador (Simulator)...');
     setupAdvancedSimulator();
-    console.log('✅ [INIT] Simulador configurado');
-    
     // REEMPLAZO: ModalManager ya se inicializó arriba
-    console.log('✅ [INIT] Modal de detalles configurado por ModalManager');
-    
     // REEMPLAZO: Verificar actualizaciones usando NotificationManager
-    console.log('🔧 [INIT] Verificando actualizaciones (NotificationManager)...');
     NotifMgr.checkForUpdates();
-    console.log('✅ [INIT] Verificación de actualizaciones completada');
-    
     // Configurar pestaña de arbitraje cripto
-    console.log('🔧 [INIT] Llamando setupCryptoArbitrageTab()...');
     setupCryptoArbitrageTab();
-    console.log('✅ [INIT] setupCryptoArbitrageTab() completado');
+    
+    // NUEVO: Listener para evento routeSelected (desde RouteManager)
+    // Esto abre el modal de detalles cuando se hace click en una card de Fiat
+    document.addEventListener('routeSelected', function(e) {
+      const route = e.detail;
+      console.log('🖱️ [POPUP] routeSelected event recibido:', route.broker || route.buyExchange);
+      showRouteDetailsByType(route);
+    });
     
     // Cargar y mostrar datos
-    console.log('🔧 [INIT] Llamando fetchAndDisplay()...');
     fetchAndDisplay();
-    console.log('✅ [INIT] fetchAndDisplay() iniciado');
-    
     // Configurar listener de cambios en storage
-    console.log('🔧 [INIT] Llamando setupStorageListener()...');
     setupStorageListener();
-    console.log('✅ [INIT] setupStorageListener() completado');
-    
     // NUEVO v6.0.0: Inicializar sistema de tooltips
     if (typeof window.initTooltips === 'function') {
-      console.log('🔧 [INIT] Llamando window.initTooltips()...');
       window.initTooltips();
-      console.log('✅ [INIT] Sistema de tooltips inicializado');
     } else {
       console.warn('⚠️ [INIT] initTooltips no está disponible - tooltipSystem.js no se cargó correctamente');
     }
     
     // NUEVO FASE 8: Inicializar componentes UI del design system
-    console.log('🔧 [INIT] Llamando initUIComponents()...');
     initUIComponents();
-    console.log('✅ [INIT] initUIComponents() completado');
-    
     // NUEVO v6.0.1: Ejecutar diagnóstico de iconos SVG
-    console.log('🔧 [INIT] Llamando diagnoseSVGIcons()...');
     diagnoseSVGIcons();
-    console.log('✅ [INIT] diagnoseSVGIcons() completado');
-    
-    console.log('🎉 [INIT] Setup completo del popup finalizado exitosamente');
   } catch (error) {
     console.error('❌ [INIT] Error crítico durante la inicialización del popup:', error);
     console.error('❌ [INIT] Stack trace:', error.stack);
@@ -239,8 +187,6 @@ document.addEventListener('DOMContentLoaded', async () => {
  * CORREGIDO v6.0.1: Agregado manejo robusto de errores y logging extensivo
  */
 function initUIComponents() {
-  console.log('🎨 [INIT UI] Inicializando componentes UI del design system...');
-  
   try {
     // Verificar que el DOM esté completamente cargado
     if (document.readyState === 'loading') {
@@ -255,16 +201,12 @@ function initUIComponents() {
       console.error('❌ [INIT UI] Elemento crítico #main-content no encontrado');
       return;
     }
-    console.log('✅ [INIT UI] Elemento #main-content encontrado');
-    
     // Inicializar ArbitragePanel si está disponible
     if (typeof window.ArbitragePanel !== 'undefined') {
       try {
         const panels = document.querySelectorAll('.arbitrage-panel');
-        console.log(`🔍 [INIT UI] Encontrados ${panels.length} elementos .arbitrage-panel`);
         panels.forEach((panel, index) => {
           new window.ArbitragePanel(panel);
-          console.log(`✅ [INIT UI] ArbitragePanel inicializado para panel ${index + 1}`);
         });
       } catch (error) {
         console.error('❌ [INIT UI] Error inicializando ArbitragePanel:', error);
@@ -277,10 +219,8 @@ function initUIComponents() {
     if (typeof window.TabSystem !== 'undefined') {
       try {
         const tabContainers = document.querySelectorAll('.tabs-nav');
-        console.log(`🔍 [INIT UI] Encontrados ${tabContainers.length} elementos .tabs-nav`);
         tabContainers.forEach((container, index) => {
           new window.TabSystem(container);
-          console.log(`✅ [INIT UI] TabSystem inicializado para contenedor ${index + 1}`);
         });
       } catch (error) {
         console.error('❌ [INIT UI] Error inicializando TabSystem:', error);
@@ -294,18 +234,14 @@ function initUIComponents() {
       try {
         // Aplicar animaciones de entrada a elementos con clase .animate-on-load
         const animatedElements = document.querySelectorAll('.animate-on-load');
-        console.log(`🔍 [INIT UI] Encontrados ${animatedElements.length} elementos .animate-on-load`);
         const container = document.querySelector('.stagger-container') || document.body;
         window.AnimationUtils.stagger(container, 'fadeInUp', 100);
-        console.log('✅ [INIT UI] AnimationUtils inicializado');
       } catch (error) {
         console.error('❌ [INIT UI] Error inicializando AnimationUtils:', error);
       }
     } else {
       console.warn('⚠️ [INIT UI] window.AnimationUtils no está disponible - ui-components/animations.js no se cargó correctamente');
     }
-    
-    console.log('✅ [INIT UI] Componentes UI del design system inicializados correctamente');
   } catch (error) {
     console.error('❌ [INIT UI] Error crítico en inicialización de componentes UI:', error);
     console.error('❌ [INIT UI] Stack trace:', error.stack);
@@ -335,9 +271,17 @@ function setupTabNavigation() {
         targetContent.classList.add('active');
       }
 
+      console.log(`📑 [TABS] Cambiando a tab: ${tabId}`);
+
       // Si es la pestaña de bancos, cargar los datos
       if (tabId === 'banks') {
         loadBanksData();
+      }
+
+      // Si es la pestaña de crypto, cargar rutas de arbitraje crypto
+      if (tabId === 'crypto-arbitrage') {
+        console.log('🔄 [CRYPTO] Activando tab de crypto, fetcheando rutas...');
+        fetchAndRenderCryptoRoutes();
       }
     });
   });
@@ -456,7 +400,7 @@ function loadUserSettings() {
       notificationsEnabled: settings.notificationsEnabled !== false,
       alertType: settings.alertType || 'all',
       customThreshold: settings.customThreshold || 5,
-      notificationFrequency: settings.notificationFrequency || '15min',
+      notificationFrequency: settings.notificationFrequency || '1min',
       soundEnabled: settings.soundEnabled !== false,
       quietHours: settings.quietHours || false,
       quietStart: settings.quietStart || '22:00',
@@ -523,40 +467,53 @@ function loadUserSettings() {
       interfaceBankDisplayMode: settings.interfaceBankDisplayMode || 'top-3',
       interfaceBankUpdateInterval: settings.interfaceBankUpdateInterval || 10
     };
-
-    console.log('⚙️ Configuración completa del usuario cargada desde storage:', userSettings);
   });
 }
 
 /**
+ * Actualizar indicador de conexión simplificado (v8.2)
+ * Muestra solo: punto de estado + hora de última actualización
+ */
+function updateConnectionStatus(data) {
+  const statusContainer = document.getElementById('connection-status');
+  const timeEl = document.getElementById('last-update-time');
+  
+  if (!statusContainer) return;
+
+  // Determinar estado de conexión
+  let status = 'online';
+  let timeText = '--:--:--';
+
+  if (data.error && !data.usingCache) {
+    status = 'offline';
+    timeText = 'Sin conexión';
+  } else if (data.lastUpdate) {
+    const now = Date.now();
+    const ageMinutes = Math.floor((now - data.lastUpdate) / 60000);
+    const date = new Date(data.lastUpdate);
+    timeText = date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    
+    // Cambiar estado si datos son antiguos (> 5 min)
+    if (ageMinutes > 5) {
+      status = 'stale';
+    }
+  }
+
+  // Actualizar clases y contenido
+  statusContainer.className = `connection-status ${status}`;
+  if (timeEl) {
+    timeEl.textContent = timeText;
+  }
+}
+
+/**
  * Actualizar indicador de estado de datos con información de frescura
+ * @deprecated Reemplazado por updateConnectionStatus en v8.2
  */
 function updateDataStatusIndicator(data) {
-  const statusEl = document.getElementById('dataStatus');
-  if (!statusEl || !window.validationService) return;
-
-  // Verificar salud del sistema
-  const health = window.validationService.generateSystemHealthReport(data);
-
-  // Obtener frescura del precio oficial
-  const freshness = window.validationService.getDataFreshnessLevel(data.oficial?.timestamp);
-
-  // Construir HTML del indicador
-  let html = `<span class="freshness-indicator" style="color: ${freshness.color}">${freshness.icon}</span>`;
-
-  if (freshness.ageMinutes !== null) {
-    html += ` <span class="age-text">Datos: hace ${freshness.ageMinutes} min</span>`;
-  } else {
-    html += ' <span class="age-text">Datos: Sin timestamp</span>';
-  }
-
-  // Mostrar advertencias si hay
-  if (health.warnings.length > 0) {
-    html += ` <span class="health-warning" title="${health.warnings.join(', ')}">⚠️</span>`;
-  }
-
-  statusEl.innerHTML = html;
-  statusEl.className = `data-status ${freshness.level}`;
+  // Función mantenida para compatibilidad pero ya no se usa
+  // La funcionalidad se movió a updateConnectionStatus
+  return;
 }
 
 /**
@@ -793,14 +750,41 @@ function setupStorageListener() {
 // Funciones helper para reducir complejidad de fetchAndDisplay
 function handleNoData(container) {
   console.error('❌ Error: No se recibió respuesta del background');
-  container.innerHTML = '<p class="error">❌ No se pudo comunicar con el servicio de fondo.</p>';
+  container.innerHTML = `
+    <div class="error-state animate-scale-in">
+      <div class="error-state-icon animate-pulse">⚠️</div>
+      <h3 class="error-state-title">Sin conexión</h3>
+      <p class="error-state-message">No se pudo comunicar con el servicio de fondo</p>
+      <div class="error-state-cta">
+        <button class="btn-retry" onclick="fetchAndDisplay(0)">
+          <span>🔄</span>
+          <span>Reintentar</span>
+        </button>
+      </div>
+    </div>
+  `;
 }
 
 function handleInitializationError(container, data, retryCount, maxRetries) {
   console.log(
     `⏳ Background inicializando, reintentando en 2 segundos... (${retryCount + 1}/${maxRetries})`
   );
-  container.innerHTML = `<p class="info">⏳ ${sanitizeHTML(data.error)} (reintentando automáticamente...)</p>`;
+  container.innerHTML = `
+    <div class="loading-state">
+      <div class="spinner-premium lg">
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring"></div>
+      </div>
+      <p class="loading-text">${sanitizeHTML(data.error)}</p>
+      <p class="loading-text" style="font-size: 14px; opacity: 0.7;">Reintentando automáticamente... (${retryCount + 1}/${maxRetries})</p>
+      <div class="loading-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  `;
   setTimeout(() => {
     fetchAndDisplay(retryCount + 1);
   }, 2000);
@@ -808,7 +792,19 @@ function handleInitializationError(container, data, retryCount, maxRetries) {
 
 function handleMaxRetriesError(container, data) {
   console.error('❌ Máximo de reintentos alcanzado');
-  container.innerHTML = `<p class="error">❌ ${sanitizeHTML(data.error)}<br><br>⚠️ Intenta actualizar manualmente en unos segundos.</p>`;
+  container.innerHTML = `
+    <div class="error-state animate-scale-in">
+      <div class="error-state-icon animate-pulse">❌</div>
+      <h3 class="error-state-title">Error de inicialización</h3>
+      <p class="error-state-message">${sanitizeHTML(data.error)}<br><br>Intenta actualizar manualmente en unos segundos</p>
+      <div class="error-state-cta">
+        <button class="btn-retry" onclick="fetchAndDisplay(0)">
+          <span>🔄</span>
+          <span>Reintentar ahora</span>
+        </button>
+      </div>
+    </div>
+  `;
 }
 
 function handleCacheIndicator(data, retryCount) {
@@ -822,7 +818,6 @@ function handleCacheIndicator(data, retryCount) {
     // Si hay error en cache, intentar actualizar automáticamente (solo 1 vez)
     if (data.error && retryCount === 0) {
       setTimeout(() => {
-        console.log('🔄 Intentando actualizar datos automáticamente...');
         fetchAndDisplay(1);
       }, 2000);
     }
@@ -832,17 +827,6 @@ function handleCacheIndicator(data, retryCount) {
 }
 
 function handleSuccessfulData(data, container) {
-  console.log('📊 [SUCCESS] handleSuccessfulData() llamado con data:', {
-    tieneOficial: !!data.oficial,
-    oficialCompra: data.oficial?.compra,
-    oficialSource: data.oficial?.source,
-    oficialTimestamp: data.oficial?.timestamp
-      ? new Date(data.oficial.timestamp).toLocaleString()
-      : 'N/A',
-    lastUpdate: data.lastUpdate ? new Date(data.lastUpdate).toLocaleString() : 'N/A',
-    rutasCount: data.optimizedRoutes?.length || 0
-  });
-
   // Actualizar estado global y sincronizar con StateManager
   currentData = data;
   if (State) {
@@ -850,23 +834,15 @@ function handleSuccessfulData(data, container) {
     State.set('lastUpdate', data.lastUpdate);
   }
 
-  // Actualizar timestamp de última actualización
-  const lastUpdateEl = document.getElementById('last-update');
-  if (lastUpdateEl && data.lastUpdate) {
-    updateTimestampWithFreshness(lastUpdateEl, data.lastUpdate);
-  }
+  // NUEVO v8.2: Actualizar indicador de conexión simplificado
+  updateConnectionStatus(data);
 
   displayMarketHealth(data.marketHealth);
 
-  // NUEVO v5.0.28: Actualizar indicador de estado de datos
-  updateDataStatusIndicator(data);
-
   // NUEVO: Mostrar información del precio del dólar
   if (data.oficial) {
-    console.log('📊 [SUCCESS] Llamando displayDollarInfo() con data.oficial');
     displayDollarInfo(data.oficial);
   } else {
-    console.log('⚠️ [SUCCESS] No hay data.oficial - no se mostrará precio del dólar');
   }
 
   if (data.error && !data.usingCache) {
@@ -898,20 +874,15 @@ function handleSuccessfulData(data, container) {
   if (State) {
     State.setRoutes(allRoutes, []);
   }
-  console.log('🔍 [POPUP] allRoutes guardadas:', allRoutes.length, 'rutas');
-
   // Actualizar contadores de filtros
   updateFilterCounts();
 
   // Aplicar filtro P2P activo
-  console.log('🔍 [POPUP] Llamando applyP2PFilter()...');
   applyP2PFilter();
 }
 
 // Obtener y mostrar datos de arbitraje (con retry automático)
 async function fetchAndDisplay(retryCount = 0) {
-  console.log(`🔄 Cargando datos de arbitraje... (intento ${retryCount + 1})`);
-
   const container = document.getElementById('optimized-routes');
   const loading = document.getElementById('loading');
   const maxRetries = 3;
@@ -929,10 +900,6 @@ async function fetchAndDisplay(retryCount = 0) {
   }
 
   try {
-    console.log('📤 [POPUP] Solicitando datos al background...');
-    console.log('📤 [POPUP] Verificando runtime disponible:', !!chrome.runtime);
-    console.log('📤 [POPUP] Verificando sendMessage disponible:', !!chrome.runtime?.sendMessage);
-
     // Timeout para detectar si el callback nunca se ejecuta
     let responseReceived = false;
     const timeoutId = setTimeout(() => {
@@ -956,9 +923,6 @@ async function fetchAndDisplay(retryCount = 0) {
         `;
       }
     }, 15000); // Aumentado a 15 segundos
-
-    console.log('📤 [POPUP] Enviando mensaje { action: "getArbitrages" }...');
-
     // Verificar que chrome.runtime está disponible antes de enviar
     if (!chrome.runtime) {
       console.error('❌ [POPUP] chrome.runtime no está disponible');
@@ -975,22 +939,6 @@ async function fetchAndDisplay(retryCount = 0) {
         clearTimeout(timeoutId);
 
         // DIAGNÓSTICO: Loggear recepción completa de datos
-        console.log('🔍 [DIAGNÓSTICO POPUP] Datos recibidos del background:', {
-          tieneData: !!data,
-          oficialCompra: data?.oficial?.compra,
-          oficialVenta: data?.oficial?.venta,
-          oficialSource: data?.oficial?.source,
-          oficialTimestamp: data?.oficial?.timestamp ? new Date(data.oficial.timestamp).toISOString() : 'N/A',
-          rutasCount: data?.optimizedRoutes?.length || 0,
-          lastUpdate: data?.lastUpdate ? new Date(data.lastUpdate).toLocaleString() : 'N/A',
-          error: data?.error,
-          usingCache: data?.usingCache,
-          dataKeys: data ? Object.keys(data) : [],
-          tieneOptimizedRoutes: !!data?.optimizedRoutes,
-          optimizedRoutesEsArray: Array.isArray(data?.optimizedRoutes)
-        });
-        console.log('📥 [POPUP] chrome.runtime.lastError:', chrome.runtime.lastError);
-
         if (chrome.runtime.lastError) {
           console.error('❌ Error en chrome.runtime:', chrome.runtime.lastError);
           loading.style.display = 'none';
@@ -1003,9 +951,6 @@ async function fetchAndDisplay(retryCount = 0) {
           `;
           return;
         }
-
-        console.log('📥 Procesando respuesta del background...');
-
         loading.style.display = 'none';
 
         if (!data) {
@@ -1015,16 +960,6 @@ async function fetchAndDisplay(retryCount = 0) {
         }
         
         // DIAGNÓSTICO: Verificar estructura de datos
-        console.log('🔍 [DIAGNÓSTICO POPUP] Estructura de datos recibidos:', {
-          tieneOficial: !!data.oficial,
-          oficialKeys: data.oficial ? Object.keys(data.oficial) : [],
-          tieneOptimizedRoutes: !!data.optimizedRoutes,
-          optimizedRoutesLength: data.optimizedRoutes?.length || 0,
-          optimizedRoutesEsArray: Array.isArray(data.optimizedRoutes),
-          tieneError: !!data.error,
-          errorMessage: data.error
-        });
-
         // NUEVO: Manejar errores específicos del background
         if (data.timeout) {
           container.innerHTML = `
@@ -1061,21 +996,7 @@ async function fetchAndDisplay(retryCount = 0) {
         `;
           return;
         }
-
-        console.log('📥 Data válida recibida, procesando...');
-
         // DIAGNÓSTICO: Loggear estado de rutas
-        console.log('🔍 [DIAGNÓSTICO POPUP] Estado de rutas antes de procesar:', {
-          tieneRutas: !!data.optimizedRoutes,
-          cantidadRutas: data.optimizedRoutes?.length || 0,
-          esArray: Array.isArray(data.optimizedRoutes),
-          primeraRuta: data.optimizedRoutes?.[0] ? {
-            broker: data.optimizedRoutes[0].broker,
-            profitPercent: data.optimizedRoutes[0].profitPercent,
-            isSingleExchange: data.optimizedRoutes[0].isSingleExchange
-          } : null
-        });
-
         // Si está inicializando y aún no hay rutas, hacer retry automático
         if (data.error?.includes('Inicializando') && retryCount < maxRetries) {
           handleInitializationError(container, data, retryCount, maxRetries);
@@ -1115,21 +1036,17 @@ async function fetchAndDisplay(retryCount = 0) {
 // NUEVA FUNCIÓN v5.0: Aplicar preferencias del usuario
 function applyUserPreferences(routes) {
   if (DEBUG_MODE) {
-    console.log('🔍 [POPUP] applyUserPreferences() llamado con', routes?.length, 'rutas');
   }
   if (DEBUG_MODE) {
-    console.log('🔍 [POPUP] userSettings completo:', JSON.stringify(userSettings, null, 2));
   }
   if (!Array.isArray(routes) || routes.length === 0) {
     if (DEBUG_MODE) {
-      console.log('🔍 [POPUP] applyUserPreferences: rutas vacías o no array, retornando vacío');
     }
     return routes;
   }
 
   let filtered = [...routes]; // Copia para no mutar original
   if (DEBUG_MODE) {
-    console.log('🔍 [POPUP] applyUserPreferences: copia inicial tiene', filtered.length, 'rutas');
   }
 
   // MEJORADO v5.0.64: Filtro unificado por ganancia mínima (separa visualización de notificaciones)
@@ -1146,7 +1063,6 @@ function applyUserPreferences(routes) {
   filtered = applyLimit(filtered, maxDisplay);
 
   if (DEBUG_MODE) {
-    console.log('🔍 [POPUP] applyUserPreferences retornando', filtered.length, 'rutas finales');
   }
   return filtered;
 }
@@ -1315,33 +1231,8 @@ function displayArbitrages(arbitrages, official) {
 
 // NUEVO v5.0.0: Mostrar rutas (single + multi-exchange) - Vista compacta
 function displayOptimizedRoutes(routes, official) {
-  console.log('🔍 [POPUP] displayOptimizedRoutes() llamado con', routes?.length, 'rutas');
   const container = document.getElementById('optimized-routes');
-  console.log('🔍 [POPUP] container encontrado:', !!container);
-
   // DIAGNÓSTICO: Loggear parámetros de entrada
-  console.log('🔍 [DIAGNÓSTICO POPUP] displayOptimizedRoutes() - Parámetros:', {
-    routes: routes ? {
-      esArray: Array.isArray(routes),
-      length: routes.length,
-      primeraRuta: routes[0] ? {
-        broker: routes[0].broker,
-        profitPercent: routes[0].profitPercent
-      } : null
-    } : null,
-    official: official ? {
-      compra: official.compra,
-      venta: official.venta,
-      source: official.source
-    } : null,
-    userSettings: userSettings ? {
-      interfaceMinProfitDisplay: userSettings.interfaceMinProfitDisplay,
-      interfaceMaxRoutesDisplay: userSettings.interfaceMaxRoutesDisplay,
-      interfaceSortByProfit: userSettings.interfaceSortByProfit,
-      interfaceShowOnlyProfitable: userSettings.interfaceShowOnlyProfitable
-    } : null
-  });
-
   // Obtener configuraciones de interfaz
   const interfaceSettings = userSettings || {};
   const showProfitColors = interfaceSettings.interfaceShowProfitColors !== false;
@@ -1350,30 +1241,70 @@ function displayOptimizedRoutes(routes, official) {
   const showTimestamps = interfaceSettings.interfaceShowTimestamps || false;
 
   if (!routes || routes.length === 0) {
-    console.log('🔍 [POPUP] No hay rutas para mostrar, mostrando mensaje informativo');
-    console.log('🔍 [DIAGNÓSTICO POPUP] displayOptimizedRoutes() - No hay rutas:', {
-      routesIsNull: !routes,
-      routesLength: routes?.length || 0,
-      currentFilter: currentFilter,
-      allRoutesLength: allRoutes?.length || 0
-    });
+    const threshold = userSettings?.profitThreshold || 1.0;
+    const routeType = userSettings?.routeType || 'arbitrage';
+    
     container.innerHTML = `
-      <div class="market-status">
-        <h3>📊 Estado del Mercado</h3>
-        <p>No se encontraron rutas que cumplan con tus criterios de filtrado.</p>
-        <div class="market-info">
-          <p><strong>Posibles causas:</strong></p>
-          <ul>
-            <li>🎯 <strong>Umbral de ganancia muy alto:</strong> Prueba bajar el umbral mínimo en Configuración</li>
-            <li>🏦 <strong>Exchanges preferidos restrictivos:</strong> Agrega más exchanges en Configuración</li>
-            <li>💰 <strong>Tipo de ruta incorrecto:</strong> Cambia el tipo de rutas en Configuración (Arbitraje, USDT→ARS, etc.)</li>
-            <li>🔄 <strong>Mercado en equilibrio:</strong> Las tasas están muy cercanas al dólar oficial</li>
-            <li>🤝 <strong>Filtro P2P activo:</strong> Cambia a "Todas" o "No P2P" en los filtros</li>
-          </ul>
-          <p><small>Tu configuración actual: Umbral ${userSettings?.profitThreshold || 1.0}%, Tipo: ${userSettings?.routeType || 'arbitrage'}</small></p>
+      <div class="empty-state-card">
+        <div class="empty-state-header">
+          <div class="empty-state-icon-wrapper">
+            <span class="empty-state-emoji">📊</span>
+          </div>
+          <h3 class="empty-state-title">Estado del Mercado</h3>
+          <p class="empty-state-subtitle">No se encontraron oportunidades</p>
         </div>
-        <button class="retry-btn" data-action="reload" style="margin-top: 15px;">🔄 Actualizar Datos</button>
-        <button class="settings-btn" onclick="chrome.runtime.openOptionsPage()" style="margin-top: 10px;">⚙️ Revisar Configuración</button>
+        
+        <div class="empty-state-reasons">
+          <p class="reasons-title">Posibles causas:</p>
+          <div class="reasons-list">
+            <div class="reason-item">
+              <span class="reason-icon">🎯</span>
+              <div class="reason-content">
+                <span class="reason-label">Umbral muy alto</span>
+                <span class="reason-hint">Prueba bajar el umbral mínimo</span>
+              </div>
+            </div>
+            <div class="reason-item">
+              <span class="reason-icon">🏦</span>
+              <div class="reason-content">
+                <span class="reason-label">Exchanges restrictivos</span>
+                <span class="reason-hint">Agrega más exchanges</span>
+              </div>
+            </div>
+            <div class="reason-item">
+              <span class="reason-icon">🔄</span>
+              <div class="reason-content">
+                <span class="reason-label">Mercado en equilibrio</span>
+                <span class="reason-hint">Tasas cercanas al oficial</span>
+              </div>
+            </div>
+            <div class="reason-item">
+              <span class="reason-icon">🤝</span>
+              <div class="reason-content">
+                <span class="reason-label">Filtro P2P activo</span>
+                <span class="reason-hint">Cambia a "Todas" o "No P2P"</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="empty-state-config">
+          <span class="config-badge">
+            <span class="config-icon">⚙️</span>
+            Umbral: ${threshold}% · Tipo: ${routeType}
+          </span>
+        </div>
+        
+        <div class="empty-state-actions">
+          <button class="btn-action btn-primary-action" data-action="reload">
+            <span class="btn-icon">🔄</span>
+            Actualizar
+          </button>
+          <button class="btn-action btn-secondary-action" onclick="chrome.runtime.openOptionsPage()">
+            <span class="btn-icon">⚙️</span>
+            Configuración
+          </button>
+        </div>
       </div>
     `;
     return;
@@ -1402,8 +1333,6 @@ function displayOptimizedRoutes(routes, official) {
     // Fallback
     return 0;
   });
-
-  console.log('🔍 [POPUP] Generando HTML para', routes.length, 'rutas ordenadas');
   let html = '';
 
   routes.forEach((route, index) => {
@@ -1448,33 +1377,32 @@ function displayOptimizedRoutes(routes, official) {
     // Escapar completamente el JSON usando encodeURIComponent para prevenir errores y vulnerabilidades
     const escapedRouteData = encodeURIComponent(routeData);
 
+    // v8.0: Estructura unificada con crypto cards
     html += `
       <div class="route-card ${profitClass} ${routeType} ${compactClass}" data-index="${index}" data-route="${escapedRouteData}">
-        <div class="route-header">
-          <div class="route-title">
-            <h3>${getRouteIcon(routeType, route)} Ruta ${index + 1} ${exchangeIcon}</h3>
-            ${negativeIndicator ? `<div class="route-loss-indicator">${negativeIndicator}</div>` : ''}
-            <div class="route-badges">
-              ${typeBadge}
-              ${p2pBadge}
-            </div>
+        <div class="fiat-card-header">
+          <div class="fiat-info">
+            <span class="fiat-icon">${getRouteIcon(routeType, route)}</span>
+            <span class="fiat-name">${getRouteTypeName(routeType)}</span>
           </div>
-          <div class="route-profit-section">
-            <div class="profit-badge ${profitBadgeClass} text-underline-animated glow-pulse">${profitSymbol}${Fmt.formatNumber(displayMetrics.percentage)}%</div>
+          <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${Fmt.formatNumber(displayMetrics.percentage)}%</div>
+        </div>
+        
+        <div class="fiat-card-body">
+          <div class="route-path">
+            ${routeDescription}
+          </div>
+          
+          <div class="operation-meta">
+            ${p2pBadge}
+            ${timestampInfo ? `<span class="time-indicator">🕐 ${new Date(route.timestamp).toLocaleTimeString()}</span>` : ''}
           </div>
         </div>
-
-        <div class="route-compact">
-          <div class="route-summary-line">
-            <span class="route-exchanges">🏦 ${routeDescription}</span>
-          </div>
-          <div class="route-profit-line">
-            <span class="profit-amount">${displayMetrics.mainValue}</span>
-            <span class="investment-info">${displayMetrics.secondaryInfo}</span>
-          </div>
-          ${timestampInfo}
-          <div class="route-action">
-            <span class="click-to-expand">👆 Click para ver detalles</span>
+        
+        <div class="fiat-card-footer">
+          <div class="profit-details">
+            <span class="label">Resultado:</span>
+            <span class="value ${displayMetrics.percentage >= 0 ? '' : 'negative'}">${displayMetrics.mainValue}</span>
           </div>
         </div>
       </div>
@@ -1483,19 +1411,14 @@ function displayOptimizedRoutes(routes, official) {
 
   container.innerHTML = html;
 
-  // NUEVO v6.0.0: Aplicar animaciones de entrada a las tarjetas de rutas
+  // v8.0: Animación simplificada para mejor rendimiento
   const routeCards = container.querySelectorAll('.route-card');
   routeCards.forEach((card, index) => {
-    // Agregar clases de animación y micro-interacciones Fase 5
-    card.classList.add('stagger-in', 'hover-lift', 'click-shrink', 'magnetic-btn', 'ripple-btn', 'hover-scale-rotate');
-    // Aplicar delay escalonado para efecto stagger
-    card.style.animationDelay = `${index * 50}ms`;
+    card.classList.add('animate-slide-up');
+    card.style.animationDelay = `${index * 30}ms`;
   });
 
   // CORREGIDO v5.0.64: Seleccionar route-cards del container correcto
-
-  console.log(`🔍 [POPUP] Agregando event listeners a ${routeCards.length} route-cards`);
-
   // NUEVO Fase 5: Inicializar micro-interacciones para las nuevas tarjetas
   if (typeof initMagneticButtons === 'function') {
     initMagneticButtons();
@@ -1532,8 +1455,6 @@ function displayOptimizedRoutes(routes, official) {
       }
     });
   });
-
-  console.log('✅ [POPUP] displayOptimizedRoutes() completado - HTML generado y aplicado');
 }
 
 // ============================================
@@ -1642,242 +1563,413 @@ function getRouteIcon(routeType, route) {
   }
 }
 
+/**
+ * Obtener nombre legible del tipo de ruta
+ */
+function getRouteTypeName(routeType) {
+  switch (routeType) {
+    case 'direct_usdt_ars':
+      return 'USDT → ARS';
+    case 'usd_to_usdt':
+      return 'USD → USDT';
+    default:
+      return 'Arbitraje';
+  }
+}
+
 // Función auxiliar para obtener ícono de exchange - Usa RouteRenderer
 const getExchangeIcon = exchangeName =>
   window.RouteRenderer?.getExchangeIcon?.(exchangeName) || '🏦';
 
 function showRouteDetailsByType(route) {
   const routeType = getRouteType(route);
+  const modal = document.getElementById('route-details-modal');
+  const modalBody = document.getElementById('modal-body');
+  const modalTitle = document.getElementById('modal-title');
+
+  if (!modal || !modalBody) {
+    console.error('❌ Modal no encontrado');
+    return;
+  }
+
+  // Actualizar título según tipo
+  if (modalTitle) {
+    modalTitle.textContent = getRouteTypeName(routeType);
+  }
+
+  // Generar contenido del modal según tipo
+  let modalContent = '';
 
   switch (routeType) {
     case 'direct_usdt_ars':
-      showDirectUsdtArsDetails(route);
+      modalContent = generateDirectUsdtArsModal(route);
       break;
     case 'usd_to_usdt':
-      showUsdToUsdtDetails(route);
+      modalContent = generateUsdToUsdtModal(route);
       break;
-    default: {
-      // CORREGIDO v6.0.2: Usar ModalManager para mostrar detalles en un modal
-      // en lugar de redirigir a la pestaña guía (que está oculta)
-      console.log('📱 [POPUP] Mostrando detalles de arbitraje en modal...');
-      
-      // Convertir ruta a formato de arbitraje para ModalManager
-      const arbitrage = {
-        broker: route.isSingleExchange
-          ? route.buyExchange
-          : `${route.buyExchange} → ${route.sellExchange}`,
-        buyExchange: route.buyExchange || 'N/A',
-        sellExchange: route.sellExchange || route.buyExchange || 'N/A',
-        isSingleExchange: route.isSingleExchange || false,
-        profitPercentage: route.profitPercentage || 0,
-        officialPrice: route.officialPrice || 0,
-        usdToUsdtRate:
-          typeof route.usdToUsdtRate === 'number' && isFinite(route.usdToUsdtRate)
-            ? route.usdToUsdtRate
-            : null,
-        usdtArsBid: route.usdtArsBid || 0,
-        sellPrice: route.usdtArsBid || 0,
-        transferFeeUSD: route.transferFeeUSD || 0,
-        calculation: route.calculation || {},
-        fees: route.fees || { trading: 0, withdrawal: 0 }
-      };
-      
-      // Usar ModalManager para abrir el modal de detalles
-      if (typeof ModMgr !== 'undefined' && ModMgr.openRouteDetailsModal) {
-        ModMgr.openRouteDetailsModal(arbitrage);
-      } else {
-        console.error('❌ [POPUP] ModalManager no disponible - usando fallback');
-        // Fallback: usar la función original si ModalManager no está disponible
-        showRouteGuideFromData(route);
-      }
+    default:
+      modalContent = generateArbitrageModal(route);
       break;
-    }
   }
+
+  modalBody.innerHTML = modalContent;
+
+  // Mostrar modal con animación
+  modal.style.display = 'flex';
+  requestAnimationFrame(() => {
+    modal.classList.add('active');
+  });
+
+  // Configurar botón de cerrar
+  setupModalCloseButton(modal);
 }
 
-// ============================================
-// FUNCIONES DE DETALLES PARA TIPOS ESPECÍFICOS
-// ============================================
+/**
+ * Configurar botón de cerrar modal
+ */
+function setupModalCloseButton(modal) {
+  const closeBtn = modal.querySelector('#modal-close, .modal-close-btn');
+  if (closeBtn) {
+    // Remover listeners previos clonando el botón
+    const newCloseBtn = closeBtn.cloneNode(true);
+    closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+    
+    newCloseBtn.addEventListener('click', () => {
+      console.log('🔳 [MODAL] Cerrando modal via botón X');
+      modal.style.display = 'none';
+      modal.classList.remove('active');
+    });
+  }
+  
+  // También cerrar al hacer click en el overlay
+  modal.onclick = (e) => {
+    if (e.target === modal) {
+      console.log('🔳 [MODAL] Cerrando modal via overlay');
+      modal.style.display = 'none';
+      modal.classList.remove('active');
+    }
+  };
+}
 
-function showDirectUsdtArsDetails(route) {
-  console.log('💰 Mostrando detalles de venta directa USDT→ARS:', route);
-
-  const modal = document.getElementById('route-details-modal');
-  const content = modal.querySelector('.modal-content');
-
+/**
+ * Generar modal para venta directa USDT → ARS
+ */
+function generateDirectUsdtArsModal(route) {
   const usdtAmount = route.usdtSold || route.calculation?.initialUsdtAmount || 1000;
   const arsReceived = route.arsReceived || 0;
-  const exchangeRate = route.exchangeRate || 0;
+  const exchangeRate = route.exchangeRate || route.usdtArsBid || 0;
   const fees = route.fees || {};
+  const profitPercent = route.profitPercent || 0;
+  const isProfitable = profitPercent >= 0;
 
-  content.innerHTML = `
-    <div class="modal-header">
-      <h2>💰 Venta Directa USDT → ARS</h2>
-      <span class="modal-close">&times;</span>
-    </div>
-    <div class="modal-body">
-      <div class="route-summary">
-        <div class="summary-item">
-          <span class="label">Exchange:</span>
-          <span class="value">${route.broker}</span>
+  return `
+    <div class="fiat-details-modal">
+      <!-- Header con profit destacado -->
+      <div class="fiat-detail-header ${isProfitable ? 'profitable' : 'loss'}">
+        <div class="fiat-symbol">
+          <span class="symbol-icon">💰</span>
+          <span class="symbol-name">USDT → ARS</span>
         </div>
-        <div class="summary-item">
-          <span class="label">USDT a vender:</span>
-          <span class="value">${usdtAmount} USDT</span>
-        </div>
-        <div class="summary-item">
-          <span class="label">ARS recibidos:</span>
-          <span class="value">$${Fmt.formatNumber(arsReceived)}</span>
-        </div>
-        <div class="summary-item">
-          <span class="label">Tasa de cambio:</span>
-          <span class="value">$${Fmt.formatNumber(exchangeRate)} ARS/USDT</span>
+        <div class="profit-highlight">
+          <span class="profit-value">${isProfitable ? '+' : ''}${profitPercent?.toFixed(2) || 0}%</span>
+          <span class="profit-label">${isProfitable ? 'Ganancia' : 'Pérdida'}</span>
         </div>
       </div>
 
-      <div class="route-steps">
-        <h3>Pasos a seguir:</h3>
-        <div class="step">
-          <div class="step-number">1</div>
-          <div class="step-content">
-            <h4>Accede a tu cuenta en ${route.broker}</h4>
-            <p>Inicia sesión en la plataforma de ${route.broker}</p>
+      <!-- Ruta visual -->
+      <div class="route-visualization">
+        <div class="route-step sell">
+          <span class="step-icon">💵</span>
+          <span class="step-exchange">${usdtAmount} USDT</span>
+          <span class="step-action">Vender</span>
+        </div>
+        <div class="route-arrow">
+          <span class="arrow-icon">→</span>
+          <span class="arrow-label">${route.broker}</span>
+        </div>
+        <div class="route-step buy">
+          <span class="step-icon">💸</span>
+          <span class="step-exchange">$${Fmt.formatNumber(arsReceived)}</span>
+          <span class="step-action">Recibir</span>
+        </div>
+      </div>
+
+      <!-- Desglose de operación -->
+      <div class="operation-breakdown">
+        <h4 class="breakdown-title">📋 Cómo realizar la operación</h4>
+        
+        <div class="breakdown-section">
+          <div class="section-header">1. Accede a ${route.broker}</div>
+          <div class="breakdown-row">
+            <span class="label">Inicia sesión en la plataforma</span>
           </div>
         </div>
-        <div class="step">
-          <div class="step-number">2</div>
-          <div class="step-content">
-            <h4>Vende ${usdtAmount} USDT por ARS</h4>
-            <p>Coloca una orden de venta al precio de $${Fmt.formatNumber(exchangeRate)} ARS por USDT</p>
+
+        <div class="breakdown-section">
+          <div class="section-header">2. Vende tus USDT</div>
+          <div class="breakdown-row">
+            <span class="label">Cantidad a vender</span>
+            <span class="value">${usdtAmount} USDT</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="label">Precio de venta</span>
+            <span class="value">$${Fmt.formatNumber(exchangeRate)} ARS/USDT</span>
           </div>
         </div>
-        <div class="step">
-          <div class="step-number">3</div>
-          <div class="step-content">
-            <h4>Recibe $${Fmt.formatNumber(arsReceived)} ARS</h4>
-            <p>Los pesos argentinos estarán disponibles en tu cuenta bancaria</p>
+
+        <div class="breakdown-section">
+          <div class="section-header">3. Retira a tu banco</div>
+          <div class="breakdown-row highlight">
+            <span class="label">Total a recibir</span>
+            <span class="value">$${Fmt.formatNumber(arsReceived)} ARS</span>
           </div>
         </div>
       </div>
 
-      ${
-        fees.total > 0
-          ? `
-      <div class="fees-info">
-        <h4>Comisiones aplicadas:</h4>
-        <div class="fee-breakdown">
-          ${fees.sell > 0 ? `<div>Comisión de venta: $${Fmt.formatNumber(fees.sell)}</div>` : ''}
-          ${fees.withdrawal > 0 ? `<div>Comisión de retiro: $${Fmt.formatNumber(fees.withdrawal)}</div>` : ''}
-          ${fees.transfer > 0 ? `<div>Comisión de transferencia: $${Fmt.formatNumber(fees.transfer)}</div>` : ''}
-          ${fees.bank > 0 ? `<div>Comisión bancaria: $${Fmt.formatNumber(fees.bank)}</div>` : ''}
-          <div class="fee-total">Total fees: $${Fmt.formatNumber(fees.total)}</div>
+      ${fees.total > 0 ? `
+      <details class="fees-details">
+        <summary>💸 Ver detalle de comisiones</summary>
+        <div class="fees-content">
+          <div class="fee-row">
+            <span>Trading fee</span>
+            <span>$${Fmt.formatNumber(fees.trading || 0)}</span>
+          </div>
+          <div class="fee-row">
+            <span>Withdrawal fee</span>
+            <span>$${Fmt.formatNumber(fees.withdrawal || 0)}</span>
+          </div>
+          <div class="fee-row total">
+            <span>Total fees</span>
+            <span>$${Fmt.formatNumber(fees.total)}</span>
+          </div>
         </div>
-      </div>
-      `
-          : ''
-      }
+      </details>
+      ` : ''}
     </div>
   `;
-
-  modal.style.display = 'block';
 }
 
-function showUsdToUsdtDetails(route) {
-  console.log('💎 Mostrando detalles de compra USD→USDT:', route);
-
-  const modal = document.getElementById('route-details-modal');
-  const content = modal.querySelector('.modal-content');
-
+/**
+ * Generar modal para compra USD → USDT
+ */
+function generateUsdToUsdtModal(route) {
   const usdAmount = route.usdInvested || route.calculation?.initialUsdAmount || 1000;
   const usdtReceived = route.usdtReceived || 0;
-  const exchangeRate = route.exchangeRate || 0;
-  const efficiency = route.efficiency || 0;
+  const efficiency = route.efficiency || 1;
   const fees = route.fees || {};
+  const isProfitable = efficiency >= 1;
 
-  content.innerHTML = `
-    <div class="modal-header">
-      <h2>💎 Compra USDT con USD</h2>
-      <span class="modal-close">&times;</span>
-    </div>
-    <div class="modal-body">
-      <div class="route-summary">
-        <div class="summary-item">
-          <span class="label">Exchange:</span>
-          <span class="value">${route.broker}</span>
+  return `
+    <div class="fiat-details-modal">
+      <!-- Header con profit destacado -->
+      <div class="fiat-detail-header ${isProfitable ? 'profitable' : 'loss'}">
+        <div class="fiat-symbol">
+          <span class="symbol-icon">💎</span>
+          <span class="symbol-name">USD → USDT</span>
         </div>
-        <div class="summary-item">
-          <span class="label">USD a invertir:</span>
-          <span class="value">$${usdAmount} USD</span>
-        </div>
-        <div class="summary-item">
-          <span class="label">USDT recibidos:</span>
-          <span class="value">${Fmt.formatNumber(usdtReceived)} USDT</span>
-        </div>
-        <div class="summary-item">
-          <span class="label">Tasa USD/USDT:</span>
-          <span class="value">${Fmt.formatNumber(exchangeRate)}</span>
-        </div>
-        <div class="summary-item">
-          <span class="label">Eficiencia:</span>
-          <span class="value">${Fmt.formatNumber(efficiency * 100)}%</span>
+        <div class="profit-highlight">
+          <span class="profit-value">${efficiency.toFixed(4)}</span>
+          <span class="profit-label">Eficiencia</span>
         </div>
       </div>
 
-      <div class="route-steps">
-        <h3>Pasos a seguir:</h3>
-        <div class="step">
-          <div class="step-number">1</div>
-          <div class="step-content">
-            <h4>Convierte ARS a USD</h4>
-            <p>Compra $${usdAmount} USD usando el dólar oficial o cuevas</p>
-          </div>
+      <!-- Ruta visual -->
+      <div class="route-visualization">
+        <div class="route-step buy">
+          <span class="step-icon">💵</span>
+          <span class="step-exchange">${usdAmount} USD</span>
+          <span class="step-action">Invertir</span>
         </div>
-        <div class="step">
-          <div class="step-number">2</div>
-          <div class="step-content">
-            <h4>Accede a ${route.broker}</h4>
-            <p>Inicia sesión en la plataforma</p>
-          </div>
+        <div class="route-arrow">
+          <span class="arrow-icon">→</span>
+          <span class="arrow-label">${route.broker}</span>
         </div>
-        <div class="step">
-          <div class="step-number">3</div>
-          <div class="step-content">
-            <h4>Compra USDT con USD</h4>
-            <p>Invierte $${usdAmount} USD para recibir ${Fmt.formatNumber(usdtReceived)} USDT</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-number">4</div>
-          <div class="step-content">
-            <h4>Guarda tus USDT</h4>
-            <p>Los USDT estarán disponibles en tu wallet para usar en arbitraje o trading</p>
-          </div>
+        <div class="route-step sell">
+          <span class="step-icon">💲</span>
+          <span class="step-exchange">${Fmt.formatNumber(usdtReceived)} USDT</span>
+          <span class="step-action">Recibir</span>
         </div>
       </div>
 
-      ${
-        fees.total > 0
-          ? `
-      <div class="fees-info">
-        <h4>Comisiones aplicadas:</h4>
-        <div class="fee-breakdown">
-          ${fees.buy > 0 ? `<div>Comisión de compra: ${Fmt.formatNumber(fees.buy)} USDT</div>` : ''}
-          <div class="fee-total">Total fees: ${Fmt.formatNumber(fees.total)} USDT</div>
+      <!-- Desglose de operación -->
+      <div class="operation-breakdown">
+        <h4 class="breakdown-title">📋 Cómo realizar la operación</h4>
+        
+        <div class="breakdown-section">
+          <div class="section-header">1. Deposita USD en ${route.broker}</div>
+          <div class="breakdown-row">
+            <span class="label">Cantidad a depositar</span>
+            <span class="value">${usdAmount} USD</span>
+          </div>
+        </div>
+
+        <div class="breakdown-section">
+          <div class="section-header">2. Compra USDT</div>
+          <div class="breakdown-row">
+            <span class="label">Tasa de conversión</span>
+            <span class="value">1 USD = ${efficiency.toFixed(4)} USDT</span>
+          </div>
+        </div>
+
+        <div class="breakdown-section">
+          <div class="section-header">3. USDT disponibles</div>
+          <div class="breakdown-row highlight">
+            <span class="label">Total obtenido</span>
+            <span class="value">${Fmt.formatNumber(usdtReceived)} USDT</span>
+          </div>
         </div>
       </div>
-      `
-          : ''
-      }
     </div>
   `;
-
-  modal.style.display = 'block';
 }
+
+/**
+ * Generar modal para arbitraje fiat completo
+ */
+function generateArbitrageModal(route) {
+  const calc = route.calculation || {};
+  const initial = calc.initialAmount || calc.initial || 100000;
+  const profitPercentage = route.profitPercentage || calc.profitPercentage || 0;
+  const netProfit = calc.netProfit || 0;
+  const isProfitable = profitPercentage >= 0;
+  const finalAmount = calc.finalAmount || (initial + netProfit);
+
+  const buyExchange = route.buyExchange || 'N/A';
+  const sellExchange = route.sellExchange || route.buyExchange || 'N/A';
+  const isSingleExchange = route.isSingleExchange || buyExchange === sellExchange;
+
+  const officialPrice = route.officialPrice || 0;
+  const usdtArsBid = route.usdtArsBid || route.sellPrice || 0;
+  const usdToUsdtRate = route.usdToUsdtRate;
+
+  return `
+    <div class="fiat-details-modal">
+      <!-- Header con profit destacado -->
+      <div class="fiat-detail-header ${isProfitable ? 'profitable' : 'loss'}">
+        <div class="fiat-symbol">
+          <span class="symbol-icon">${isSingleExchange ? '🎯' : '🔀'}</span>
+          <span class="symbol-name">Arbitraje ${isSingleExchange ? buyExchange : ''}</span>
+        </div>
+        <div class="profit-highlight">
+          <span class="profit-value">${isProfitable ? '+' : ''}${profitPercentage?.toFixed(2) || 0}%</span>
+          <span class="profit-label">${isProfitable ? 'Ganancia' : 'Pérdida'}</span>
+        </div>
+      </div>
+
+      <!-- Ruta visual -->
+      <div class="route-visualization">
+        <div class="route-step buy">
+          <span class="step-icon">💵</span>
+          <span class="step-exchange">Banco</span>
+          <span class="step-action">Comprar USD</span>
+        </div>
+        <div class="route-arrow">
+          <span class="arrow-icon">→</span>
+          <span class="arrow-label">$${Fmt.formatNumber(officialPrice)}</span>
+        </div>
+        <div class="route-step transfer">
+          <span class="step-icon">🔄</span>
+          <span class="step-exchange">${buyExchange}</span>
+          <span class="step-action">USD → USDT</span>
+        </div>
+        ${!isSingleExchange ? `
+        <div class="route-arrow">
+          <span class="arrow-icon">→</span>
+          <span class="arrow-label">Transfer</span>
+        </div>
+        <div class="route-step sell">
+          <span class="step-icon">💸</span>
+          <span class="step-exchange">${sellExchange}</span>
+          <span class="step-action">USDT → ARS</span>
+        </div>
+        ` : `
+        <div class="route-arrow">
+          <span class="arrow-icon">→</span>
+          <span class="arrow-label">$${Fmt.formatNumber(usdtArsBid)}</span>
+        </div>
+        <div class="route-step sell">
+          <span class="step-icon">💸</span>
+          <span class="step-exchange">ARS</span>
+          <span class="step-action">Recibir</span>
+        </div>
+        `}
+      </div>
+
+      <!-- Desglose de operación -->
+      <div class="operation-breakdown">
+        <h4 class="breakdown-title">📋 Paso a paso del arbitraje</h4>
+        
+        <div class="breakdown-section">
+          <div class="section-header">1. Compra USD Oficial</div>
+          <div class="breakdown-row">
+            <span class="label">Inversión</span>
+            <span class="value">$${Fmt.formatNumber(initial)} ARS</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="label">Precio dólar oficial</span>
+            <span class="value">$${Fmt.formatNumber(officialPrice)}</span>
+          </div>
+          <div class="breakdown-row highlight">
+            <span class="label">USD obtenidos</span>
+            <span class="value">${Fmt.formatNumber(calc.usdPurchased || initial / officialPrice)} USD</span>
+          </div>
+        </div>
+
+        <div class="breakdown-section">
+          <div class="section-header">2. Convierte USD → USDT en ${buyExchange}</div>
+          ${usdToUsdtRate && isFinite(usdToUsdtRate) ? `
+          <div class="breakdown-row">
+            <span class="label">Tasa de conversión</span>
+            <span class="value">${usdToUsdtRate.toFixed(4)} USD = 1 USDT</span>
+          </div>
+          ` : ''}
+          <div class="breakdown-row highlight">
+            <span class="label">USDT obtenidos</span>
+            <span class="value">${Fmt.formatNumber(calc.usdtAfterFees || 0)} USDT</span>
+          </div>
+        </div>
+
+        <div class="breakdown-section">
+          <div class="section-header">3. Vende USDT → ARS ${!isSingleExchange ? `en ${sellExchange}` : ''}</div>
+          <div class="breakdown-row">
+            <span class="label">Precio venta</span>
+            <span class="value">$${Fmt.formatNumber(usdtArsBid)}/USDT</span>
+          </div>
+          <div class="breakdown-row highlight">
+            <span class="label">ARS recibidos</span>
+            <span class="value">$${Fmt.formatNumber(calc.arsFromSale || finalAmount)}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen final -->
+      <div class="final-summary ${isProfitable ? 'profitable' : 'loss'}">
+        <div class="summary-row">
+          <span class="label">Inversión inicial</span>
+          <span class="value">$${Fmt.formatNumber(initial)}</span>
+        </div>
+        <div class="summary-row">
+          <span class="label">Retorno final</span>
+          <span class="value">$${Fmt.formatNumber(finalAmount)}</span>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-row result">
+          <span class="label">${isProfitable ? '✅ Ganancia Neta' : '❌ Pérdida Neta'}</span>
+          <span class="value ${isProfitable ? 'profit' : 'loss'}">
+            ${isProfitable ? '+' : ''}$${Fmt.formatNumber(Math.abs(netProfit))} ARS
+          </span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================
+// FUNCIONES DE SOPORTE LEGACY
+// ============================================
 
 // NUEVA FUNCIÓN v5.0.72: Mostrar guía desde datos de ruta directos (sin índice)
 function showRouteGuideFromData(route) {
-  console.log('🔍 [POPUP] showRouteGuideFromData() llamado con ruta:', route);
-
   if (!route) {
     console.warn('❌ [POPUP] No hay datos de ruta disponibles');
     return;
@@ -1903,16 +1995,12 @@ function showRouteGuideFromData(route) {
     calculation: route.calculation || {},
     fees: route.fees || { trading: 0, withdrawal: 0 }
   };
-
-  console.log('🔄 [POPUP] Arbitrage convertido:', arbitrage);
-
   selectedArbitrage = arbitrage;
   displayStepByStepGuide(arbitrage);
 
   // Cambiar a la pestaña de guía
   const guideTab = document.querySelector('[data-tab="guide"]');
   if (guideTab) {
-    console.log('✅ [POPUP] Cambiando a pestaña de guía');
     guideTab.click();
   } else {
     console.error('❌ [POPUP] No se encontró el botón de la pestaña guía');
@@ -1922,9 +2010,6 @@ function showRouteGuideFromData(route) {
 // FUNCIÓN LEGACY v5.0.5: Mostrar guía de una ruta optimizada (POR ÍNDICE - DEPRECADO en v5.0.72)
 // Mantener para compatibilidad pero ya no se usa
 function showRouteGuide(index) {
-  console.log(`🔍 [POPUP] showRouteGuide() llamado con índice: ${index}`);
-  console.log('🔍 [POPUP] currentData existe:', !!currentData);
-  console.log('🔍 [POPUP] currentData.optimizedRoutes existe:', !!currentData?.optimizedRoutes);
   console.log(
     '🔍 [POPUP] currentData.optimizedRoutes.length:',
     currentData?.optimizedRoutes?.length
@@ -1937,8 +2022,6 @@ function showRouteGuide(index) {
   }
 
   const route = currentData.optimizedRoutes[index];
-  console.log(`✅ [POPUP] Ruta encontrada para índice ${index}:`, route);
-
   // Convertir ruta a formato de arbitraje para la guía
   const arbitrage = {
     broker: route.isSingleExchange
@@ -1959,16 +2042,12 @@ function showRouteGuide(index) {
     calculation: route.calculation || {},
     fees: route.fees || { trading: 0, withdrawal: 0 }
   };
-
-  console.log('🔄 [POPUP] Arbitrage convertido:', arbitrage);
-
   selectedArbitrage = arbitrage;
   displayStepByStepGuide(arbitrage);
 
   // Cambiar a la pestaña de guía
   const guideTab = document.querySelector('[data-tab="guide"]');
   if (guideTab) {
-    console.log('✅ [POPUP] Cambiando a pestaña de guía');
     guideTab.click();
   } else {
     console.error('❌ [POPUP] No se encontró el botón de la pestaña guía');
@@ -2252,27 +2331,26 @@ function setupGuideAnimations(container) {
 
 // Función principal refactorizada para mostrar guía paso a paso
 function displayStepByStepGuide(arb) {
-  console.log('📝 [POPUP] displayStepByStepGuide() llamado con:', arb);
-
   const container = document.getElementById('selected-arbitrage-guide');
   if (!container) {
     console.error('❌ [POPUP] No se encontró el contenedor selected-arbitrage-guide');
     return;
   }
-
-  console.log('✅ [POPUP] Contenedor de guía encontrado:', container);
-
   // Validar datos mínimos necesarios
   if (!arb.broker) {
     console.error('❌ [POPUP] Datos incompletos del arbitraje:', arb);
-    container.innerHTML = '<p class="error">❌ Error: Datos incompletos del arbitraje</p>';
+    container.innerHTML = `
+      <div class="error-state animate-scale-in">
+        <div class="error-state-icon animate-pulse">⚠️</div>
+        <h3 class="error-state-title">Datos incompletos</h3>
+        <p class="error-state-message">No se pudieron cargar todos los datos del arbitraje</p>
+      </div>
+    `;
     return;
   }
 
   // Calcular valores usando función auxiliar
   const values = calculateGuideValues(arb);
-  console.log('📊 [POPUP] Valores calculados para la guía:', values);
-
   // Generar HTML completo usando funciones auxiliares (SIMPLIFICADO)
   const html = `
     <div class="guide-container-simple">
@@ -2280,14 +2358,9 @@ function displayStepByStepGuide(arb) {
       ${generateGuideSteps(values)}
     </div>
   `;
-
-  console.log('📄 [POPUP] HTML generado, insertando en container...');
   container.innerHTML = html;
-  console.log('✅ [POPUP] HTML insertado correctamente');
-
   // Configurar animaciones y event listeners
   setupGuideAnimations(container);
-  console.log('✅ [POPUP] Guía paso a paso mostrada correctamente');
 }
 
 // Nota: La función loadBanksDataOld() fue eliminada en v5.0.69
@@ -2313,9 +2386,6 @@ async function fetchExchangeRatesFromAPIs() {
       criptoyaUsdtArsUrl: userSettings.criptoyaUsdtArsUrl || defaultUrls.criptoyaUsdtArsUrl,
       criptoyaUsdtUsdUrl: userSettings.criptoyaUsdtUsdUrl || defaultUrls.criptoyaUsdtUsdUrl
     };
-
-    console.log('[POPUP] 📡 Obteniendo datos de APIs:', urls);
-
     // Obtener datos de las 3 APIs en paralelo
     const [dolarResponse, usdtArsResponse, usdtUsdResponse] = await Promise.allSettled([
       fetch(urls.dolarApiUrl).then(r => r.json()),
@@ -2382,8 +2452,6 @@ async function fetchExchangeRatesFromAPIs() {
         }
       });
     }
-
-    console.log('[POPUP] ✅ Datos obtenidos de', Object.keys(exchangeRates).length, 'exchanges');
     return exchangeRates;
   } catch (error) {
     console.error('[POPUP] ❌ Error obteniendo datos de APIs:', error);
@@ -2403,9 +2471,20 @@ async function displayExchangeRates(exchangeRates) {
   // Si no se deben mostrar precios bancarios, ocultar la sección
   if (!showBankPrices) {
     container.innerHTML = `
-      <div class="select-prompt">
-        <p>🏦 Los precios bancarios están ocultos</p>
-        <p style="margin-top: 8px; font-size: 0.85em;">Puedes activarlos en Configuración → Interfaz → Bancos en Popup</p>
+      <div class="empty-state-card">
+        <div class="empty-state-header">
+          <div class="empty-state-icon-wrapper">
+            <span class="empty-state-emoji">🏦</span>
+          </div>
+          <h3 class="empty-state-title">Precios Ocultos</h3>
+          <p class="empty-state-subtitle">Los precios de exchanges están deshabilitados</p>
+        </div>
+        <div class="empty-state-actions">
+          <button class="btn-action btn-primary-action" onclick="chrome.runtime.openOptionsPage()">
+            <span class="btn-icon">⚙️</span>
+            Ir a Configuración
+          </button>
+        </div>
       </div>
     `;
     return;
@@ -2413,9 +2492,20 @@ async function displayExchangeRates(exchangeRates) {
 
   if (!exchangeRates || Object.keys(exchangeRates).length === 0) {
     container.innerHTML = `
-      <div class="select-prompt">
-        <p>📊 No hay datos de exchanges disponibles</p>
-        <p style="margin-top: 8px; font-size: 0.85em;">Presiona el botón "Actualizar" para cargar las cotizaciones</p>
+      <div class="empty-state-card">
+        <div class="empty-state-header">
+          <div class="empty-state-icon-wrapper">
+            <span class="empty-state-emoji">📊</span>
+          </div>
+          <h3 class="empty-state-title">Sin Datos</h3>
+          <p class="empty-state-subtitle">No hay cotizaciones disponibles</p>
+        </div>
+        <div class="empty-state-actions">
+          <button class="btn-action btn-primary-action" data-action="reload">
+            <span class="btn-icon">🔄</span>
+            Actualizar
+          </button>
+        </div>
       </div>
     `;
     return;
@@ -2815,27 +2905,15 @@ async function loadBankRates() {
 
 /**
  * Actualizar timestamp con indicador de frescura
+ * @deprecated Esta función ya no se usa en v8.2 - ver updateConnectionStatus
  */
 function updateTimestampWithFreshness(container, timestamp) {
+  // Función mantenida para compatibilidad pero simplificada
+  if (!container || !timestamp) return;
+  
   const date = new Date(timestamp);
   const timeStr = date.toLocaleTimeString('es-AR');
-
-  // NUEVO v5.0.74: Indicador de frescura mejorado
-  const freshness = getDataFreshnessLevel(timestamp);
-
-  container.innerHTML = `
-    <span class="freshness-indicator" style="color: ${freshness.color}">${freshness.icon}</span>
-    <span class="timestamp-text">${timeStr}</span>
-    ${freshness.ageMinutes !== null ? `<span class="age-text">(hace ${freshness.ageMinutes} min)</span>` : ''}
-  `;
-
-  // Agregar clase CSS según nivel de frescura
-  container.className = `last-update-container ${freshness.level}`;
-
-  // NUEVO v5.0.74: Mostrar advertencia si datos muy desactualizados
-  if (freshness.level === 'stale' && freshness.ageMinutes > 5) {
-    showDataFreshnessWarning(freshness.ageMinutes);
-  }
+  container.textContent = timeStr;
 }
 
 /**
@@ -2948,19 +3026,11 @@ function setupRouteDetailsModal() {
 
 // Mostrar información del precio del dólar
 function displayDollarInfo(officialData) {
-  console.log('💵 [DISPLAY] displayDollarInfo() llamado con:', {
-    officialData: officialData,
-    compra: officialData?.compra,
-    source: officialData?.source,
-    timestamp: officialData?.timestamp ? new Date(officialData.timestamp).toLocaleString() : 'N/A'
-  });
-
   const dollarInfo = document.getElementById('dollar-info');
   const dollarPrice = document.getElementById('dollar-current-price');
   const dollarSource = document.getElementById('dollar-source-text');
 
   if (!dollarInfo || !officialData) {
-    console.log('❌ [DISPLAY] No hay dollarInfo o officialData - ocultando elemento');
     if (dollarInfo) dollarInfo.style.display = 'none';
     return;
   }
@@ -2972,12 +3042,6 @@ function displayDollarInfo(officialData) {
   // CORREGIDO v5.0.35: Después del fix de campos API, mostrar precio de COMPRA (lo que pagamos por comprar USD)
   dollarPrice.textContent = `$${Fmt.formatNumber(officialData.compra)}`;
   dollarSource.textContent = `Fuente: ${Fmt.getDollarSourceDisplay(officialData)}`;
-
-  console.log('✅ [DISPLAY] Display actualizado:', {
-    precioMostrado: dollarPrice.textContent,
-    fuenteMostrada: dollarSource.textContent
-  });
-
   // Mostrar la información
   dollarInfo.style.display = 'block';
 }
@@ -3106,9 +3170,6 @@ async function loadBanksData() {
     console.error('❌ ERROR: No se encontró el elemento banks-list');
     return;
   }
-
-  console.log('🚀 Iniciando loadBanksData...');
-
   try {
     // Mostrar loading
     banksList.innerHTML = `
@@ -3117,13 +3178,8 @@ async function loadBanksData() {
         <p>Cargando cotizaciones de exchanges...</p>
       </div>
     `;
-
-    console.log('📡 Enviando mensaje getBanksData al background...');
-
     // Obtener datos de background
     const response = await chrome.runtime.sendMessage({ action: 'getBanksData' });
-    console.log('📨 Respuesta del background:', response);
-
     if (!response) {
       throw new Error('No se recibió respuesta del background');
     }
@@ -3133,14 +3189,6 @@ async function loadBanksData() {
     }
 
     const { dollarTypes, usdtUsdData, usdtData } = response.data;
-    console.log('📊 Datos procesados:', {
-      dollarTypes: dollarTypes ? Object.keys(dollarTypes).length + ' bancos' : 'null/undefined',
-      usdtUsdData: usdtUsdData
-        ? Object.keys(usdtUsdData).length + ' exchanges USD/USDT'
-        : 'null/undefined',
-      usdtData: usdtData ? Object.keys(usdtData).length + ' exchanges USDT/ARS' : 'null/undefined'
-    });
-
     // Verificar que tenemos datos
     if (!dollarTypes || Object.keys(dollarTypes).length === 0) {
       console.warn('⚠️ WARNING: dollarTypes está vacío o undefined');
@@ -3154,27 +3202,18 @@ async function loadBanksData() {
 
     // Obtener configuraciones del usuario
     const userSettings = await getUserSettings();
-    console.log('🔍 User settings:', userSettings);
-
     // Almacenar datos globalmente para actualizaciones de ordenamiento
     window.currentBanksData = { dollarTypes, usdtUsdData, usdtData, userSettings };
-    console.log('💾 Datos almacenados en window.currentBanksData');
-
     // Generar HTML con tabs
     const html = generateBanksTabsHTML(dollarTypes, usdtUsdData, usdtData, userSettings);
-    console.log('📄 HTML generado, longitud:', html.length);
-
     if (!html || html.length < 100) {
       console.error('❌ ERROR: HTML generado es demasiado corto o vacío');
       throw new Error('Error generando HTML de pestañas');
     }
 
     banksList.innerHTML = html;
-    console.log('✅ HTML asignado al DOM');
-
     // Inicializar funcionalidad de tabs
     initializeBanksTabs();
-    console.log('✅ Pestañas inicializadas');
   } catch (error) {
     console.error('❌ Error cargando datos de bancos:', error);
     banksList.innerHTML = `
@@ -3316,9 +3355,6 @@ function generateUSDTUSDTTab(usdtUsdData, sortPreference, userSettings = null) {
       </div>
     `;
   }
-
-  console.log('✅ Generando sección USD/USDT con', Object.keys(usdtUsdData).length, 'exchanges');
-
   let html = `
     <div class="banks-section">
   `;
@@ -3595,8 +3631,6 @@ function updateActiveTabSorting() {
       activeTabContent.classList.add('active');
     }
   }
-
-  console.log('✅ Todas las pestañas actualizadas con nuevo ordenamiento, navegación intacta');
 }
 
 /**
@@ -3646,8 +3680,6 @@ let currentOperationFilter = 'all'; // all, direct, p2p
  * Configurar pestaña de arbitraje cripto
  */
 function setupCryptoArbitrageTab() {
-  console.log('🔄 Configurando pestaña de Arbitraje Cripto...');
-
   // Event listener para el selector de criptos
   const cryptoSelector = document.getElementById('crypto-filter');
   if (cryptoSelector) {
@@ -3670,7 +3702,6 @@ function setupCryptoArbitrageTab() {
 
       // Aplicar filtro
       currentOperationFilter = filter;
-      console.log(`⚡ Filtro de operación cambiado a: ${currentOperationFilter}`);
       filterAndRenderCryptoRoutes();
     });
   });
@@ -3683,23 +3714,31 @@ function setupCryptoArbitrageTab() {
  * Obtener datos de crypto arbitrage desde el background
  */
 function fetchAndRenderCryptoRoutes() {
-  console.log('📡 Solicitando datos de crypto arbitrage al background...');
+  console.log('🔄 [CRYPTO] fetchAndRenderCryptoRoutes() - INICIANDO');
+  
+  // Mostrar loading animado
+  showCryptoLoading('Buscando oportunidades de arbitraje crypto...');
 
   // Enviar mensaje al background script para obtener crypto routes
+  console.log('📤 [CRYPTO] Enviando mensaje GET_CRYPTO_ARBITRAGE al background...');
+  
   chrome.runtime.sendMessage({ type: 'GET_CRYPTO_ARBITRAGE' }, response => {
     if (chrome.runtime.lastError) {
-      console.error('❌ Error comunicándose con background:', chrome.runtime.lastError);
-      showCryptoError('Error de comunicación con el servicio');
+      console.error('❌ [CRYPTO] Error comunicándose con background:', chrome.runtime.lastError);
+      showCryptoError('Error de comunicación con el servicio. Intenta nuevamente.');
       return;
     }
 
+    console.log('📥 [CRYPTO] Respuesta recibida del background:', response);
+
     if (response && response.routes) {
-      console.log(`✅ Crypto routes recibidas: ${response.routes.length} rutas`);
+      console.log(`✅ [CRYPTO] ${response.routes.length} rutas recibidas`);
       cryptoRoutes = response.routes;
       filterAndRenderCryptoRoutes();
     } else {
-      console.warn('⚠️ No se recibieron crypto routes del background');
-      showCryptoEmpty('No hay datos de arbitraje crypto disponibles');
+      console.warn('⚠️ [CRYPTO] No se recibieron crypto routes del background');
+      console.log('⚠️ [CRYPTO] Response completo:', response);
+      showCryptoEmpty('No hay datos de arbitraje crypto disponibles en este momento');
     }
   });
 }
@@ -3713,7 +3752,6 @@ function filterAndRenderCryptoRoutes() {
   // Filtro por criptomoneda
   if (currentCryptoFilter !== 'all') {
     filtered = filtered.filter(route => route.crypto === currentCryptoFilter);
-    console.log(`🔍 Después de filtro crypto (${currentCryptoFilter}): ${filtered.length} rutas`);
   }
 
   // Filtro por tipo de operación
@@ -3746,10 +3784,13 @@ function renderCryptoRoutes(routes) {
     return;
   }
 
+  console.log(`🔍 [CRYPTO] Renderizando ${routes?.length || 0} rutas de cripto`);
+
   // Limpiar contenedor
   container.innerHTML = '';
 
   if (!routes || routes.length === 0) {
+    console.warn('⚠️ [CRYPTO] No hay rutas para renderizar');
     showCryptoEmpty('No se encontraron oportunidades con los filtros seleccionados');
     return;
   }
@@ -3764,8 +3805,6 @@ function renderCryptoRoutes(routes) {
   if (typeof initMagneticButtons === 'function') {
     initMagneticButtons();
   }
-
-  console.log(`✅ Renderizadas ${routes.length} crypto routes`);
 }
 
 /**
@@ -3775,9 +3814,9 @@ function createCryptoRouteCard(route, index) {
   const card = document.createElement('div');
   card.className = 'crypto-route-card';
 
-  // NUEVO v6.0.0: Agregar clases de animación y micro-interacciones Fase 5
-  card.classList.add('stagger-in', 'hover-lift', 'click-shrink', 'magnetic-btn', 'ripple-btn', 'hover-scale-rotate');
-  card.style.animationDelay = `${index * 50}ms`;
+  // v8.0: Animación simplificada para mejor rendimiento
+  card.classList.add('animate-slide-up');
+  card.style.animationDelay = `${index * 30}ms`;
 
   // Agregar clase de profit
   if (route.profitPercent > 2) {
@@ -3824,19 +3863,26 @@ function createCryptoRouteCard(route, index) {
           $${Fmt.formatNumber(Math.abs(route.netProfit))} ARS
         </span>
       </div>
-      <button class="btn-details" data-route-index="${index}">
-        Ver detalles
-      </button>
     </div>
   `;
 
-  // Agregar event listener al botón de detalles
-  const detailsBtn = card.querySelector('.btn-details');
-  if (detailsBtn) {
-    detailsBtn.addEventListener('click', () => {
-      showCryptoRouteDetails(route);
-    });
-  }
+  // Hacer toda la card clickeable para mostrar detalles
+  card.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('🖱️ [CRYPTO] Click en card:', route.crypto, route.buyExchange, '→', route.sellExchange);
+    
+    // Marcar como seleccionada
+    const container = card.parentElement;
+    if (container) {
+      container.querySelectorAll('.crypto-route-card').forEach(c => c.classList.remove('selected'));
+    }
+    card.classList.add('selected');
+    
+    // Mostrar modal de detalles
+    showCryptoRouteDetails(route);
+  });
 
   return card;
 }
@@ -3909,64 +3955,240 @@ function getDifficultyIndicator(difficulty) {
 }
 
 /**
- * Mostrar detalles de una ruta crypto en un modal o expandiendo la card
+ * Mostrar detalles de una ruta crypto en un modal profesional
  */
 function showCryptoRouteDetails(route) {
-  console.log('📊 Mostrando detalles de ruta crypto:', route);
+  const modal = document.getElementById('route-details-modal');
+  const modalBody = document.getElementById('modal-body');
+  const modalTitle = document.getElementById('modal-title');
 
-  // Por ahora, mostrar en console.log
-  // TODO: Implementar modal similar al de rutas fiat
-  const details = `
-    🔄 Arbitraje ${route.crypto}
-    📍 Ruta: ${route.buyExchange} → ${route.sellExchange}
-    💰 Tipo: ${route.operationType}
-    ⚡ Velocidad: ${route.speed}
-    🎯 Dificultad: ${route.difficulty}
-    
-    💵 Inversión inicial: $${Fmt.formatNumber(route.calculation?.initialAmount || 0)} ARS
-    🛒 Comprar: ${route.calculation?.cryptoPurchased?.toFixed(8) || 0} ${route.crypto}
-    💸 Precio compra: $${Fmt.formatNumber(route.buyPriceARS)} ARS
-    
-    📤 Transferir (después de fees): ${route.calculation?.cryptoAfterNetworkFee?.toFixed(8) || 0} ${route.crypto}
-    🌐 Network fee: ${route.calculation?.networkFee?.toFixed(8) || 0} ${route.crypto} ($${Fmt.formatNumber(route.calculation?.networkFeeARS || 0)} ARS)
-    
-    💰 Vender por: $${Fmt.formatNumber(route.calculation?.arsFromSale || 0)} ARS
-    💵 Precio venta: $${Fmt.formatNumber(route.sellPriceARS)} ARS
-    
-    ✅ Ganancia bruta: $${Fmt.formatNumber(route.grossProfit)} ARS (${route.grossProfitPercent?.toFixed(2)}%)
-    💎 Ganancia neta: $${Fmt.formatNumber(route.netProfit)} ARS (${route.profitPercent?.toFixed(2)}%)
-    💸 Total fees: $${Fmt.formatNumber(route.fees?.total || 0)} ARS
+  if (!modal || !modalBody) {
+    console.error('❌ Modal no encontrado');
+    return;
+  }
+
+  // Actualizar título
+  if (modalTitle) {
+    modalTitle.textContent = `Arbitraje ${route.crypto}`;
+  }
+
+  // Calcular valores
+  const calc = route.calculation || {};
+  const initialAmount = calc.initialAmount || 100000;
+  const cryptoPurchased = calc.cryptoPurchased || 0;
+  const cryptoAfterFee = calc.cryptoAfterNetworkFee || cryptoPurchased;
+  const arsFromSale = calc.arsFromSale || 0;
+  const networkFee = calc.networkFee || 0;
+  const networkFeeARS = calc.networkFeeARS || 0;
+  const isProfitable = route.profitPercent >= 0;
+
+  // Generar HTML del modal
+  modalBody.innerHTML = `
+    <div class="crypto-details-modal">
+      <!-- Header con profit destacado -->
+      <div class="crypto-detail-header ${isProfitable ? 'profitable' : 'loss'}">
+        <div class="crypto-symbol">
+          <span class="symbol-icon">${getCryptoIcon(route.crypto)}</span>
+          <span class="symbol-name">${route.crypto}</span>
+        </div>
+        <div class="profit-highlight">
+          <span class="profit-value">${isProfitable ? '+' : ''}${route.profitPercent?.toFixed(2) || 0}%</span>
+          <span class="profit-label">${isProfitable ? 'Ganancia' : 'Pérdida'}</span>
+        </div>
+      </div>
+
+      <!-- Ruta visual -->
+      <div class="route-visualization">
+        <div class="route-step buy">
+          <span class="step-icon">🛒</span>
+          <span class="step-exchange">${capitalizeFirst(route.buyExchange)}</span>
+          <span class="step-action">Comprar</span>
+        </div>
+        <div class="route-arrow">
+          <span class="arrow-icon">→</span>
+          <span class="arrow-label">Transfer</span>
+        </div>
+        <div class="route-step sell">
+          <span class="step-icon">💰</span>
+          <span class="step-exchange">${capitalizeFirst(route.sellExchange)}</span>
+          <span class="step-action">Vender</span>
+        </div>
+      </div>
+
+      <!-- Badges de info -->
+      <div class="info-badges">
+        ${getOperationBadge(route.operationType)}
+        ${getSpeedIndicator(route.speed)}
+        ${getDifficultyIndicator(route.difficulty)}
+      </div>
+
+      <!-- Desglose de operación -->
+      <div class="operation-breakdown">
+        <h4 class="breakdown-title">📊 Desglose de la Operación</h4>
+        
+        <div class="breakdown-section">
+          <div class="section-header">1. Compra de ${route.crypto}</div>
+          <div class="breakdown-row">
+            <span class="label">Inversión inicial</span>
+            <span class="value">$${Fmt.formatNumber(initialAmount)} ARS</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="label">Precio compra</span>
+            <span class="value">$${Fmt.formatNumber(route.buyPriceARS)} ARS</span>
+          </div>
+          <div class="breakdown-row highlight">
+            <span class="label">${route.crypto} comprados</span>
+            <span class="value">${cryptoPurchased.toFixed(8)}</span>
+          </div>
+        </div>
+
+        <div class="breakdown-section">
+          <div class="section-header">2. Transferencia</div>
+          <div class="breakdown-row fee">
+            <span class="label">Network fee</span>
+            <span class="value negative">-${networkFee.toFixed(8)} ${route.crypto}</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="label">Fee en ARS</span>
+            <span class="value muted">≈ $${Fmt.formatNumber(networkFeeARS)}</span>
+          </div>
+          <div class="breakdown-row highlight">
+            <span class="label">${route.crypto} a vender</span>
+            <span class="value">${cryptoAfterFee.toFixed(8)}</span>
+          </div>
+        </div>
+
+        <div class="breakdown-section">
+          <div class="section-header">3. Venta por ARS</div>
+          <div class="breakdown-row">
+            <span class="label">Precio venta</span>
+            <span class="value">$${Fmt.formatNumber(route.sellPriceARS)} ARS</span>
+          </div>
+          <div class="breakdown-row highlight">
+            <span class="label">Total recibido</span>
+            <span class="value">$${Fmt.formatNumber(arsFromSale)} ARS</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen final -->
+      <div class="final-summary ${isProfitable ? 'profitable' : 'loss'}">
+        <div class="summary-row">
+          <span class="label">Inversión</span>
+          <span class="value">$${Fmt.formatNumber(initialAmount)}</span>
+        </div>
+        <div class="summary-row">
+          <span class="label">Retorno</span>
+          <span class="value">$${Fmt.formatNumber(arsFromSale)}</span>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-row result">
+          <span class="label">${isProfitable ? '✅ Ganancia Neta' : '❌ Pérdida Neta'}</span>
+          <span class="value ${isProfitable ? 'profit' : 'loss'}">
+            ${isProfitable ? '+' : ''}$${Fmt.formatNumber(route.netProfit)} ARS
+          </span>
+        </div>
+      </div>
+
+      <!-- Fees breakdown -->
+      <details class="fees-details">
+        <summary>💸 Ver detalle de comisiones</summary>
+        <div class="fees-content">
+          <div class="fee-row">
+            <span>Trading fee compra</span>
+            <span>$${Fmt.formatNumber(route.fees?.tradingBuy || 0)}</span>
+          </div>
+          <div class="fee-row">
+            <span>Network fee</span>
+            <span>$${Fmt.formatNumber(networkFeeARS)}</span>
+          </div>
+          <div class="fee-row">
+            <span>Trading fee venta</span>
+            <span>$${Fmt.formatNumber(route.fees?.tradingSell || 0)}</span>
+          </div>
+          <div class="fee-row total">
+            <span>Total fees</span>
+            <span>$${Fmt.formatNumber(route.fees?.total || 0)}</span>
+          </div>
+        </div>
+      </details>
+    </div>
   `;
 
-  alert(details);
+  // Mostrar modal con animación
+  modal.style.display = 'flex';
+  requestAnimationFrame(() => {
+    modal.classList.add('active');
+  });
+
+  // Configurar botón de cerrar
+  setupModalCloseButton(modal);
 }
 
 /**
- * Mostrar mensaje de error en el contenedor
+ * Mostrar mensaje de error en el contenedor con animación
  */
 function showCryptoError(message) {
   const container = document.getElementById('crypto-routes-container');
   if (!container) return;
 
   container.innerHTML = `
-    <div class="empty-state">
-      <div class="empty-state-icon">❌</div>
-      <div class="empty-state-text">${message}</div>
+    <div class="error-state animate-scale-in">
+      <div class="error-state-icon animate-pulse">❌</div>
+      <h3 class="error-state-title">Error de conexión</h3>
+      <p class="error-state-message">${message}</p>
+      <div class="error-state-cta">
+        <button class="btn-retry" onclick="fetchAndRenderCryptoRoutes()">
+          <span>🔄</span>
+          <span>Reintentar</span>
+        </button>
+      </div>
     </div>
   `;
 }
 
 /**
- * Mostrar mensaje de "sin datos" en el contenedor
+ * Mostrar mensaje de "sin datos" en el contenedor con animación
  */
 function showCryptoEmpty(message) {
   const container = document.getElementById('crypto-routes-container');
   if (!container) return;
 
   container.innerHTML = `
-    <div class="empty-state">
+    <div class="empty-state animate-scale-in">
       <div class="empty-state-icon">🔍</div>
-      <div class="empty-state-text">${message || 'No hay oportunidades de arbitraje disponibles'}</div>
+      <h3 class="empty-state-title">Sin oportunidades</h3>
+      <p class="empty-state-message">${message || 'No hay oportunidades de arbitraje disponibles en este momento'}</p>
+      <div class="empty-state-cta">
+        <button class="btn-primary" onclick="fetchAndRenderCryptoRoutes()">
+          <span>🔄</span>
+          <span>Actualizar</span>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Mostrar estado de carga con spinner animado
+ */
+function showCryptoLoading(message = 'Buscando oportunidades...') {
+  const container = document.getElementById('crypto-routes-container');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="loading-state">
+      <div class="spinner-premium lg">
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring"></div>
+      </div>
+      <p class="loading-text">${message}</p>
+      <div class="loading-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
     </div>
   `;
 }
@@ -4179,8 +4401,6 @@ function smoothScrollTo(target, offset = 0) {
  * Inicializar todas las micro-interacciones de la Fase 5
  */
 function initMicroInteractions() {
-  console.log('🎬 Inicializando micro-interacciones avanzadas...');
-  
   // Inicializar botones magnéticos
   initMagneticButtons();
   
@@ -4209,8 +4429,6 @@ function initMicroInteractions() {
     
     observer.observe(counter);
   });
-  
-  console.log('✅ Micro-interacciones avanzadas inicializadas');
 }
 
 /**
@@ -4218,13 +4436,9 @@ function initMicroInteractions() {
  * PROBLEMA 3: Imágenes/iconos faltantes - Síntoma: Sprites SVG no referenciados correctamente
  */
 function diagnoseSVGIcons() {
-  console.log('🔍 [SVG DIAGNOSIS] Iniciando diagnóstico de iconos SVG...');
-  
   try {
     // 1. Verificar que el SVG sprite sheet existe en el DOM
     const svgSprite = document.querySelector('svg[style*="display: none"]');
-    console.log(`🔍 [SVG DIAGNOSIS] Sprite sheet SVG encontrado: ${!!svgSprite}`);
-    
     if (!svgSprite) {
       console.error('❌ [SVG DIAGNOSIS] No se encontró el sprite sheet SVG en el DOM');
       return;
@@ -4232,8 +4446,6 @@ function diagnoseSVGIcons() {
     
     // 2. Contar y listar todos los symbol IDs definidos
     const symbols = svgSprite.querySelectorAll('symbol');
-    console.log(`🔍 [SVG DIAGNOSIS] Símbolos SVG definidos: ${symbols.length}`);
-    
     const symbolIds = [];
     symbols.forEach(symbol => {
       const id = symbol.id;
@@ -4241,9 +4453,6 @@ function diagnoseSVGIcons() {
         symbolIds.push(id);
       }
     });
-    
-    console.log('📋 [SVG DIAGNOSIS] IDs de símbolos definidos:', symbolIds);
-    
     // 3. Verificar que iconos críticos están definidos
     const criticalIcons = [
       'icon-refresh',
@@ -4277,8 +4486,6 @@ function diagnoseSVGIcons() {
       'icon-arrow-up',
       'icon-arrow-down'
     ];
-    
-    console.log('🔍 [SVG DIAGNOSIS] Verificando iconos críticos...');
     const missingIcons = [];
     criticalIcons.forEach(iconId => {
       const exists = symbolIds.includes(iconId);
@@ -4286,27 +4493,20 @@ function diagnoseSVGIcons() {
         missingIcons.push(iconId);
         console.warn(`⚠️ [SVG DIAGNOSIS] Icono crítico faltante: ${iconId}`);
       } else {
-        console.log(`✅ [SVG DIAGNOSIS] Icono encontrado: ${iconId}`);
       }
     });
     
     if (missingIcons.length > 0) {
       console.error(`❌ [SVG DIAGNOSIS] Faltan ${missingIcons.length} iconos críticos:`, missingIcons);
     } else {
-      console.log('✅ [SVG DIAGNOSIS] Todos los iconos críticos están definidos');
     }
     
     // 4. Verificar referencias de iconos en botones de filtro
-    console.log('🔍 [SVG DIAGNOSIS] Verificando referencias en botones de filtro...');
     const filterButtons = document.querySelectorAll('.filter-btn');
-    console.log(`🔍 [SVG DIAGNOSIS] Botones de filtro encontrados: ${filterButtons.length}`);
-    
     filterButtons.forEach((btn, index) => {
       const svgIcon = btn.querySelector('svg use');
       if (svgIcon) {
         const href = svgIcon.getAttribute('href') || svgIcon.getAttribute('xlink:href');
-        console.log(`🔍 [SVG DIAGNOSIS] Botón ${index + 1}: referencia SVG = "${href}"`);
-        
         if (href) {
           // Extraer el ID del icono (formato: #icon-name o /path/to/sprite.svg#icon-name)
           const iconId = href.includes('#') ? href.split('#').pop() : href.replace('#', '');
@@ -4315,7 +4515,6 @@ function diagnoseSVGIcons() {
           if (!exists) {
             console.error(`❌ [SVG DIAGNOSIS] Botón ${index + 1} referencia icono inexistente: ${iconId}`);
           } else {
-            console.log(`✅ [SVG DIAGNOSIS] Botón ${index + 1} referencia válida: ${iconId}`);
           }
         } else {
           console.warn(`⚠️ [SVG DIAGNOSIS] Botón ${index + 1} no tiene referencia SVG`);
@@ -4326,16 +4525,11 @@ function diagnoseSVGIcons() {
     });
     
     // 5. Verificar referencias en botones de header
-    console.log('🔍 [SVG DIAGNOSIS] Verificando referencias en botones de header...');
     const headerButtons = document.querySelectorAll('.btn-settings, .btn-refresh');
-    console.log(`🔍 [SVG DIAGNOSIS] Botones de header encontrados: ${headerButtons.length}`);
-    
     headerButtons.forEach((btn, index) => {
       const svgIcon = btn.querySelector('svg use');
       if (svgIcon) {
         const href = svgIcon.getAttribute('href') || svgIcon.getAttribute('xlink:href');
-        console.log(`🔍 [SVG DIAGNOSIS] Botón header ${index + 1}: referencia SVG = "${href}"`);
-        
         if (href) {
           const iconId = href.includes('#') ? href.split('#').pop() : href.replace('#', '');
           const exists = symbolIds.includes(iconId);
@@ -4343,13 +4537,10 @@ function diagnoseSVGIcons() {
           if (!exists) {
             console.error(`❌ [SVG DIAGNOSIS] Botón header ${index + 1} referencia icono inexistente: ${iconId}`);
           } else {
-            console.log(`✅ [SVG DIAGNOSIS] Botón header ${index + 1} referencia válida: ${iconId}`);
           }
         }
       }
     });
-    
-    console.log('✅ [SVG DIAGNOSIS] Diagnóstico de iconos SVG completado');
   } catch (error) {
     console.error('❌ [SVG DIAGNOSIS] Error durante el diagnóstico:', error);
     console.error('❌ [SVG DIAGNOSIS] Stack trace:', error.stack);

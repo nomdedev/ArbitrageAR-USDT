@@ -4,6 +4,63 @@
    ========================================== */
 
 /* ==========================================
+   0. LOADING STATE (Nuevo - v8.0)
+   Estado de carga con spinner y dots animados
+   ========================================== */
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  gap: 16px;
+  min-height: 300px;
+}
+
+.loading-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary, #1a1a1a);
+  margin: 0;
+}
+
+/* Loading dots animation */
+.loading-dots {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.loading-dots span {
+  width: 8px;
+  height: 8px;
+  background: var(--primary-color, #3b82f6);
+  border-radius: 50%;
+  animation: loadingDotBounce 1.4s infinite ease-in-out both;
+}
+
+.loading-dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes loadingDotBounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ==========================================
    1. SKELETON SCREENS
    ========================================== */
 
@@ -295,6 +352,9 @@
 }
 
 .btn-retry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: var(--space-2) var(--space-4);
   background: var(--color-danger);
   color: white;
@@ -313,6 +373,39 @@
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
+.btn-retry:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+}
+
+/* Botón para empty state */
+.empty-state .btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: var(--space-2) var(--space-4);
+  background: var(--primary-color, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.empty-state .btn-primary:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.empty-state .btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+}
+
 /* ==========================================
    6. ANIMACIONES
    ========================================== */
@@ -323,6 +416,48 @@
   }
   100% {
     background-position: 200% 0;
+  }
+}
+
+/* Scale-in animation para error/empty states */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Pulse animation para íconos */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 

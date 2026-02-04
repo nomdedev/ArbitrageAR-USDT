@@ -9,6 +9,10 @@
     "test:coverage": "jest --coverage",
     "test:legacy": "node tests/run-all-tests.js",
     "test:bank-methods": "node tests/test-bank-methods.js",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:report": "playwright show-report",
     "lint": "eslint src/ --ext .js",
     "lint:fix": "eslint src/ --ext .js --fix",
     "format": "prettier --write \"src/**/*.{js,css,html}\"",
@@ -44,12 +48,14 @@
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.1",
     "archiver": "^7.0.1",
     "clean-css": "^5.3.3",
     "eslint": "^8.57.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "jsdom": "^27.0.0",
+    "playwright": "^1.58.1",
     "prettier": "^3.2.5",
     "terser": "^5.31.0"
   },

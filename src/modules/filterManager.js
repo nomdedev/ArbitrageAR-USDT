@@ -204,6 +204,47 @@
   function updateRoutes(routes) {
     allRoutes = routes || [];
     console.log('✅ [FilterManager] Rutas actualizadas:', allRoutes.length);
+    
+    // Auto-ajustar filtro por defecto si no hay rutas del tipo actual
+    autoAdjustDefaultFilter();
+  }
+
+  /**
+   * Ajustar automáticamente el filtro por defecto según las rutas disponibles
+   * @private
+   */
+  function autoAdjustDefaultFilter() {
+    if (!allRoutes || allRoutes.length === 0) return;
+
+    const p2pCount = allRoutes.filter(route => isP2PRoute(route)).length;
+    const noP2pCount = allRoutes.filter(route => !isP2PRoute(route)).length;
+
+    console.log(`🔍 [FilterManager] Auto-ajuste: ${p2pCount} P2P, ${noP2pCount} No-P2P`);
+
+    // Si el filtro actual no tiene rutas, cambiar a uno que sí tenga
+    if (currentFilter === 'no-p2p' && noP2pCount === 0 && p2pCount > 0) {
+      console.log('🔄 [FilterManager] Cambiando filtro de "no-p2p" a "all" (no hay rutas no-P2P)');
+      currentFilter = 'all';
+      
+      // Actualizar botones visualmente
+      document.querySelectorAll('.filter-btn, .filter-btn-footer').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelectorAll('[data-filter="all"]').forEach(btn => {
+        btn.classList.add('active');
+      });
+    } else if (currentFilter === 'p2p' && p2pCount === 0 && noP2pCount > 0) {
+      console.log('🔄 [FilterManager] Cambiando filtro de "p2p" a "all" (no hay rutas P2P)');
+      currentFilter = 'all';
+      
+      // Actualizar botones visualmente
+      document.querySelectorAll('.filter-btn, .filter-btn-footer').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelectorAll('[data-filter="all"]').forEach(btn => {
+        btn.classList.add('active');
+      });
+    }
   }
 
   /**
@@ -475,11 +516,12 @@
   function setupFilterButtons() {
     console.log('🔧 [FilterManager] Configurando botones de filtro P2P...');
 
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    console.log(`🔍 [FilterManager] Encontrados ${filterButtons.length} botones con clase .filter-btn`);
+    // Buscar botones tanto en el panel como en el footer
+    const filterButtons = document.querySelectorAll('.filter-btn, .filter-btn-footer');
+    console.log(`🔍 [FilterManager] Encontrados ${filterButtons.length} botones de filtro`);
 
     if (filterButtons.length === 0) {
-      console.error('❌ [FilterManager] No se encontraron botones con clase .filter-btn');
+      console.error('❌ [FilterManager] No se encontraron botones de filtro');
       return;
     }
 
@@ -495,23 +537,39 @@
       btn.addEventListener('click', () => {
         console.log(`🖱️ [FilterManager] Click en botón con filtro: ${filter}`);
 
-        // Actualizar estado activo
-        filterButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        // Actualizar estado activo en todos los botones de filtro (incluyendo footer)
+        document.querySelectorAll('.filter-btn, .filter-btn-footer').forEach(b => b.classList.remove('active'));
+        // Marcar todos los botones con el mismo filtro como activos
+        document.querySelectorAll(`[data-filter="${filter}"]`).forEach(b => b.classList.add('active'));
 
         // Aplicar filtro
         setCurrentFilter(filter);
-        applyAllFilters();
+        const filteredRoutes = applyAllFilters();
+        
+        // Actualizar UI con rutas filtradas
+        if (window.RouteManager && window.RouteManager.displayRoutes) {
+          window.RouteManager.displayRoutes(filteredRoutes, 'optimized-routes');
+          console.log(`✅ [FilterManager] UI actualizada con ${filteredRoutes.length} rutas`);
+        }
+        
+        // Actualizar contadores
+        updateFilterCounts();
       });
 
       console.log(`✅ [FilterManager] Event listener adjuntado al botón ${index + 1}`);
     });
 
-    // Marcar filtro por defecto como activo
-    const defaultButton = document.querySelector(`[data-filter="${currentFilter}"]`);
-    if (defaultButton) {
-      defaultButton.classList.add('active');
-      console.log(`✅ [FilterManager] Filtro por defecto marcado como activo: ${currentFilter}`);
+    // Limpiar cualquier clase active previa del HTML
+    document.querySelectorAll('.filter-btn, .filter-btn-footer').forEach(b => b.classList.remove('active'));
+
+    // Auto-ajustar filtro por defecto si es necesario
+    autoAdjustDefaultFilter();
+
+    // Marcar filtro actual como activo (solo uno)
+    const defaultButtons = document.querySelectorAll(`[data-filter="${currentFilter}"]`);
+    defaultButtons.forEach(btn => btn.classList.add('active'));
+    if (defaultButtons.length > 0) {
+      console.log(`✅ [FilterManager] Filtro activo: ${currentFilter}`);
     }
 
     console.log('✅ [FilterManager] Botones de filtro configurados correctamente');

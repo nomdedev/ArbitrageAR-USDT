@@ -1852,6 +1852,7 @@ async function shouldSendNotification(settings, arbitrage) {
   const now = Date.now();
   const frequencies = {
     always: 0,
+    '1min': 1 * 60 * 1000,
     '5min': 5 * 60 * 1000,
     '15min': 15 * 60 * 1000,
     '30min': 30 * 60 * 1000,
@@ -1859,7 +1860,7 @@ async function shouldSendNotification(settings, arbitrage) {
     once: Infinity
   };
 
-  const minInterval = frequencies[settings.notificationFrequency] || frequencies['15min'];
+  const minInterval = frequencies[settings.notificationFrequency] || frequencies['1min'];
   if (now - lastNotificationTime < minInterval) {
     console.log(
       `[NOTIF] ❌ Intervalo mínimo no cumplido (${Math.round((minInterval - (now - lastNotificationTime)) / 1000)}s restantes)`
@@ -1913,37 +1914,49 @@ async function sendNotification(arbitrage, settings) {
     const broker = arbitrage.broker || arbitrage.exchange || 'Exchange';
     const profit = arbitrage.profitPercentage || arbitrage.profitPercent || 0;
 
-    // Determinar el ícono según la ganancia
+    // Determinar el nivel de urgencia según la ganancia
     const iconLevel =
       profit >= 15 ? 'extreme' : profit >= 10 ? 'high' : profit >= 5 ? 'moderate' : 'normal';
 
-    const icons = {
-      extreme: '🚀',
-      high: '💎',
-      moderate: '💰',
-      normal: '📊'
+    // Emojis y textos amigables según nivel
+    const levelConfig = {
+      extreme: { icon: '🚀', label: '¡OPORTUNIDAD EXCEPCIONAL!' },
+      high: { icon: '💎', label: '¡Gran oportunidad!' },
+      moderate: { icon: '💰', label: 'Oportunidad interesante' },
+      normal: { icon: '📊', label: 'Oportunidad detectada' }
     };
 
-    const icon = icons[iconLevel];
+    const config = levelConfig[iconLevel];
 
-    // Construir mensaje con datos disponibles
-    let message = `Ganancia: ${profit.toFixed(2)}% neto`;
-    if (arbitrage.usdToUsdtRate) {
-      message += `\nUSD→USDT: ${arbitrage.usdToUsdtRate}`;
-    }
+    // Formatear nombre del exchange de forma amigable
+    const brokerName = broker.charAt(0).toUpperCase() + broker.slice(1).toLowerCase();
+
+    // Construir mensaje amigable y legible
+    let message = `Ganancia neta estimada: +${profit.toFixed(2)}%`;
+    
+    // Agregar información de precios si está disponible
     if (arbitrage.usdtArsBid) {
-      message += `\nUSDT: $${arbitrage.usdtArsBid.toFixed(2)} ARS`;
+      message += `\nPrecio USDT: $${arbitrage.usdtArsBid.toLocaleString('es-AR', { minimumFractionDigits: 2 })} ARS`;
     }
+    if (arbitrage.usdToUsdtRate) {
+      message += `\nTasa USD/USDT: ${parseFloat(arbitrage.usdToUsdtRate).toFixed(4)}`;
+    }
+    
+    // Agregar contexto temporal
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    message += `\n⏰ Detectado a las ${timeStr}`;
 
-    console.log(`[NOTIF] 🔔 Enviando notificación: ${broker} - ${profit.toFixed(2)}%`);
+    console.log(`[NOTIF] 🔔 Enviando notificación: ${brokerName} - ${profit.toFixed(2)}%`);
 
     await chrome.notifications.create(notificationId, {
       type: 'basic',
       iconUrl: 'icons/icon128.png',
-      title: `${icon} Arbitraje: ${broker} +${profit.toFixed(2)}%`,
+      title: `${config.icon} ${config.label} en ${brokerName}`,
       message: message,
       priority: profit >= 10 ? 2 : 1,
-      requireInteraction: profit >= 15
+      requireInteraction: profit >= 10, // Requiere interacción para ganancias >= 10%
+      silent: false // Asegurar que suene
     });
 
     // Actualizar tiempo de última notificación
@@ -1983,7 +1996,7 @@ async function checkAndNotify(arbitrages) {
     const settings = result.notificationSettings || {
       notificationsEnabled: true,
       alertThreshold: 1.0, // CORREGIDO: Usar alertThreshold
-      notificationFrequency: '15min',
+      notificationFrequency: '1min',
       soundEnabled: true,
       notificationExchanges: [], // CORREGIDO: Usar notificationExchanges
       quietHoursEnabled: false,

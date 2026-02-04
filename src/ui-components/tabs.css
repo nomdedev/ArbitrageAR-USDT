@@ -26,10 +26,10 @@
   bottom: var(--space-1);
   left: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--color-brand-primary) 0%, var(--color-brand-accent) 100%);
+  background: var(--color-brand-primary);
   border-radius: var(--radius-full);
   transition: all var(--duration-normal) var(--ease-out-back);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 2px 8px var(--color-brand-glow);
 }
 
 /* ==========================================
@@ -97,7 +97,7 @@
 .tab-badge.highlight {
   background: var(--color-brand-primary);
   color: white;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 2px 8px var(--color-brand-glow);
   animation: badgeBounce 0.4s var(--ease-out-back);
 }
 
@@ -108,12 +108,12 @@
 }
 
 /* ==========================================
-   4. ESTADOS DEL TAB
+   4. ESTADOS DEL TAB (Fase 4)
    ========================================== */
 
 /* Hover: background sutil */
 .tab-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-hover-overlay);
   color: var(--color-text-primary);
 }
 
@@ -132,7 +132,7 @@
 }
 
 .tab-item.active .tab-badge {
-  background: rgba(59, 130, 246, 0.2);
+  background: var(--color-brand-muted);
   color: var(--color-brand-primary);
 }
 
@@ -140,7 +140,7 @@
 .tab-item:focus-visible {
   outline: 2px solid var(--color-brand-primary);
   outline-offset: -2px;
-  box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.3);
+  box-shadow: inset 0 0 0 2px var(--color-focus-ring);
 }
 
 /* ==========================================

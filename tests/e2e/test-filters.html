@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E2E Test - Filter Buttons</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #1a1a1a;
+      margin-bottom: 30px;
+    }
+    .test-section {
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+    }
+    .test-section h2 {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 15px;
+    }
+    .test-result {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      font-family: 'Consolas', monospace;
+      font-size: 14px;
+    }
+    .test-result.pass {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .test-result.fail {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .test-result.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    button {
+      padding: 10px 20px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      margin: 5px;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+    #test-iframe {
+      width: 430px;
+      height: 600px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>🧪 E2E Tests - Filter Buttons</h1>
+    
+    <div class="controls">
+      <button onclick="runAllTests()">▶️ Run All Tests</button>
+      <button onclick="clearResults()">🗑️ Clear Results</button>
+    </div>
+
+    <div id="test-results"></div>
+
+    <div class="test-section">
+      <h2>📺 Extension Preview</h2>
+      <iframe id="test-iframe" src="../../../src/popup.html"></iframe>
+    </div>
+  </div>
+
+  <script>
+    const results = [];
+    const resultsContainer = document.getElementById('test-results');
+
+    function log(message, type = 'info') {
+      results.push({ message, type });
+      renderResults();
+    }
+
+    function renderResults() {
+      resultsContainer.innerHTML = results.map(r => 
+        `<div class="test-result ${r.type}">${r.message}</div>`
+      ).join('');
+    }
+
+    function clearResults() {
+      results.length = 0;
+      renderResults();
+    }
+
+    async function runAllTests() {
+      clearResults();
+      log('🚀 Iniciando pruebas E2E de filtros...', 'info');
+      
+      const iframe = document.getElementById('test-iframe');
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      
+      // Wait for iframe to load
+      await new Promise(resolve => {
+        if (iframe.contentWindow.document.readyState === 'complete') {
+          resolve();
+        } else {
+          iframe.onload = resolve;
+        }
+      });
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Test 1: Verify filter buttons exist in footer
+      log('📋 Test 1: Verificar que los botones de filtro existan en el footer', 'info');
+      const filterButtons = iframeDoc.querySelectorAll('.filter-btn-footer');
+      
+      if (filterButtons.length === 3) {
+        log(`✅ PASS: Se encontraron 3 botones de filtro en el footer`, 'pass');
+      } else {
+        log(`❌ FAIL: Se esperaban 3 botones, se encontraron ${filterButtons.length}`, 'fail');
+        return;
+      }
+
+      // Test 2: Verify data-filter attributes
+      log('📋 Test 2: Verificar atributos data-filter', 'info');
+      const expectedFilters = ['no-p2p', 'p2p', 'all'];
+      const actualFilters = Array.from(filterButtons).map(btn => btn.dataset.filter);
+      
+      const filtersMatch = expectedFilters.every(f => actualFilters.includes(f));
+      if (filtersMatch) {
+        log(`✅ PASS: Todos los filtros tienen los atributos correctos: ${actualFilters.join(', ')}`, 'pass');
+      } else {
+        log(`❌ FAIL: Filtros incorrectos. Esperados: ${expectedFilters.join(', ')}, Actuales: ${actualFilters.join(', ')}`, 'fail');
+      }
+
+      // Test 3: Verify default active state
+      log('📋 Test 3: Verificar estado activo por defecto', 'info');
+      const activeButton = iframeDoc.querySelector('.filter-btn-footer.active');
+      
+      if (activeButton && activeButton.dataset.filter === 'all') {
+        log(`✅ PASS: El botón "all" está activo por defecto`, 'pass');
+      } else {
+        log(`❌ FAIL: El botón activo por defecto debería ser "all"`, 'fail');
+      }
+
+      // Test 4: Verify SVG icons exist
+      log('📋 Test 4: Verificar que los íconos SVG existan', 'info');
+      const icons = iframeDoc.querySelectorAll('.filter-btn-footer .icon svg');
+      
+      if (icons.length === 3) {
+        log(`✅ PASS: Todos los botones tienen íconos SVG`, 'pass');
+      } else {
+        log(`❌ FAIL: Se esperaban 3 íconos SVG, se encontraron ${icons.length}`, 'fail');
+      }
+
+      // Test 5: Simulate click on no-p2p filter
+      log('📋 Test 5: Simular click en filtro "no-p2p"', 'info');
+      const arbitrageBtn = iframeDoc.querySelector('.filter-btn-footer[data-filter="no-p2p"]');
+      
+      if (arbitrageBtn) {
+        arbitrageBtn.click();
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        const isActive = arbitrageBtn.classList.contains('active');
+        const prevActive = iframeDoc.querySelector('.filter-btn-footer[data-filter="all"]').classList.contains('active');
+        
+        if (isActive && !prevActive) {
+          log(`✅ PASS: Click cambió el filtro activo correctamente`, 'pass');
+        } else {
+          log(`❌ FAIL: Click no cambió el estado activo correctamente`, 'fail');
+        }
+      } else {
+        log(`❌ FAIL: No se encontró el botón de no-p2p`, 'fail');
+      }
+
+      // Test 6: Simulate click on p2p filter
+      log('📋 Test 6: Simular click en filtro "p2p"', 'info');
+      const p2pBtn = iframeDoc.querySelector('.filter-btn-footer[data-filter="p2p"]');
+      
+      if (p2pBtn) {
+        p2pBtn.click();
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        const isActive = p2pBtn.classList.contains('active');
+        const prevActive = arbitrageBtn.classList.contains('active');
+        
+        if (isActive && !prevActive) {
+          log(`✅ PASS: Click en p2p cambió el filtro activo correctamente`, 'pass');
+        } else {
+          log(`❌ FAIL: Click en p2p no cambió el estado activo correctamente`, 'fail');
+        }
+      } else {
+        log(`❌ FAIL: No se encontró el botón de p2p`, 'fail');
+      }
+
+      // Test 7: Verify tooltips
+      log('📋 Test 7: Verificar tooltips', 'info');
+      const tooltips = Array.from(filterButtons).map(btn => btn.dataset.tooltip);
+      const hasTooltips = tooltips.every(t => t && t.length > 0);
+      
+      if (hasTooltips) {
+        log(`✅ PASS: Todos los botones tienen tooltips: ${tooltips.join(', ')}`, 'pass');
+      } else {
+        log(`❌ FAIL: Algunos botones no tienen tooltips`, 'fail');
+      }
+
+      // Test 8: Verify ARIA labels
+      log('📋 Test 8: Verificar ARIA labels para accesibilidad', 'info');
+      const ariaLabels = Array.from(filterButtons).map(btn => btn.getAttribute('aria-label'));
+      const hasAriaLabels = ariaLabels.every(a => a && a.length > 0);
+      
+      if (hasAriaLabels) {
+        log(`✅ PASS: Todos los botones tienen aria-label`, 'pass');
+      } else {
+        log(`❌ FAIL: Algunos botones no tienen aria-label`, 'fail');
+      }
+
+      // Test 9: Verify CSS classes
+      log('📋 Test 9: Verificar clases CSS aplicadas', 'info');
+      const allHaveClass = Array.from(filterButtons).every(btn => 
+        btn.classList.contains('filter-btn-footer')
+      );
+      
+      if (allHaveClass) {
+        log(`✅ PASS: Todos los botones tienen la clase filter-btn-footer`, 'pass');
+      } else {
+        log(`❌ FAIL: Algunos botones no tienen la clase correcta`, 'fail');
+      }
+
+      // Test 10: Verify click toggles between all states
+      log('📋 Test 10: Verificar ciclo completo de filtros', 'info');
+      const allBtn = iframeDoc.querySelector('.filter-btn-footer[data-filter="all"]');
+      allBtn.click();
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      arbitrageBtn.click();
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      p2pBtn.click();
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      allBtn.click();
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      if (allBtn.classList.contains('active')) {
+        log(`✅ PASS: Ciclo completo de filtros funciona correctamente`, 'pass');
+      } else {
+        log(`❌ FAIL: El ciclo de filtros no funcionó correctamente`, 'fail');
+      }
+
+      // Summary
+      const passed = results.filter(r => r.type === 'pass').length;
+      const failed = results.filter(r => r.type === 'fail').length;
+      
+      log(`\n📊 RESUMEN: ${passed} passed, ${failed} failed de ${passed + failed} tests`, 
+        failed === 0 ? 'pass' : 'info');
+    }
+
+    // Auto-run tests on load
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        log('✨ Página cargada. Click en "Run All Tests" para iniciar las pruebas.', 'info');
+      }, 500);
+    });
+  </script>
+</body>
+</html>

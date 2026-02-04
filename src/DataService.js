@@ -71,25 +71,25 @@ class DataService {
     if (data && typeof data.compra === 'number' && typeof data.venta === 'number') {
       return data;
     }
-    console.error('Estructura inválida de DolarAPI:', data);
+    console.warn('⚠️ Sin datos de DolarAPI disponibles');
     return null;
   }
 
   async fetchUSDTData() {
     const data = await this.fetchWithRateLimit('https://criptoya.com/api/usdt/ars/1');
-    if (data && typeof data === 'object') {
+    if (data && typeof data === 'object' && Object.keys(data).length > 0) {
       return data;
     }
-    console.error('Estructura inválida de CriptoYA:', data);
+    console.warn('⚠️ Sin datos USDT/ARS disponibles');
     return null;
   }
 
   async fetchUSDTUsdData() {
     const data = await this.fetchWithRateLimit('https://criptoya.com/api/usdt/usd/1');
-    if (data && typeof data === 'object') {
+    if (data && typeof data === 'object' && Object.keys(data).length > 0) {
       return data;
     }
-    console.error('Estructura inválida de CriptoYA USD:', data);
+    console.warn('⚠️ Sin datos USDT/USD disponibles');
     return null;
   }
 
@@ -107,7 +107,7 @@ class DataService {
     const url = `https://criptoya.com/api/${symbol}/${fiatCurrency}/1`;
     const data = await this.fetchWithRateLimit(url);
 
-    if (data && typeof data === 'object') {
+    if (data && typeof data === 'object' && Object.keys(data).length > 0) {
       console.log(
         `💎 Datos ${symbol}/${fiatCurrency} obtenidos:`,
         Object.keys(data).length,
@@ -121,7 +121,8 @@ class DataService {
       };
     }
 
-    console.error(`Estructura inválida de CriptoYA ${symbol}/${fiatCurrency}:`, data);
+    // No es un error crítico - la API puede no tener datos para algunas criptos
+    console.warn(`⚠️ Sin datos disponibles para ${symbol}/${fiatCurrency}`);
     return null;
   }
 

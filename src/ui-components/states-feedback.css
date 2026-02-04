@@ -1,0 +1,527 @@
+/* ==========================================
+   ARBITRAGEAR - ESTADOS Y FEEDBACKS v1.0
+   Estados vacíos, loading y componentes UI
+   ========================================== */
+
+/* ==========================================
+   1. ESTADOS VACÍOS (Empty States)
+   ========================================== */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.empty-state-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--space-4);
+  color: var(--color-text-muted);
+  opacity: 0.5;
+}
+
+.empty-state-title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.empty-state-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  max-width: 280px;
+  line-height: var(--line-height-relaxed);
+}
+
+.empty-state-action {
+  margin-top: var(--space-4);
+}
+
+/* ==========================================
+   2. LOADING STATES MEJORADOS
+   ========================================== */
+
+/* Spinner minimalista */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-border-default);
+  border-top-color: var(--color-brand-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.spinner-sm {
+  width: 14px;
+  height: 14px;
+  border-width: 1.5px;
+}
+
+.spinner-lg {
+  width: 32px;
+  height: 32px;
+  border-width: 3px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Loading overlay */
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-primary);
+  opacity: 0.9;
+  z-index: 10;
+}
+
+/* Skeleton loading */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-tertiary) 25%,
+    var(--color-bg-elevated) 50%,
+    var(--color-bg-tertiary) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-text {
+  height: 12px;
+  margin-bottom: var(--space-2);
+}
+
+.skeleton-text-sm {
+  height: 10px;
+  width: 60%;
+}
+
+.skeleton-card {
+  height: 80px;
+  margin-bottom: var(--space-3);
+}
+
+/* ==========================================
+   3. ESTADOS DE ERROR
+   ========================================== */
+
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+  background: var(--color-danger-muted);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-lg);
+}
+
+.error-state-icon {
+  width: 40px;
+  height: 40px;
+  color: var(--color-danger);
+  margin-bottom: var(--space-3);
+}
+
+.error-state-message {
+  font-size: var(--font-size-sm);
+  color: var(--color-danger-text);
+  margin-bottom: var(--space-3);
+}
+
+.error-state-retry {
+  font-size: var(--font-size-sm);
+  color: var(--color-brand-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* ==========================================
+   4. FEEDBACK VISUAL SUTIL
+   ========================================== */
+
+/* Hover sutil sin transformaciones */
+.hover-highlight {
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.hover-highlight:hover {
+  background: var(--color-hover-overlay);
+}
+
+/* Focus ring consistente */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+}
+
+/* Active feedback sutil */
+.click-feedback:active {
+  opacity: 0.8;
+}
+
+/* ==========================================
+   5. BADGES Y TAGS
+   ========================================== */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-0-5) var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+.badge-success {
+  background: var(--color-success-muted);
+  color: var(--color-success-text);
+}
+
+.badge-danger {
+  background: var(--color-danger-muted);
+  color: var(--color-danger-text);
+}
+
+.badge-warning {
+  background: var(--color-warning-muted);
+  color: var(--color-warning-text);
+}
+
+.badge-info {
+  background: var(--color-info-muted);
+  color: var(--color-info-text);
+}
+
+.badge-primary {
+  background: var(--color-brand-muted);
+  color: var(--color-brand-secondary);
+}
+
+/* ==========================================
+   6. TARJETAS INTERACTIVAS (Hover sutil)
+   ========================================== */
+
+.card-interactive {
+  transition: 
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.card-interactive:hover {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-border-hover);
+}
+
+.card-interactive:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: -2px;
+}
+
+/* ==========================================
+   7. BOTONES REFINADOS
+   ========================================== */
+
+.btn-subtle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.btn-subtle:hover {
+  color: var(--color-text-primary);
+  background: var(--color-hover-overlay);
+}
+
+.btn-subtle:active {
+  opacity: 0.8;
+}
+
+/* Ghost button */
+.btn-ghost {
+  padding: var(--space-2);
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.btn-ghost:hover {
+  color: var(--color-text-primary);
+  background: var(--color-hover-overlay);
+}
+
+/* ==========================================
+   8. SEPARADORES Y DIVIDERS
+   ========================================== */
+
+.divider {
+  height: 1px;
+  background: var(--color-border-muted);
+  margin: var(--space-4) 0;
+}
+
+.divider-subtle {
+  height: 1px;
+  background: var(--color-border-muted);
+  opacity: 0.5;
+}
+
+/* ==========================================
+   9. EMPTY STATE CARD (Estado vacío mejorado)
+   ========================================== */
+
+.empty-state-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-6);
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.05) 0%, 
+    rgba(139, 92, 246, 0.05) 100%);
+  border: 1px solid var(--color-border-muted);
+  border-radius: var(--radius-xl, 16px);
+  margin: var(--space-4);
+  animation: fadeInUp 0.4s var(--ease-out);
+}
+
+.empty-state-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--space-5);
+}
+
+.empty-state-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.15) 0%, 
+    rgba(139, 92, 246, 0.15) 100%);
+  border-radius: 50%;
+  margin-bottom: var(--space-3);
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.empty-state-emoji {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.empty-state-card .empty-state-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-1) 0;
+}
+
+.empty-state-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Razones / Causas */
+.empty-state-reasons {
+  width: 100%;
+  margin-bottom: var(--space-4);
+}
+
+.reasons-title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 var(--space-3) 0;
+  text-align: left;
+}
+
+.reasons-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.reason-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-secondary, rgba(255, 255, 255, 0.5));
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.reason-item:hover {
+  background: var(--color-bg-tertiary, rgba(255, 255, 255, 0.8));
+  transform: translateX(4px);
+}
+
+.reason-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+}
+
+.reason-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.reason-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.reason-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* Configuración actual */
+.empty-state-config {
+  margin-bottom: var(--space-4);
+}
+
+.config-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-bg-tertiary, rgba(0, 0, 0, 0.05));
+  border-radius: var(--radius-full, 999px);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.config-icon {
+  font-size: 12px;
+}
+
+/* Botones de acción */
+.empty-state-actions {
+  display: flex;
+  gap: var(--space-3);
+  width: 100%;
+  justify-content: center;
+}
+
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  border: none;
+  min-width: 120px;
+}
+
+.btn-icon {
+  font-size: 14px;
+}
+
+.btn-primary-action {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+}
+
+.btn-primary-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.45);
+}
+
+.btn-primary-action:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+}
+
+.btn-secondary-action {
+  background: var(--color-bg-secondary, rgba(0, 0, 0, 0.05));
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-muted);
+}
+
+.btn-secondary-action:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-default);
+}
+
+@keyframes pulse-soft {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================
+   10. TRANSICIONES GLOBALES
+   ========================================== */
+
+/* Reducir animaciones si el usuario lo prefiere */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

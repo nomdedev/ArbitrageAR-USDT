@@ -9,7 +9,11 @@ console.log('🚀 DEBUG: options.js cargado correctamente');
 const DEFAULT_SETTINGS = {
   notificationsEnabled: true,
   alertThreshold: 1.0, // Umbral único de alerta (%)
+  notificationFrequency: '1min', // Frecuencia de notificaciones por defecto
   soundEnabled: true,
+  quietHoursEnabled: false,
+  quietStart: '22:00',
+  quietEnd: '08:00',
   notificationExchanges: [
     'binance',
     'buenbit',
@@ -764,7 +768,13 @@ function getCurrentSettings() {
   // Notificaciones
   settings.notificationsEnabled = document.getElementById('notify-enabled')?.checked ?? true;
   settings.alertThreshold = parseFloat(document.getElementById('alert-threshold')?.value) || 1.0;
+  settings.notificationFrequency = document.getElementById('notify-frequency')?.value || '1min';
   settings.soundEnabled = document.getElementById('sound-enabled')?.checked ?? true;
+  
+  // Horario silencioso
+  settings.quietHoursEnabled = document.getElementById('quiet-hours')?.checked ?? false;
+  settings.quietStart = document.getElementById('quiet-start')?.value || '22:00';
+  settings.quietEnd = document.getElementById('quiet-end')?.value || '08:00';
 
   // Exchanges para notificaciones
   const notifyExchangeCheckboxes = document.querySelectorAll(

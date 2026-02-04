@@ -55,15 +55,13 @@
 /* Up: color verde, icono ▲ */
 .variation-badge[data-trend="up"] {
   background: var(--color-success-muted);
-  color: var(--color-success);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: var(--color-success-text);
 }
 
 /* Down: color rojo, icono ▼ */
 .variation-badge[data-trend="down"] {
   background: var(--color-danger-muted);
-  color: var(--color-danger);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--color-danger-text);
 }
 .trend-icon {
   font-size: 10px;
@@ -125,7 +123,7 @@
 .best-price-badge {
   display: none;
   padding: var(--space-1) var(--space-2);
-  background: linear-gradient(135deg, var(--color-success) 0%, #059669 100%);
+  background: var(--color-success);
   color: white;
   border-radius: var(--radius-sm);
   font-size: var(--font-size-xs);

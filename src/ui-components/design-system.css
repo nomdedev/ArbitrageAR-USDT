@@ -4,82 +4,117 @@
    ========================================== */
 
 /* ==========================================
+   IMPORTACIÓN DE FUENTES - INTER
+   Google Fonts con weights optimizados
+   ========================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ==========================================
    1. VARIABLES CSS COMPLETAS
    ========================================== */
 
 :root {
-  /* === PALETA DE COLORES DARK PREMIUM === */
+  /* ==========================================
+     PALETA DE COLORES DARK PREMIUM (Fase 4)
+     Inspirada en Tailwind/shadcn con mejor contraste
+     ========================================== */
   
-  /* Fondos */
-  --color-bg-primary: #0a0e1a;
-  --color-bg-secondary: #111827;
-  --color-bg-tertiary: #1f2937;
-  --color-bg-elevated: #374151;
-  --color-bg-canvas: #05080f;
+  /* Fondos - Escala de grises fríos */
+  --color-bg-primary: #09090b;     /* zinc-950 - Fondo base */
+  --color-bg-secondary: #18181b;   /* zinc-900 - Tarjetas */
+  --color-bg-tertiary: #27272a;    /* zinc-800 - Inputs/elevados */
+  --color-bg-elevated: #3f3f46;    /* zinc-700 - Hovers */
+  --color-bg-canvas: #000000;      /* Negro puro para overlays */
+  --color-bg-muted: #27272a;       /* zinc-800 */
   
-  /* Gradientes de fondo */
-  --bg-primary: linear-gradient(135deg, #0a0e1a 0%, #111827 100%);
-  --bg-secondary: linear-gradient(135deg, #111827 0%, #1f2937 100%);
-  --bg-tertiary: #1f2937;
-  --bg-dark: #0a0e1a;
-  --bg-darker: #05080f;
+  /* Gradientes de fondo - Más sutiles */
+  --bg-primary: linear-gradient(180deg, #09090b 0%, #18181b 100%);
+  --bg-secondary: linear-gradient(180deg, #18181b 0%, #27272a 100%);
+  --bg-tertiary: #27272a;
+  --bg-dark: #09090b;
+  --bg-darker: #000000;
   
-  /* Marca */
-  --color-brand-primary: #3b82f6;
-  --color-brand-secondary: #60a5fa;
-  --color-brand-accent: #8b5cf6;
-  --color-brand-glow: rgba(59, 130, 246, 0.4);
+  /* Marca - Azul más desaturado y profesional */
+  --color-brand-primary: #3b82f6;    /* blue-500 */
+  --color-brand-secondary: #60a5fa;  /* blue-400 */
+  --color-brand-accent: #818cf8;     /* indigo-400 - Menos saturado */
+  --color-brand-glow: rgba(59, 130, 246, 0.25);
+  --color-brand-muted: rgba(59, 130, 246, 0.1);
   
-  /* Semánticos */
-  --color-success: #10b981;
-  --color-success-muted: rgba(16, 185, 129, 0.15);
-  --color-danger: #ef4444;
-  --color-danger-muted: rgba(239, 68, 68, 0.15);
-  --color-warning: #f59e0b;
-  --color-warning-muted: rgba(245, 158, 11, 0.15);
-  --color-info: #06b6d4;
-  --color-info-muted: rgba(6, 182, 212, 0.15);
+  /* Semánticos - Ligeramente desaturados para tema oscuro */
+  --color-success: #22c55e;          /* green-500 */
+  --color-success-muted: rgba(34, 197, 94, 0.12);
+  --color-success-text: #4ade80;     /* green-400 - Para texto sobre fondos oscuros */
   
-  /* Texto */
-  /* WCAG AA: Todos los colores de texto cumplen con contraste mínimo 4.5:1 sobre fondos oscuros (#0a0e1a, #111827) */
-  --color-text-primary: #f0f6fc; /* Contraste 15.2:1 sobre #0a0e1a - EXCELENTE */
-  --color-text-secondary: #9ca3af; /* Contraste 5.4:1 sobre #0a0e1a - CUMPLE WCAG AA (mejorado de #8b949e) */
-  --color-text-muted: #9ca3af; /* Contraste 5.4:1 sobre #0a0e1a - CUMPLE WCAG AA (mejorado de #6e7681) */
-  --color-text-inverse: #0a0e1a;
-  --color-text-disabled: #6b7280; /* Contraste 4.5:1 - Para elementos deshabilitados */
+  --color-danger: #ef4444;           /* red-500 */
+  --color-danger-muted: rgba(239, 68, 68, 0.12);
+  --color-danger-text: #f87171;      /* red-400 */
   
-  /* Bordes */
-  /* WCAG AA: Los bordes decorativos no requieren contraste específico, pero los bordes de elementos interactivos sí */
-  --color-border-default: #30363d; /* Contraste suficiente para bordes de formularios */
-  --color-border-muted: #21262d; /* Contraste 2.1:1 - Adecuado para bordes decorativos */
-  --color-border-emphasis: #8b949e; /* Contraste 4.8:1 - Visible para elementos importantes */
+  --color-warning: #eab308;          /* yellow-500 - Ligeramente más oscuro */
+  --color-warning-muted: rgba(234, 179, 8, 0.12);
+  --color-warning-text: #facc15;     /* yellow-400 */
   
-  /* === SISTEMA TIPOGRÁFICO === */
+  --color-info: #06b6d4;             /* cyan-500 */
+  --color-info-muted: rgba(6, 182, 212, 0.12);
+  --color-info-text: #22d3ee;        /* cyan-400 */
   
-  /* Fuente */
+  /* Texto - Escala de grises con buen contraste */
+  --color-text-primary: #fafafa;     /* zinc-50 - Contraste 18:1 */
+  --color-text-secondary: #a1a1aa;   /* zinc-400 - Contraste 6.5:1 */
+  --color-text-muted: #71717a;       /* zinc-500 - Contraste 4.6:1 */
+  --color-text-inverse: #09090b;     /* zinc-950 */
+  --color-text-disabled: #52525b;    /* zinc-600 - Contraste 3.5:1 */
+  
+  /* Bordes - Más sutiles */
+  --color-border-default: #27272a;   /* zinc-800 */
+  --color-border-muted: #18181b;     /* zinc-900 */
+  --color-border-emphasis: #52525b;  /* zinc-600 */
+  --color-border-hover: #3f3f46;     /* zinc-700 */
+  
+  /* Estados interactivos */
+  --color-hover-overlay: rgba(255, 255, 255, 0.05);
+  --color-active-overlay: rgba(255, 255, 255, 0.08);
+  --color-focus-ring: rgba(59, 130, 246, 0.5);
+  
+  /* === SISTEMA TIPOGRÁFICO MODERNO === */
+  
+  /* Fuentes - Inter + JetBrains Mono */
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
   
-  /* Tamaños */
-  --font-size-xs: 0.75rem;    /* 12px */
-  --font-size-sm: 0.8125rem;  /* 13px */
-  --font-size-base: 0.875rem; /* 14px */
-  --font-size-md: 0.875rem;   /* 14px */
-  --font-size-lg: 1rem;       /* 16px */
-  --font-size-xl: 1.125rem;   /* 18px */
-  --font-size-2xl: 1.25rem;   /* 20px */
-  --font-size-3xl: 1.5rem;    /* 24px */
+  /* Escala Tipográfica Moderna (Minor Third 1.2) */
+  --font-size-2xs: 0.625rem;  /* 10px - Para badges muy pequeños */
+  --font-size-xs: 0.6875rem;  /* 11px - Para micro texto */
+  --font-size-sm: 0.75rem;    /* 12px - Para texto secundario */
+  --font-size-base: 0.8125rem;/* 13px - Tamaño base para extensión */
+  --font-size-md: 0.875rem;   /* 14px - Para texto importante */
+  --font-size-lg: 1rem;       /* 16px - Para subtítulos */
+  --font-size-xl: 1.125rem;   /* 18px - Para títulos pequeños */
+  --font-size-2xl: 1.25rem;   /* 20px - Para títulos medianos */
+  --font-size-3xl: 1.5rem;    /* 24px - Para títulos grandes */
+  --font-size-4xl: 1.75rem;   /* 28px - Para display */
   
-  /* Pesos */
+  /* Pesos - Variaciones de Inter */
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
   
-  /* Alturas de línea */
+  /* Tracking (Letter Spacing) - Crucial para legibilidad */
+  --tracking-tighter: -0.02em;
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.01em;
+  --tracking-wider: 0.025em;
+  --tracking-widest: 0.05em;
+  
+  /* Alturas de línea optimizadas */
+  --line-height-none: 1;
   --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
   --line-height-normal: 1.5;
-  --line-height-relaxed: 1.75;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
   
   /* === SISTEMA DE ESPACIADO (Base 4px) === */
   --space-0: 0;
@@ -191,7 +226,7 @@
   --card-border-hover: 1px solid var(--color-border-emphasis);
   --backdrop-blur: blur(12px);
 }
-.inline-flex { display: inline-flex; }
+
 .flex-row { flex-direction: row; }
 .flex-1 { flex: 1; }
 .items-center { align-items: center; }
@@ -454,33 +489,131 @@
 .line-through { text-decoration: line-through; }
 .no-underline { text-decoration: none; }
 
-/* Semantic typography classes */
-.heading { font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); }
-.heading-1 { font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); }
-.heading-2 { font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); }
-.heading-3 { font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); }
-.heading-4 { font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); }
-.heading-5 { font-size: var(--font-size-base); font-weight: var(--font-weight-medium); }
-.heading-6 { font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); }
+/* ==========================================
+   SEMANTIC TYPOGRAPHY CLASSES (Fase 3)
+   Tipografía profesional estilo shadcn/ui
+   ========================================== */
 
-.body-text { font-size: var(--font-size-base); line-height: var(--line-height-normal); }
-.caption-text { font-size: var(--font-size-xs); line-height: var(--line-height-normal); }
-.label-text { font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); }
-.code-text { font-family: var(--font-mono); font-size: var(--font-size-sm); }
-.monospace { font-family: var(--font-mono); }
+/* Headings con tracking optimizado */
+.heading { 
+  font-weight: var(--font-weight-semibold); 
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--tracking-tight);
+}
+.heading-1 { 
+  font-size: var(--font-size-3xl); 
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-tighter);
+}
+.heading-2 { 
+  font-size: var(--font-size-2xl); 
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-tight);
+}
+.heading-3 { 
+  font-size: var(--font-size-xl); 
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-tight);
+}
+.heading-4 { 
+  font-size: var(--font-size-lg); 
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-normal);
+}
+.heading-5 { 
+  font-size: var(--font-size-md); 
+  font-weight: var(--font-weight-medium);
+}
+.heading-6 { 
+  font-size: var(--font-size-sm); 
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+}
+
+/* Body text classes */
+.body { 
+  font-size: var(--font-size-base); 
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+}
+.body-large { 
+  font-size: var(--font-size-md); 
+  line-height: var(--line-height-relaxed);
+}
+.body-small { 
+  font-size: var(--font-size-sm); 
+  line-height: var(--line-height-normal);
+  color: var(--color-text-secondary);
+}
+.body-text { 
+  font-size: var(--font-size-base); 
+  line-height: var(--line-height-normal); 
+}
+
+/* Caption and labels */
+.caption { 
+  font-size: var(--font-size-xs); 
+  line-height: var(--line-height-normal);
+  color: var(--color-text-muted);
+}
+.caption-text { 
+  font-size: var(--font-size-xs); 
+  line-height: var(--line-height-normal); 
+}
+.label { 
+  font-size: var(--font-size-sm); 
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-wide);
+}
+.label-text { 
+  font-size: var(--font-size-sm); 
+  font-weight: var(--font-weight-medium); 
+}
+
+/* Monospace / code */
+.text-mono,
+.monospace { 
+  font-family: var(--font-mono);
+  font-size: 0.9em; /* Ligeramente más pequeño para balance visual */
+  font-feature-settings: 'liga' 0; /* Desactivar ligaduras en código */
+}
+.code-text { 
+  font-family: var(--font-mono); 
+  font-size: var(--font-size-sm);
+  background: var(--color-bg-tertiary);
+  padding: 0.125em 0.25em;
+  border-radius: var(--radius-sm);
+}
+
+/* Text utilities */
 .truncate {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-emphasis { 
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Letter spacing utilities */
+.tracking-tighter { letter-spacing: var(--tracking-tighter); }
+.tracking-tight { letter-spacing: var(--tracking-tight); }
+.tracking-normal { letter-spacing: var(--tracking-normal); }
+.tracking-wide { letter-spacing: var(--tracking-wide); }
+.tracking-wider { letter-spacing: var(--tracking-wider); }
+.tracking-widest { letter-spacing: var(--tracking-widest); }
 
 /* === DISPLAY UTILITIES === */
 .block { display: block; }
 .inline-block { display: inline-block; }
 .inline { display: inline; }
 .flex { display: flex; }
-.inline-flex { display: inline-flex; }
-.grid { display: grid; }
 .inline-grid { display: inline-grid; }
 .hidden { display: none !important; }
 .visible { visibility: visible; }
@@ -847,17 +980,6 @@
    15. ADDITIONAL BADGE VARIANTS
    ========================================== */
 
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: var(--space-1) var(--space-2);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  border-radius: var(--radius-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
 .badge-success {
   background: var(--color-success-muted);
   color: var(--color-success);
@@ -911,12 +1033,6 @@
 /* ==========================================
    16. ACCESIBILIDAD GLOBAL
    ========================================== */
-
-/* Focus visible mejorado para navegación por teclado */
-:focus-visible {
-  outline: 2px solid var(--color-brand-primary);
-  outline-offset: 2px;
-}
 
 /* Focus para elementos interactivos */
 button:focus-visible,

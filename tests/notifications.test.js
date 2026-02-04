@@ -49,6 +49,7 @@ async function shouldSendNotification(settings, arbitrage) {
   const now = Date.now();
   const frequencies = {
     always: 0,
+    '1min': 1 * 60 * 1000,
     '5min': 5 * 60 * 1000,
     '15min': 15 * 60 * 1000,
     '30min': 30 * 60 * 1000,
@@ -56,7 +57,7 @@ async function shouldSendNotification(settings, arbitrage) {
     once: Infinity
   };
 
-  const minInterval = frequencies[settings.notificationFrequency] || frequencies['15min'];
+  const minInterval = frequencies[settings.notificationFrequency] || frequencies['1min'];
   if (now - lastNotificationTime < minInterval && lastNotificationTime > 0) {
     return { allowed: false, reason: 'frequency' };
   }

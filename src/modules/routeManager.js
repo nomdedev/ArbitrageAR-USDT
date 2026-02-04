@@ -370,27 +370,20 @@
 
     const showProfitColors = interfaceSettings.interfaceShowProfitColors !== false;
     const compactView = interfaceSettings.interfaceCompactView || false;
-    const showExchangeIcons = interfaceSettings.interfaceShowExchangeIcons !== false;
     const showTimestamps = interfaceSettings.interfaceShowTimestamps || false;
 
     const routeType = getRouteType(route);
     const displayMetrics = getRouteDisplayMetrics(route, routeType);
 
-    const { isNegative, profitClass, profitBadgeClass } = showProfitColors
+    const { profitClass, profitBadgeClass } = showProfitColors
       ? getProfitClasses(displayMetrics.percentage)
       : { isNegative: false, profitClass: '', profitBadgeClass: '' };
 
-    const negativeIndicator = isNegative ? '<span class="negative-tag">⚠️ Pérdida</span>' : '';
-    const profitSymbol = isNegative ? '' : '+';
-
-    const typeBadge = getRouteTypeBadge(routeType);
+    const profitSymbol = displayMetrics.percentage >= 0 ? '+' : '';
     const p2pBadge = getP2PBadge(route);
     const compactClass = compactView ? 'compact-view' : '';
-    const exchangeIcon = showExchangeIcons ? getExchangeIcon(route.buyExchange) : '';
 
-    const timestampInfo = showTimestamps && route.timestamp
-      ? `<div class="route-timestamp">🕐 ${new Date(route.timestamp).toLocaleTimeString()}</div>`
-      : '';
+    const timestampInfo = showTimestamps && route.timestamp;
 
     const routeDescription = getRouteDescription(route, routeType);
 
@@ -406,34 +399,33 @@
     card.dataset.index = index;
     card.dataset.route = escapedRouteData;
 
+    // Estructura unificada con crypto cards
     card.innerHTML = `
-      <div class="route-header">
-        <div class="route-title">
-          <h3>${getRouteIcon(routeType, route)} Ruta ${index + 1} ${exchangeIcon}</h3>
-          ${negativeIndicator ? `<div class="route-loss-indicator">${negativeIndicator}</div>` : ''}
-          <div class="route-badges">
-            ${typeBadge}
-            ${p2pBadge}
-          </div>
+      <div class="fiat-card-header">
+        <div class="fiat-info">
+          <span class="fiat-icon">${getRouteIcon(routeType, route)}</span>
+          <span class="fiat-name">${getRouteTypeName(routeType)}</span>
         </div>
-        <div class="route-profit-section">
-          <div class="profit-badge ${profitBadgeClass} text-underline-animated glow-pulse">
-            ${profitSymbol}${Fmt.formatNumber(displayMetrics.percentage)}%
-          </div>
+        <div class="profit-badge ${profitBadgeClass} text-underline-animated glow-pulse">
+          ${profitSymbol}${Fmt.formatNumber(displayMetrics.percentage)}%
         </div>
       </div>
-
-      <div class="route-compact">
-        <div class="route-summary-line">
-          <span class="route-exchanges">🏦 ${routeDescription}</span>
+      
+      <div class="fiat-card-body">
+        <div class="route-path">
+          ${routeDescription}
         </div>
-        <div class="route-profit-line">
-          <span class="profit-amount">${displayMetrics.mainValue}</span>
-          <span class="investment-info">${displayMetrics.secondaryInfo}</span>
+        
+        <div class="operation-meta">
+          ${p2pBadge}
+          ${timestampInfo ? `<span class="time-indicator">🕐 ${new Date(route.timestamp).toLocaleTimeString()}</span>` : ''}
         </div>
-        ${timestampInfo}
-        <div class="route-action">
-          <span class="click-to-expand">👆 Click para ver detalles</span>
+      </div>
+      
+      <div class="fiat-card-footer">
+        <div class="profit-details">
+          <span class="label">Resultado:</span>
+          <span class="value ${displayMetrics.percentage >= 0 ? '' : 'negative'}">${displayMetrics.mainValue}</span>
         </div>
       </div>
     `;
@@ -458,23 +450,70 @@
 
     // Verificar si hay rutas para mostrar
     if (!routes || routes.length === 0) {
+      const threshold = interfaceSettings.profitThreshold || 1.0;
+      const routeType = interfaceSettings.routeType || 'arbitrage';
+      
       container.innerHTML = `
-        <div class="market-status">
-          <h3>📊 Estado del Mercado</h3>
-          <p>No se encontraron rutas que cumplan con tus criterios de filtrado.</p>
-          <div class="market-info">
-            <p><strong>Posibles causas:</strong></p>
-            <ul>
-              <li>🎯 <strong>Umbral de ganancia muy alto:</strong> Prueba bajar el umbral mínimo en Configuración</li>
-              <li>🏦 <strong>Exchanges preferidos restrictivos:</strong> Agrega más exchanges en Configuración</li>
-              <li>💰 <strong>Tipo de ruta incorrecto:</strong> Cambia el tipo de rutas en Configuración</li>
-              <li>🔄 <strong>Mercado en equilibrio:</strong> Las tasas están muy cercanas al dólar oficial</li>
-              <li>🤝 <strong>Filtro P2P activo:</strong> Cambia a "Todas" o "No P2P" en los filtros</li>
-            </ul>
-            <p><small>Tu configuración actual: Umbral ${interfaceSettings.profitThreshold || 1.0}%, Tipo: ${interfaceSettings.routeType || 'arbitrage'}</small></p>
+        <div class="empty-state-card">
+          <div class="empty-state-header">
+            <div class="empty-state-icon-wrapper">
+              <span class="empty-state-emoji">📊</span>
+            </div>
+            <h3 class="empty-state-title">Estado del Mercado</h3>
+            <p class="empty-state-subtitle">No se encontraron oportunidades</p>
           </div>
-          <button class="retry-btn" data-action="reload" style="margin-top: 15px;">🔄 Actualizar Datos</button>
-          <button class="settings-btn" onclick="chrome.runtime.openOptionsPage()" style="margin-top: 10px;">⚙️ Revisar Configuración</button>
+          
+          <div class="empty-state-reasons">
+            <p class="reasons-title">Posibles causas:</p>
+            <div class="reasons-list">
+              <div class="reason-item">
+                <span class="reason-icon">🎯</span>
+                <div class="reason-content">
+                  <span class="reason-label">Umbral muy alto</span>
+                  <span class="reason-hint">Prueba bajar el umbral mínimo</span>
+                </div>
+              </div>
+              <div class="reason-item">
+                <span class="reason-icon">🏦</span>
+                <div class="reason-content">
+                  <span class="reason-label">Exchanges restrictivos</span>
+                  <span class="reason-hint">Agrega más exchanges</span>
+                </div>
+              </div>
+              <div class="reason-item">
+                <span class="reason-icon">🔄</span>
+                <div class="reason-content">
+                  <span class="reason-label">Mercado en equilibrio</span>
+                  <span class="reason-hint">Tasas cercanas al oficial</span>
+                </div>
+              </div>
+              <div class="reason-item">
+                <span class="reason-icon">🤝</span>
+                <div class="reason-content">
+                  <span class="reason-label">Filtro P2P activo</span>
+                  <span class="reason-hint">Cambia a "Todas" o "No P2P"</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="empty-state-config">
+            <span class="config-badge">
+              <span class="config-icon">⚙️</span>
+              Umbral: ${threshold}% · Tipo: ${routeType}
+            </span>
+          </div>
+          
+          <div class="empty-state-actions">
+            <button class="btn-action btn-primary-action" data-action="reload">
+              <span class="btn-icon">🔄</span>
+              Actualizar
+            </button>
+            <button class="btn-action btn-secondary-action" onclick="chrome.runtime.openOptionsPage()">
+              <span class="btn-icon">⚙️</span>
+              Configuración
+            </button>
+          </div>
         </div>
       `;
       return;

@@ -1,0 +1,180 @@
+/* ==========================================
+   ARBITRAGEAR - ANIMATIONS MINIMAL v8.0
+   Sistema de Animaciones Simplificado
+   Solo 8 animaciones esenciales
+   ========================================== */
+
+/* ==========================================
+   1. VARIABLES DE ANIMACIÓN
+   ========================================== */
+:root {
+  /* Duraciones */
+  --duration-instant: 100ms;
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  
+  /* Easings */
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ==========================================
+   2. ANIMACIONES ESENCIALES (8 total)
+   ========================================== */
+
+/* 1. Fade In - Entrada suave */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 2. Slide Up - Entrada desde abajo (para contenido nuevo) */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 3. Scale In - Entrada con escala (para modales) */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 4. Spin - Rotación continua (para loading) */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 5. Shimmer - Efecto de carga skeleton */
+@keyframes shimmer {
+  to { background-position: 200% 0; }
+}
+
+/* 6. Pulse - Parpadeo suave (para indicadores) */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* 7. Flash Update - Feedback de actualización de datos */
+@keyframes flashUpdate {
+  0% { background-color: transparent; }
+  30% { background-color: rgba(59, 130, 246, 0.15); }
+  100% { background-color: transparent; }
+}
+
+/* 8. Shake - Feedback de error */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* ==========================================
+   3. CLASES UTILITARIAS
+   ========================================== */
+
+/* Entradas */
+.animate-fade-in {
+  animation: fadeIn var(--duration-normal) var(--ease-out);
+}
+
+.animate-slide-up {
+  animation: slideUp var(--duration-normal) var(--ease-out);
+}
+
+.animate-scale-in {
+  animation: scaleIn var(--duration-normal) var(--ease-spring);
+}
+
+/* Estados de carga */
+.animate-spin {
+  animation: spin 0.8s linear infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s var(--ease-in-out) infinite;
+}
+
+/* Skeleton loading */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-surface, #161920) 25%,
+    var(--bg-hover, #252830) 50%,
+    var(--bg-surface, #161920) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Feedback */
+.animate-update {
+  animation: flashUpdate 600ms var(--ease-out);
+}
+
+.animate-error {
+  animation: shake 400ms var(--ease-out);
+}
+
+/* ==========================================
+   4. TRANSICIONES GLOBALES
+   ========================================== */
+
+/* Transiciones para elementos interactivos */
+button,
+.btn,
+.tab,
+.filter-btn,
+.filter-btn-operation,
+a,
+input,
+select {
+  transition: 
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+/* Transición para contenido de tabs */
+.tab-content {
+  transition: opacity var(--duration-normal) var(--ease-out);
+}
+
+/* ==========================================
+   5. RESPETO A PREFERENCIAS DEL USUARIO
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .skeleton {
+    animation: none !important;
+    background: var(--bg-surface, #161920) !important;
+  }
+}
+
+/* ==========================================
+   FIN - ~160 líneas vs 1,163 del original
+   ========================================== */

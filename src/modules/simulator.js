@@ -151,7 +151,72 @@
   function init(data, settings) {
     currentData = data;
     userSettings = settings;
-    console.log('✅ [Simulator] Módulo inicializado');
+    setupEventListeners();
+    console.log('✅ [Simulator] Módulo inicializado con event listeners');
+  }
+
+  /**
+   * Configurar event listeners para los botones del simulador
+   * @private
+   */
+  function setupEventListeners() {
+    // Botón toggle configuración avanzada
+    const toggleAdvanced = document.getElementById('toggle-advanced');
+    const advancedConfig = document.getElementById('advanced-config');
+    if (toggleAdvanced && advancedConfig) {
+      toggleAdvanced.addEventListener('click', () => {
+        const isHidden = advancedConfig.style.display === 'none';
+        advancedConfig.style.display = isHidden ? 'block' : 'none';
+        console.log('⚙️ [Simulator] Config avanzada:', isHidden ? 'visible' : 'oculta');
+      });
+    }
+
+    // Botón "Calcular Matriz" en la sección de configuración
+    const btnCalculateMatrix = document.getElementById('btn-calculate-matrix');
+    if (btnCalculateMatrix) {
+      btnCalculateMatrix.addEventListener('click', () => {
+        console.log('🎯 [Simulator] Botón calcular matriz presionado');
+        generateRiskMatrix(false);
+      });
+    }
+
+    // Botón "Generar Matriz" en los controles de la matriz
+    const btnGenerateMatrix = document.getElementById('generate-risk-matrix');
+    if (btnGenerateMatrix) {
+      btnGenerateMatrix.addEventListener('click', () => {
+        console.log('🎯 [Simulator] Botón regenerar matriz presionado');
+        generateRiskMatrix(true);
+      });
+    }
+
+    // Botón "Resetear Configuración"
+    const btnResetConfig = document.getElementById('btn-reset-config');
+    if (btnResetConfig) {
+      btnResetConfig.addEventListener('click', () => {
+        console.log('🔄 [Simulator] Reseteando configuración');
+        resetConfig();
+      });
+    }
+
+    // Botón "Aplicar Filtro" de la matriz
+    const btnApplyFilter = document.getElementById('apply-matrix-filter');
+    if (btnApplyFilter) {
+      btnApplyFilter.addEventListener('click', () => {
+        console.log('🔍 [Simulator] Aplicando filtro de matriz');
+        applyMatrixFilter();
+      });
+    }
+
+    // Botón "Resetear Filtro" de la matriz
+    const btnResetFilter = document.getElementById('reset-matrix-filter');
+    if (btnResetFilter) {
+      btnResetFilter.addEventListener('click', () => {
+        console.log('🔄 [Simulator] Reseteando filtro de matriz');
+        resetMatrixFilter();
+      });
+    }
+
+    console.log('✅ [Simulator] Event listeners configurados correctamente');
   }
 
   /**

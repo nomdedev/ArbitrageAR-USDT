@@ -292,11 +292,123 @@
   }
 
   /**
-   * Mostrar modal de actualización
+   * Mostrar indicador de actualización no invasivo
+   * Solo muestra modal para actualizaciones MAJOR
    * @public
    * @param {Object} updateInfo - Información de actualización
    */
   function showUpdateBanner(updateInfo) {
+    // Determinar tipo de actualización
+    const updateType = determineUpdateType(
+      updateInfo.currentVersion,
+      updateInfo.latestVersion
+    );
+
+    // Siempre mostrar el indicador no invasivo primero
+    showUpdateIndicator(updateInfo, updateType);
+
+    // Solo mostrar modal invasivo para actualizaciones MAJOR
+    if (updateType === UPDATE_TYPES.MAJOR) {
+      showUpdateModal(updateInfo, updateType);
+    }
+
+    activeBanner = updateInfo;
+    console.log(`📢 [NotificationManager] Actualización ${updateType} detectada: v${updateInfo.latestVersion}`);
+  }
+
+  /**
+   * Mostrar indicador de actualización no invasivo en el header
+   * @private
+   * @param {Object} updateInfo - Información de actualización
+   * @param {string} updateType - Tipo de actualización (MAJOR, MINOR, PATCH)
+   */
+  function showUpdateIndicator(updateInfo, updateType) {
+    const versionIndicator = document.getElementById('version-indicator');
+    const updateBadge = document.getElementById('update-badge');
+    
+    if (!versionIndicator) {
+      console.warn('⚠️ [NotificationManager] Indicador de versión no encontrado');
+      return;
+    }
+
+    // Agregar clase para estilo visual
+    versionIndicator.classList.add('has-update');
+    
+    // Mostrar badge de actualización
+    if (updateBadge) {
+      updateBadge.style.display = 'flex';
+    }
+
+    // Crear tooltip con información de la actualización
+    const typeLabels = {
+      [UPDATE_TYPES.MAJOR]: '🚀 ¡Actualización importante!',
+      [UPDATE_TYPES.MINOR]: '✨ Nueva versión disponible',
+      [UPDATE_TYPES.PATCH]: '🔧 Correcciones disponibles'
+    };
+
+    const tooltipText = `${typeLabels[updateType] || 'Nueva versión'}\nv${updateInfo.latestVersion}\nClick para descargar`;
+    versionIndicator.setAttribute('data-update-tooltip', tooltipText.replace(/\n/g, ' • '));
+    versionIndicator.setAttribute('aria-label', `Actualización disponible: v${updateInfo.latestVersion}. Click para descargar.`);
+
+    // Configurar click para descargar
+    versionIndicator.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      downloadUpdate(updateInfo);
+    };
+
+    console.log(`🔔 [NotificationManager] Indicador de actualización mostrado: ${updateType}`);
+  }
+
+  /**
+   * Descargar actualización (abrir repositorio de GitHub)
+   * @private
+   * @param {Object} updateInfo - Información de actualización
+   */
+  function downloadUpdate(updateInfo) {
+    // URL del repositorio de GitHub (releases)
+    const repoUrl = 'https://github.com/nomdedev/ArbitrageAR-USDT/releases/latest';
+    
+    // Usar URL específica si está disponible
+    const downloadUrl = updateInfo?.downloadUrl || updateInfo?.url || repoUrl;
+
+    console.log(`⬇️ [NotificationManager] Descargando actualización desde: ${downloadUrl}`);
+    
+    // Abrir en nueva pestaña
+    chrome.tabs.create({ url: downloadUrl });
+    
+    // Mostrar toast de confirmación
+    showToast('Abriendo página de descarga...', TOAST_TYPES.INFO, TOAST_DURATION.SHORT);
+  }
+
+  /**
+   * Ocultar indicador de actualización
+   * @public
+   */
+  function hideUpdateIndicator() {
+    const versionIndicator = document.getElementById('version-indicator');
+    const updateBadge = document.getElementById('update-badge');
+    
+    if (versionIndicator) {
+      versionIndicator.classList.remove('has-update');
+      versionIndicator.removeAttribute('data-update-tooltip');
+      versionIndicator.onclick = null;
+    }
+    
+    if (updateBadge) {
+      updateBadge.style.display = 'none';
+    }
+
+    console.log('🔕 [NotificationManager] Indicador de actualización oculto');
+  }
+
+  /**
+   * Mostrar modal de actualización (solo para MAJOR updates)
+   * @private
+   * @param {Object} updateInfo - Información de actualización
+   * @param {string} updateType - Tipo de actualización
+   */
+  function showUpdateModal(updateInfo, updateType) {
     const modal = document.getElementById('update-modal');
     if (!modal) {
       console.warn('⚠️ [NotificationManager] Modal #update-modal no encontrado');
@@ -312,12 +424,6 @@
     if (currentVersionEl) currentVersionEl.textContent = `v${updateInfo.currentVersion}`;
     if (newVersionEl) newVersionEl.textContent = `v${updateInfo.latestVersion}`;
     if (messageEl) messageEl.textContent = updateInfo.message || 'Nueva versión con mejoras de rendimiento y nuevas funcionalidades.';
-
-    // Determinar tipo de actualización
-    const updateType = determineUpdateType(
-      updateInfo.currentVersion,
-      updateInfo.latestVersion
-    );
 
     if (typeBadgeEl) {
       typeBadgeEl.textContent = updateType;
@@ -360,16 +466,8 @@
 
       newDownloadBtn.addEventListener('click', () => {
         console.log('🖱️ [NotificationManager] Click en "Descargar actualización"');
-        if (updateInfo?.downloadUrl) {
-          // Abrir URL de descarga en nueva pestaña
-          chrome.tabs.create({ url: updateInfo.downloadUrl });
-        } else if (updateInfo?.url) {
-          // Fallback a la URL general si no hay URL de descarga específica
-          chrome.tabs.create({ url: updateInfo.url });
-        } else {
-          // Si no hay URL, mostrar un toast con instrucciones
-          showToast('Visita la Chrome Web Store para actualizar', 'info');
-        }
+        downloadUpdate(updateInfo);
+        hideUpdateBanner();
       });
     }
 
@@ -380,9 +478,9 @@
 
       newViewBtn.addEventListener('click', () => {
         console.log('🖱️ [NotificationManager] Click en "Ver más detalles"');
-        if (updateInfo?.url) {
-          chrome.tabs.create({ url: updateInfo.url });
-        }
+        // Abrir página de releases de GitHub
+        const releasesUrl = 'https://github.com/nomdedev/ArbitrageAR-USDT/releases';
+        chrome.tabs.create({ url: updateInfo?.url || releasesUrl });
       });
     }
 
@@ -532,6 +630,8 @@
     // Banner de actualización
     showUpdateBanner,
     hideUpdateBanner,
+    hideUpdateIndicator,
+    downloadUpdate,
     checkForUpdates,
     getActiveBanner,
     hasActiveBanner
