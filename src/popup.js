@@ -453,7 +453,7 @@ function loadUserSettings() {
 
       // Configuración de bancos
       showBestBankPrice: settings.showBestBankPrice || false,
-      selectedBanks: settings.selectedBanks || ['nacion', 'galicia', 'santander', 'bbva', 'icbc'],
+      selectedBanks: settings.selectedBanks || ['bna', 'galicia', 'santander', 'bbva', 'icbc'],
 
       // NUEVO v5.0.76: Configuración de interfaz consolidada
       simulatorDefaultAmount: settings.simulatorDefaultAmount || 100000,
@@ -3558,8 +3558,19 @@ function filterBanksBySelection(dollarTypes, selectedBanks) {
     selectedBanks = defaultBanks;
   }
 
+  const bankAliasMap = {
+    nacion: 'bna',
+    banco_nacion: 'bna',
+    banco_nacion_argentina: 'bna',
+    santander_rio: 'santander'
+  };
+
+  const normalizedBanks = selectedBanks
+    .map(bankKey => bankAliasMap[bankKey] || bankKey)
+    .filter((bankKey, index, list) => list.indexOf(bankKey) === index);
+
   const filtered = {};
-  selectedBanks.forEach(bankKey => {
+  normalizedBanks.forEach(bankKey => {
     if (dollarTypes[bankKey]) {
       filtered[bankKey] = dollarTypes[bankKey];
     }

@@ -520,7 +520,21 @@ async function fetchBinanceP2P_USDT_USD(userSettings) {
 
 async function fetchBankDollarRates(userSettings) {
   log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - INICIANDO');
-  const url = userSettings.criptoyaBanksUrl || 'https://criptoya.com/api/bancostodos';
+  const configuredUrl = userSettings.criptoyaBanksUrl;
+  const defaultBanksUrl = 'https://criptoya.com/api/bancostodos';
+  const hasLegacyDolarApiBankUrl =
+    typeof configuredUrl === 'string' && configuredUrl.includes('/v1/bancos/');
+
+  const url = hasLegacyDolarApiBankUrl
+    ? defaultBanksUrl
+    : configuredUrl || defaultBanksUrl;
+
+  if (hasLegacyDolarApiBankUrl) {
+    console.warn(
+      '⚠️ [BANKS] URL legacy detectada en configuración (DolarAPI /v1/bancos/*). Se usa fallback a CriptoYa bancostodos.'
+    );
+  }
+
   log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - URL:', url);
 
   const data = await fetchWithRateLimit(url);
