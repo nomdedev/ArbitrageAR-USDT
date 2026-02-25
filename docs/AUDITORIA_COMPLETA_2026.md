@@ -511,11 +511,11 @@ tests/
    - **Estado actual:** se agregó wiring UI real en `popup.html` + `popup.js` (`recalculate-dollar` y `configure-dollar`) usando `showRecalculateDialog()`.
    - **Impacto residual:** Nulo en flujo de recálculo manual.
 
-2. **Selectores CSS Duplicados**
-   - **Ubicación:** popup.css (~25 duplicados)
-   - **Descripción:** Mismo selector definido múltiples veces
-   - **Impacto:** Bajo - Mantenimiento y tamaño
-   - **Solución:** Consolidar selectores duplicados
+2. ✅ **Selectores CSS Duplicados** — **RESUELTO (fase incremental)**
+   - **Ubicación:** `src/popup.css`
+   - **Estado actual:** se eliminaron duplicados directos y se consolidaron bloques semánticamente idénticos (fiat/crypto, labels/values, reglas de `border-bottom: none` y estados `hover/focus`) en selectores agrupados.
+   - **Validación:** `npm run lint` y `npm test -- --runInBand` en verde tras la consolidación.
+   - **Impacto residual:** Bajo (aún pueden existir oportunidades de refactor cosmético no funcional).
 
 3. ✅ **Media Query Vacía** — **RESUELTO**
    - **Ubicación:** popup.css línea 3008

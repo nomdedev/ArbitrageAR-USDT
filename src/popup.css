@@ -218,7 +218,9 @@
 button:focus-visible,
 .btn:focus-visible,
 .btn-settings:focus-visible,
-.btn-refresh:focus-visible {
+.btn-refresh:focus-visible,
+.route-card:focus-visible,
+.crypto-route-card:focus-visible {
   outline: 2px solid var(--color-brand-primary);
   outline-offset: 2px;
   box-shadow: 0 0 0 4px rgba(88, 166, 255, 0.2);
@@ -1207,14 +1209,6 @@ main::-webkit-scrollbar-thumb:hover {
     0 8px 25px -5px rgba(16, 185, 129, 0.3),
     0 0 0 1px rgba(16, 185, 129, 0.2);
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, var(--card-bg) 100%);
-}
-
-/* Estado activo/focus para tarjetas */
-.route-card:focus-visible,
-.crypto-route-card:focus-visible {
-  outline: 2px solid var(--color-brand-primary);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(88, 166, 255, 0.2);
 }
 
 .route-card.loading::after {
@@ -2333,7 +2327,8 @@ footer {
   border: 1px solid var(--color-border-default);
 }
 
-.sim-btn-reset:hover {
+.sim-btn-reset:hover,
+.sim-btn-filter-reset:hover {
   color: var(--color-danger);
   border-color: var(--color-danger);
 }
@@ -2484,11 +2479,6 @@ footer {
   background: var(--color-bg-secondary);
   color: var(--color-text-secondary);
   border: 1px solid var(--color-border-default);
-}
-
-.sim-btn-filter-reset:hover {
-  color: var(--color-danger);
-  border-color: var(--color-danger);
 }
 
 .sim-filter-count {
@@ -2984,7 +2974,8 @@ footer {
   transition: all var(--duration-fast) var(--ease-out);
 }
 
-.filter-btn-operation:hover {
+.filter-btn-operation:hover,
+.sort-btn:hover {
   background: var(--color-bg-tertiary);
   border-color: var(--color-border-emphasis);
   color: var(--color-text-primary);
@@ -3894,12 +3885,6 @@ p.error {
   transition: all var(--duration-fast) var(--ease-out);
   white-space: nowrap;
   text-align: center;
-}
-
-.sort-btn:hover {
-  background: var(--color-bg-tertiary);
-  border-color: var(--color-border-emphasis);
-  color: var(--color-text-primary);
 }
 
 .sort-btn.active {
