@@ -87,13 +87,13 @@
     const filterMinProfit = minProfit ?? -10.0;
     const beforeCount = routes.length;
     const filtered = routes.filter(r => r.profitPercentage >= filterMinProfit);
-    
+
     if (window.Logger?.debug) {
       window.Logger.debug(
         `Filtradas por ganancia mínima ${filterMinProfit}%: ${beforeCount} → ${filtered.length} rutas`
       );
     }
-    
+
     return filtered;
   }
 
@@ -204,7 +204,7 @@
   function updateRoutes(routes) {
     allRoutes = routes || [];
     console.log('✅ [FilterManager] Rutas actualizadas:', allRoutes.length);
-    
+
     // Auto-ajustar filtro por defecto si no hay rutas del tipo actual
     autoAdjustDefaultFilter();
   }
@@ -225,7 +225,7 @@
     if (currentFilter === 'no-p2p' && noP2pCount === 0 && p2pCount > 0) {
       console.log('🔄 [FilterManager] Cambiando filtro de "no-p2p" a "all" (no hay rutas no-P2P)');
       currentFilter = 'all';
-      
+
       // Actualizar botones visualmente
       document.querySelectorAll('.filter-btn, .filter-btn-footer').forEach(btn => {
         btn.classList.remove('active');
@@ -236,7 +236,7 @@
     } else if (currentFilter === 'p2p' && p2pCount === 0 && noP2pCount > 0) {
       console.log('🔄 [FilterManager] Cambiando filtro de "p2p" a "all" (no hay rutas P2P)');
       currentFilter = 'all';
-      
+
       // Actualizar botones visualmente
       document.querySelectorAll('.filter-btn, .filter-btn-footer').forEach(btn => {
         btn.classList.remove('active');
@@ -272,7 +272,7 @@
    */
   function setCurrentFilter(filter) {
     currentFilter = filter;
-    
+
     // Sincronizar con StateManager si está disponible
     if (window.StateManager?.setFilter) {
       window.StateManager.setFilter(filter);
@@ -545,13 +545,13 @@
         // Aplicar filtro
         setCurrentFilter(filter);
         const filteredRoutes = applyAllFilters();
-        
+
         // Actualizar UI con rutas filtradas
         if (window.RouteManager && window.RouteManager.displayRoutes) {
           window.RouteManager.displayRoutes(filteredRoutes, 'optimized-routes');
           console.log(`✅ [FilterManager] UI actualizada con ${filteredRoutes.length} rutas`);
         }
-        
+
         // Actualizar contadores
         updateFilterCounts();
       });

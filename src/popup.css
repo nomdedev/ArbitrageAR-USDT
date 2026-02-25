@@ -751,6 +751,38 @@ header {
   gap: var(--space-3);
 }
 
+.dollar-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.dollar-action-btn {
+  border: 1px solid var(--color-success);
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--color-success);
+  border-radius: var(--radius-md);
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.dollar-action-btn:hover {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+.dollar-action-btn.secondary {
+  border-color: var(--color-border-default);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-tertiary);
+}
+
+.dollar-action-btn.secondary:hover {
+  background: var(--color-bg-elevated);
+}
+
 .dollar-price {
   display: flex;
   align-items: center;
@@ -1385,7 +1417,8 @@ main::-webkit-scrollbar-thumb:hover {
   gap: var(--space-2);
 }
 
-.route-card .fiat-icon {
+.route-card .fiat-icon,
+.crypto-route-card .crypto-icon {
   font-size: 1.2em; /* MISMO que crypto-icon */
 }
 
@@ -1409,7 +1442,8 @@ main::-webkit-scrollbar-thumb:hover {
   color: #e6edf3; /* MISMO que crypto */
 }
 
-.route-card .route-path .arrow {
+.route-card .route-path .arrow,
+.crypto-route-card .route-path .arrow {
   color: #58a6ff; /* MISMO que crypto */
   font-size: 1.1em; /* MISMO que crypto */
 }
@@ -1439,7 +1473,8 @@ main::-webkit-scrollbar-thumb:hover {
   border-top: 1px solid var(--color-border-subtle);
 }
 
-.route-card .profit-details {
+.route-card .profit-details,
+.crypto-route-card .profit-details {
   display: flex;
   flex-direction: column;
   gap: 2px; /* MISMO que crypto */
@@ -1482,13 +1517,15 @@ main::-webkit-scrollbar-thumb:hover {
 }
 
 /* Estilos del modal fiat (reutiliza estilos crypto) */
-.fiat-details-modal {
+.fiat-details-modal,
+.crypto-details-modal {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
 }
 
-.fiat-detail-header {
+.fiat-detail-header,
+.crypto-detail-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1498,12 +1535,14 @@ main::-webkit-scrollbar-thumb:hover {
   border: 1px solid var(--color-border-default);
 }
 
-.fiat-detail-header.profitable {
+.fiat-detail-header.profitable,
+.crypto-detail-header.profitable {
   background: linear-gradient(135deg, rgba(63, 185, 80, 0.1) 0%, var(--color-bg-tertiary) 100%);
   border-color: rgba(63, 185, 80, 0.3);
 }
 
-.fiat-detail-header.loss {
+.fiat-detail-header.loss,
+.crypto-detail-header.loss {
   background: linear-gradient(135deg, rgba(248, 81, 73, 0.1) 0%, var(--color-bg-tertiary) 100%);
   border-color: rgba(248, 81, 73, 0.3);
 }
@@ -1512,10 +1551,6 @@ main::-webkit-scrollbar-thumb:hover {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-}
-
-.fiat-symbol .symbol-icon {
-  font-size: 1.5rem;
 }
 
 .fiat-symbol .symbol-name {
@@ -1622,17 +1657,22 @@ main::-webkit-scrollbar-thumb:hover {
   border-bottom: 1px solid var(--color-border-subtle);
 }
 
-.route-summary .summary-item:last-child {
+.route-summary .summary-item:last-child,
+.step-item:last-child,
+.breakdown-section:last-child,
+.fee-row:last-child {
   border-bottom: none;
 }
 
-.route-summary .label {
+.route-summary .label,
+.rate-label {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   font-weight: var(--font-weight-medium);
 }
 
-.route-summary .value {
+.route-summary .value,
+.rate-value {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
@@ -2768,7 +2808,8 @@ footer {
   min-width: 120px;
 }
 
-.config-input label {
+.config-input label,
+.matrix-control-item label {
   display: block;
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
@@ -2779,14 +2820,6 @@ footer {
 .matrix-control-item {
   flex: 1;
   min-width: 110px;
-}
-
-.matrix-control-item label {
-  display: block;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  font-weight: var(--font-weight-medium);
-  margin-bottom: var(--space-1);
 }
 
 .config-actions {
@@ -3218,14 +3251,6 @@ p.error {
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.6) 0%, rgba(220, 38, 38, 0.4) 100%);
 }
 /* NUEVO v5.0.31: Filtros de matriz */
-.matrix-filters {
-  background: rgba(15, 23, 42, 0.6);
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid rgba(71, 85, 105, 0.4);
-  margin-bottom: 16px;
-}
-
 /* FILTROS DE MATRIZ */
 .matrix-filters {
   background: var(--color-bg-secondary);
@@ -3710,19 +3735,6 @@ p.error {
   border-radius: var(--radius-md);
 }
 
-.rate-label {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  font-weight: var(--font-weight-medium);
-}
-
-.rate-value {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  font-family: var(--font-mono);
-}
-
 .exchange-source {
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
@@ -3991,9 +4003,6 @@ p.error {
   border-bottom: 1px solid var(--color-border-subtle);
 }
 
-.step-item:last-child {
-  border-bottom: none;
-}
 .step-item .step-content {
   flex: 1;
 }
@@ -4035,9 +4044,6 @@ p.error {
 }
 /* .crypto-card-header duplicado - Ya definido en línea ~1113 */
 
-.crypto-route-card .crypto-icon {
-  font-size: 1.2em;
-}
 /* Badge de profit */
 .profit-badge {
   padding: 4px 10px;
@@ -4058,10 +4064,6 @@ p.error {
   font-size: 0.85em;
   color: #e6edf3;
 }
-.crypto-route-card .route-path .arrow {
-  color: #58a6ff;
-  font-size: 1.1em;
-}
 .operation-badge {
   padding: 2px 6px;
   border-radius: 4px;
@@ -4077,11 +4079,6 @@ p.error {
 .difficulty-indicator {
   font-size: 0.75em;
   color: #8b949e;
-}
-.crypto-route-card .profit-details {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
 }
 .crypto-route-card .profit-details .value {
   font-weight: 600;
@@ -4277,33 +4274,7 @@ header .subtitle {
    Diseño profesional y claro
    ========================================== */
 
-.crypto-details-modal {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
 /* Header con profit destacado */
-.crypto-detail-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-4);
-  border-radius: var(--radius-lg);
-  background: var(--color-bg-tertiary);
-  border: 1px solid var(--color-border-default);
-}
-
-.crypto-detail-header.profitable {
-  background: linear-gradient(135deg, rgba(63, 185, 80, 0.1) 0%, var(--color-bg-tertiary) 100%);
-  border-color: rgba(63, 185, 80, 0.3);
-}
-
-.crypto-detail-header.loss {
-  background: linear-gradient(135deg, rgba(248, 81, 73, 0.1) 0%, var(--color-bg-tertiary) 100%);
-  border-color: rgba(248, 81, 73, 0.3);
-}
-
 .crypto-symbol {
   display: flex;
   align-items: center;
@@ -4439,10 +4410,6 @@ header .subtitle {
 .breakdown-section {
   padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--color-border-subtle);
-}
-
-.breakdown-section:last-child {
-  border-bottom: none;
 }
 
 .section-header {
@@ -4603,10 +4570,6 @@ header .subtitle {
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   border-bottom: 1px solid var(--color-border-subtle);
-}
-
-.fee-row:last-child {
-  border-bottom: none;
 }
 
 .fee-row.total {

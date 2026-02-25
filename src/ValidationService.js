@@ -238,7 +238,6 @@ class ValidationService {
    */
   async showConfirmation(amount, profitPercentage, route) {
     const profitSign = profitPercentage >= 0 ? '+' : '';
-    const profitColor = profitPercentage >= 0 ? 'verde' : 'rojo';
 
     let message = '⚠️ CONFIRMACIÓN REQUERIDA\n\n';
     message += `Monto: $${this.formatNumber(amount)} ARS\n`;

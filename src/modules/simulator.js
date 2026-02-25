@@ -275,7 +275,7 @@
     const missing = Object.entries(elements)
       .filter(([, el]) => !el)
       .map(([k]) => k);
-    
+
     if (missing.length > 0) {
       console.warn('⚠️ [Simulator] Elementos faltantes para preset:', missing);
       return false;
@@ -315,7 +315,7 @@
       bankCommission: document.getElementById('sim-bank-commission')
     };
 
-    if (!elements.usdBuy || !elements.usdSell || !elements.buyFee || 
+    if (!elements.usdBuy || !elements.usdSell || !elements.buyFee ||
         !elements.sellFee || !elements.transferFee || !elements.bankCommission) {
       console.warn('⚠️ [Simulator] No se encontraron todos los inputs del simulador');
       return;
@@ -362,7 +362,7 @@
     };
 
     const missingElements = Object.entries(elements)
-      .filter(([key, value]) => !value)
+      .filter(([_key, value]) => !value)
       .map(([key]) => key);
 
     if (missingElements.length > 0) {
@@ -410,9 +410,9 @@
 
     if (useCustomParams) {
       // MODO PERSONALIZADO
-      const usdMinInput = parseFloat(document.getElementById('matrix-usd-min')?.value) || 
+      const usdMinInput = parseFloat(document.getElementById('matrix-usd-min')?.value) ||
                          currentData?.oficial?.compra || 1000;
-      const usdMaxInput = parseFloat(document.getElementById('matrix-usd-max')?.value) || 
+      const usdMaxInput = parseFloat(document.getElementById('matrix-usd-max')?.value) ||
                          currentData?.oficial?.compra * 1.5 || 1500;
       const usdtMinInput = parseFloat(document.getElementById('matrix-usdt-min')?.value) || 1000;
       const usdtMaxInput = parseFloat(document.getElementById('matrix-usdt-max')?.value) || 1100;
@@ -432,7 +432,7 @@
     } else {
       // MODO AUTOMÁTICO con datos reales
       const banksData = getBanksData();
-      
+
       if (banksData && Object.keys(banksData).length > 0) {
         const bankCompraPrices = Object.values(banksData)
           .filter(bank => bank.compra && bank.compra > 0)
@@ -509,12 +509,12 @@
 
     // Generar tabla HTML
     const tableHTML = generateMatrixTableHTML(
-      usdPrices, 
-      usdtPrices, 
-      amount, 
-      buyFeePercent, 
-      sellFeePercent, 
-      transferFeeUSD, 
+      usdPrices,
+      usdtPrices,
+      amount,
+      buyFeePercent,
+      sellFeePercent,
+      transferFeeUSD,
       bankCommissionPercent
     );
 
@@ -549,16 +549,16 @@
    * @returns {string} HTML de la tabla
    */
   function generateMatrixTableHTML(
-    usdPrices, 
-    usdtPrices, 
-    amount, 
-    buyFeePercent, 
-    sellFeePercent, 
-    transferFeeUSD, 
+    usdPrices,
+    usdtPrices,
+    amount,
+    buyFeePercent,
+    sellFeePercent,
+    transferFeeUSD,
     bankCommissionPercent
   ) {
     const Fmt = window.Formatters;
-    
+
     let tableHTML = '<thead><tr><th>USD Compra \\ USDT Venta</th>';
     usdtPrices.forEach(price => {
       tableHTML += `<th>$${price.toFixed(0)}</th>`;
@@ -655,7 +655,6 @@
 
     const cells = matrixTable.querySelectorAll('td');
     let visibleCount = 0;
-    let totalCells = 0;
 
     cells.forEach(cell => {
       // Skip header cells
@@ -663,7 +662,6 @@
 
       const text = cell.textContent.trim();
       if (text.endsWith('%')) {
-        totalCells++;
         const profitValue = parseFloat(text.replace('%', ''));
 
         if (profitValue >= minProfit && profitValue <= maxProfit) {

@@ -1,3 +1,5 @@
+/* global importScripts */
+
 // ============================================
 // MAIN BACKGROUND SCRIPT - ArbitrageAR v5.0.84
 // Service Worker para Chrome Extension
@@ -272,8 +274,6 @@ async function updateBanksData() {
     cachedUsdtUsdData = usdtUsdData.status === 'fulfilled' ? usdtUsdData.value : cachedUsdtUsdData;
     cachedUsdtData = usdtData.status === 'fulfilled' ? usdtData.value : cachedUsdtData;
 
-    lastDataUpdate = new Date();
-
     log('✅ Datos de bancos actualizados');
   } catch (error) {
     log('❌ Error actualizando datos de bancos:', error);
@@ -285,7 +285,6 @@ const DEBUG_MODE = false; // PRODUCCIÓN: Desactivado después de diagnosticar p
 let cachedDollarTypes = {};
 let cachedUsdtUsdData = {};
 let cachedUsdtData = {};
-let lastDataUpdate = null;
 
 // Variables globales de configuración
 let REQUEST_INTERVAL = 100; // ms - OPTIMIZADO v5.0.61: Reducido de 600ms a 100ms
@@ -297,6 +296,16 @@ let lastRequestTime = 0;
 function log(...args) {
   if (DEBUG_MODE) {
     console.log(...args);
+  }
+}
+
+async function getUserSettings() {
+  try {
+    const result = await chrome.storage.local.get('notificationSettings');
+    return result.notificationSettings || {};
+  } catch (error) {
+    log('⚠️ Error obteniendo configuración de usuario:', error);
+    return {};
   }
 }
 
@@ -327,7 +336,7 @@ async function updateGlobalConfig() {
 
 async function fetchWithRateLimit(url) {
   console.log('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - INICIANDO para URL:', url);
-  
+
   // OPTIMIZADO v5.0.61: Rate limit opcional para mejorar performance
   if (ENABLE_RATE_LIMIT) {
     const now = Date.now();
@@ -343,14 +352,14 @@ async function fetchWithRateLimit(url) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
     console.log('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - Iniciando fetch, timeout:', REQUEST_TIMEOUT, 'ms');
-    
+
     const res = await fetch(url, { signal: controller.signal });
     clearTimeout(timeoutId);
-    
+
     console.log('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - Respuesta recibida, status:', res.status, 'ok:', res.ok);
 
     if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
-    
+
     const json = await res.json();
     console.log('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - ✅ JSON parseado exitosamente');
     return json;
@@ -368,15 +377,15 @@ async function fetchDolarOficial(userSettings) {
   console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - INICIANDO');
   const url = userSettings.criptoyaDolarOficialUrl || 'https://criptoya.com/api/dolar';
   console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - URL:', url);
-  
+
   const data = await fetchWithRateLimit(url);
   console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - Datos recibidos:', data);
-  
+
   if (data && data.oficial) {
     console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - data.oficial.ask:', data.oficial.ask, 'tipo:', typeof data.oficial.ask);
     console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - data.oficial.bid:', data.oficial.bid, 'tipo:', typeof data.oficial.bid);
   }
-  
+
   if (data && data.oficial && typeof data.oficial.ask === 'number' && typeof data.oficial.bid === 'number') {
     // Mapeo correcto según API de CriptoYa:
     // - compra = bid (lo que el usuario RECIBE al vender)
@@ -390,7 +399,7 @@ async function fetchDolarOficial(userSettings) {
     console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - ✅ Devolviendo datos válidos:', result);
     return result;
   }
-  
+
   console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - ❌ Datos inválidos o nulos, devolviendo NULL');
   return null;
 }
@@ -401,48 +410,48 @@ async function fetchAllDollarTypes(userSettings) {
   console.log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - URL:', url);
   log('[BACKGROUND] 🔄 Fetching bancos from:', url);
   console.log('[FETCH] 🔄 Iniciando fetchAllDollarTypes desde:', url);
-  
+
   const data = await fetchWithRateLimit(url);
   console.log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - Datos recibidos:', data);
   console.log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - Tipo de datos:', typeof data);
-  
+
   log(
     '[BACKGROUND] 📊 Bancos data received:',
     data ? Object.keys(data).length + ' bancos' : 'null'
   );
   console.log('[FETCH] 📊 Datos crudos recibidos:', data);
-  
+
   if (data && typeof data === 'object') {
     console.log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - Datos son objeto válido, procesando...');
     // Los datos de CriptoYa ya vienen en formato objeto
     const dollarTypes = {};
-    let invalidBanks = [];
-    let suspiciousBanks = [];
-    let spreads = [];
-    
+    const invalidBanks = [];
+    const suspiciousBanks = [];
+    const spreads = [];
+
     Object.entries(data).forEach(([key, value]) => {
       if (
-          value &&
+        value &&
           typeof value === 'object' &&
           (typeof value.bid === 'number' || typeof value.ask === 'number')
-        ) {
+      ) {
         const ask = value.ask || value.totalAsk;
         const bid = value.bid || value.totalBid;
-        
+
         // VALIDACIÓN FUNDAMENTAL: ask > bid (spread positivo)
         if (ask <= bid) {
           console.error(`❌ [VALIDACIÓN] ${key}: ask (${ask}) <= bid (${bid}) - CAMPOS INVERTIDOS`);
-          console.error(`   Esto es IMPOSIBLE: el banco vende más barato de lo que compra`);
+          console.error('   Esto es IMPOSIBLE: el banco vende más barato de lo que compra');
           console.error(`   Spread negativo: ${(bid - ask).toFixed(2)}`);
           invalidBanks.push({ bankCode: key, ask, bid, error: 'Spread negativo - ask debe ser mayor que bid' });
           return; // NO incluir este banco
         }
-        
+
         // Validar spread razonable (0.1% - 5%)
         const spread = ask - bid;
         const spreadPercent = (spread / ask) * 100;
         spreads.push({ bankCode: key, spread, spreadPercent });
-        
+
         if (spreadPercent < 0.1) {
           console.warn(`⚠️ [VALIDACIÓN] ${key}: Spread ${spreadPercent.toFixed(2)}% muy bajo (sospechoso)`);
           suspiciousBanks.push({ bankCode: key, spreadPercent, warning: 'Spread muy bajo - posible error en datos' });
@@ -450,7 +459,7 @@ async function fetchAllDollarTypes(userSettings) {
           console.warn(`⚠️ [VALIDACIÓN] ${key}: Spread ${spreadPercent.toFixed(2)}% muy alto (sospechoso)`);
           suspiciousBanks.push({ bankCode: key, spreadPercent, warning: 'Spread muy alto - posible error en datos' });
         }
-        
+
         dollarTypes[key] = {
           nombre: key.charAt(0).toUpperCase() + key.slice(1), // Capitalizar nombre
           compra: bid,
@@ -460,20 +469,20 @@ async function fetchAllDollarTypes(userSettings) {
         };
       }
     });
-    
+
     // Loggear resumen de validación
     if (invalidBanks.length > 0) {
       console.error(`❌ [VALIDACIÓN] ${invalidBanks.length} bancos con datos inválidos:`, invalidBanks);
       console.error('   Estos bancos serán excluidos de los cálculos');
     }
-    
+
     if (suspiciousBanks.length > 0) {
       console.warn(`⚠️ [VALIDACIÓN] ${suspiciousBanks.length} bancos con spreads anómalos:`, suspiciousBanks);
     }
-    
+
     const avgSpread = spreads.reduce((sum, s) => sum + s.spreadPercent, 0) / spreads.length;
     console.log(`📊 [VALIDACIÓN] Spread promedio: ${avgSpread.toFixed(2)}%`);
-    
+
     log(
       '[BACKGROUND] 📤 Processed bancos data:',
       Object.keys(dollarTypes).length + ' bancos procesados'
@@ -484,32 +493,6 @@ async function fetchAllDollarTypes(userSettings) {
   log('[BACKGROUND] ❌ No data received from bancos API');
   console.log('[FETCH] ❌ No se pudieron procesar datos de bancos');
   return null;
-}
-
-async function fetchUSDTWithSettings(userSettings) {
-  const url = userSettings.criptoyaUsdtArsUrl || 'https://criptoya.com/api/USDT/ARS/1';
-  log('[BACKGROUND] 🔄 Fetching USDT/ARS from:', url);
-  console.log('[FETCH] 🔄 Iniciando fetchUSDT desde:', url);
-  const data = await fetchWithRateLimit(url);
-  log(
-    '[BACKGROUND] 📊 USDT/ARS data received:',
-    data ? Object.keys(data).length + ' exchanges' : 'null'
-  );
-  console.log('[FETCH] 📊 Datos USDT/ARS crudos:', data);
-  return data;
-}
-
-async function fetchUSDTtoUSDWithSettings(userSettings) {
-  const url = userSettings.criptoyaUsdtUsdUrl || 'https://criptoya.com/api/USDT/USD/1';
-  log('[BACKGROUND] 🔄 Fetching USDT/USD from:', url);
-  console.log('[FETCH] 🔄 Iniciando fetchUSDTtoUSD desde:', url);
-  const data = await fetchWithRateLimit(url);
-  log(
-    '[BACKGROUND] 📊 USDT/USD data received:',
-    data ? Object.keys(data).length + ' exchanges' : 'null'
-  );
-  console.log('[FETCH] 📊 Datos USDT/USD crudos:', data);
-  return data;
 }
 
 async function fetchUSDT_USD_Brokers(userSettings) {
@@ -555,11 +538,11 @@ async function fetchBankDollarRates(userSettings) {
   console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - INICIANDO');
   const url = userSettings.criptoyaBanksUrl || 'https://criptoya.com/api/bancostodos';
   console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - URL:', url);
-  
+
   const data = await fetchWithRateLimit(url);
   console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - Datos recibidos:', data);
   console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - Tipo de datos:', typeof data);
-  
+
   if (data && typeof data === 'object') {
     const result = {
       ...data,
@@ -569,7 +552,7 @@ async function fetchBankDollarRates(userSettings) {
     console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - ✅ Devolviendo datos válidos, keys:', Object.keys(data));
     return result;
   }
-  
+
   console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - ❌ Datos inválidos o nulos, devolviendo NULL');
   return null;
 }
@@ -606,7 +589,7 @@ async function calculateInterBrokerRoutes(
   const p2pUsdtArsExchanges = userSettings.p2pUsdtArsExchanges || [];
   const p2pUsdUsdtExchanges = userSettings.p2pUsdUsdtExchanges || [];
   const p2pSyncExchanges = userSettings.p2pSyncExchanges || [];
-  
+
   const disabledP2pUsdtArs = userSettings.disabledP2pUsdtArs || [];
   const disabledP2pUsdUsdt = userSettings.disabledP2pUsdUsdt || [];
   const disabledP2pSync = userSettings.disabledP2pSync || [];
@@ -621,7 +604,7 @@ async function calculateInterBrokerRoutes(
     });
     log(`🔄 [INTER-BROKER] Filtrando exchanges: ${selectedUsdtBrokers.length} seleccionados`);
   }
-  
+
   // NUEVO: Filtrar exchanges P2P por función (USDT/ARS para paso 3)
   let filteredP2pUsdtArs = filteredUsdt;
   if (p2pUsdtArsExchanges && Array.isArray(p2pUsdtArsExchanges) && p2pUsdtArsExchanges.length > 0) {
@@ -633,7 +616,7 @@ async function calculateInterBrokerRoutes(
     });
     log(`🔄 [INTER-BROKER] Filtrando P2P USDT/ARS: ${p2pUsdtArsExchanges.length} seleccionados`);
   }
-  
+
   // Excluir exchanges P2P desactivados para USDT/ARS
   if (disabledP2pUsdtArs && Array.isArray(disabledP2pUsdtArs) && disabledP2pUsdtArs.length > 0) {
     filteredP2pUsdtArs = Object.entries(filteredP2pUsdtArs)
@@ -644,7 +627,7 @@ async function calculateInterBrokerRoutes(
       }, {});
     log(`🔄 [INTER-BROKER] Excluyendo P2P USDT/ARS desactivados: ${disabledP2pUsdtArs.length}`);
   }
-  
+
   // NUEVO: Filtrar exchanges P2P por función (USD/USDT para paso 2)
   let filteredP2pUsdUsdt = filteredUsdt;
   if (p2pUsdUsdtExchanges && Array.isArray(p2pUsdUsdtExchanges) && p2pUsdUsdtExchanges.length > 0) {
@@ -656,7 +639,7 @@ async function calculateInterBrokerRoutes(
     });
     log(`🔄 [INTER-BROKER] Filtrando P2P USD/USDT: ${p2pUsdUsdtExchanges.length} seleccionados`);
   }
-  
+
   // Excluir exchanges P2P desactivados para USD/USDT
   if (disabledP2pUsdUsdt && Array.isArray(disabledP2pUsdUsdt) && disabledP2pUsdUsdt.length > 0) {
     filteredP2pUsdUsdt = Object.entries(filteredP2pUsdUsdt)
@@ -667,7 +650,7 @@ async function calculateInterBrokerRoutes(
       }, {});
     log(`🔄 [INTER-BROKER] Excluyendo P2P USD/USDT desactivados: ${disabledP2pUsdUsdt.length}`);
   }
-  
+
   // NUEVO: Sincronizar exchanges P2P seleccionados para ambos pasos
   let filteredP2pSync = filteredUsdt;
   if (p2pSyncExchanges && Array.isArray(p2pSyncExchanges) && p2pSyncExchanges.length > 0) {
@@ -679,7 +662,7 @@ async function calculateInterBrokerRoutes(
     });
     log(`🔄 [INTER-BROKER] Sincronizando P2P: ${p2pSyncExchanges.length} seleccionados`);
   }
-  
+
   // Excluir exchanges P2P desactivados para sincronización
   if (disabledP2pSync && Array.isArray(disabledP2pSync) && disabledP2pSync.length > 0) {
     filteredP2pSync = Object.entries(filteredP2pSync)
@@ -690,7 +673,7 @@ async function calculateInterBrokerRoutes(
       }, {});
     log(`🔄 [INTER-BROKER] Excluyendo P2P sincronización desactivados: ${disabledP2pSync.length}`);
   }
-  
+
   // NUEVO: Combinar todos los exchanges filtrados
   const combinedFilteredUsdt = {
     ...filteredUsdt,
@@ -698,7 +681,7 @@ async function calculateInterBrokerRoutes(
     ...filteredP2pUsdUsdt,
     ...filteredP2pSync
   };
-  
+
   // Usar el combinedFilteredUsdt para el cálculo
   filteredUsdt = combinedFilteredUsdt;
 
@@ -970,13 +953,13 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
       }
     });
     log(`🔍 [CALC] Filtrando exchanges USDT: ${selectedUsdtBrokers.length} seleccionados`);
-    
+
     // DIAGNÓSTICO: Loggear exchanges encontrados y no encontrados
     const foundExchanges = selectedUsdtBrokers.filter(b => usdt[b]);
     const notFoundExchanges = selectedUsdtBrokers.filter(b => !usdt[b]);
     console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Exchanges ENCONTRADOS:', foundExchanges);
     console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Exchanges NO encontrados:', notFoundExchanges);
-    
+
     // DIAGNÓSTICO: Loggear resultado del filtro
     const filteredExchanges = Object.keys(filteredUsdt).filter(k => k !== 'time' && k !== 'timestamp');
     console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Resultado del filtro (filteredUsdt):', filteredExchanges);
@@ -1233,6 +1216,7 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
   console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Resultado final:', {
     totalRoutes: routes.length,
     intraBroker: processedCount,
+    skippedIntraBroker: skippedCount,
     interBroker: interBrokerRoutes.length,
     top3Routes: routes.slice(0, 3).map(r => ({
       broker: r.broker,
@@ -1933,7 +1917,7 @@ async function sendNotification(arbitrage, settings) {
 
     // Construir mensaje amigable y legible
     let message = `Ganancia neta estimada: +${profit.toFixed(2)}%`;
-    
+
     // Agregar información de precios si está disponible
     if (arbitrage.usdtArsBid) {
       message += `\nPrecio USDT: $${arbitrage.usdtArsBid.toLocaleString('es-AR', { minimumFractionDigits: 2 })} ARS`;
@@ -1941,7 +1925,7 @@ async function sendNotification(arbitrage, settings) {
     if (arbitrage.usdToUsdtRate) {
       message += `\nTasa USD/USDT: ${parseFloat(arbitrage.usdToUsdtRate).toFixed(4)}`;
     }
-    
+
     // Agregar contexto temporal
     const now = new Date();
     const timeStr = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
@@ -2047,7 +2031,7 @@ async function updateData() {
     // NUEVO v5.0.48: Leer configuración del usuario ANTES de obtener datos
     const settingsResult = await chrome.storage.local.get('notificationSettings');
     const userSettings = settingsResult.notificationSettings || {};
-    
+
     // DIAGNÓSTICO: Loggear configuración leída
     console.log('🔍 [DIAGNÓSTICO] updateData() - Configuración leída:', {
       dollarPriceSource: userSettings.dollarPriceSource,
@@ -2071,7 +2055,7 @@ async function updateData() {
     console.log('🔍 [DIAGNÓSTICO] updateData() - Decidiendo método para obtener dólar oficial...');
     console.log('🔍 [DIAGNÓSTICO] dollarPriceSource:', userSettings.dollarPriceSource);
     console.log('🔍 [DIAGNÓSTICO] preferredBank:', userSettings.preferredBank);
-    
+
     if (userSettings.dollarPriceSource === 'manual') {
       // Usar precio manual configurado por el usuario
       console.log('🔍 [DIAGNÓSTICO] Rama: MODO MANUAL');
@@ -2102,7 +2086,7 @@ async function updateData() {
         const bankData = await fetchBankDollarRates(userSettings);
         console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() devolvió:', bankData ? 'DATOS' : 'NULL');
         console.log('🔍 [DIAGNÓSTICO] bankData keys:', bankData ? Object.keys(bankData) : 'null');
-        
+
         const selectedBanks =
           userSettings.selectedBanks && userSettings.selectedBanks.length > 0
             ? userSettings.selectedBanks
@@ -2140,12 +2124,12 @@ async function updateData() {
             );
             log('   selectedBanks:', selectedBanks);
             log('   bankData keys:', bankData ? Object.keys(bankData) : 'null');
-            
+
             // ⭐ NUEVO: Intentar API oficial como fallback antes de usar manual
             console.log('🔍 [DIAGNÓSTICO] Llamando fetchDolarOficial() como fallback...');
             oficial = await fetchDolarOficial(userSettings);
             console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() fallback devolvió:', oficial ? 'DATOS' : 'NULL');
-            
+
             if (!oficial) {
               console.log('🔍 [DIAGNÓSTICO] ❌ API oficial también falló, usando manual como último fallback');
               const manualPrice = userSettings.manualDollarPrice || 1400;
@@ -2167,12 +2151,12 @@ async function updateData() {
           log(
             '⚠️ [BACKGROUND] No se pudieron obtener datos de bancos, intentando API oficial como fallback...'
           );
-          
+
           // ⭐ NUEVO: Intentar API oficial como fallback antes de usar manual
           console.log('🔍 [DIAGNÓSTICO] Llamando fetchDolarOficial() como fallback...');
           oficial = await fetchDolarOficial(userSettings);
           console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() fallback devolvió:', oficial ? 'DATOS' : 'NULL');
-          
+
           if (!oficial) {
             console.log('🔍 [DIAGNÓSTICO] ❌ API oficial también falló, usando manual como último fallback');
             const manualPrice = userSettings.manualDollarPrice || 1400;
@@ -2314,7 +2298,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === 'getArbitrages') {
     log('[BACKGROUND] 📥 Mensaje getArbitrages recibido');
-    
+
     // DIAGNÓSTICO: Loggear recepción del mensaje
     console.log('🔍 [DIAGNÓSTICO] getArbitrages - Mensaje recibido:', {
       hasCurrentData: !!currentData,
@@ -2336,7 +2320,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     } else {
       // DIAGNÓSTICO: Loggear que no hay datos en cache
       console.log('🔍 [DIAGNÓSTICO] getArbitrages - No hay datos en cache, actualizando...');
-      
+
       // Actualizar datos de forma asíncrona
       updateData()
         .then(data => {
@@ -2350,7 +2334,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             hasError: !!data?.error,
             error: data?.error
           });
-          
+
           log('[BACKGROUND] 📤 Enviando datos FRESCOS al popup:', {
             oficialCompra: data?.oficial?.compra,
             oficialSource: data?.oficial?.source,
@@ -2397,9 +2381,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     currentData = null;
     log('[BACKGROUND] 🗑️ Cache limpiada (currentData = null)');
 
-    // Actualizar configuración del usuario
-    userSettings = request.settings;
-    log('[BACKGROUND] 👤 userSettings actualizada con nueva configuración');
+    log('[BACKGROUND] 👤 Configuración de usuario recibida y aplicada en el próximo recálculo');
 
     // NUEVO: Restablecer isFirstUpdate para evitar notificaciones al cambiar configuración
     isFirstUpdate = false; // Mantener false para permitir notificaciones después de cambiar configuración
@@ -2465,21 +2447,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               log('[BACKGROUND] 📤 Enviando datos de bancos y dólar:', {
                 banksCount: banksData
                   ? Object.keys(banksData).filter(key => key !== 'source' && key !== 'timestamp')
-                      .length
+                    .length
                   : 0,
                 dollarTypesCount: dollarTypes ? Object.keys(dollarTypes).length : 0,
                 usdtExchanges: usdtData
                   ? Object.keys(usdtData).filter(key => key !== 'source' && key !== 'timestamp')
-                      .length
+                    .length
                   : 0,
                 usdtUsdExchanges: usdtUsdData
                   ? Object.keys(usdtUsdData).filter(key => key !== 'source' && key !== 'timestamp')
-                      .length
+                    .length
                   : 0,
                 usdtUsdBrokers: usdtUsdBrokers
                   ? Object.keys(usdtUsdBrokers).filter(
-                      key => key !== 'source' && key !== 'timestamp'
-                    ).length
+                    key => key !== 'source' && key !== 'timestamp'
+                  ).length
                   : 0,
                 binanceP2P_ARS: binanceP2PArs ? 'disponible' : 'null',
                 binanceP2P_USD: binanceP2PUsd ? 'disponible' : 'null'
@@ -2539,6 +2521,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // NUEVO v6.0: Handler para crypto arbitrage
   if (request.action === 'GET_CRYPTO_ARBITRAGE' || request.type === 'GET_CRYPTO_ARBITRAGE') {
     log('[CRYPTO-ARB] 📥 Solicitud de crypto arbitrage recibida');
+
+    const dataService = typeof self !== 'undefined' ? self.dataService : null;
+    if (!dataService) {
+      console.error('[CRYPTO-ARB] ❌ DataService no disponible en background');
+      sendResponse({ routes: [], error: 'DataService no disponible' });
+      return false;
+    }
 
     // Verificar que hayamos datos disponibles
     if (!currentData || !currentData.oficial) {
@@ -2603,38 +2592,59 @@ log('[BACKGROUND] Listener registrado');
 // LISTENER DE CAMBIOS EN CONFIGURACIÓN
 // ============================================
 
-// NUEVO v5.0.48: Detectar cuando el usuario cambia configuración y recalcular
-chrome.storage.onChanged.addListener((changes, namespace) => {
-  if (namespace === 'local' && changes.notificationSettings) {
-    const oldSettings = changes.notificationSettings.oldValue || {};
-    const newSettings = changes.notificationSettings.newValue || {};
+function handleNotificationSettingsChange(oldSettings, newSettings) {
+  log('⚙️ [STORAGE] Configuración cambió');
 
-    log('⚙️ [STORAGE] Configuración cambió');
+  const dollarSourceChanged = oldSettings.dollarPriceSource !== newSettings.dollarPriceSource;
+  const manualPriceChanged = oldSettings.manualDollarPrice !== newSettings.manualDollarPrice;
+  const bankMethodChanged = oldSettings.preferredBank !== newSettings.preferredBank;
+  const defaultSimAmountChanged = oldSettings.defaultSimAmount !== newSettings.defaultSimAmount;
+  const updateIntervalChanged =
+    oldSettings.updateIntervalMinutes !== newSettings.updateIntervalMinutes;
+  const requestTimeoutChanged =
+    oldSettings.requestTimeoutSeconds !== newSettings.requestTimeoutSeconds;
 
-    // Detectar cambios que requieren recálculo de rutas
-    const dollarSourceChanged = oldSettings.dollarPriceSource !== newSettings.dollarPriceSource;
-    const manualPriceChanged = oldSettings.manualDollarPrice !== newSettings.manualDollarPrice;
-    const bankMethodChanged = oldSettings.preferredBank !== newSettings.preferredBank;
+  const requiresDataRefresh =
+    dollarSourceChanged || manualPriceChanged || bankMethodChanged || defaultSimAmountChanged;
 
-    if (dollarSourceChanged || manualPriceChanged || bankMethodChanged) {
-      log('🔄 [STORAGE] Cambios críticos detectados, forzando actualización...');
-      log('   - Fuente dólar:', oldSettings.dollarPriceSource, '→', newSettings.dollarPriceSource);
-      log('   - Precio manual:', oldSettings.manualDollarPrice, '→', newSettings.manualDollarPrice);
-      log('   - Método banco:', oldSettings.preferredBank, '→', newSettings.preferredBank);
+  if (requiresDataRefresh) {
+    log('🔄 [STORAGE] Cambios relevantes detectados, forzando actualización...');
+    log('   - Fuente dólar:', oldSettings.dollarPriceSource, '→', newSettings.dollarPriceSource);
+    log('   - Precio manual:', oldSettings.manualDollarPrice, '→', newSettings.manualDollarPrice);
+    log('   - Método banco:', oldSettings.preferredBank, '→', newSettings.preferredBank);
+    log(
+      '   - Monto simulador:',
+      oldSettings.defaultSimAmount,
+      '→',
+      newSettings.defaultSimAmount
+    );
 
-      // Forzar actualización de datos
-      updateData()
-        .then(() => {
-          log('✅ [STORAGE] Datos actualizados con nueva configuración');
-        })
-        .catch(error => {
-          console.error('❌ [STORAGE] Error actualizando datos:', error);
-        });
-    }
+    updateData()
+      .then(() => {
+        log('✅ [STORAGE] Datos actualizados con nueva configuración');
+      })
+      .catch(error => {
+        console.error('❌ [STORAGE] Error actualizando datos:', error);
+      });
   }
-});
 
-log('[BACKGROUND] Listener de storage registrado');
+  if (updateIntervalChanged) {
+    log(
+      `⏰ Intervalo cambió: ${oldSettings.updateIntervalMinutes}min → ${newSettings.updateIntervalMinutes}min`
+    );
+    log('🔄 Reiniciando actualizaciones periódicas...');
+    startPeriodicUpdates();
+  }
+
+  if (updateIntervalChanged || requestTimeoutChanged) {
+    if (requestTimeoutChanged) {
+      log(
+        `⏱️ Timeout cambió: ${oldSettings.requestTimeoutSeconds}s → ${newSettings.requestTimeoutSeconds}s`
+      );
+    }
+    updateGlobalConfig();
+  }
+}
 
 // ============================================
 // SISTEMA DE ALERTAS DE ACTUALIZACIÓN v6.0
@@ -2646,7 +2656,7 @@ log('[BACKGROUND] Listener de storage registrado');
  */
 async function checkForUpdatesInBackground() {
   const currentVersion = chrome.runtime.getManifest().version;
-  
+
   try {
     const response = await fetch(
       'https://api.github.com/repos/nomdedev/ArbitrageAR-USDT/commits/main',
@@ -2654,26 +2664,26 @@ async function checkForUpdatesInBackground() {
         headers: { 'Accept': 'application/vnd.github.v3+json' }
       }
     );
-    
+
     if (!response.ok) {
       console.warn('⚠️ [UPDATE] No se pudo verificar actualizaciones');
       return;
     }
-    
+
     const data = await response.json();
-    
+
     // Extraer versión del commit message
     const versionMatch = data.commit.message.match(/v?(\d+\.\d+\.\d+)/);
     const latestVersion = versionMatch ? versionMatch[1] : null;
-    
+
     if (!latestVersion) {
       console.warn('⚠️ [UPDATE] No se pudo extraer versión del commit');
       return;
     }
-    
+
     // Comparar versiones
     const hasUpdate = compareVersions(currentVersion, latestVersion);
-    
+
     if (hasUpdate) {
       // Guardar en storage
       await chrome.storage.local.set({
@@ -2686,11 +2696,11 @@ async function checkForUpdatesInBackground() {
           sha: data.sha.substring(0, 7)
         }
       });
-      
+
       // Actualizar badge
       chrome.action.setBadgeText({ text: '!' });
       chrome.action.setBadgeBackgroundColor({ color: '#3b82f6' });
-      
+
       console.log('✅ [UPDATE] Nueva versión disponible:', latestVersion);
     } else {
       console.log('✅ [UPDATE] Versión actualizada');
@@ -2710,7 +2720,7 @@ function compareVersions(current, latest) {
   const parse = (v) => v.replace('v', '').split('.').map(Number);
   const [cMajor, cMinor, cPatch] = parse(current);
   const [lMajor, lMinor, lPatch] = parse(latest);
-  
+
   if (lMajor > cMajor) return true;
   if (lMajor < cMajor) return false;
   if (lMinor > cMinor) return true;
@@ -2734,7 +2744,7 @@ updateGlobalConfig()
           .then(() => {
             log('[BACKGROUND] Datos de bancos inicializados');
             console.log('🏦 Datos de bancos inicializados correctamente');
-            
+
             // Verificar actualizaciones al iniciar
             checkForUpdatesInBackground();
           })
@@ -2807,42 +2817,16 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   }
 });
 
-// Listener para cambios en configuración del usuario
+// Listener unificado para cambios en configuración del usuario
 chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace === 'local' && changes.notificationSettings) {
     const oldSettings = changes.notificationSettings.oldValue || {};
     const newSettings = changes.notificationSettings.newValue || {};
 
-    // Si cambió el monto por defecto, recalcular rutas
-    if (oldSettings.defaultSimAmount !== newSettings.defaultSimAmount) {
-      log(
-        `💰 Monto por defecto cambió: $${oldSettings.defaultSimAmount} → $${newSettings.defaultSimAmount}`
-      );
-      log('🔄 Recalculando rutas con nuevo monto...');
-      updateData().then(() => {
-        log('✅ Rutas recalculadas con nuevo monto');
-      });
-    }
-
-    // NUEVO v5.0.54: Si cambió el intervalo de actualización, reiniciar el timer
-    if (oldSettings.updateIntervalMinutes !== newSettings.updateIntervalMinutes) {
-      log(
-        `⏰ Intervalo cambió: ${oldSettings.updateIntervalMinutes}min → ${newSettings.updateIntervalMinutes}min`
-      );
-      log('🔄 Reiniciando actualizaciones periódicas...');
-      startPeriodicUpdates();
-    }
-
-    // Si cambió el timeout, actualizar configuración global
-    if (oldSettings.requestTimeoutSeconds !== newSettings.requestTimeoutSeconds) {
-      log(
-        `⏱️ Timeout cambió: ${oldSettings.requestTimeoutSeconds}s → ${newSettings.requestTimeoutSeconds}s`
-      );
-      updateGlobalConfig();
-    }
+    handleNotificationSettingsChange(oldSettings, newSettings);
   }
 });
 
-log('[BACKGROUND] Background completamente inicializado');
+log('[BACKGROUND] Listener de storage registrado');
 
 log('[BACKGROUND] Background completamente inicializado');

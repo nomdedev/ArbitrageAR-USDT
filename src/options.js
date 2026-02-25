@@ -58,33 +58,33 @@ const DEFAULT_SETTINGS = {
   selectedTraditionalExchanges: undefined, // undefined = usar todos los exchanges tradicionales
   selectedUsdtBrokers: undefined, // undefined = usar TODOS los exchanges USDT disponibles
   filterP2POutliers: true, // Filtrar precios anómalos por defecto
-  
+
   // NUEVO: Selección granular de exchanges por paso del arbitraje
   paso1_ars_usd_banco: 'auto', // 'auto' o código de banco específico para ARS → USD
   paso2_usd_usdt_exchange: 'auto', // 'auto' o código de exchange específico para USD → USDT
   paso3_usdt_ars_exchange: 'auto', // 'auto' o código de exchange específico para USDT → ARS
-  
+
   // NUEVO: Exchanges desactivados por paso
   disabledExchanges: {
     paso1: [], // Bancos desactivados para ARS → USD
     paso2: [], // Exchanges desactivados para USD → USDT
     paso3: []  // Exchanges desactivados para USDT → ARS
   },
-  
+
   // NUEVO: Validación de datos
   validateBankSpreads: true, // Validar que ask > bid (spread positivo)
   validateExchangeData: true, // Validar consistencia de datos de exchanges
   logValidationErrors: true, // Loggear errores de validación
-  
+
   // NUEVO: Subdivisión de exchanges P2P por función
   p2pUsdtArsExchanges: undefined, // Exchanges P2P para USDT/ARS (paso 3)
   p2pUsdUsdtExchanges: undefined, // Exchanges P2P para USD/USDT (paso 2)
   p2pSyncExchanges: undefined, // Exchanges P2P para sincronización (paso 2 y 3)
-  
+
   // NUEVO: Exchanges desactivados por función P2P
   disabledP2pUsdtArs: [], // Exchanges P2P desactivados para USDT/ARS
   disabledP2pUsdUsdt: [], // Exchanges P2P desactivados para USD/USDT
-  disabledP2pSync: [], // Exchanges P2P desactivados para sincronización
+  disabledP2pSync: [] // Exchanges P2P desactivados para sincronización
 };
 
 // Cargar configuración al iniciar
@@ -770,7 +770,7 @@ function getCurrentSettings() {
   settings.alertThreshold = parseFloat(document.getElementById('alert-threshold')?.value) || 1.0;
   settings.notificationFrequency = document.getElementById('notify-frequency')?.value || '1min';
   settings.soundEnabled = document.getElementById('sound-enabled')?.checked ?? true;
-  
+
   // Horario silencioso
   settings.quietHoursEnabled = document.getElementById('quiet-hours')?.checked ?? false;
   settings.quietStart = document.getElementById('quiet-start')?.value || '22:00';

@@ -12,39 +12,39 @@ class TabSystem {
     this.tabs = container.querySelectorAll('[role="tab"]');
     this.panels = container.querySelectorAll('.tab-panel');
     this.indicator = container.querySelector('.tab-indicator');
-    
+
     this.activeTab = null;
     this.activePanel = null;
-    
+
     this.init();
   }
-  
+
   /**
    * Inicializar eventos y estado inicial
    */
   init() {
     // Encontrar el tab activo inicial
     this.activeTab = this.container.querySelector('.tab-item.active') || this.tabs[0];
-    
+
     if (this.activeTab) {
       const tabName = this.activeTab.dataset.tab;
       this.activePanel = this.container.querySelector(`.tab-panel[data-tab="${tabName}"]`);
-      
+
       // Posicionar el indicador
       this.moveIndicator(this.activeTab);
-      
+
       // Mostrar el panel activo
       if (this.activePanel) {
         this.activePanel.classList.add('active');
       }
     }
-    
+
     // Agregar event listeners a los tabs
     this.tabs.forEach(tab => {
-      tab.addEventListener('click', (e) => this.switchTab(tab));
+      tab.addEventListener('click', () => this.switchTab(tab));
       tab.addEventListener('keydown', (e) => this.handleKeydown(e, tab));
     });
-    
+
     // Actualizar indicador al redimensionar
     window.addEventListener('resize', () => {
       if (this.activeTab) {
@@ -52,43 +52,43 @@ class TabSystem {
       }
     });
   }
-  
+
   /**
    * Cambiar al tab seleccionado
    */
   switchTab(selectedTab) {
     if (selectedTab === this.activeTab) return;
-    
+
     const tabName = selectedTab.dataset.tab;
     const targetPanel = this.container.querySelector(`.tab-panel[data-tab="${tabName}"]`);
-    
+
     if (!targetPanel) return;
-    
+
     // Remover clase active del tab anterior
     if (this.activeTab) {
       this.activeTab.classList.remove('active');
       this.activeTab.setAttribute('aria-selected', 'false');
     }
-    
+
     // Ocultar el panel anterior
     if (this.activePanel) {
       this.activePanel.classList.remove('active');
     }
-    
+
     // Activar el nuevo tab
     selectedTab.classList.add('active');
     selectedTab.setAttribute('aria-selected', 'true');
-    
+
     // Mostrar el nuevo panel
     targetPanel.classList.add('active');
-    
+
     // Mover el indicador
     this.moveIndicator(selectedTab);
-    
+
     // Actualizar referencias
     this.activeTab = selectedTab;
     this.activePanel = targetPanel;
-    
+
     // Dispatch custom event
     const event = new CustomEvent('tab-change', {
       detail: {
@@ -98,35 +98,35 @@ class TabSystem {
       },
       bubbles: true
     });
-    
+
     this.container.dispatchEvent(event);
   }
-  
+
   /**
    * Mover el indicador al tab
    */
   moveIndicator(tab) {
     if (!this.indicator || !tab) return;
-    
+
     const containerRect = this.container.getBoundingClientRect();
     const tabRect = tab.getBoundingClientRect();
-    
+
     // Calcular posición y ancho del indicador
     const left = tabRect.left - containerRect.left;
     const width = tabRect.width;
-    
+
     // Aplicar transform
     this.indicator.style.transform = `translateX(${left}px)`;
     this.indicator.style.width = `${width}px`;
   }
-  
+
   /**
    * Manejar navegación por teclado
    */
   handleKeydown(event, tab) {
     const currentIndex = Array.from(this.tabs).indexOf(tab);
     let nextIndex = currentIndex;
-    
+
     switch (event.key) {
       case 'ArrowLeft':
         nextIndex = currentIndex > 0 ? currentIndex - 1 : this.tabs.length - 1;
@@ -143,33 +143,33 @@ class TabSystem {
       default:
         return;
     }
-    
+
     event.preventDefault();
     this.tabs[nextIndex].focus();
     this.switchTab(this.tabs[nextIndex]);
   }
-  
+
   /**
    * Actualizar el contador de un tab
    */
   updateBadge(tabName, count, highlight = false) {
     const tab = this.container.querySelector(`[data-tab="${tabName}"]`);
     const badge = tab?.querySelector('.tab-badge');
-    
+
     if (badge) {
       badge.textContent = count;
-      
+
       if (highlight) {
         badge.classList.add('highlight');
         badge.classList.add('updating');
-        
+
         setTimeout(() => {
           badge.classList.remove('updating');
         }, 600);
       }
     }
   }
-  
+
   /**
    * Activar un tab específico
    */
@@ -179,14 +179,14 @@ class TabSystem {
       this.switchTab(tab);
     }
   }
-  
+
   /**
    * Obtener el tab activo
    */
   getActiveTab() {
     return this.activeTab;
   }
-  
+
   /**
    * Obtener el panel activo
    */
@@ -200,7 +200,7 @@ class TabSystem {
  */
 function initTabSystems() {
   const tabContainers = document.querySelectorAll('.tabs-nav');
-  
+
   tabContainers.forEach(container => {
     new TabSystem(container);
   });
@@ -213,12 +213,12 @@ function createTabSystem(config) {
   const container = document.createElement('nav');
   container.className = 'tabs-nav';
   container.setAttribute('role', 'tablist');
-  
+
   // Crear indicador
   const indicator = document.createElement('div');
   indicator.className = 'tab-indicator';
   container.appendChild(indicator);
-  
+
   // Crear tabs
   config.tabs.forEach((tabConfig, index) => {
     const tab = document.createElement('button');
@@ -230,7 +230,7 @@ function createTabSystem(config) {
     tab.id = `tab-${tabConfig.name}`;
     tab.setAttribute('aria-controls', `panel-${tabConfig.name}`);
     tab.dataset.tab = tabConfig.name;
-    
+
     // Icono
     if (tabConfig.icon) {
       const icon = document.createElement('span');
@@ -240,13 +240,13 @@ function createTabSystem(config) {
       icon.textContent = tabConfig.icon;
       tab.appendChild(icon);
     }
-    
+
     // Label
     const label = document.createElement('span');
     label.className = 'tab-label';
     label.textContent = tabConfig.label;
     tab.appendChild(label);
-    
+
     // Badge (opcional)
     if (tabConfig.badge !== undefined) {
       const badge = document.createElement('span');
@@ -255,14 +255,14 @@ function createTabSystem(config) {
       badge.textContent = tabConfig.badge;
       tab.appendChild(badge);
     }
-    
+
     container.appendChild(tab);
   });
-  
+
   // Crear contenedor de paneles
   const contentContainer = document.createElement('div');
   contentContainer.className = 'tabs-content';
-  
+
   config.tabs.forEach((tabConfig, index) => {
     const panel = document.createElement('div');
     panel.className = 'tab-panel';
@@ -277,10 +277,10 @@ function createTabSystem(config) {
     panel.textContent = tabConfig.content || '';
     contentContainer.appendChild(panel);
   });
-  
+
   // Inicializar el sistema
   new TabSystem(container);
-  
+
   return {
     nav: container,
     content: contentContainer

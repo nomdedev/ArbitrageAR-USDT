@@ -54,7 +54,6 @@ if (typeof window.CommonUtils === 'undefined') {
 // Aliases para compatibilidad con código legacy
 const State = window.StateManager;
 const Fmt = window.Formatters;
-const Log = window.Logger;
 const Sim = window.Simulator;
 const RteMgr = window.RouteManager;
 const FltMgr = window.FilterManager;
@@ -66,17 +65,8 @@ const Utils = window.CommonUtils;
 let currentData = null;
 let selectedArbitrage = null;
 let userSettings = null; // NUEVO v5.0: Configuración del usuario
-let currentFilter = 'no-p2p'; // CORREGIDO v5.0.12: Volver a 'no-p2p' pero con debug forzado
 let allRoutes = []; // NUEVO: Cache de todas las rutas sin filtrar
 // NOTA: filteredRoutes eliminada - solo se usa como variable local en funciones
-
-// Estado global para filtros avanzados
-let advancedFilters = {
-  exchange: 'all',
-  profitMin: 0,
-  hideNegative: false,
-  sortBy: 'profit-desc'
-};
 
 // Modo debug para reducir logs excesivos
 const DEBUG_MODE = false; // PRODUCCIÓN: Desactivado después de diagnosticar problema
@@ -101,11 +91,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log(`  - #main-content: ${!!mainContent}`);
     console.log(`  - #optimized-routes: ${!!optimizedRoutes}`);
     console.log(`  - #loading: ${!!loading}`);
-    
+
     if (!mainContent || !optimizedRoutes || !loading) {
       console.error('❌ [INIT] Faltan elementos críticos del DOM - el HTML puede estar corrupto');
     }
-    
+
     // Cargar configuración del usuario primero
     await loadUserSettings();
     // NUEVO v6.0.0: Inicializar módulos especializados
@@ -123,6 +113,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupTabNavigation();
     // Inicializar botón de refresh
     setupRefreshButton();
+    // Configurar controles de precio del dólar
+    setupDollarPriceControls();
     // REEMPLAZO: Configurar botones de filtro usando FilterManager
     FltMgr.setupFilterButtons();
     // Configurar filtros avanzados usando FilterManager
@@ -134,7 +126,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     NotifMgr.checkForUpdates();
     // Configurar pestaña de arbitraje cripto
     setupCryptoArbitrageTab();
-    
+
     // NUEVO: Listener para evento routeSelected (desde RouteManager)
     // Esto abre el modal de detalles cuando se hace click en una card de Fiat
     document.addEventListener('routeSelected', function(e) {
@@ -142,7 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.log('🖱️ [POPUP] routeSelected event recibido:', route.broker || route.buyExchange);
       showRouteDetailsByType(route);
     });
-    
+
     // Cargar y mostrar datos
     fetchAndDisplay();
     // Configurar listener de cambios en storage
@@ -153,7 +145,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
       console.warn('⚠️ [INIT] initTooltips no está disponible - tooltipSystem.js no se cargó correctamente');
     }
-    
+
     // NUEVO FASE 8: Inicializar componentes UI del design system
     initUIComponents();
     // NUEVO v6.0.1: Ejecutar diagnóstico de iconos SVG
@@ -161,7 +153,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (error) {
     console.error('❌ [INIT] Error crítico durante la inicialización del popup:', error);
     console.error('❌ [INIT] Stack trace:', error.stack);
-    
+
     // Mostrar error visual al usuario
     const mainContent = document.getElementById('main-content');
     if (mainContent) {
@@ -194,7 +186,7 @@ function initUIComponents() {
       document.addEventListener('DOMContentLoaded', initUIComponents, { once: true });
       return;
     }
-    
+
     // Verificar elementos críticos del DOM
     const mainContent = document.getElementById('main-content');
     if (!mainContent) {
@@ -205,7 +197,7 @@ function initUIComponents() {
     if (typeof window.ArbitragePanel !== 'undefined') {
       try {
         const panels = document.querySelectorAll('.arbitrage-panel');
-        panels.forEach((panel, index) => {
+        panels.forEach(panel => {
           new window.ArbitragePanel(panel);
         });
       } catch (error) {
@@ -214,12 +206,12 @@ function initUIComponents() {
     } else {
       console.warn('⚠️ [INIT UI] window.ArbitragePanel no está disponible - ui-components/arbitrage-panel.js no se cargó correctamente');
     }
-    
+
     // Inicializar TabSystem si está disponible
     if (typeof window.TabSystem !== 'undefined') {
       try {
         const tabContainers = document.querySelectorAll('.tabs-nav');
-        tabContainers.forEach((container, index) => {
+        tabContainers.forEach(container => {
           new window.TabSystem(container);
         });
       } catch (error) {
@@ -228,12 +220,11 @@ function initUIComponents() {
     } else {
       console.warn('⚠️ [INIT UI] window.TabSystem no está disponible - ui-components/tabs.js no se cargó correctamente');
     }
-    
+
     // Inicializar AnimationUtils si está disponible
     if (typeof window.AnimationUtils !== 'undefined') {
       try {
         // Aplicar animaciones de entrada a elementos con clase .animate-on-load
-        const animatedElements = document.querySelectorAll('.animate-on-load');
         const container = document.querySelector('.stagger-container') || document.body;
         window.AnimationUtils.stagger(container, 'fadeInUp', 100);
       } catch (error) {
@@ -477,7 +468,7 @@ function loadUserSettings() {
 function updateConnectionStatus(data) {
   const statusContainer = document.getElementById('connection-status');
   const timeEl = document.getElementById('last-update-time');
-  
+
   if (!statusContainer) return;
 
   // Determinar estado de conexión
@@ -492,7 +483,7 @@ function updateConnectionStatus(data) {
     const ageMinutes = Math.floor((now - data.lastUpdate) / 60000);
     const date = new Date(data.lastUpdate);
     timeText = date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    
+
     // Cambiar estado si datos son antiguos (> 5 min)
     if (ageMinutes > 5) {
       status = 'stale';
@@ -510,7 +501,7 @@ function updateConnectionStatus(data) {
  * Actualizar indicador de estado de datos con información de frescura
  * @deprecated Reemplazado por updateConnectionStatus en v8.2
  */
-function updateDataStatusIndicator(data) {
+function updateDataStatusIndicator(_data) {
   // Función mantenida para compatibilidad pero ya no se usa
   // La funcionalidad se movió a updateConnectionStatus
   return;
@@ -576,13 +567,13 @@ function applyP2PFilter() {
   if (allRoutes && allRoutes.length > 0) {
     FltMgr.updateRoutes(allRoutes);
   }
-  
+
   // Aplicar todos los filtros
   const filteredRoutes = FltMgr.applyAllFilters();
-  
+
   // Actualizar contadores
   FltMgr.updateFilterCounts();
-  
+
   // Mostrar rutas filtradas usando RouteManager
   if (filteredRoutes && filteredRoutes.length > 0 && currentData) {
     RteMgr.displayRoutes(filteredRoutes, 'optimized-routes');
@@ -626,15 +617,15 @@ function applyAllFilters() {
   if (allRoutes && allRoutes.length > 0) {
     FltMgr.updateRoutes(allRoutes);
   }
-  
+
   // Aplicar todos los filtros
   const filteredRoutes = FltMgr.applyAllFilters();
-  
+
   // Mostrar rutas filtradas usando RouteManager
   if (currentData) {
     RteMgr.displayRoutes(filteredRoutes, 'optimized-routes');
   }
-  
+
   return filteredRoutes;
 }
 
@@ -842,7 +833,6 @@ function handleSuccessfulData(data, container) {
   // NUEVO: Mostrar información del precio del dólar
   if (data.oficial) {
     displayDollarInfo(data.oficial);
-  } else {
   }
 
   if (data.error && !data.usingCache) {
@@ -958,7 +948,7 @@ async function fetchAndDisplay(retryCount = 0) {
           handleNoData(container);
           return;
         }
-        
+
         // DIAGNÓSTICO: Verificar estructura de datos
         // NUEVO: Manejar errores específicos del background
         if (data.timeout) {
@@ -1035,19 +1025,11 @@ async function fetchAndDisplay(retryCount = 0) {
 
 // NUEVA FUNCIÓN v5.0: Aplicar preferencias del usuario
 function applyUserPreferences(routes) {
-  if (DEBUG_MODE) {
-  }
-  if (DEBUG_MODE) {
-  }
   if (!Array.isArray(routes) || routes.length === 0) {
-    if (DEBUG_MODE) {
-    }
     return routes;
   }
 
   let filtered = [...routes]; // Copia para no mutar original
-  if (DEBUG_MODE) {
-  }
 
   // MEJORADO v5.0.64: Filtro unificado por ganancia mínima (separa visualización de notificaciones)
   filtered = applyMinProfitFilter(filtered, userSettings?.filterMinProfit);
@@ -1062,8 +1044,6 @@ function applyUserPreferences(routes) {
   const maxDisplay = userSettings.maxRoutesDisplay || 20;
   filtered = applyLimit(filtered, maxDisplay);
 
-  if (DEBUG_MODE) {
-  }
   return filtered;
 }
 
@@ -1175,15 +1155,15 @@ function displayArbitrages(arbitrages, official) {
             <span class="price-value">$${Fmt.formatNumber(arb.officialPrice)}</span>
           </div>
           ${
-            official?.source
-              ? `
+  official?.source
+    ? `
           <div class="price-row source-row">
             <span class="price-label">📍 Fuente</span>
             <span class="price-value source-value">${Fmt.getDollarSourceDisplay(official)}</span>
           </div>
           `
-              : ''
-          }
+    : ''
+}
           <div class="price-row">
             <span class="price-label">💱 USD → USDT</span>
             <span class="price-value">${Fmt.formatUsdUsdtRatio(arb.usdToUsdtRate)} USD/USDT</span>
@@ -1193,8 +1173,8 @@ function displayArbitrages(arbitrages, official) {
             <span class="price-value highlight">$${Fmt.formatNumber(arb.usdtArsBid)}</span>
           </div>
           ${
-            hasFees
-              ? `
+  hasFees
+    ? `
           <div class="price-row fees-row">
             <span class="price-label">📊 Comisiones</span>
             <span class="price-value fee-value">${Fmt.formatNumber(arb.fees.total)}%</span>
@@ -1204,8 +1184,8 @@ function displayArbitrages(arbitrages, official) {
             <span class="price-value net-profit">+${Fmt.formatNumber(arb.profitPercentage)}%</span>
           </div>
           `
-              : ''
-          }
+    : ''
+}
         </div>
       </div>
     `;
@@ -1230,20 +1210,19 @@ function displayArbitrages(arbitrages, official) {
 }
 
 // NUEVO v5.0.0: Mostrar rutas (single + multi-exchange) - Vista compacta
-function displayOptimizedRoutes(routes, official) {
+function displayOptimizedRoutes(routes, _official) {
   const container = document.getElementById('optimized-routes');
   // DIAGNÓSTICO: Loggear parámetros de entrada
   // Obtener configuraciones de interfaz
   const interfaceSettings = userSettings || {};
   const showProfitColors = interfaceSettings.interfaceShowProfitColors !== false;
   const compactView = interfaceSettings.interfaceCompactView || false;
-  const showExchangeIcons = interfaceSettings.interfaceShowExchangeIcons !== false;
   const showTimestamps = interfaceSettings.interfaceShowTimestamps || false;
 
   if (!routes || routes.length === 0) {
     const threshold = userSettings?.profitThreshold || 1.0;
     const routeType = userSettings?.routeType || 'arbitrage';
-    
+
     container.innerHTML = `
       <div class="empty-state-card">
         <div class="empty-state-header">
@@ -1345,18 +1324,12 @@ function displayOptimizedRoutes(routes, official) {
       : { isNegative: false, profitClass: '', profitBadgeClass: '' };
 
     // Indicadores
-    const negativeIndicator = isNegative ? '<span class="negative-tag">⚠️ Pérdida</span>' : '';
     const profitSymbol = isNegative ? '' : '+';
 
-    // Badges según tipo de ruta
-    const typeBadge = getRouteTypeBadge(routeType);
     const p2pBadge = getP2PBadge(route);
 
     // Aplicar vista compacta si está configurada
     const compactClass = compactView ? 'compact-view' : '';
-
-    // Aplicar íconos de exchanges si está configurado
-    const exchangeIcon = showExchangeIcons ? getExchangeIcon(route.buyExchange) : '';
 
     // Timestamps si está configurado
     const timestampInfo =
@@ -1424,7 +1397,7 @@ function displayOptimizedRoutes(routes, official) {
     initMagneticButtons();
   }
 
-  routeCards.forEach((card, idx) => {
+  routeCards.forEach(card => {
     card.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -1633,14 +1606,14 @@ function setupModalCloseButton(modal) {
     // Remover listeners previos clonando el botón
     const newCloseBtn = closeBtn.cloneNode(true);
     closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
-    
+
     newCloseBtn.addEventListener('click', () => {
       console.log('🔳 [MODAL] Cerrando modal via botón X');
       modal.style.display = 'none';
       modal.classList.remove('active');
     });
   }
-  
+
   // También cerrar al hacer click en el overlay
   modal.onclick = (e) => {
     if (e.target === modal) {
@@ -1756,7 +1729,6 @@ function generateUsdToUsdtModal(route) {
   const usdAmount = route.usdInvested || route.calculation?.initialUsdAmount || 1000;
   const usdtReceived = route.usdtReceived || 0;
   const efficiency = route.efficiency || 1;
-  const fees = route.fees || {};
   const isProfitable = efficiency >= 1;
 
   return `
@@ -2210,14 +2182,14 @@ function generateGuideSteps(values) {
             <span class="calc-result">${Fmt.formatNumber(usdtAfterFees)} USDT</span>
           </div>
           ${
-            typeof usdToUsdtRate === 'number' && isFinite(usdToUsdtRate) && usdToUsdtRate > 1.005
-              ? `
+  typeof usdToUsdtRate === 'number' && isFinite(usdToUsdtRate) && usdToUsdtRate > 1.005
+    ? `
           <div class="step-simple-warning">
             ⚠️ El exchange cobra ${Fmt.formatCommissionPercent((usdToUsdtRate - 1) * 100)}% para esta conversión
           </div>
           `
-              : ''
-          }
+    : ''
+}
         </div>
       </div>
 
@@ -2532,10 +2504,10 @@ async function displayExchangeRates(exchangeRates) {
   // Aplicar modo de display bancario
   if (bankDisplayMode === 'best-only') {
     // Encontrar el exchange con el mejor precio de compra (ARS/USD oficial)
-    const oficialExchanges = exchanges.filter(([code, data]) => data.type === 'oficial');
+    const oficialExchanges = exchanges.filter(([_code, data]) => data.type === 'oficial');
     if (oficialExchanges.length > 0) {
       const bestExchange = oficialExchanges.reduce((best, current) => {
-        const [code, data] = current;
+        const [, data] = current;
         return !best || data.rates.compra < best[1].rates.compra ? current : best;
       });
       exchanges = [bestExchange];
@@ -2543,7 +2515,7 @@ async function displayExchangeRates(exchangeRates) {
   } else if (bankDisplayMode === 'top-3') {
     // Mostrar solo los top 3 exchanges oficiales por precio de compra
     const oficialExchanges = exchanges
-      .filter(([code, data]) => data.type === 'oficial')
+      .filter(([_code, data]) => data.type === 'oficial')
       .sort((a, b) => a[1].rates.compra - b[1].rates.compra)
       .slice(0, 3);
     exchanges = oficialExchanges;
@@ -2554,7 +2526,7 @@ async function displayExchangeRates(exchangeRates) {
   const renderExchanges = filteredExchanges => {
     let html = '';
 
-    filteredExchanges.forEach(([exchangeCode, exchangeData]) => {
+    filteredExchanges.forEach(([_exchangeCode, exchangeData]) => {
       const { name, type, rates, usdRates, source } = exchangeData;
 
       // Determinar qué rates mostrar
@@ -2656,14 +2628,14 @@ function setupExchangeFilters(allExchanges) {
 
     // Filtrar por tipo
     if (activeFilter !== 'all') {
-      filtered = filtered.filter(([code, data]) => data.type === activeFilter);
+      filtered = filtered.filter(([_code, data]) => data.type === activeFilter);
     }
 
     // Filtrar por búsqueda
     if (searchTerm) {
       filtered = filtered.filter(
-        ([code, data]) =>
-          data.name.toLowerCase().includes(searchTerm) || code.toLowerCase().includes(searchTerm)
+        ([_code, data]) =>
+          data.name.toLowerCase().includes(searchTerm) || _code.toLowerCase().includes(searchTerm)
       );
     }
 
@@ -2673,40 +2645,40 @@ function setupExchangeFilters(allExchanges) {
       exchangesList.innerHTML =
         filtered.length > 0
           ? filtered
-              .map(([code, data]) => {
-                const { name, type, rates, usdRates, source } = data;
+            .map(([_code, data]) => {
+              const { name, type, rates, usdRates, source } = data;
 
-                let displayRates = '';
-                let rateType = '';
+              let displayRates = '';
+              let rateType = '';
 
-                if (type === 'oficial' && rates) {
-                  displayRates = `
+              if (type === 'oficial' && rates) {
+                displayRates = `
               <div class="exchange-rate">
                 <span class="rate-label">ARS/USD:</span>
                 <span class="rate-value">$${Fmt.formatNumber(rates.compra)} / $${Fmt.formatNumber(rates.venta)}</span>
               </div>
             `;
-                  rateType = 'Oficial';
-                } else if (type === 'usdt_ars' && rates) {
-                  displayRates = `
+                rateType = 'Oficial';
+              } else if (type === 'usdt_ars' && rates) {
+                displayRates = `
               <div class="exchange-rate">
                 <span class="rate-label">USDT/ARS:</span>
                 <span class="rate-value">$${Fmt.formatNumber(rates.compra)} / $${Fmt.formatNumber(rates.venta)}</span>
               </div>
             `;
-                  rateType = 'USDT/ARS';
-                } else if (type === 'usdt_usd' && usdRates) {
-                  displayRates = `
+                rateType = 'USDT/ARS';
+              } else if (type === 'usdt_usd' && usdRates) {
+                displayRates = `
               <div class="exchange-rate">
                 <span class="rate-label">USDT/USD:</span>
                 <span class="rate-value">$${Fmt.formatNumber(usdRates.compra)} / $${Fmt.formatNumber(usdRates.venta)}</span>
               </div>
             `;
-                  rateType = 'USDT/USD';
-                }
+                rateType = 'USDT/USD';
+              }
 
-                if (rates && usdRates) {
-                  displayRates = `
+              if (rates && usdRates) {
+                displayRates = `
               <div class="exchange-rate">
                 <span class="rate-label">USDT/ARS:</span>
                 <span class="rate-value">$${Fmt.formatNumber(rates.compra)} / $${Fmt.formatNumber(rates.venta)}</span>
@@ -2716,10 +2688,10 @@ function setupExchangeFilters(allExchanges) {
                 <span class="rate-value">$${Fmt.formatNumber(usdRates.compra)} / $${Fmt.formatNumber(usdRates.venta)}</span>
               </div>
             `;
-                  rateType = 'USDT/ARS + USD';
-                }
+                rateType = 'USDT/ARS + USD';
+              }
 
-                return `
+              return `
             <div class="exchange-card" data-type="${type}" data-name="${name.toLowerCase()}">
               <div class="exchange-header">
                 <div class="exchange-name">${name}</div>
@@ -2731,8 +2703,8 @@ function setupExchangeFilters(allExchanges) {
               <div class="exchange-source">Fuente: ${source}</div>
             </div>
           `;
-              })
-              .join('')
+            })
+            .join('')
           : '<div class="no-results">No se encontraron exchanges que coincidan con los filtros</div>';
     }
   };
@@ -2910,7 +2882,7 @@ async function loadBankRates() {
 function updateTimestampWithFreshness(container, timestamp) {
   // Función mantenida para compatibilidad pero simplificada
   if (!container || !timestamp) return;
-  
+
   const date = new Date(timestamp);
   const timeStr = date.toLocaleTimeString('es-AR');
   container.textContent = timeStr;
@@ -3013,9 +2985,18 @@ function resetMatrixFilter() {
 // NUEVO: Configurar controles del precio del dólar
 function setupDollarPriceControls() {
   const configureBtn = document.getElementById('configure-dollar');
+  const recalculateBtn = document.getElementById('recalculate-dollar');
 
   if (configureBtn) {
     configureBtn.addEventListener('click', openDollarConfiguration);
+  }
+
+  if (recalculateBtn) {
+    recalculateBtn.addEventListener('click', () => {
+      showRecalculateDialog().catch(error => {
+        console.error('❌ Error mostrando diálogo de recálculo:', error);
+      });
+    });
   }
 }
 
@@ -3138,7 +3119,6 @@ function closeRouteDetailsModal() {
  */
 function resetAllFilters() {
   // Resetear filtro P2P
-  currentFilter = 'no-p2p';
   const defaultButton = document.querySelector('[data-filter="no-p2p"]');
   if (defaultButton) {
     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
@@ -3437,7 +3417,6 @@ function generateUSDTARSTab(usdtData, sortPreference, userSettings = null) {
 function initializeBanksTabs() {
   const tabButtons = document.querySelectorAll('.banks-tab-btn');
   const tabContents = document.querySelectorAll('.banks-tab-content');
-  const sortSelect = document.getElementById('banks-sort-select');
 
   // Configurar botones de tabs
   tabButtons.forEach(button => {
@@ -3594,10 +3573,6 @@ function updateActiveTabSorting() {
   );
 
   // Obtener preferencia de ordenamiento actual
-  const activeSort = localStorage.getItem('banksActiveSort') || 'sell';
-  const sortDirection = localStorage.getItem(`banksSort${activeSort}Direction`) || 'desc';
-  const sortPreference = `${activeSort}-${sortDirection}`;
-
   // Si no tenemos datos almacenados, recargar todo
   if (!window.currentBanksData) {
     loadBanksData();
@@ -3672,7 +3647,6 @@ function applySortingToData(dataArray, sortPreference) {
 
 // Estado global para crypto arbitrage
 let cryptoRoutes = [];
-let filteredCryptoRoutes = [];
 let currentCryptoFilter = 'all'; // all, BTC, ETH, etc.
 let currentOperationFilter = 'all'; // all, direct, p2p
 
@@ -3715,13 +3689,13 @@ function setupCryptoArbitrageTab() {
  */
 function fetchAndRenderCryptoRoutes() {
   console.log('🔄 [CRYPTO] fetchAndRenderCryptoRoutes() - INICIANDO');
-  
+
   // Mostrar loading animado
   showCryptoLoading('Buscando oportunidades de arbitraje crypto...');
 
   // Enviar mensaje al background script para obtener crypto routes
   console.log('📤 [CRYPTO] Enviando mensaje GET_CRYPTO_ARBITRAGE al background...');
-  
+
   chrome.runtime.sendMessage({ type: 'GET_CRYPTO_ARBITRAGE' }, response => {
     if (chrome.runtime.lastError) {
       console.error('❌ [CRYPTO] Error comunicándose con background:', chrome.runtime.lastError);
@@ -3770,7 +3744,6 @@ function filterAndRenderCryptoRoutes() {
     );
   }
 
-  filteredCryptoRoutes = filtered;
   renderCryptoRoutes(filtered);
 }
 
@@ -3870,16 +3843,16 @@ function createCryptoRouteCard(route, index) {
   card.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     console.log('🖱️ [CRYPTO] Click en card:', route.crypto, route.buyExchange, '→', route.sellExchange);
-    
+
     // Marcar como seleccionada
     const container = card.parentElement;
     if (container) {
       container.querySelectorAll('.crypto-route-card').forEach(c => c.classList.remove('selected'));
     }
     card.classList.add('selected');
-    
+
     // Mostrar modal de detalles
     showCryptoRouteDetails(route);
   });
@@ -4207,7 +4180,7 @@ function createRipple(event, element) {
   const radius = diameter / 2;
 
   const rect = element.getBoundingClientRect();
-  
+
   circle.style.width = circle.style.height = `${diameter}px`;
   circle.style.left = `${event.clientX - rect.left - radius}px`;
   circle.style.top = `${event.clientY - rect.top - radius}px`;
@@ -4235,70 +4208,67 @@ function createRipple(event, element) {
 function initMagneticButtons() {
   // Verificar si es dispositivo táctil
   const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  
+
   if (isTouchDevice) {
     // En dispositivos táctiles, no aplicar efecto magnético
     return;
   }
 
   const magneticButtons = document.querySelectorAll('.magnetic-btn');
-  
-  // Mapa para almacenar RAF IDs por botón (para cancelar si es necesario)
-  const rafIds = new WeakMap();
-  
+
   magneticButtons.forEach(button => {
     // Variables para almacenar la última posición calculada
     let lastX = 0;
     let lastY = 0;
     let animationFrameId = null;
-    
+
     // OPTIMIZACIÓN: Usar passive event listener para mejor rendimiento
     button.addEventListener('mousemove', (e) => {
       const rect = button.getBoundingClientRect();
       const x = e.clientX - rect.left - rect.width / 2;
       const y = e.clientY - rect.top - rect.height / 2;
-      
+
       // Guardar valores para el próximo frame
       lastX = x;
       lastY = y;
-      
+
       // OPTIMIZACIÓN: Usar requestAnimationFrame para debouncing
       // Cancelar el RAF anterior si existe
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }
-      
+
       // Programar la actualización para el próximo frame de animación
       animationFrameId = requestAnimationFrame(() => {
         // Movimiento sutil (máximo 10px)
         const moveX = lastX * 0.2;
         const moveY = lastY * 0.2;
-        
+
         // Aplicar transformación usando willChange para optimización
         button.style.willChange = 'transform';
         button.style.transform = `translate(${moveX}px, ${moveY}px)`;
-        
+
         // Limpiar RAF ID
         animationFrameId = null;
       });
     }, { passive: true }); // OPTIMIZACIÓN: Event listener pasivo
-    
+
     button.addEventListener('mouseleave', () => {
       // Cancelar cualquier RAF pendiente
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
         animationFrameId = null;
       }
-      
+
       // Resetear transformación
       button.style.transform = 'translate(0, 0)';
-      
+
       // Limpiar willChange después de la transición
       setTimeout(() => {
         button.style.willChange = '';
       }, 300);
     }, { passive: true }); // OPTIMIZACIÓN: Event listener pasivo
-    
+
     // Limpieza: Cancelar RAF si el elemento se remueve del DOM
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
@@ -4309,10 +4279,55 @@ function initMagneticButtons() {
         }
       });
     });
-    
+
     observer.observe(button.parentNode, { childList: true, subtree: true });
   });
 }
+
+window.PopupLegacyApi = {
+  getDataFreshnessLevel,
+  validateRouteCalculations,
+  updateDataStatusIndicator,
+  addRiskIndicatorToRoute,
+  getRouteTypeBadge,
+  getExchangeIcon,
+  setupFilterButtons,
+  isP2PRoute,
+  setupAdvancedFilters,
+  populateExchangeFilter,
+  applyAllFilters,
+  sortRoutes,
+  handleTabChange,
+  displayArbitrages,
+  showRouteGuideFromData,
+  showRouteGuide,
+  getBankDisplayName,
+  loadBankRates,
+  updateTimestampWithFreshness,
+  showDataFreshnessWarning,
+  SIMULATOR_PRESETS,
+  setupSimulatorPresets,
+  applySimulatorPreset,
+  showPresetTooltip,
+  loadDefaultSimulatorValues,
+  resetSimulatorConfig,
+  generateRiskMatrix,
+  applyMatrixFilter,
+  resetMatrixFilter,
+  setupDollarPriceControls,
+  setupRouteDetailsModal,
+  showRecalculateDialog,
+  checkForUpdatesOnPopupLoad,
+  showUpdateBanner,
+  setupUpdateBannerButtons,
+  hideUpdateBanner,
+  openRouteDetailsModal,
+  closeRouteDetailsModal,
+  resetAllFilters,
+  showToast,
+  setProgressRing,
+  smoothScrollTo
+};
 
 /**
  * Animar contador numérico
@@ -4320,32 +4335,32 @@ function initMagneticButtons() {
  */
 function animateCounter(element, endValue, duration = 1000, decimals = 0) {
   if (!element) return;
-  
+
   const startValue = 0;
   const startTime = performance.now();
-  
+
   // Verificar prefers-reduced-motion
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (prefersReducedMotion) {
     element.textContent = endValue.toFixed(decimals);
     return;
   }
-  
+
   function updateCounter(currentTime) {
     const elapsed = currentTime - startTime;
     const progress = Math.min(elapsed / duration, 1);
-    
+
     // Easing function para suavidad
     const easeOutQuart = 1 - Math.pow(1 - progress, 4);
     const currentValue = startValue + (endValue - startValue) * easeOutQuart;
-    
+
     element.textContent = currentValue.toFixed(decimals);
-    
+
     if (progress < 1) {
       requestAnimationFrame(updateCounter);
     }
   }
-  
+
   requestAnimationFrame(updateCounter);
 }
 
@@ -4357,17 +4372,17 @@ function animateCounter(element, endValue, duration = 1000, decimals = 0) {
 function setProgressRing(elementId, percentage) {
   const circle = document.getElementById(elementId);
   if (!circle) return;
-  
+
   const radius = circle.r.baseVal.value;
   const circumference = radius * 2 * Math.PI;
-  
+
   // Clamp percentage between 0 and 100
   const clampedPercentage = Math.max(0, Math.min(100, percentage));
   const offset = circumference - (clampedPercentage / 100) * circumference;
-  
+
   circle.style.strokeDasharray = `${circumference} ${circumference}`;
   circle.style.strokeDashoffset = offset;
-  
+
   // Agregar clase para animación
   circle.classList.add('progress-ring-animated');
 }
@@ -4380,12 +4395,12 @@ function setProgressRing(elementId, percentage) {
 function smoothScrollTo(target, offset = 0) {
   const element = typeof target === 'string' ? document.querySelector(target) : target;
   if (!element) return;
-  
+
   // Verificar prefers-reduced-motion
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  
+
   const targetPosition = element.getBoundingClientRect().top + window.pageYOffset - offset;
-  
+
   if (prefersReducedMotion) {
     // Scroll instantáneo si el usuario prefiere reducción de movimiento
     window.scrollTo(0, targetPosition);
@@ -4403,20 +4418,20 @@ function smoothScrollTo(target, offset = 0) {
 function initMicroInteractions() {
   // Inicializar botones magnéticos
   initMagneticButtons();
-  
+
   // Agregar efecto ripple a botones con clase ripple-btn
   const rippleButtons = document.querySelectorAll('.ripple-btn');
   rippleButtons.forEach(button => {
     button.addEventListener('click', (e) => createRipple(e, button));
   });
-  
+
   // Inicializar contadores con clase counter-animate
   const counters = document.querySelectorAll('.counter-animate');
   counters.forEach(counter => {
     const targetValue = parseFloat(counter.dataset.target) || 0;
     const decimals = parseInt(counter.dataset.decimals) || 0;
     const duration = parseInt(counter.dataset.duration) || 1000;
-    
+
     // Usar IntersectionObserver para animar solo cuando sea visible
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -4426,7 +4441,7 @@ function initMicroInteractions() {
         }
       });
     }, { threshold: 0.5 });
-    
+
     observer.observe(counter);
   });
 }
@@ -4443,7 +4458,7 @@ function diagnoseSVGIcons() {
       console.error('❌ [SVG DIAGNOSIS] No se encontró el sprite sheet SVG en el DOM');
       return;
     }
-    
+
     // 2. Contar y listar todos los symbol IDs definidos
     const symbols = svgSprite.querySelectorAll('symbol');
     const symbolIds = [];
@@ -4492,15 +4507,13 @@ function diagnoseSVGIcons() {
       if (!exists) {
         missingIcons.push(iconId);
         console.warn(`⚠️ [SVG DIAGNOSIS] Icono crítico faltante: ${iconId}`);
-      } else {
       }
     });
-    
+
     if (missingIcons.length > 0) {
       console.error(`❌ [SVG DIAGNOSIS] Faltan ${missingIcons.length} iconos críticos:`, missingIcons);
-    } else {
     }
-    
+
     // 4. Verificar referencias de iconos en botones de filtro
     const filterButtons = document.querySelectorAll('.filter-btn');
     filterButtons.forEach((btn, index) => {
@@ -4511,10 +4524,9 @@ function diagnoseSVGIcons() {
           // Extraer el ID del icono (formato: #icon-name o /path/to/sprite.svg#icon-name)
           const iconId = href.includes('#') ? href.split('#').pop() : href.replace('#', '');
           const exists = symbolIds.includes(iconId);
-          
+
           if (!exists) {
             console.error(`❌ [SVG DIAGNOSIS] Botón ${index + 1} referencia icono inexistente: ${iconId}`);
-          } else {
           }
         } else {
           console.warn(`⚠️ [SVG DIAGNOSIS] Botón ${index + 1} no tiene referencia SVG`);
@@ -4523,7 +4535,7 @@ function diagnoseSVGIcons() {
         console.warn(`⚠️ [SVG DIAGNOSIS] Botón ${index + 1} no tiene elemento SVG use`);
       }
     });
-    
+
     // 5. Verificar referencias en botones de header
     const headerButtons = document.querySelectorAll('.btn-settings, .btn-refresh');
     headerButtons.forEach((btn, index) => {
@@ -4533,10 +4545,9 @@ function diagnoseSVGIcons() {
         if (href) {
           const iconId = href.includes('#') ? href.split('#').pop() : href.replace('#', '');
           const exists = symbolIds.includes(iconId);
-          
+
           if (!exists) {
             console.error(`❌ [SVG DIAGNOSIS] Botón header ${index + 1} referencia icono inexistente: ${iconId}`);
-          } else {
           }
         }
       }

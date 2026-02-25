@@ -13,8 +13,7 @@
   // ==========================================
 
   let activeModal = null;
-  let modalHistory = [];
-  let userSettings = null;
+  const modalHistory = [];
 
   // ==========================================
   // CONSTANTES
@@ -161,14 +160,14 @@
               <span class="calc-result">${Fmt.formatNumber(usdtAfterFees)} USDT</span>
             </div>
             ${
-              typeof usdToUsdtRate === 'number' && isFinite(usdToUsdtRate) && usdToUsdtRate > 1.005
-                ? `
+  typeof usdToUsdtRate === 'number' && isFinite(usdToUsdtRate) && usdToUsdtRate > 1.005
+    ? `
             <div class="step-simple-warning">
               ⚠️ El exchange cobra ${Fmt.formatCommissionPercent ? Fmt.formatCommissionPercent((usdToUsdtRate - 1) * 100) : ((usdToUsdtRate - 1) * 100).toFixed(2)}% para esta conversión
             </div>
             `
-                : ''
-            }
+    : ''
+  }
           </div>
         </div>
 
@@ -287,8 +286,7 @@
    * @public
    * @param {Object} settings - Configuración del usuario
    */
-  function init(settings) {
-    userSettings = settings;
+  function init(_settings) {
     setupGlobalEventListeners();
     console.log('✅ [ModalManager] Módulo inicializado');
   }
@@ -375,7 +373,7 @@
     // Mostrar modal
     modal.style.display = 'flex';
     activeModal = 'route-details';
-    
+
     // Agregar al historial
     modalHistory.push('route-details');
 

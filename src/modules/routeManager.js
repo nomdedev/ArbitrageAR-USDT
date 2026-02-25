@@ -14,7 +14,6 @@
 
   let allRoutes = [];
   let filteredRoutes = [];
-  let currentData = null;
   let userSettings = null;
 
   // ==========================================
@@ -129,20 +128,14 @@
     }
   }
 
-  /**
-   * Obtener badge de tipo de ruta
-   * @private
-   * @param {string} routeType - Tipo de ruta
-   * @returns {string} HTML del badge
-   */
-  function getRouteTypeBadge(routeType) {
+  function getRouteTypeName(routeType) {
     switch (routeType) {
       case ROUTE_TYPES.DIRECT_USDT_ARS:
-        return '<span class="route-type-badge direct-sale">💰 USDT→ARS</span>';
+        return 'USDT → ARS';
       case ROUTE_TYPES.USD_TO_USDT:
-        return '<span class="route-type-badge purchase">💎 USD→USDT</span>';
+        return 'USD → USDT';
       default:
-        return '<span class="route-type-badge arbitrage">🔄 Arbitraje</span>';
+        return 'Arbitraje';
     }
   }
 
@@ -199,32 +192,6 @@
     }
   }
 
-  /**
-   * Obtener icono de exchange
-   * @private
-   * @param {string} exchangeName - Nombre del exchange
-   * @returns {string} Icono o emoji
-   */
-  function getExchangeIcon(exchangeName) {
-    if (window.RouteRenderer?.getExchangeIcon) {
-      return window.RouteRenderer.getExchangeIcon(exchangeName);
-    }
-    return '🏦';
-  }
-
-  /**
-   * Sanitizar HTML para prevenir XSS
-   * @private
-   * @param {string} text - Texto a sanitizar
-   * @returns {string} Texto sanitizado
-   */
-  function sanitizeHTML(text) {
-    if (typeof text !== 'string') return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
   // ==========================================
   // FUNCIONES PÚBLICAS
   // ==========================================
@@ -236,7 +203,6 @@
    * @param {Object} settings - Configuración del usuario
    */
   function init(data, settings) {
-    currentData = data;
     userSettings = settings;
     allRoutes = data?.optimizedRoutes || [];
     console.log('✅ [RouteManager] Módulo inicializado con', allRoutes.length, 'rutas');
@@ -248,7 +214,6 @@
    * @param {Object} data - Nuevos datos
    */
   function updateData(data) {
-    currentData = data;
     allRoutes = data?.optimizedRoutes || [];
     console.log('✅ [RouteManager] Datos actualizados:', allRoutes.length, 'rutas');
   }
@@ -452,7 +417,7 @@
     if (!routes || routes.length === 0) {
       const threshold = interfaceSettings.profitThreshold || 1.0;
       const routeType = interfaceSettings.routeType || 'arbitrage';
-      
+
       container.innerHTML = `
         <div class="empty-state-card">
           <div class="empty-state-header">
@@ -546,11 +511,11 @@
     const fragment = document.createDocumentFragment();
     routes.forEach((route, index) => {
       const card = createRouteElement(route, index);
-      
+
       // Agregar clases de animación
       card.classList.add('stagger-in', 'hover-lift', 'click-shrink', 'magnetic-btn', 'ripple-btn', 'hover-scale-rotate');
       card.style.animationDelay = `${index * 50}ms`;
-      
+
       fragment.appendChild(card);
     });
 
@@ -562,7 +527,7 @@
     }
 
     // Agregar event listeners a las tarjetas
-    attachRouteListeners(container, routes);
+    attachRouteListeners(container);
 
     console.log(`✅ [RouteManager] Renderizadas ${routes.length} rutas`);
   }
@@ -573,7 +538,7 @@
    * @param {HTMLElement} container - Contenedor de rutas
    * @param {Array} routes - Rutas renderizadas
    */
-  function attachRouteListeners(container, routes) {
+  function attachRouteListeners(container) {
     const routeCards = container.querySelectorAll('.route-card');
 
     routeCards.forEach((card) => {
@@ -589,7 +554,7 @@
 
         try {
           const route = JSON.parse(decodeURIComponent(routeData));
-          console.log(`🖱️ [RouteManager] Click en ruta:`, route.broker || route.buyExchange);
+          console.log('🖱️ [RouteManager] Click en ruta:', route.broker || route.buyExchange);
 
           // Remover selección previa
           container.querySelectorAll('.route-card').forEach(c => c.classList.remove('selected'));

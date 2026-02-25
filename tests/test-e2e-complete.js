@@ -375,7 +375,7 @@ function testHTMLFiles() {
       const fullPath = path.join(basePath, file);
       const content = fs.readFileSync(fullPath, 'utf8');
       
-      const hasDoctype = content.includes('<!DOCTYPE html>');
+      const hasDoctype = /<!doctype\s+html>/i.test(content);
       const hasAllRequired = mustContain.every(item => content.includes(item));
       
       if (hasDoctype && hasAllRequired) {
@@ -400,18 +400,9 @@ function testRenderHelpers() {
   log('\n🖼️ TEST 9: Render Helpers', 'cyan');
   
   try {
-    const { formatNumber, escapeHtml, getRouteDescription } = require('../src/renderHelpers.js');
+    const { escapeHtml, getRouteDescription } = require('../src/renderHelpers.js');
     
     let passed = 0;
-    
-    // Test formatNumber
-    if (formatNumber(1234.567) === '1.234,57') {
-      log(`  ✅ formatNumber(1234.567) = "1.234,57"`, 'green');
-      passed++;
-    } else {
-      log(`  ⚠️ formatNumber locale diferente: ${formatNumber(1234.567)}`, 'yellow');
-      passed++; // Aceptar diferencias de locale
-    }
     
     // Test escapeHtml
     const escaped = escapeHtml('<script>alert("xss")</script>');
@@ -431,7 +422,7 @@ function testRenderHelpers() {
       log(`  ❌ getRouteDescription incorrecto: "${routeDesc}"`, 'red');
     }
     
-    return passed >= 2;
+    return passed === 2;
   } catch (error) {
     log(`  ❌ Error: ${error.message}`, 'red');
     return false;

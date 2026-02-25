@@ -1,7 +1,7 @@
 /**
  * TooltipSystem - Sistema de Tooltips Interactivos
  * Fase 3: Sistema de Tooltips Interactivos
- * 
+ *
  * Proporciona tooltips contextuales con:
  * - Posicionamiento inteligente (top > right > bottom > left)
  * - Animaciones suaves con GPU acceleration
@@ -20,7 +20,7 @@ class TooltipSystem {
       maxWidth: options.maxWidth ?? 280,     // Ancho máximo del tooltip (px)
       zIndex: options.zIndex ?? 700,         // Z-index del tooltip
       showOnHover: options.showOnHover ?? true,
-      showOnFocus: options.showOnFocus ?? true,
+      showOnFocus: options.showOnFocus ?? true
     };
 
     // Estado interno
@@ -128,7 +128,7 @@ class TooltipSystem {
   /**
    * Maneja el evento mouse leave
    */
-  handleMouseLeave(e) {
+  handleMouseLeave() {
     // Limpiar timer de mostrar si existe
     if (this.showTimer) {
       clearTimeout(this.showTimer);
@@ -153,7 +153,7 @@ class TooltipSystem {
   /**
    * Maneja el evento blur
    */
-  handleBlur(e) {
+  handleBlur() {
     this.hide();
   }
 
@@ -312,9 +312,6 @@ class TooltipSystem {
     this.container.appendChild(arrow);
 
     // Posicionar flecha
-    const tooltipRect = this.container.getBoundingClientRect();
-    let arrowTop, arrowLeft;
-
     switch (position) {
       case 'top':
         arrow.style.bottom = '-6px';
@@ -444,7 +441,7 @@ class TooltipSystem {
     else if (age > 5) level = 'por actualizar';
 
     const messages = {
-      'actualizado': `Datos actualizados&#10;Hace menos de 5 minutos`,
+      'actualizado': 'Datos actualizados&#10;Hace menos de 5 minutos',
       'por actualizar': `Datos por actualizar&#10;Hace ${age} minutos`,
       'desactualizado': `Datos desactualizados&#10;Hace ${age} minutos. Recomendado actualizar.`
     };

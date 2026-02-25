@@ -14,7 +14,6 @@
 
   let activeToasts = [];
   let activeBanner = null;
-  let userSettings = null;
 
   // ==========================================
   // CONSTANTES
@@ -53,7 +52,7 @@
   function createToastElement(message, type) {
     const toast = document.createElement('div');
     toast.className = `toast-notification toast-${type}`;
-    
+
     const colors = {
       [TOAST_TYPES.INFO]: '#3b82f6',
       [TOAST_TYPES.SUCCESS]: '#10b981',
@@ -90,7 +89,7 @@
   function applyToastAnimation(toast, type) {
     toast.style.animation = 'none';
     toast.offsetHeight; // Trigger reflow
-    
+
     const animations = {
       [TOAST_TYPES.SUCCESS]: 'successPulse 0.6s ease-out',
       [TOAST_TYPES.ERROR]: 'errorShake 0.5s ease-out',
@@ -144,7 +143,7 @@
    */
   async function isUpdateDismissed(updateInfo) {
     const { dismissedUpdate } = await chrome.storage.local.get('dismissedUpdate');
-    
+
     if (!dismissedUpdate) return false;
     if (dismissedUpdate.expiresAt > Date.now()) {
       return dismissedUpdate.version === updateInfo.latestVersion;
@@ -161,8 +160,7 @@
    * @public
    * @param {Object} settings - Configuración del usuario
    */
-  function init(settings) {
-    userSettings = settings;
+  function init(_settings) {
     setupUpdateBanner();
     console.log('✅ [NotificationManager] Módulo inicializado');
   }
@@ -172,8 +170,8 @@
    * @public
    * @param {Object} settings - Nueva configuración
    */
-  function updateSettings(settings) {
-    userSettings = settings;
+  function updateSettings(_settings) {
+    return;
   }
 
   /**
@@ -187,9 +185,9 @@
   function showToast(message, type = TOAST_TYPES.INFO, duration = TOAST_DURATION.MEDIUM) {
     // Verificar preferencia de movimiento reducido
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
+
     const toast = createToastElement(message, type);
-    
+
     if (!prefersReducedMotion) {
       applyToastAnimation(toast, type);
     }
@@ -276,7 +274,7 @@
    */
   async function setupUpdateBanner() {
     const { pendingUpdate } = await chrome.storage.local.get('pendingUpdate');
-    
+
     if (!pendingUpdate) {
       console.log('✅ [NotificationManager] No hay actualizaciones pendientes');
       return;
@@ -325,7 +323,7 @@
   function showUpdateIndicator(updateInfo, updateType) {
     const versionIndicator = document.getElementById('version-indicator');
     const updateBadge = document.getElementById('update-badge');
-    
+
     if (!versionIndicator) {
       console.warn('⚠️ [NotificationManager] Indicador de versión no encontrado');
       return;
@@ -333,7 +331,7 @@
 
     // Agregar clase para estilo visual
     versionIndicator.classList.add('has-update');
-    
+
     // Mostrar badge de actualización
     if (updateBadge) {
       updateBadge.style.display = 'flex';
@@ -368,15 +366,15 @@
   function downloadUpdate(updateInfo) {
     // URL del repositorio de GitHub (releases)
     const repoUrl = 'https://github.com/nomdedev/ArbitrageAR-USDT/releases/latest';
-    
+
     // Usar URL específica si está disponible
     const downloadUrl = updateInfo?.downloadUrl || updateInfo?.url || repoUrl;
 
     console.log(`⬇️ [NotificationManager] Descargando actualización desde: ${downloadUrl}`);
-    
+
     // Abrir en nueva pestaña
     chrome.tabs.create({ url: downloadUrl });
-    
+
     // Mostrar toast de confirmación
     showToast('Abriendo página de descarga...', TOAST_TYPES.INFO, TOAST_DURATION.SHORT);
   }
@@ -388,13 +386,13 @@
   function hideUpdateIndicator() {
     const versionIndicator = document.getElementById('version-indicator');
     const updateBadge = document.getElementById('update-badge');
-    
+
     if (versionIndicator) {
       versionIndicator.classList.remove('has-update');
       versionIndicator.removeAttribute('data-update-tooltip');
       versionIndicator.onclick = null;
     }
-    
+
     if (updateBadge) {
       updateBadge.style.display = 'none';
     }

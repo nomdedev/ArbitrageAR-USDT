@@ -33,7 +33,6 @@ const ArbitrageCalculator = (() => {
 
     // Calcular comisiones
     const tradingFee = fees.trading ?? config.defaultFees.trading;
-    const withdrawalFee = fees.withdrawal ?? config.defaultFees.withdrawal;
     const bankFee = fees.bank ?? config.defaultFees.bank;
 
     // Paso 1: Comprar USD con ARS

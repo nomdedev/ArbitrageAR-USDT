@@ -60,7 +60,6 @@ class ArbitragePanel {
     if (!this.ring) return;
 
     // Obtener el porcentaje del data attribute
-    const profitability = this.container.dataset.profitability || 'medium';
     const targetPercent = parseFloat(this.percentElement?.textContent) || 0;
 
     // Calcular el stroke-dashoffset
@@ -204,15 +203,15 @@ function createArbitragePanel(data) {
         <span class="calc-value">+${sanitizeHTML(formatCurrency(data.profit))}</span>
       </div>
       ${
-        data.fees
-          ? `
+  data.fees
+    ? `
       <div class="calculation-row">
         <span class="calc-label">Comisiones:</span>
         <span class="calc-value">-${sanitizeHTML(formatCurrency(data.fees))}</span>
       </div>
       `
-          : ''
-      }
+    : ''
+}
     </div>
     
     <div class="panel-actions">

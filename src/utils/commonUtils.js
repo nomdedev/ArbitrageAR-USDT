@@ -457,7 +457,7 @@
    * @returns {Object} Objeto con funciones de log
    */
   function createLogger(prefix) {
-    const isDevelopment = process?.env?.NODE_ENV === 'development' || 
+    const isDevelopment = process?.env?.NODE_ENV === 'development' ||
                           window.location?.hostname === 'localhost';
 
     return {

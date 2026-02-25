@@ -27,6 +27,7 @@ module.exports = {
     }
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
+  testPathIgnorePatterns: ['<rootDir>/tests/e2e/playwright/'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1'
   },

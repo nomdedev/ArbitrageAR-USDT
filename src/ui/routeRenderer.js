@@ -6,7 +6,6 @@
 const RouteRenderer = (() => {
   // Obtener referencias a utilidades
   const getFormatters = () => window.Formatters || {};
-  const getState = () => window.StateManager || { get: () => null };
 
   /**
    * Obtener clases CSS basadas en el porcentaje de ganancia
@@ -126,7 +125,7 @@ const RouteRenderer = (() => {
             <span class="route-type ${routeTypeClass}">${routeType}</span>
           </div>
           <div class="route-profit ${profitBadgeClass}">
-            <span class="profit-value">${isNegative ? '' : '+'}${profitPercent.toFixed(2)}%</span>
+            <span class="profit-value">${isNegative ? '' : '+'}${profitPercentage.toFixed(2)}%</span>
           </div>
         </div>
         
