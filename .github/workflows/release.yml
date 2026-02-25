@@ -28,7 +28,7 @@ jobs:
           node-version: '20.x'
       
       - name: Install dependencies
-        run: npm install
+        run: npm install --ignore-scripts
       
       - name: Run tests
         run: npm test -- --runInBand
