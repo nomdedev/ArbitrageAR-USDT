@@ -273,7 +273,14 @@
    * @private
    */
   async function setupUpdateBanner() {
-    const { pendingUpdate } = await chrome.storage.local.get('pendingUpdate');
+    const updateData =
+      typeof chrome !== 'undefined' &&
+      chrome.storage &&
+      chrome.storage.local &&
+      typeof chrome.storage.local.get === 'function'
+        ? await chrome.storage.local.get('pendingUpdate')
+        : {};
+    const pendingUpdate = updateData?.pendingUpdate;
 
     if (!pendingUpdate) {
       window.Logger?.debug('✅ [NotificationManager] No hay actualizaciones pendientes');
@@ -549,7 +556,14 @@
    * @async
    */
   async function checkForUpdates() {
-    const { pendingUpdate } = await chrome.storage.local.get('pendingUpdate');
+    const updateData =
+      typeof chrome !== 'undefined' &&
+      chrome.storage &&
+      chrome.storage.local &&
+      typeof chrome.storage.local.get === 'function'
+        ? await chrome.storage.local.get('pendingUpdate')
+        : {};
+    const pendingUpdate = updateData?.pendingUpdate;
 
     if (!pendingUpdate) {
       window.Logger?.debug('✅ [NotificationManager] No hay actualizaciones pendientes');

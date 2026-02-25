@@ -29,11 +29,11 @@
     if (!cached || !cached.timestamp) {
       return false;
     }
-    
+
     const now = Date.now();
     const age = now - cached.timestamp;
     const maxAge = CACHE_CONFIG[cacheType];
-    
+
     return age < maxAge;
   }
 
@@ -48,7 +48,7 @@
       timestamp: Date.now(),
       source: 'api'
     };
-    
+
     console.log(`🗄️ [CACHE] Datos guardados en caché ${cacheType}:`, {
       timestamp: new Date().toISOString(),
       dataType: typeof data,
@@ -66,11 +66,11 @@
       console.log(`🕒 [CACHE] Caché ${cacheType} expirado o inexistente`);
       return null;
     }
-    
+
     const cached = cacheStorage[cacheType];
     const age = Date.now() - cached.timestamp;
     const maxAge = CACHE_CONFIG[cacheType];
-    
+
     console.log(`✅ [CACHE] Usando datos de caché ${cacheType} (${Math.round(age/1000)}s/${Math.round(maxAge/1000)}s)`);
     return cached.data;
   }
@@ -88,16 +88,16 @@
     if (cachedData !== null) {
       return cachedData;
     }
-    
+
     // Si no hay caché válido, obtener de API
     console.log(`🌐 [CACHE] Obteniendo datos frescos para ${cacheType}...`);
     const freshData = await fetchFunction(...args);
-    
+
     // Guardar en caché si los datos son válidos
     if (freshData !== null && freshData !== undefined) {
       setCache(cacheType, freshData);
     }
-    
+
     return freshData;
   }
 
@@ -127,7 +127,7 @@
   function getCacheStats() {
     const stats = {};
     const now = Date.now();
-    
+
     Object.keys(CACHE_CONFIG).forEach(cacheType => {
       const cached = cacheStorage[cacheType];
       if (cached && cached.timestamp) {
@@ -152,7 +152,7 @@
         };
       }
     });
-    
+
     return stats;
   }
 
@@ -175,16 +175,16 @@
     getCachedOrFetch,
     getCache,
     setCache,
-    
+
     // Funciones de mantenimiento
     clearCache,
     clearAllCache,
     forceRefresh,
-    
+
     // Funciones de información
     isCacheValid,
     getCacheStats,
-    
+
     // Configuración (solo lectura)
     CACHE_CONFIG: { ...CACHE_CONFIG }
   };

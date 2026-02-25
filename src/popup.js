@@ -707,6 +707,16 @@ function setupRefreshButton() {
 function setupStorageListener() {
   log('👂 Configurando listener de cambios en storage...');
 
+  if (
+    typeof chrome === 'undefined' ||
+    !chrome.storage ||
+    !chrome.storage.onChanged ||
+    typeof chrome.storage.onChanged.addListener !== 'function'
+  ) {
+    log('⚠️ [POPUP] chrome.storage.onChanged no está disponible; se omite listener');
+    return;
+  }
+
   chrome.storage.onChanged.addListener((changes, namespace) => {
     if (namespace === 'local' && changes.notificationSettings) {
       log('⚙️ Configuración cambió - actualizando popup...');
@@ -893,8 +903,14 @@ async function fetchAndDisplay(retryCount = 0) {
   container.innerHTML = '';
 
   // NUEVO v5.0: Cargar preferencias del usuario
-  const settings = await chrome.storage.local.get('notificationSettings');
-  userSettings = settings.notificationSettings || {};
+  const settings =
+    typeof chrome !== 'undefined' &&
+    chrome.storage &&
+    chrome.storage.local &&
+    typeof chrome.storage.local.get === 'function'
+      ? await chrome.storage.local.get('notificationSettings')
+      : {};
+  userSettings = (settings && settings.notificationSettings) || {};
 
   // Sincronizar con StateManager
   if (State) {
