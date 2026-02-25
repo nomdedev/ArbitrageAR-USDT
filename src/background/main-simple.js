@@ -8,17 +8,17 @@
 // - getCachedData() - función no utilizada
 // ============================================
 
-console.log('🔧 [BACKGROUND] Iniciando service worker...');
+log('🔧 [BACKGROUND] Iniciando service worker...');
 
 // ============================================
 // IMPORTAR MÓDULOS (compatibilidad con service worker)
 // ============================================
 try {
-  importScripts('apiClient.js', 'arbitrageCalculator.js', '../DataService.js');
-  console.log('✅ [BACKGROUND] Módulos importados correctamente');
+  importScripts('apiClient.js', 'arbitrageCalculator.js', '../DataService.js', 'cacheManager.js');
+  log('✅ [BACKGROUND] Módulos importados correctamente');
 } catch (e) {
   console.warn('⚠️ [BACKGROUND] No se pudieron importar módulos:', e.message);
-  console.log('📝 [BACKGROUND] Usando implementación inline como fallback');
+  log('📝 [BACKGROUND] Usando implementación inline como fallback');
 }
 
 // ============================================
@@ -175,19 +175,11 @@ const BANK_CALCULATIONS = {
  */
 async function fetchUSDTtoUSD() {
   try {
-    const response = await fetch('https://criptoya.com/api/USDT/USD/1', {
-      timeout: REQUEST_TIMEOUT,
-      headers: {
-        Accept: 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    const data = await fetchWithRateLimit('https://criptoya.com/api/USDT/USD/1');
+    if (!data || typeof data !== 'object') {
+      throw new Error('Respuesta inválida de API USDT/USD');
     }
 
-    const data = await response.json();
     log('💰 Datos USDT/USD obtenidos:', Object.keys(data).length, 'exchanges');
 
     // Procesar datos
@@ -202,7 +194,7 @@ async function fetchUSDTtoUSD() {
       }
     });
 
-    console.log('💰 USDT/USD procesados:', Object.keys(processedData).length, 'exchanges válidos');
+    log('💰 USDT/USD procesados:', Object.keys(processedData).length, 'exchanges válidos');
     cachedUsdtUsdData = processedData;
     return processedData;
   } catch (error) {
@@ -216,19 +208,11 @@ async function fetchUSDTtoUSD() {
  */
 async function fetchUSDT() {
   try {
-    const response = await fetch('https://criptoya.com/api/USDT/ARS/1', {
-      timeout: REQUEST_TIMEOUT,
-      headers: {
-        Accept: 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    const data = await fetchWithRateLimit('https://criptoya.com/api/USDT/ARS/1');
+    if (!data || typeof data !== 'object') {
+      throw new Error('Respuesta inválida de API USDT/ARS');
     }
 
-    const data = await response.json();
     log('💎 Datos USDT/ARS obtenidos:', Object.keys(data).length, 'exchanges');
 
     // Procesar datos
@@ -243,7 +227,7 @@ async function fetchUSDT() {
       }
     });
 
-    console.log('💎 USDT/ARS procesados:', Object.keys(processedData).length, 'exchanges válidos');
+    log('💎 USDT/ARS procesados:', Object.keys(processedData).length, 'exchanges válidos');
     cachedUsdtData = processedData;
     return processedData;
   } catch (error) {
@@ -295,7 +279,7 @@ let lastRequestTime = 0;
 
 function log(...args) {
   if (DEBUG_MODE) {
-    console.log(...args);
+    console.info(...args);
   }
 }
 
@@ -335,14 +319,14 @@ async function updateGlobalConfig() {
 // ============================================
 
 async function fetchWithRateLimit(url) {
-  console.log('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - INICIANDO para URL:', url);
+  log('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - INICIANDO para URL:', url);
 
   // OPTIMIZADO v5.0.61: Rate limit opcional para mejorar performance
   if (ENABLE_RATE_LIMIT) {
     const now = Date.now();
     const delay = REQUEST_INTERVAL - (now - lastRequestTime);
     if (delay > 0) {
-      console.log('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - Rate limit activo, esperando', delay, 'ms');
+      log('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - Rate limit activo, esperando', delay, 'ms');
       await new Promise(r => setTimeout(r, delay));
     }
     lastRequestTime = Date.now();
@@ -351,17 +335,17 @@ async function fetchWithRateLimit(url) {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
-    console.log('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - Iniciando fetch, timeout:', REQUEST_TIMEOUT, 'ms');
+    log('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - Iniciando fetch, timeout:', REQUEST_TIMEOUT, 'ms');
 
     const res = await fetch(url, { signal: controller.signal });
     clearTimeout(timeoutId);
 
-    console.log('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - Respuesta recibida, status:', res.status, 'ok:', res.ok);
+    log('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - Respuesta recibida, status:', res.status, 'ok:', res.ok);
 
     if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
 
     const json = await res.json();
-    console.log('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - ✅ JSON parseado exitosamente');
+    log('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - ✅ JSON parseado exitosamente');
     return json;
   } catch (e) {
     console.error('🔍 [DIAGNÓSTICO] fetchWithRateLimit() - ❌ ERROR en fetch:', url);
@@ -374,16 +358,16 @@ async function fetchWithRateLimit(url) {
 }
 
 async function fetchDolarOficial(userSettings) {
-  console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - INICIANDO');
+  log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - INICIANDO');
   const url = userSettings.criptoyaDolarOficialUrl || 'https://criptoya.com/api/dolar';
-  console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - URL:', url);
+  log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - URL:', url);
 
   const data = await fetchWithRateLimit(url);
-  console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - Datos recibidos:', data);
+  log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - Datos recibidos:', data);
 
   if (data && data.oficial) {
-    console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - data.oficial.ask:', data.oficial.ask, 'tipo:', typeof data.oficial.ask);
-    console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - data.oficial.bid:', data.oficial.bid, 'tipo:', typeof data.oficial.bid);
+    log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - data.oficial.ask:', data.oficial.ask, 'tipo:', typeof data.oficial.ask);
+    log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - data.oficial.bid:', data.oficial.bid, 'tipo:', typeof data.oficial.bid);
   }
 
   if (data && data.oficial && typeof data.oficial.ask === 'number' && typeof data.oficial.bid === 'number') {
@@ -396,33 +380,33 @@ async function fetchDolarOficial(userSettings) {
       source: 'criptoya_oficial',
       timestamp: Date.now()
     };
-    console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - ✅ Devolviendo datos válidos:', result);
+    log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - ✅ Devolviendo datos válidos:', result);
     return result;
   }
 
-  console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - ❌ Datos inválidos o nulos, devolviendo NULL');
+  log('🔍 [DIAGNÓSTICO] fetchDolarOficial() - ❌ Datos inválidos o nulos, devolviendo NULL');
   return null;
 }
 
 async function fetchAllDollarTypes(userSettings) {
-  console.log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - INICIANDO');
+  log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - INICIANDO');
   const url = userSettings.criptoyaDolarUrl || 'https://criptoya.com/api/bancostodos';
-  console.log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - URL:', url);
+  log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - URL:', url);
   log('[BACKGROUND] 🔄 Fetching bancos from:', url);
-  console.log('[FETCH] 🔄 Iniciando fetchAllDollarTypes desde:', url);
+  log('[FETCH] 🔄 Iniciando fetchAllDollarTypes desde:', url);
 
   const data = await fetchWithRateLimit(url);
-  console.log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - Datos recibidos:', data);
-  console.log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - Tipo de datos:', typeof data);
+  log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - Datos recibidos:', data);
+  log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - Tipo de datos:', typeof data);
 
   log(
     '[BACKGROUND] 📊 Bancos data received:',
     data ? Object.keys(data).length + ' bancos' : 'null'
   );
-  console.log('[FETCH] 📊 Datos crudos recibidos:', data);
+  log('[FETCH] 📊 Datos crudos recibidos:', data);
 
   if (data && typeof data === 'object') {
-    console.log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - Datos son objeto válido, procesando...');
+    log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - Datos son objeto válido, procesando...');
     // Los datos de CriptoYa ya vienen en formato objeto
     const dollarTypes = {};
     const invalidBanks = [];
@@ -481,17 +465,17 @@ async function fetchAllDollarTypes(userSettings) {
     }
 
     const avgSpread = spreads.reduce((sum, s) => sum + s.spreadPercent, 0) / spreads.length;
-    console.log(`📊 [VALIDACIÓN] Spread promedio: ${avgSpread.toFixed(2)}%`);
+    log(`📊 [VALIDACIÓN] Spread promedio: ${avgSpread.toFixed(2)}%`);
 
     log(
       '[BACKGROUND] 📤 Processed bancos data:',
       Object.keys(dollarTypes).length + ' bancos procesados'
     );
-    console.log('[FETCH] 📤 Datos procesados:', Object.keys(dollarTypes).length + ' bancos');
+    log('[FETCH] 📤 Datos procesados:', Object.keys(dollarTypes).length + ' bancos');
     return dollarTypes;
   }
   log('[BACKGROUND] ❌ No data received from bancos API');
-  console.log('[FETCH] ❌ No se pudieron procesar datos de bancos');
+  log('[FETCH] ❌ No se pudieron procesar datos de bancos');
   return null;
 }
 
@@ -535,13 +519,13 @@ async function fetchBinanceP2P_USDT_USD(userSettings) {
 }
 
 async function fetchBankDollarRates(userSettings) {
-  console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - INICIANDO');
+  log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - INICIANDO');
   const url = userSettings.criptoyaBanksUrl || 'https://criptoya.com/api/bancostodos';
-  console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - URL:', url);
+  log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - URL:', url);
 
   const data = await fetchWithRateLimit(url);
-  console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - Datos recibidos:', data);
-  console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - Tipo de datos:', typeof data);
+  log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - Datos recibidos:', data);
+  log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - Tipo de datos:', typeof data);
 
   if (data && typeof data === 'object') {
     const result = {
@@ -549,11 +533,11 @@ async function fetchBankDollarRates(userSettings) {
       source: 'criptoya_banks',
       timestamp: Date.now()
     };
-    console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - ✅ Devolviendo datos válidos, keys:', Object.keys(data));
+    log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - ✅ Devolviendo datos válidos, keys:', Object.keys(data));
     return result;
   }
 
-  console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - ❌ Datos inválidos o nulos, devolviendo NULL');
+  log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - ❌ Datos inválidos o nulos, devolviendo NULL');
   return null;
 }
 
@@ -883,7 +867,7 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
   log('🔍 [CALC] usdtUsd:', usdtUsd ? Object.keys(usdtUsd).length + ' exchanges' : 'null');
 
   // DIAGNÓSTICO: Verificar datos de entrada
-  console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Datos de entrada:', {
+  log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Datos de entrada:', {
     oficial: oficial ? { compra: oficial.compra, venta: oficial.venta } : null,
     usdtExchanges: usdt ? Object.keys(usdt).filter(k => k !== 'time' && k !== 'timestamp') : [],
     usdtUsdExchanges: usdtUsd ? Object.keys(usdtUsd).filter(k => k !== 'time' && k !== 'timestamp') : []
@@ -934,11 +918,11 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
 
   // DIAGNÓSTICO: Loggear exchanges disponibles en usdt
   const availableExchanges = Object.keys(usdt).filter(k => k !== 'time' && k !== 'timestamp');
-  console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Exchanges disponibles en usdt:', availableExchanges);
-  console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Exchanges en selectedUsdtBrokers:', selectedUsdtBrokers || []);
+  log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Exchanges disponibles en usdt:', availableExchanges);
+  log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Exchanges en selectedUsdtBrokers:', selectedUsdtBrokers || []);
 
   // DIAGNÓSTICO: Loggear filtro de exchanges
-  console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Filtro de exchanges:', {
+  log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Filtro de exchanges:', {
     totalExchanges: availableExchanges.length,
     selectedUsdtBrokers: selectedUsdtBrokers || [],
     hasSelection: !!(selectedUsdtBrokers && Array.isArray(selectedUsdtBrokers) && selectedUsdtBrokers.length > 0)
@@ -957,13 +941,13 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
     // DIAGNÓSTICO: Loggear exchanges encontrados y no encontrados
     const foundExchanges = selectedUsdtBrokers.filter(b => usdt[b]);
     const notFoundExchanges = selectedUsdtBrokers.filter(b => !usdt[b]);
-    console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Exchanges ENCONTRADOS:', foundExchanges);
-    console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Exchanges NO encontrados:', notFoundExchanges);
+    log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Exchanges ENCONTRADOS:', foundExchanges);
+    log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Exchanges NO encontrados:', notFoundExchanges);
 
     // DIAGNÓSTICO: Loggear resultado del filtro
     const filteredExchanges = Object.keys(filteredUsdt).filter(k => k !== 'time' && k !== 'timestamp');
-    console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Resultado del filtro (filteredUsdt):', filteredExchanges);
-    console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Después del filtro:', {
+    log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Resultado del filtro (filteredUsdt):', filteredExchanges);
+    log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Después del filtro:', {
       filteredExchanges: filteredExchanges,
       found: foundExchanges,
       notFound: notFoundExchanges,
@@ -1213,7 +1197,7 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd) {
   routes.sort((a, b) => (b.profitPercentage || b.profitPercent || 0) - (a.profitPercentage || a.profitPercent || 0));
 
   // DIAGNÓSTICO: Loggear resultado final del cálculo
-  console.log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Resultado final:', {
+  log('🔍 [DIAGNÓSTICO] calculateSimpleRoutes() - Resultado final:', {
     totalRoutes: routes.length,
     intraBroker: processedCount,
     skippedIntraBroker: skippedCount,
@@ -1807,7 +1791,7 @@ const notifiedArbitrages = new Set(); // Para evitar notificar el mismo arbitraj
 async function shouldSendNotification(settings, arbitrage) {
   // 1. Verificar si las notificaciones están habilitadas
   if (!settings.notificationsEnabled) {
-    console.log('[NOTIF] ❌ Notificaciones deshabilitadas');
+    log('[NOTIF] ❌ Notificaciones deshabilitadas');
     return false;
   }
 
@@ -1821,12 +1805,12 @@ async function shouldSendNotification(settings, arbitrage) {
     // Si el horario atraviesa medianoche (ej: 22:00 - 08:00)
     if (start > end) {
       if (currentTime >= start || currentTime <= end) {
-        console.log('[NOTIF] ❌ Horario silencioso activo');
+        log('[NOTIF] ❌ Horario silencioso activo');
         return false;
       }
     } else {
       if (currentTime >= start && currentTime <= end) {
-        console.log('[NOTIF] ❌ Horario silencioso activo');
+        log('[NOTIF] ❌ Horario silencioso activo');
         return false;
       }
     }
@@ -1846,7 +1830,7 @@ async function shouldSendNotification(settings, arbitrage) {
 
   const minInterval = frequencies[settings.notificationFrequency] || frequencies['1min'];
   if (now - lastNotificationTime < minInterval) {
-    console.log(
+    log(
       `[NOTIF] ❌ Intervalo mínimo no cumplido (${Math.round((minInterval - (now - lastNotificationTime)) / 1000)}s restantes)`
     );
     return false;
@@ -1858,7 +1842,7 @@ async function shouldSendNotification(settings, arbitrage) {
   const profitPct = arbitrage.profitPercentage || arbitrage.profitPercent || 0;
 
   if (profitPct < threshold) {
-    console.log(
+    log(
       `[NOTIF] ❌ Ganancia ${profitPct.toFixed(2)}% < umbral ${threshold}%`
     );
     return false;
@@ -1874,7 +1858,7 @@ async function shouldSendNotification(settings, arbitrage) {
         exchangeName.includes(allowed.toLowerCase()) || allowed.toLowerCase().includes(exchangeName)
     );
     if (!isAllowed) {
-      console.log(`[NOTIF] ❌ Exchange ${exchangeName} no está en la lista de notificaciones`);
+      log(`[NOTIF] ❌ Exchange ${exchangeName} no está en la lista de notificaciones`);
       return false;
     }
   }
@@ -1882,11 +1866,11 @@ async function shouldSendNotification(settings, arbitrage) {
   // 6. Verificar si ya notificamos este arbitraje recientemente
   const arbKey = `${arbitrage.broker}_${Math.floor(profitPct)}`; // Redondear para evitar spam
   if (notifiedArbitrages.has(arbKey)) {
-    console.log(`[NOTIF] ❌ Arbitraje ya notificado recientemente: ${arbKey}`);
+    log(`[NOTIF] ❌ Arbitraje ya notificado recientemente: ${arbKey}`);
     return false;
   }
 
-  console.log(
+  log(
     `[NOTIF] ✅ Notificación aprobada: ${arbitrage.broker} ${profitPct.toFixed(2)}%`
   );
   return true;
@@ -1931,7 +1915,7 @@ async function sendNotification(arbitrage, settings) {
     const timeStr = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
     message += `\n⏰ Detectado a las ${timeStr}`;
 
-    console.log(`[NOTIF] 🔔 Enviando notificación: ${brokerName} - ${profit.toFixed(2)}%`);
+    log(`[NOTIF] 🔔 Enviando notificación: ${brokerName} - ${profit.toFixed(2)}%`);
 
     await chrome.notifications.create(notificationId, {
       type: 'basic',
@@ -1960,7 +1944,7 @@ async function sendNotification(arbitrage, settings) {
     if (settings.soundEnabled) {
       // Chrome no permite reproducir audio desde background,
       // pero podemos usar la API de notificaciones que tiene sonido por defecto
-      console.log('🔔 Notificación con sonido enviada');
+      log('🔔 Notificación con sonido enviada');
     }
   } catch (error) {
     console.error('Error enviando notificación:', error);
@@ -1972,7 +1956,7 @@ async function checkAndNotify(arbitrages) {
   try {
     // NUEVO: No enviar notificaciones en la primera actualización (inicialización)
     if (isFirstUpdate) {
-      console.log('[NOTIF] ⏭️ Saltando notificación en inicialización (isFirstUpdate = true)');
+      log('[NOTIF] ⏭️ Saltando notificación en inicialización (isFirstUpdate = true)');
       return;
     }
 
@@ -1988,7 +1972,7 @@ async function checkAndNotify(arbitrages) {
       quietEnd: '08:00'
     };
 
-    console.log('[NOTIF] 🔍 Verificando notificaciones...', {
+    log('[NOTIF] 🔍 Verificando notificaciones...', {
       enabled: settings.notificationsEnabled,
       threshold: settings.alertThreshold,
       frequency: settings.notificationFrequency,
@@ -2024,7 +2008,7 @@ let isFirstUpdate = true; // NUEVO: Bandera para evitar notificaciones en inicia
 // ============================================
 
 async function updateData() {
-  console.log('🔍 [DIAGNÓSTICO] updateData() - INICIANDO función de actualización de datos');
+  log('🔍 [DIAGNÓSTICO] updateData() - INICIANDO función de actualización de datos');
   log('� Actualizando datos...');
 
   try {
@@ -2033,7 +2017,7 @@ async function updateData() {
     const userSettings = settingsResult.notificationSettings || {};
 
     // DIAGNÓSTICO: Loggear configuración leída
-    console.log('🔍 [DIAGNÓSTICO] updateData() - Configuración leída:', {
+    log('🔍 [DIAGNÓSTICO] updateData() - Configuración leída:', {
       dollarPriceSource: userSettings.dollarPriceSource,
       manualDollarPrice: userSettings.manualDollarPrice,
       preferredBank: userSettings.preferredBank,
@@ -2052,13 +2036,13 @@ async function updateData() {
 
     // Decidir cómo obtener el precio del dólar oficial
     let oficial;
-    console.log('🔍 [DIAGNÓSTICO] updateData() - Decidiendo método para obtener dólar oficial...');
-    console.log('🔍 [DIAGNÓSTICO] dollarPriceSource:', userSettings.dollarPriceSource);
-    console.log('🔍 [DIAGNÓSTICO] preferredBank:', userSettings.preferredBank);
+    log('🔍 [DIAGNÓSTICO] updateData() - Decidiendo método para obtener dólar oficial...');
+    log('🔍 [DIAGNÓSTICO] dollarPriceSource:', userSettings.dollarPriceSource);
+    log('🔍 [DIAGNÓSTICO] preferredBank:', userSettings.preferredBank);
 
     if (userSettings.dollarPriceSource === 'manual') {
       // Usar precio manual configurado por el usuario
-      console.log('🔍 [DIAGNÓSTICO] Rama: MODO MANUAL');
+      log('🔍 [DIAGNÓSTICO] Rama: MODO MANUAL');
       const manualPrice = userSettings.manualDollarPrice || 1400;
       log(`💵 [BACKGROUND] MODO MANUAL: Usando precio manual: $${manualPrice}`);
       oficial = {
@@ -2068,24 +2052,24 @@ async function updateData() {
         timestamp: Date.now()
       };
       log('✅ [BACKGROUND] Oficial MANUAL creado:', oficial);
-      console.log('🔍 [DIAGNÓSTICO] Oficial MANUAL creado exitosamente:', oficial);
+      log('🔍 [DIAGNÓSTICO] Oficial MANUAL creado exitosamente:', oficial);
     } else {
       // Usar API automática - verificar si usar método de bancos
       const bankMethod = userSettings.preferredBank;
-      console.log('🔍 [DIAGNÓSTICO] Rama: MODO AUTO (dollarPriceSource !== "manual")');
-      console.log('🔍 [DIAGNÓSTICO] bankMethod:', bankMethod);
-      console.log('🔍 [DIAGNÓSTICO] ¿bankMethod existe y es diferente de "oficial"?:', !!(bankMethod && bankMethod !== 'oficial'));
+      log('🔍 [DIAGNÓSTICO] Rama: MODO AUTO (dollarPriceSource !== "manual")');
+      log('🔍 [DIAGNÓSTICO] bankMethod:', bankMethod);
+      log('🔍 [DIAGNÓSTICO] ¿bankMethod existe y es diferente de "oficial"?:', !!(bankMethod && bankMethod !== 'oficial'));
 
       if (bankMethod && bankMethod !== 'oficial') {
         // Usar método estadístico de bancos
-        console.log('🔍 [DIAGNÓSTICO] Rama: MÉTODO DE BANCOS (bankMethod:', bankMethod, ')');
+        log('🔍 [DIAGNÓSTICO] Rama: MÉTODO DE BANCOS (bankMethod:', bankMethod, ')');
         log(`🏦 Obteniendo precio usando método: ${bankMethod}`);
 
         // Obtener datos de bancos y calcular precio según método
-        console.log('🔍 [DIAGNÓSTICO] Llamando fetchBankDollarRates()...');
+        log('🔍 [DIAGNÓSTICO] Llamando fetchBankDollarRates()...');
         const bankData = await fetchBankDollarRates(userSettings);
-        console.log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() devolvió:', bankData ? 'DATOS' : 'NULL');
-        console.log('🔍 [DIAGNÓSTICO] bankData keys:', bankData ? Object.keys(bankData) : 'null');
+        log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() devolvió:', bankData ? 'DATOS' : 'NULL');
+        log('🔍 [DIAGNÓSTICO] bankData keys:', bankData ? Object.keys(bankData) : 'null');
 
         const selectedBanks =
           userSettings.selectedBanks && userSettings.selectedBanks.length > 0
@@ -2093,16 +2077,16 @@ async function updateData() {
             : ['bna', 'galicia', 'santander', 'bbva', 'icbc']; // Bancos principales por defecto
 
         log(`🏦 Usando ${selectedBanks.length} bancos para cálculo:`, selectedBanks);
-        console.log('🔍 [DIAGNÓSTICO] selectedBanks:', selectedBanks);
+        log('🔍 [DIAGNÓSTICO] selectedBanks:', selectedBanks);
 
         if (bankData) {
-          console.log('🔍 [DIAGNÓSTICO] bankData existe, calculando precio con método:', bankMethod);
+          log('🔍 [DIAGNÓSTICO] bankData existe, calculando precio con método:', bankMethod);
           const calculatedPrice = BANK_CALCULATIONS.calculateDollarPrice(
             bankData,
             bankMethod,
             selectedBanks
           );
-          console.log('🔍 [DIAGNÓSTICO] calculatedPrice:', calculatedPrice);
+          log('🔍 [DIAGNÓSTICO] calculatedPrice:', calculatedPrice);
 
           if (calculatedPrice) {
             log(
@@ -2116,9 +2100,9 @@ async function updateData() {
               banksCount: calculatedPrice.banksCount,
               timestamp: Date.now()
             };
-            console.log('🔍 [DIAGNÓSTICO] Oficial desde BANCOS creado exitosamente:', oficial);
+            log('🔍 [DIAGNÓSTICO] Oficial desde BANCOS creado exitosamente:', oficial);
           } else {
-            console.log('🔍 [DIAGNÓSTICO] ❌ ERROR: calculatedPrice es NULL');
+            log('🔍 [DIAGNÓSTICO] ❌ ERROR: calculatedPrice es NULL');
             log(
               '⚠️ [BACKGROUND] No se pudo calcular precio de bancos, intentando API oficial como fallback...'
             );
@@ -2126,12 +2110,12 @@ async function updateData() {
             log('   bankData keys:', bankData ? Object.keys(bankData) : 'null');
 
             // ⭐ NUEVO: Intentar API oficial como fallback antes de usar manual
-            console.log('🔍 [DIAGNÓSTICO] Llamando fetchDolarOficial() como fallback...');
+            log('🔍 [DIAGNÓSTICO] Llamando fetchDolarOficial() como fallback...');
             oficial = await fetchDolarOficial(userSettings);
-            console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() fallback devolvió:', oficial ? 'DATOS' : 'NULL');
+            log('🔍 [DIAGNÓSTICO] fetchDolarOficial() fallback devolvió:', oficial ? 'DATOS' : 'NULL');
 
             if (!oficial) {
-              console.log('🔍 [DIAGNÓSTICO] ❌ API oficial también falló, usando manual como último fallback');
+              log('🔍 [DIAGNÓSTICO] ❌ API oficial también falló, usando manual como último fallback');
               const manualPrice = userSettings.manualDollarPrice || 1400;
               oficial = {
                 compra: manualPrice,
@@ -2140,25 +2124,25 @@ async function updateData() {
                 timestamp: Date.now()
               };
               log('⚠️ [BACKGROUND] Oficial MANUAL_FALLBACK creado:', oficial);
-              console.log('🔍 [DIAGNÓSTICO] ⚠️ Oficial MANUAL_FALLBACK creado (porque API oficial también falló)');
+              log('🔍 [DIAGNÓSTICO] ⚠️ Oficial MANUAL_FALLBACK creado (porque API oficial también falló)');
             } else {
               log('✅ [BACKGROUND] Oficial desde API OFICIAL (fallback) creado:', oficial);
-              console.log('🔍 [DIAGNÓSTICO] ✅ Oficial desde API OFICIAL (fallback) creado exitosamente:', oficial);
+              log('🔍 [DIAGNÓSTICO] ✅ Oficial desde API OFICIAL (fallback) creado exitosamente:', oficial);
             }
           }
         } else {
-          console.log('🔍 [DIAGNÓSTICO] ❌ ERROR: bankData es NULL');
+          log('🔍 [DIAGNÓSTICO] ❌ ERROR: bankData es NULL');
           log(
             '⚠️ [BACKGROUND] No se pudieron obtener datos de bancos, intentando API oficial como fallback...'
           );
 
           // ⭐ NUEVO: Intentar API oficial como fallback antes de usar manual
-          console.log('🔍 [DIAGNÓSTICO] Llamando fetchDolarOficial() como fallback...');
+          log('🔍 [DIAGNÓSTICO] Llamando fetchDolarOficial() como fallback...');
           oficial = await fetchDolarOficial(userSettings);
-          console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() fallback devolvió:', oficial ? 'DATOS' : 'NULL');
+          log('🔍 [DIAGNÓSTICO] fetchDolarOficial() fallback devolvió:', oficial ? 'DATOS' : 'NULL');
 
           if (!oficial) {
-            console.log('🔍 [DIAGNÓSTICO] ❌ API oficial también falló, usando manual como último fallback');
+            log('🔍 [DIAGNÓSTICO] ❌ API oficial también falló, usando manual como último fallback');
             const manualPrice = userSettings.manualDollarPrice || 1400;
             oficial = {
               compra: manualPrice,
@@ -2167,19 +2151,19 @@ async function updateData() {
               timestamp: Date.now()
             };
             log('⚠️ [BACKGROUND] Oficial MANUAL_FALLBACK creado:', oficial);
-            console.log('🔍 [DIAGNÓSTICO] ⚠️ Oficial MANUAL_FALLBACK creado (porque API oficial también falló)');
+            log('🔍 [DIAGNÓSTICO] ⚠️ Oficial MANUAL_FALLBACK creado (porque API oficial también falló)');
           } else {
             log('✅ [BACKGROUND] Oficial desde API OFICIAL (fallback) creado:', oficial);
-            console.log('🔍 [DIAGNÓSTICO] ✅ Oficial desde API OFICIAL (fallback) creado exitosamente:', oficial);
+            log('🔍 [DIAGNÓSTICO] ✅ Oficial desde API OFICIAL (fallback) creado exitosamente:', oficial);
           }
         }
       } else {
         // Usar precio oficial estándar
-        console.log('🔍 [DIAGNÓSTICO] Rama: PRECIO OFICIAL ESTÁNDAR (DolarAPI)');
+        log('🔍 [DIAGNÓSTICO] Rama: PRECIO OFICIAL ESTÁNDAR (DolarAPI)');
         log('🌐 Obteniendo precio oficial desde DolarAPI...');
         oficial = await fetchDolarOficial(userSettings);
-        console.log('🔍 [DIAGNÓSTICO] fetchDolarOficial() devolvió:', oficial ? 'DATOS' : 'NULL');
-        console.log('🔍 [DIAGNÓSTICO] oficial:', oficial);
+        log('🔍 [DIAGNÓSTICO] fetchDolarOficial() devolvió:', oficial ? 'DATOS' : 'NULL');
+        log('🔍 [DIAGNÓSTICO] oficial:', oficial);
       }
     }
 
@@ -2192,7 +2176,7 @@ async function updateData() {
     log('📊 Datos obtenidos:', { oficial: !!oficial, usdt: !!usdt, usdtUsd: !!usdtUsd });
 
     // DIAGNÓSTICO: Loggear detalles de datos obtenidos
-    console.log('🔍 [DIAGNÓSTICO] updateData() - Datos obtenidos:', {
+    log('🔍 [DIAGNÓSTICO] updateData() - Datos obtenidos:', {
       oficial: oficial ? { compra: oficial.compra, venta: oficial.venta, source: oficial.source } : null,
       usdt: usdt ? Object.keys(usdt).length + ' exchanges' : null,
       usdtUsd: usdtUsd ? Object.keys(usdtUsd).length + ' exchanges' : null
@@ -2213,7 +2197,7 @@ async function updateData() {
     });
 
     // DIAGNÓSTICO: Loggear resultado del cálculo
-    console.log('🔍 [DIAGNÓSTICO] updateData() - Rutas calculadas:', {
+    log('🔍 [DIAGNÓSTICO] updateData() - Rutas calculadas:', {
       routeType: userSettings.routeType || 'arbitrage',
       totalRoutes: optimizedRoutes.length,
       firstRoute: optimizedRoutes[0] ? {
@@ -2251,7 +2235,7 @@ async function updateData() {
     isFirstUpdate = false;
 
     // DIAGNÓSTICO FINAL: Verificar estado de oficial antes de retornar
-    console.log('🔍 [DIAGNÓSTICO] updateData() - VERIFICACIÓN FINAL:', {
+    log('🔍 [DIAGNÓSTICO] updateData() - VERIFICACIÓN FINAL:', {
       oficialIsNull: oficial === null,
       oficialExists: !!oficial,
       oficialCompra: oficial?.compra,
@@ -2300,7 +2284,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     log('[BACKGROUND] 📥 Mensaje getArbitrages recibido');
 
     // DIAGNÓSTICO: Loggear recepción del mensaje
-    console.log('🔍 [DIAGNÓSTICO] getArbitrages - Mensaje recibido:', {
+    log('🔍 [DIAGNÓSTICO] getArbitrages - Mensaje recibido:', {
       hasCurrentData: !!currentData,
       currentDataKeys: currentData ? Object.keys(currentData) : [],
       optimizedRoutesCount: currentData?.optimizedRoutes?.length || 0,
@@ -2319,13 +2303,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       return false; // CORREGIDO: Respuesta síncrona, no mantener canal
     } else {
       // DIAGNÓSTICO: Loggear que no hay datos en cache
-      console.log('🔍 [DIAGNÓSTICO] getArbitrages - No hay datos en cache, actualizando...');
+      log('🔍 [DIAGNÓSTICO] getArbitrages - No hay datos en cache, actualizando...');
 
       // Actualizar datos de forma asíncrona
       updateData()
         .then(data => {
           // DIAGNÓSTICO: Loggear resultado de actualización
-          console.log('🔍 [DIAGNÓSTICO] getArbitrages - Datos frescos obtenidos:', {
+          log('🔍 [DIAGNÓSTICO] getArbitrages - Datos frescos obtenidos:', {
             hasData: !!data,
             hasOficial: !!data?.oficial,
             oficialCompra: data?.oficial?.compra,
@@ -2701,9 +2685,9 @@ async function checkForUpdatesInBackground() {
       chrome.action.setBadgeText({ text: '!' });
       chrome.action.setBadgeBackgroundColor({ color: '#3b82f6' });
 
-      console.log('✅ [UPDATE] Nueva versión disponible:', latestVersion);
+      log('✅ [UPDATE] Nueva versión disponible:', latestVersion);
     } else {
-      console.log('✅ [UPDATE] Versión actualizada');
+      log('✅ [UPDATE] Versión actualizada');
     }
   } catch (error) {
     console.error('❌ [UPDATE] Error verificando actualizaciones:', error);
@@ -2743,7 +2727,7 @@ updateGlobalConfig()
         updateBanksData()
           .then(() => {
             log('[BACKGROUND] Datos de bancos inicializados');
-            console.log('🏦 Datos de bancos inicializados correctamente');
+            log('🏦 Datos de bancos inicializados correctamente');
 
             // Verificar actualizaciones al iniciar
             checkForUpdatesInBackground();

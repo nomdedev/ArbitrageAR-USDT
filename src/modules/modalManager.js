@@ -288,7 +288,7 @@
    */
   function init(_settings) {
     setupGlobalEventListeners();
-    console.log('✅ [ModalManager] Módulo inicializado');
+    window.Logger?.debug('✅ [ModalManager] Módulo inicializado');
   }
 
   /**
@@ -312,7 +312,7 @@
    * @public
    */
   function setupRouteDetailsModal() {
-    console.log('📱 [ModalManager] Configurando modal de detalles de ruta');
+    window.Logger?.debug('📱 [ModalManager] Configurando modal de detalles de ruta');
 
     const modal = document.getElementById('route-details-modal');
     if (!modal) {
@@ -333,7 +333,7 @@
       }
     });
 
-    console.log('✅ [ModalManager] Modal de detalles configurado');
+    window.Logger?.debug('✅ [ModalManager] Modal de detalles configurado');
   }
 
   /**
@@ -342,7 +342,7 @@
    * @param {Object} arbitrage - Datos del arbitraje
    */
   function openRouteDetailsModal(arbitrage) {
-    console.log('📱 [ModalManager] Abriendo modal de detalles para:', arbitrage);
+    window.Logger?.debug('📱 [ModalManager] Abriendo modal de detalles para:', arbitrage);
 
     const modal = document.getElementById('route-details-modal');
     if (!modal) {
@@ -377,7 +377,7 @@
     // Agregar al historial
     modalHistory.push('route-details');
 
-    console.log('✅ [ModalManager] Modal abierto');
+    window.Logger?.debug('✅ [ModalManager] Modal abierto');
   }
 
   /**
@@ -390,7 +390,7 @@
       return;
     }
 
-    console.log('📱 [ModalManager] Cerrando modal:', activeModal);
+    window.Logger?.debug('📱 [ModalManager] Cerrando modal:', activeModal);
 
     const modal = document.getElementById('route-details-modal');
     if (modal) {
@@ -405,7 +405,7 @@
     // Establecer modal activo anterior
     activeModal = modalHistory.length > 0 ? modalHistory[modalHistory.length - 1] : null;
 
-    console.log('✅ [ModalManager] Modal cerrado');
+    window.Logger?.debug('✅ [ModalManager] Modal cerrado');
   }
 
   /**
@@ -600,6 +600,6 @@
   // Exportar para uso global
   window.ModalManager = ModalManager;
 
-  console.log('✅ [ModalManager] Módulo cargado correctamente');
+  window.Logger?.debug('✅ [ModalManager] Módulo cargado correctamente');
 
 })(window);

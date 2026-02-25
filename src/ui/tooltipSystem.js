@@ -50,7 +50,7 @@ class TooltipSystem {
 
     this.createTooltipContainer();
     this.attachEventListeners();
-    console.log('[TooltipSystem] Inicializado correctamente');
+    window.Logger?.debug?.('[TooltipSystem] Inicializado correctamente');
   }
 
   /**

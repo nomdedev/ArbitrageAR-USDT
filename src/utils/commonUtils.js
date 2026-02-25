@@ -460,17 +460,22 @@
     const isDevelopment = process?.env?.NODE_ENV === 'development' ||
                           window.location?.hostname === 'localhost';
 
+    let debugLogsEnabled = isDevelopment || window.__ARBITRAGE_DEBUG__ === true;
+    try {
+      debugLogsEnabled = debugLogsEnabled || window.localStorage?.getItem('arb_debug_logs') === 'true';
+    } catch (_) {
+      // Ignorar errores de acceso a localStorage
+    }
+
     return {
       debug: (...args) => {
-        if (isDevelopment && window.Logger?.debug) {
+        if (debugLogsEnabled && window.Logger?.debug) {
           window.Logger.debug(`[${prefix}]`, ...args);
         }
       },
       info: (...args) => {
-        if (window.Logger?.info) {
+        if (debugLogsEnabled && window.Logger?.info) {
           window.Logger.info(`[${prefix}]`, ...args);
-        } else {
-          console.info(`[${prefix}]`, ...args);
         }
       },
       warn: (...args) => {
@@ -549,7 +554,5 @@
 
   // Exportar para uso global
   window.CommonUtils = CommonUtils;
-
-  console.log('✅ [CommonUtils] Módulo cargado correctamente');
 
 })(window);

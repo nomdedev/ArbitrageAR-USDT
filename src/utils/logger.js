@@ -11,7 +11,26 @@ const LogLevel = {
 };
 
 const Logger = (() => {
-  let currentLevel = LogLevel.INFO;
+  const isDebugEnvironment = (() => {
+    const isNodeDev = typeof process !== 'undefined' && process?.env?.NODE_ENV === 'development';
+    if (isNodeDev) return true;
+
+    if (typeof window === 'undefined') return false;
+
+    const isLocalhost = window.location?.hostname === 'localhost';
+    const globalDebugFlag = window.__ARBITRAGE_DEBUG__ === true;
+
+    let storageDebugFlag = false;
+    try {
+      storageDebugFlag = window.localStorage?.getItem('arb_debug_logs') === 'true';
+    } catch (_) {
+      storageDebugFlag = false;
+    }
+
+    return isLocalhost || globalDebugFlag || storageDebugFlag;
+  })();
+
+  let currentLevel = isDebugEnvironment ? LogLevel.DEBUG : LogLevel.WARN;
   let prefix = '[ArbitrageAR]';
 
   // Historial de logs para debugging

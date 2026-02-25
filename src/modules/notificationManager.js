@@ -162,7 +162,7 @@
    */
   function init(_settings) {
     setupUpdateBanner();
-    console.log('✅ [NotificationManager] Módulo inicializado');
+    window.Logger?.debug('✅ [NotificationManager] Módulo inicializado');
   }
 
   /**
@@ -210,7 +210,7 @@
       }
     }, duration);
 
-    console.log(`🔔 [NotificationManager] Toast mostrado: ${type} - ${message}`);
+    window.Logger?.debug(`🔔 [NotificationManager] Toast mostrado: ${type} - ${message}`);
     return toast;
   }
 
@@ -265,7 +265,7 @@
       }
     });
     activeToasts = [];
-    console.log('🔕 [NotificationManager] Todos los toasts cerrados');
+    window.Logger?.debug('🔕 [NotificationManager] Todos los toasts cerrados');
   }
 
   /**
@@ -276,13 +276,13 @@
     const { pendingUpdate } = await chrome.storage.local.get('pendingUpdate');
 
     if (!pendingUpdate) {
-      console.log('✅ [NotificationManager] No hay actualizaciones pendientes');
+      window.Logger?.debug('✅ [NotificationManager] No hay actualizaciones pendientes');
       return;
     }
 
     // Verificar si fue descartada
     if (await isUpdateDismissed(pendingUpdate)) {
-      console.log('✅ [NotificationManager] Actualización ya descartada');
+      window.Logger?.debug('✅ [NotificationManager] Actualización ya descartada');
       return;
     }
 
@@ -311,7 +311,7 @@
     }
 
     activeBanner = updateInfo;
-    console.log(`📢 [NotificationManager] Actualización ${updateType} detectada: v${updateInfo.latestVersion}`);
+    window.Logger?.debug(`📢 [NotificationManager] Actualización ${updateType} detectada: v${updateInfo.latestVersion}`);
   }
 
   /**
@@ -355,7 +355,7 @@
       downloadUpdate(updateInfo);
     };
 
-    console.log(`🔔 [NotificationManager] Indicador de actualización mostrado: ${updateType}`);
+    window.Logger?.debug(`🔔 [NotificationManager] Indicador de actualización mostrado: ${updateType}`);
   }
 
   /**
@@ -370,7 +370,7 @@
     // Usar URL específica si está disponible
     const downloadUrl = updateInfo?.downloadUrl || updateInfo?.url || repoUrl;
 
-    console.log(`⬇️ [NotificationManager] Descargando actualización desde: ${downloadUrl}`);
+    window.Logger?.debug(`⬇️ [NotificationManager] Descargando actualización desde: ${downloadUrl}`);
 
     // Abrir en nueva pestaña
     chrome.tabs.create({ url: downloadUrl });
@@ -397,7 +397,7 @@
       updateBadge.style.display = 'none';
     }
 
-    console.log('🔕 [NotificationManager] Indicador de actualización oculto');
+    window.Logger?.debug('🔕 [NotificationManager] Indicador de actualización oculto');
   }
 
   /**
@@ -444,7 +444,7 @@
     // Configurar botones
     setupUpdateBannerButtons(updateInfo);
 
-    console.log(`📢 [NotificationManager] Modal de actualización mostrado: ${updateType}`);
+    window.Logger?.debug(`📢 [NotificationManager] Modal de actualización mostrado: ${updateType}`);
   }
 
   /**
@@ -463,7 +463,7 @@
       downloadBtn.parentNode.replaceChild(newDownloadBtn, downloadBtn);
 
       newDownloadBtn.addEventListener('click', () => {
-        console.log('🖱️ [NotificationManager] Click en "Descargar actualización"');
+        window.Logger?.debug('🖱️ [NotificationManager] Click en "Descargar actualización"');
         downloadUpdate(updateInfo);
         hideUpdateBanner();
       });
@@ -475,7 +475,7 @@
       viewBtn.parentNode.replaceChild(newViewBtn, viewBtn);
 
       newViewBtn.addEventListener('click', () => {
-        console.log('🖱️ [NotificationManager] Click en "Ver más detalles"');
+        window.Logger?.debug('🖱️ [NotificationManager] Click en "Ver más detalles"');
         // Abrir página de releases de GitHub
         const releasesUrl = 'https://github.com/nomdedev/ArbitrageAR-USDT/releases';
         chrome.tabs.create({ url: updateInfo?.url || releasesUrl });
@@ -488,7 +488,7 @@
       dismissBtn.parentNode.replaceChild(newDismissBtn, dismissBtn);
 
       newDismissBtn.addEventListener('click', async () => {
-        console.log('🖱️ [NotificationManager] Click en "Cerrar"');
+        window.Logger?.debug('🖱️ [NotificationManager] Click en "Cerrar"');
 
         const expiryDate = new Date();
         expiryDate.setDate(expiryDate.getDate() + 7);
@@ -502,7 +502,7 @@
         };
 
         await chrome.storage.local.set(dismissedData);
-        console.log('💾 [NotificationManager] Actualización descartada');
+        window.Logger?.debug('💾 [NotificationManager] Actualización descartada');
 
         hideUpdateBanner();
       });
@@ -540,7 +540,7 @@
 
     activeBanner = null;
 
-    console.log('🔽 [NotificationManager] Modal de actualización oculto');
+    window.Logger?.debug('🔽 [NotificationManager] Modal de actualización oculto');
   }
 
   /**
@@ -552,13 +552,13 @@
     const { pendingUpdate } = await chrome.storage.local.get('pendingUpdate');
 
     if (!pendingUpdate) {
-      console.log('✅ [NotificationManager] No hay actualizaciones pendientes');
+      window.Logger?.debug('✅ [NotificationManager] No hay actualizaciones pendientes');
       return;
     }
 
     // Verificar si fue descartada
     if (await isUpdateDismissed(pendingUpdate)) {
-      console.log('✅ [NotificationManager] Actualización ya descartada');
+      window.Logger?.debug('✅ [NotificationManager] Actualización ya descartada');
       return;
     }
 
@@ -638,6 +638,6 @@
   // Exportar para uso global
   window.NotificationManager = NotificationManager;
 
-  console.log('✅ [NotificationManager] Módulo cargado correctamente');
+  window.Logger?.debug('✅ [NotificationManager] Módulo cargado correctamente');
 
 })(window);

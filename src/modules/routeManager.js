@@ -205,7 +205,7 @@
   function init(data, settings) {
     userSettings = settings;
     allRoutes = data?.optimizedRoutes || [];
-    console.log('✅ [RouteManager] Módulo inicializado con', allRoutes.length, 'rutas');
+    window.Logger?.debug('✅ [RouteManager] Módulo inicializado con', allRoutes.length, 'rutas');
   }
 
   /**
@@ -215,7 +215,7 @@
    */
   function updateData(data) {
     allRoutes = data?.optimizedRoutes || [];
-    console.log('✅ [RouteManager] Datos actualizados:', allRoutes.length, 'rutas');
+    window.Logger?.debug('✅ [RouteManager] Datos actualizados:', allRoutes.length, 'rutas');
   }
 
   /**
@@ -529,7 +529,7 @@
     // Agregar event listeners a las tarjetas
     attachRouteListeners(container);
 
-    console.log(`✅ [RouteManager] Renderizadas ${routes.length} rutas`);
+    window.Logger?.debug(`✅ [RouteManager] Renderizadas ${routes.length} rutas`);
   }
 
   /**
@@ -554,7 +554,7 @@
 
         try {
           const route = JSON.parse(decodeURIComponent(routeData));
-          console.log('🖱️ [RouteManager] Click en ruta:', route.broker || route.buyExchange);
+          window.Logger?.debug('🖱️ [RouteManager] Click en ruta:', route.broker || route.buyExchange);
 
           // Remover selección previa
           container.querySelectorAll('.route-card').forEach(c => c.classList.remove('selected'));
@@ -639,6 +639,6 @@
   // Exportar para uso global
   window.RouteManager = RouteManager;
 
-  console.log('✅ [RouteManager] Módulo cargado correctamente');
+  window.Logger?.debug('✅ [RouteManager] Módulo cargado correctamente');
 
 })(window);

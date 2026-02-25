@@ -523,17 +523,34 @@ tests/
 
 ### Problemas Menores (🟢)
 
-1. **Contraste WCAG en Algunos Elementos**
-   - **Ubicación:** Varios en popup.css
-   - **Descripción:** Algunos textos tienen bajo contraste
-   - **Impacto:** Bajo - Accesibilidad
-   - **Solución:** Ajustar colores para mejorar contraste
+1. ✅ **Contraste WCAG en Algunos Elementos** — **RESUELTO (fase base)**
+   - **Ubicación:** `src/popup.css`
+   - **Estado actual:** se ajustaron textos secundarios con bajo contraste (`#8b949e`/`#94a3b8`) a tokens semánticos del sistema (`--color-text-secondary`) en componentes visibles (cards, estados vacíos, prompts y labels).
+   - **Validación:** `npm run lint` + `npm test -- --runInBand` en verde.
+   - **Impacto residual:** Bajo; puede ampliarse en una fase visual con auditoría manual de contraste por pantalla.
 
-2. **Logging Excesivo en Producción**
+2. ✅ **Logging Excesivo en Producción** — **RESUELTO (fase principal)**
    - **Ubicación:** Varios archivos
-   - **Descripción:** Muchos console.log en código de producción
-   - **Impacto:** Mínimo - Performance y seguridad
-   - **Solución:** Implementar logger condicional
+   - **Estado actual:**
+     - `src/utils/logger.js`: nivel por defecto reducido a `WARN` en producción, con `DEBUG` solo en entornos explícitos (`localhost`, `window.__ARBITRAGE_DEBUG__`, `localStorage: arb_debug_logs=true`).
+     - `src/utils/commonUtils.js`: `createLogger().info/debug` ahora respeta modo debug explícito.
+     - `src/utils/formatters.js` y `src/utils/commonUtils.js`: removidos logs de carga de módulo.
+       - `src/popup.js` y `src/options.js`: supresión de `console.log/info` en producción, manteniendo `warn/error` y habilitando verbose solo con flags de debug explícitos.
+       - `src/modules/*`: migración de `console.log` directos a `window.Logger?.debug(...)`.
+       - `src/background/main-simple.js`: migración de `console.log` directos a `log(...)` (condicionado por `DEBUG_MODE`).
+   - **Validación:** `npm run lint` + `npm test -- --runInBand` en verde.
+    - **Avance adicional:** también se migraron logs informativos en archivos secundarios clave:
+       - `src/DataService.js` → `debugLog(...)` condicional.
+       - `src/background/apiClient.js` → `debugLog(...)` condicionado por `self.__ARBITRAGE_DEBUG__`.
+       - `src/ui/tooltipSystem.js` → `window.Logger?.debug?.(...)`.
+       - `src/popup.js` y `src/options.js` → logs heredados unificados con wrapper `log(...)` (sin monkeypatch global de `console`).
+    - **Impacto residual:** Muy bajo; logging funcionalmente controlado y homogéneo en el flujo principal.
+    - **Próximo subpaso (opcional):** limpieza cosmética de mensajes de debug para estandarizar prefijos por dominio.
+
+4. ✅ **Normalización de comentarios y headers CSS** — **RESUELTO**
+   - **Ubicación:** `src/popup.css`
+   - **Estado actual:** encabezados de sección y notas de mantenimiento normalizados, removiendo ruido legacy sin cambios funcionales.
+   - **Validación:** `npm run lint` + `npm test -- --runInBand` en verde.
 
 3. ✅ **Duplicidad de listeners de storage en background** — **RESUELTO**
    - **Ubicación:** `src/background/main-simple.js`
@@ -568,6 +585,14 @@ tests/
    - **Descripción:** se consolidó una API explícita para funciones wrapper/deprecadas que antes quedaban implícitas en el scope global.
    - **Impacto:** Bajo/Positivo - mejora claridad de integración legacy sin cambiar comportamiento de UI.
    - **Acción recomendada:** en una fase posterior, migrar llamadas legacy a módulos (`FilterManager`, `ModalManager`, `NotificationManager`) y retirar wrappers gradualmente.
+
+### Cierre QA (25-02-2026, validación extendida)
+
+- ✅ Se corrigió `tests/test-api-direct.js` para evitar cálculos `NaN` en consenso/promedio de rutas (se incorporó `ask` en dataset de spreads y guardas de finitud).
+- ✅ Se corrigió `tests/test_comprehensive.js` (rutas de archivos relativas a raíz del proyecto y aserciones de integración alineadas al código actual).
+- ✅ `test_comprehensive.js` finaliza en **19/19** tests pasados.
+- ✅ Batería principal en verde en esta iteración: `npm run lint`, `npm test -- --runInBand` (47/47), `npm run test:legacy`, `npm run test:e2e` (38/38).
+- ⚠️ Alcance “QA en vivo”: Playwright valida flujo UI local (`popup.html`), no reemplaza una prueba manual final en Chrome real con service worker activo.
 
 ---
 

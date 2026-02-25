@@ -120,7 +120,7 @@ async function testBancosAPI() {
     // Validar spread razonable
     const spread = ask - bid;
     const spreadPercent = (spread / ask) * 100;
-    spreads.push({ bankCode, spread, spreadPercent });
+    spreads.push({ bankCode, ask, bid, spread, spreadPercent });
     
     if (spreadPercent < 0.1) {
       console.warn(`⚠️  ${bankCode}: Spread ${spreadPercent.toFixed(2)}% muy bajo (sospechoso)`);
@@ -306,15 +306,24 @@ async function testRouteCalculations() {
   
   // Obtener datos de las APIs
   console.log('\n📥 Obteniendo datos de APIs...');
-  const [banksData, usdtArsData, usdtUsdData] = await Promise.allSettled([
+  const [banksDataResult, usdtArsDataResult, usdtUsdDataResult] = await Promise.allSettled([
     testBancosAPI(),
     testUsdtArsAPI(),
     testUsdtUsdAPI()
   ]);
+
+  const banksData = banksDataResult.status === 'fulfilled' ? banksDataResult.value : null;
+  const usdtArsData = usdtArsDataResult.status === 'fulfilled' ? usdtArsDataResult.value : null;
+  const usdtUsdData = usdtUsdDataResult.status === 'fulfilled' ? usdtUsdDataResult.value : null;
   
-  if (!banksData.success || !usdtArsData.success || !usdtUsdData.success) {
+  if (!banksData?.success || !usdtArsData?.success || !usdtUsdData?.success) {
     console.error('❌ Error al obtener datos de APIs');
-    return false;
+    return {
+      success: false,
+      consensusPrice: null,
+      averagePrice: null,
+      banksUsed: 0
+    };
   }
   
   console.log(`\n✅ Datos obtenidos:`);
@@ -331,7 +340,12 @@ async function testRouteCalculations() {
   
   if (bankPrices.length === 0) {
     console.warn('⚠️ No hay precios válidos para calcular consenso');
-    return false;
+    return {
+      success: false,
+      consensusPrice: null,
+      averagePrice: null,
+      banksUsed: 0
+    };
   }
   
   bankPrices.sort((a, b) => a - b);
@@ -344,6 +358,16 @@ async function testRouteCalculations() {
   // Simular cálculo de promedio bancario
   console.log('\n📊 Simulando cálculo de promedio bancario...');
   const avgPrice = bankPrices.reduce((sum, price) => sum + price, 0) / bankPrices.length;
+
+  if (!Number.isFinite(median) || !Number.isFinite(avgPrice)) {
+    console.error('❌ Cálculo inválido de consenso/promedio (NaN o infinito)');
+    return {
+      success: false,
+      consensusPrice: null,
+      averagePrice: null,
+      banksUsed: bankPrices.length
+    };
+  }
   console.log(`   Precio promedio: $${avgPrice.toFixed(2)} ARS`);
   console.log(`   Bancos usados: ${bankPrices.length}`);
   
@@ -391,8 +415,8 @@ async function runAllTests() {
   console.log(`   • Inválidos: ${results.usdtUsd.invalidExchanges}`);
   
   console.log(`\n🧮 Test Rutas:`);
-  console.log(`   • Precio consenso: $${results.routes.consensusPrice.toFixed(2)} ARS`);
-  console.log(`   • Precio promedio: $${results.routes.averagePrice.toFixed(2)} ARS`);
+  console.log(`   • Precio consenso: ${results.routes.consensusPrice !== null ? `$${results.routes.consensusPrice.toFixed(2)} ARS` : 'N/A'}`);
+  console.log(`   • Precio promedio: ${results.routes.averagePrice !== null ? `$${results.routes.averagePrice.toFixed(2)} ARS` : 'N/A'}`);
   console.log(`   • Bancos usados: ${results.routes.banksUsed}`);
   
   console.log('\n✅ Todos los tests completados');

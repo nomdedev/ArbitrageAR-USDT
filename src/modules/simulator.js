@@ -152,7 +152,7 @@
     currentData = data;
     userSettings = settings;
     setupEventListeners();
-    console.log('✅ [Simulator] Módulo inicializado con event listeners');
+    window.Logger?.debug('✅ [Simulator] Módulo inicializado con event listeners');
   }
 
   /**
@@ -167,7 +167,7 @@
       toggleAdvanced.addEventListener('click', () => {
         const isHidden = advancedConfig.style.display === 'none';
         advancedConfig.style.display = isHidden ? 'block' : 'none';
-        console.log('⚙️ [Simulator] Config avanzada:', isHidden ? 'visible' : 'oculta');
+        window.Logger?.debug('⚙️ [Simulator] Config avanzada:', isHidden ? 'visible' : 'oculta');
       });
     }
 
@@ -175,7 +175,7 @@
     const btnCalculateMatrix = document.getElementById('btn-calculate-matrix');
     if (btnCalculateMatrix) {
       btnCalculateMatrix.addEventListener('click', () => {
-        console.log('🎯 [Simulator] Botón calcular matriz presionado');
+        window.Logger?.debug('🎯 [Simulator] Botón calcular matriz presionado');
         generateRiskMatrix(false);
       });
     }
@@ -184,7 +184,7 @@
     const btnGenerateMatrix = document.getElementById('generate-risk-matrix');
     if (btnGenerateMatrix) {
       btnGenerateMatrix.addEventListener('click', () => {
-        console.log('🎯 [Simulator] Botón regenerar matriz presionado');
+        window.Logger?.debug('🎯 [Simulator] Botón regenerar matriz presionado');
         generateRiskMatrix(true);
       });
     }
@@ -193,7 +193,7 @@
     const btnResetConfig = document.getElementById('btn-reset-config');
     if (btnResetConfig) {
       btnResetConfig.addEventListener('click', () => {
-        console.log('🔄 [Simulator] Reseteando configuración');
+        window.Logger?.debug('🔄 [Simulator] Reseteando configuración');
         resetConfig();
       });
     }
@@ -202,7 +202,7 @@
     const btnApplyFilter = document.getElementById('apply-matrix-filter');
     if (btnApplyFilter) {
       btnApplyFilter.addEventListener('click', () => {
-        console.log('🔍 [Simulator] Aplicando filtro de matriz');
+        window.Logger?.debug('🔍 [Simulator] Aplicando filtro de matriz');
         applyMatrixFilter();
       });
     }
@@ -211,12 +211,12 @@
     const btnResetFilter = document.getElementById('reset-matrix-filter');
     if (btnResetFilter) {
       btnResetFilter.addEventListener('click', () => {
-        console.log('🔄 [Simulator] Reseteando filtro de matriz');
+        window.Logger?.debug('🔄 [Simulator] Reseteando filtro de matriz');
         resetMatrixFilter();
       });
     }
 
-    console.log('✅ [Simulator] Event listeners configurados correctamente');
+    window.Logger?.debug('✅ [Simulator] Event listeners configurados correctamente');
   }
 
   /**
@@ -289,7 +289,7 @@
     elements.transferFee.value = preset.transferFee.toFixed(2);
     elements.bankCommission.value = preset.bankCommission.toFixed(2);
 
-    console.log(`✅ [Simulator] Preset "${preset.name}" aplicado:`, preset);
+    window.Logger?.debug(`✅ [Simulator] Preset "${preset.name}" aplicado:`, preset);
 
     // Mostrar tooltip de confirmación
     showPresetTooltip(preset.name, preset.description);
@@ -341,7 +341,7 @@
     elements.transferFee.value = transferFee.toFixed(2);
     elements.bankCommission.value = bankCommission.toFixed(2);
 
-    console.log('✅ [Simulator] Valores por defecto cargados');
+    window.Logger?.debug('✅ [Simulator] Valores por defecto cargados');
   }
 
   /**
@@ -384,7 +384,7 @@
     // Recargar valores desde configuración
     loadDefaultValues();
 
-    console.log('✅ [Simulator] Configuración reseteada');
+    window.Logger?.debug('✅ [Simulator] Configuración reseteada');
   }
 
   /**
@@ -394,7 +394,7 @@
    * @returns {Promise<boolean>} True si se generó correctamente
    */
   async function generateRiskMatrix(useCustomParams = false) {
-    console.log('🔍 [Simulator] Generando matriz de riesgo...');
+    window.Logger?.debug('🔍 [Simulator] Generando matriz de riesgo...');
 
     const amountInput = document.getElementById('sim-amount');
     const amount = parseFloat(amountInput?.value) || 1000000;
@@ -741,6 +741,6 @@
   // Exportar para uso global
   window.Simulator = Simulator;
 
-  console.log('✅ [Simulator] Módulo cargado correctamente');
+  window.Logger?.debug('✅ [Simulator] Módulo cargado correctamente');
 
 })(window);

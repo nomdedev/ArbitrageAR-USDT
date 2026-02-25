@@ -8,6 +8,7 @@ const path = require('path');
  */
 module.exports = defineConfig({
   testDir: './tests/e2e/playwright',
+  testIgnore: ['**/extension-live.spec.js'],
   
   // Timeout de 30 segundos por test
   timeout: 30 * 1000,

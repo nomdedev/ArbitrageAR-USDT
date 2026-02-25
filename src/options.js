@@ -2,8 +2,26 @@
 // OPTIONS PAGE LOGIC - ArbitrageAR v3.0
 // ============================================
 
+let verboseLogsEnabled = window.__ARBITRAGE_DEBUG__ === true;
+try {
+  verboseLogsEnabled = verboseLogsEnabled || window.localStorage?.getItem('arb_debug_logs') === 'true';
+} catch (_) {
+  // Ignorar errores de acceso a localStorage
+}
+
+function log(...args) {
+  if (!verboseLogsEnabled) return;
+
+  if (window.Logger?.debug) {
+    window.Logger.debug(...args);
+    return;
+  }
+
+  console.info(...args);
+}
+
 // Debug inmediato - CSP compliant (movido desde inline script)
-console.log('🚀 DEBUG: options.js cargado correctamente');
+log('🚀 DEBUG: options.js cargado correctamente');
 
 // Configuración por defecto
 const DEFAULT_SETTINGS = {
@@ -428,7 +446,7 @@ async function loadSettings() {
     // Actualizar UI según estado de notificaciones
     updateUIState();
 
-    console.log('✅ Configuración cargada correctamente');
+    log('✅ Configuración cargada correctamente');
   } catch (error) {
     console.error('Error cargando configuración:', error);
   }
@@ -436,7 +454,7 @@ async function loadSettings() {
 
 // Configurar event listeners
 function setupEventListeners() {
-  console.log('Configurando event listeners...');
+  log('Configurando event listeners...');
 }
 
 // Configurar event listeners principales
@@ -445,7 +463,7 @@ function setupMainEventListeners() {
   const saveButton = document.getElementById('save-settings');
   if (saveButton) {
     saveButton.addEventListener('click', async () => {
-      console.log('💾 Guardando configuración...');
+      log('💾 Guardando configuración...');
       const success = await saveSettings();
       if (success) {
         // Recargar configuración para verificar que se guardó
@@ -459,7 +477,7 @@ function setupMainEventListeners() {
   if (resetButton) {
     resetButton.addEventListener('click', async () => {
       if (confirm('¿Estás seguro de que quieres restaurar la configuración por defecto?')) {
-        console.log('🔄 Reseteando configuración...');
+        log('🔄 Reseteando configuración...');
         await saveSettings(DEFAULT_SETTINGS);
         await loadSettings();
         showNotification('Configuración restaurada', 'success');
@@ -496,7 +514,7 @@ function setupMainEventListeners() {
 
 // Inicializar nueva interfaz mejorada de fees por broker
 function initializeBrokerFeesImproved() {
-  console.log('🔧 Inicializando Broker Fees UI...');
+  log('🔧 Inicializando Broker Fees UI...');
 
   const brokerSelect = document.getElementById('broker-select');
   const customBrokerField = document.getElementById('custom-broker-field');
@@ -694,7 +712,7 @@ function initializeBrokerFeesImproved() {
       const settings = result.notificationSettings || DEFAULT_SETTINGS;
       settings.brokerFees = brokerFees;
       chrome.storage.local.set({ notificationSettings: settings }, () => {
-        console.log('✅ Broker fees guardados:', brokerFees);
+        log('✅ Broker fees guardados:', brokerFees);
       });
     });
   }
@@ -713,13 +731,13 @@ async function saveSettings(settings = null) {
 
     await chrome.storage.local.set({ notificationSettings: settingsToSave });
 
-    console.log('✅ Configuración guardada:', settingsToSave);
+    log('✅ Configuración guardada:', settingsToSave);
     showNotification('Configuración guardada correctamente', 'success');
 
     // NUEVO: Notificar al background script que la configuración cambió
     try {
-      console.log('📤 [OPTIONS] Enviando settingsUpdated al background...');
-      console.log(
+      log('📤 [OPTIONS] Enviando settingsUpdated al background...');
+      log(
         '📤 [OPTIONS] Configuración a enviar:',
         JSON.stringify(
           {
@@ -737,11 +755,11 @@ async function saveSettings(settings = null) {
         settings: settingsToSave
       });
 
-      console.log('📥 [OPTIONS] Respuesta del background:', response);
+      log('📥 [OPTIONS] Respuesta del background:', response);
 
       if (response?.success) {
-        console.log('✅ [OPTIONS] Background confirmó actualización exitosa');
-        console.log('📊 [OPTIONS] Nuevos datos del background:', {
+        log('✅ [OPTIONS] Background confirmó actualización exitosa');
+        log('📊 [OPTIONS] Nuevos datos del background:', {
           oficialCompra: response.data?.oficial?.compra,
           oficialSource: response.data?.oficial?.source
         });

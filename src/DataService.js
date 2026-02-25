@@ -3,6 +3,31 @@
 // Responsabilidad: Obtener datos de APIs externas
 // ============================================
 
+function debugLog(...args) {
+  const logger = (typeof window !== 'undefined' ? window.Logger : undefined)
+    || (typeof self !== 'undefined' ? self.Logger : undefined);
+
+  if (logger?.debug) {
+    logger.debug(...args);
+    return;
+  }
+
+  const workerDebug = typeof self !== 'undefined' && self.__ARBITRAGE_DEBUG__ === true;
+  const browserDebug = (() => {
+    if (typeof window === 'undefined') return false;
+    if (window.__ARBITRAGE_DEBUG__ === true) return true;
+    try {
+      return window.localStorage?.getItem('arb_debug_logs') === 'true';
+    } catch (_) {
+      return false;
+    }
+  })();
+
+  if (workerDebug || browserDebug) {
+    console.info(...args);
+  }
+}
+
 class DataService {
   constructor() {
     this.REQUEST_INTERVAL = 600; // ms
@@ -108,7 +133,7 @@ class DataService {
     const data = await this.fetchWithRateLimit(url);
 
     if (data && typeof data === 'object' && Object.keys(data).length > 0) {
-      console.log(
+      debugLog(
         `💎 Datos ${symbol}/${fiatCurrency} obtenidos:`,
         Object.keys(data).length,
         'exchanges'
@@ -137,7 +162,7 @@ class DataService {
     const data = await this.fetchWithRateLimit(url);
 
     if (data && typeof data === 'object') {
-      console.log(
+      debugLog(
         `🔄 Datos ${symbolFrom}/${symbolTo} obtenidos:`,
         Object.keys(data).length,
         'exchanges'
@@ -219,7 +244,7 @@ class DataService {
     ];
     const cryptos = cryptoList || defaultCryptos;
 
-    console.log(`🔄 Obteniendo datos para ${cryptos.length} criptomonedas...`);
+    debugLog(`🔄 Obteniendo datos para ${cryptos.length} criptomonedas...`);
 
     const promises = cryptos.map(symbol =>
       this.fetchCryptoData(symbol, fiatCurrency)
@@ -239,7 +264,7 @@ class DataService {
       }
     });
 
-    console.log(
+    debugLog(
       `✅ Datos obtenidos para ${Object.keys(cryptoData).length}/${cryptos.length} criptomonedas`
     );
     return cryptoData;
@@ -415,7 +440,7 @@ class DataService {
     try {
       if (typeof chrome !== 'undefined' && chrome.storage) {
         await chrome.storage.local.set({ activeCryptos: cryptoList });
-        console.log('✅ Criptos activas guardadas:', cryptoList);
+        debugLog('✅ Criptos activas guardadas:', cryptoList);
         return true;
       }
     } catch (error) {
@@ -466,7 +491,7 @@ class DataService {
         }
       }
 
-      console.log(
+      debugLog(
         `💰 Precios bancarios obtenidos (dolarito): ${Object.keys(bankRates).length} bancos`
       );
       return bankRates;
@@ -505,7 +530,7 @@ class DataService {
         }
       }
 
-      console.log(
+      debugLog(
         `💰 Precios bancarios obtenidos (criptoya): ${Object.keys(bankRates).length} bancos`
       );
       return bankRates;
@@ -604,7 +629,7 @@ class DataService {
         });
       }
 
-      console.log(`💰 Precios bancarios combinados: ${Object.keys(combined).length} bancos`);
+      debugLog(`💰 Precios bancarios combinados: ${Object.keys(combined).length} bancos`);
       return combined;
     } catch (error) {
       console.error('Error combinando precios bancarios:', error);

@@ -42,12 +42,9 @@
   width: var(--space-8);
   height: var(--space-8);
 }
-/* .icon-primary, .icon-danger, .icon-warning, .icon-white, .icon-glow - NO USADOS, ELIMINADOS */
-
 .icon-pulse {
   animation: pulse 2s ease-in-out infinite;
 }
-/* @keyframes bounce - NO USADO EN POPUP, ELIMINADO */
 
 /* ===========================================
    💬 SISTEMA DE TOOLTIPS (Fase 3)
@@ -314,7 +311,7 @@ a:focus-visible {
   color: var(--color-text-secondary);
 }
 
-/* .btn-sm - DEFINIDO EN design-system.css */
+/* .btn-sm se mantiene en design-system.css */
 
 /* ============================================
    BOTONES DEL HEADER - Compactos (v8.0)
@@ -346,7 +343,7 @@ a:focus-visible {
   color: var(--color-text-primary);
 }
 
-/* Legacy aliases */
+/* Aliases de compatibilidad */
 .btn-settings,
 .btn-refresh {
   display: flex;
@@ -404,7 +401,7 @@ a:focus-visible {
   border-color: var(--color-border-hover);
 }
 
-/* .filter-btn .btn-icon y .btn-count - NO USADOS, ELIMINADOS */
+/* Variantes de icon/count removidas durante limpieza */
 
 .filter-btn.active {
   background: rgba(59, 130, 246, 0.2);
@@ -1455,7 +1452,7 @@ main::-webkit-scrollbar-thumb:hover {
 
 .route-card .time-indicator {
   font-size: 0.9em; /* +10px desde 0.75em */
-  color: #8b949e; /* MISMO que crypto */
+  color: var(--color-text-secondary);
 }
 
 /* Footer de la tarjeta fiat (IGUAL que crypto) */
@@ -1476,7 +1473,7 @@ main::-webkit-scrollbar-thumb:hover {
 
 .route-card .profit-details .label {
   font-size: 0.85em; /* +10px desde 0.7em */
-  color: #8b949e; /* MISMO que crypto */
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   font-weight: 600;
 }
@@ -1576,7 +1573,6 @@ main::-webkit-scrollbar-thumb:hover {
   align-items: center;
   margin-bottom: 8px;
 }
-/* .route-header duplicado - ELIMINADO (usar definición L965) */
 
 .route-exchange-section {
   display: flex;
@@ -1620,7 +1616,6 @@ main::-webkit-scrollbar-thumb:hover {
   border: 1px solid rgba(63, 185, 80, 0.3);
 }
 
-/* .profit-badge.profit-low, .profit-badge.low - ELIMINADO (no usado) */
 
 
 .profit-amount {
@@ -1630,7 +1625,7 @@ main::-webkit-scrollbar-thumb:hover {
 }
 
 
-/* .route-summary - usado en modal de detalles */
+/* Resumen de ruta en modal de detalles */
 .route-summary {
   display: flex;
   flex-direction: column;
@@ -1803,7 +1798,6 @@ main::-webkit-scrollbar-thumb:hover {
   color: #e1e8ed;
   font-weight: 700;
 }
-/* @keyframes pulseGlow - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
 
 .card-body {
   position: relative;
@@ -1834,7 +1828,6 @@ main::-webkit-scrollbar-thumb:hover {
   font-size: 0.85em;
   margin-left: var(--space-1);
 }
-/* @keyframes pulse - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
 
 /* Grid de precios */
 .price-grid {
@@ -1917,12 +1910,10 @@ main::-webkit-scrollbar-thumb:hover {
 .error-message {
   text-align: center;
   padding: 40px 20px;
-  color: #8b949e;
+  color: var(--color-text-secondary);
 }
 
-/* spin - DEFINIDO EN animations.css como refreshSpin */
-
-/* @keyframes trail y .spinner-trail - NO USADOS, ELIMINADOS */
+/* Animaciones auxiliares centralizadas en animations.css */
 
 /* Contenedor de error */
 .error-container {
@@ -1954,7 +1945,7 @@ main::-webkit-scrollbar-thumb:hover {
 .select-prompt {
   text-align: center;
   padding: 40px 20px;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   font-size: 0.95em;
   background: rgba(59, 130, 246, 0.05);
   border-radius: 12px;
@@ -1994,11 +1985,9 @@ main::-webkit-scrollbar-thumb:hover {
 }
 
 /* ==========================================
-   ESTILOS PARA CARDS DE EXCHANGES (Reducido)
-   ELIMINADOS: usdt-card, broker-card, binance-card, usdt-name, usdt-prices,
-   broker-prices, binance-prices, usdt-grid, brokers-grid, binance-grid
-   (no usados en templates actuales)
-   ========================================== */
+  ESTILOS PARA CARDS DE EXCHANGES (Reducido)
+  Nota: variantes legacy no usadas fueron removidas.
+  ========================================== */
 
 .broker-name {
   color: #e1e8ed;
@@ -2010,7 +1999,7 @@ main::-webkit-scrollbar-thumb:hover {
 
 /* Las clases .price-label y .price-value SÍ se usan: */
 .price-label {
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   font-weight: 500;
   min-width: 50px;
 }
@@ -2847,10 +2836,7 @@ footer {
   overflow-x: hidden;
 }
 
-/* Clases legacy de guía eliminadas: .step-container, .step-item, .step-timeline-connector,
-   .step-icon-wrapper, .step-icon, .step-number-badge, .step-content-card, .step-details-grid,
-   .detail-item, .detail-content, .detail-label, .detail-value, .step-warning, .step-action,
-   .action-link (no se usan en templates actuales) */
+/* Nota: clases legacy de guía no usadas fueron removidas. */
 .calc-value {
   color: var(--primary-blue);
   font-size: 1.1em;
@@ -3550,9 +3536,9 @@ p.error {
 
 
 /* ============================================
-   COMPONENTES DE RUTA (Reducido v5.0.75)
-   NOTA: .route-header, .route-info, .route-details, .p2p-badge - DEFINIDOS EN SECCIÓN CARDS L965+
-   ============================================ */
+  COMPONENTES DE RUTA (Reducido)
+  Nota: estructura principal de cards definida en la sección de cards.
+  ============================================ */
 
 /* ============================================
    ESTADO SIN RUTAS
@@ -3560,7 +3546,7 @@ p.error {
 .no-routes {
   text-align: center;
   padding: 40px 20px;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
 }
 .no-routes-text {
   font-size: 16px;
@@ -3598,7 +3584,7 @@ p.error {
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3);
 }
-/* @keyframes panelSlideDown - Usar slideDown (DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS) */
+/* panelSlideDown consolidado en slideDown */
 
 .filters-panel-header {
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
@@ -3645,7 +3631,7 @@ p.error {
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
-/* ELIMINADO: .filter-buttons y .filter-btn:hover duplicados - Ya definidos en líneas 2000-2015 */
+/* Duplicados de filtros consolidados */
 
 /* ============================================
    EXCHANGES LIST - Tarjetas de exchanges
@@ -3919,7 +3905,7 @@ p.error {
    📱 MEDIA QUERIES CONSOLIDADAS (max-width: 768px)
    ========================================== */
 @media (max-width: 768px) {
-/* .bank-prices, .price-bid, .price-ask - ELIMINADOS (no usados) */
+/* Variantes legacy de precios de bancos removidas */
 
   /* Exchanges */
   .exchanges-list {
@@ -4027,8 +4013,6 @@ p.error {
   background: linear-gradient(135deg, rgba(88, 166, 255, 0.1) 0%, rgba(22, 27, 34, 0.9) 100%);
   box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.3), var(--shadow-lg);
 }
-/* .crypto-card-header duplicado - Ya definido en línea ~1113 */
-
 /* Badge de profit */
 .profit-badge {
   padding: 4px 10px;
@@ -4063,7 +4047,7 @@ p.error {
 .speed-indicator,
 .difficulty-indicator {
   font-size: 0.75em;
-  color: #8b949e;
+  color: var(--color-text-secondary);
 }
 .crypto-route-card .profit-details .value {
   font-weight: 600;
@@ -4071,9 +4055,7 @@ p.error {
   font-size: 0.85em;
 }
 
-/* .btn-details eliminado - ahora toda la card es clickeable */
-
-/* .empty-state-icon - DEFINIDO EN loading-states.css */
+/* Botón de detalle removido: tarjeta completa clickeable */
 
 /* ==========================================
    FASE 6: JERARQUÍA VISUAL MEJORADA
@@ -4084,8 +4066,7 @@ p.error {
    SISTEMA DE TIPOGRAFÍA - Jerarquía Visual
    ========================================== */
 
-/* heading-1, heading-2, heading-3, heading-4 - DEFINIDOS EN design-system.css */
-/* .body - DEFINIDO EN design-system.css como .body-text */
+/* Tipografías base y utilidades principales viven en design-system.css */
 
 /* Texto del cuerpo - Pequeño */
 .body-small {
@@ -4095,31 +4076,19 @@ p.error {
   color: var(--color-text-primary);
 }
 
-/* .body-xs - NO USADO, ELIMINADO */
-
-/* text-secondary - DEFINIDO EN design-system.css */
-/* text-muted - DEFINIDO EN design-system.css */
 
 /* Texto con énfasis */
 .text-emphasis {
   font-weight: 600;
   color: var(--color-text-primary);
 }
-/* text-success - DEFINIDO EN design-system.css */
-/* text-warning - DEFINIDO EN design-system.css */
 
 /* Monospace para números/code */
 .text-mono {
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
   font-size: 0.9em;
 }
-/* text-line-through - DEFINIDO EN design-system.css como .line-through */
-
-/* Utility classes de espaciado, pesos, bordes y sombras - NO USADAS, ELIMINADAS:
-   .container-tight, .container-relaxed, .stack-xs, .stack-md, .stack-xl, 
-   .inline-sm, .inline-lg, .divider-vertical, .gap-sm, .gap-lg,
-   .weight-light, .weight-medium, .weight-bold, .border-normal,
-   .shadow-subtle, .shadow-prominent */
+/* Utilidades no usadas removidas durante limpieza de estilos */
 
 /* ==========================================
    JERARQUÍA VISUAL APLICADA A COMPONENTES

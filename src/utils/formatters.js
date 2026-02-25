@@ -190,6 +190,5 @@
       formatTimeAgo,
       formatExchangeName
     };
-    console.log('✅ [Formatters] Módulo cargado correctamente');
   }
 })(window);

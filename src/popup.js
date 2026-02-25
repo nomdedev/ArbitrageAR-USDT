@@ -70,14 +70,26 @@ let allRoutes = []; // NUEVO: Cache de todas las rutas sin filtrar
 
 // Modo debug para reducir logs excesivos
 const DEBUG_MODE = false; // PRODUCCIÓN: Desactivado después de diagnosticar problema
+let verboseLogsEnabled = DEBUG_MODE || window.__ARBITRAGE_DEBUG__ === true;
+try {
+  verboseLogsEnabled = verboseLogsEnabled || window.localStorage?.getItem('arb_debug_logs') === 'true';
+} catch (_) {
+  // Ignorar errores de acceso a localStorage
+}
+
 // NOTA: Código CommonJS eliminado - require() no existe en el navegador
 // getProfitClasses se carga globalmente desde utils.js vía <script> tag en popup.html
 
 // Función de logging condicional
 function log(...args) {
-  if (DEBUG_MODE) {
-    console.log(...args);
+  if (!verboseLogsEnabled) return;
+
+  if (window.Logger?.debug) {
+    window.Logger.debug(...args);
+    return;
   }
+
+  console.info(...args);
 }
 
 // Inicialización
@@ -88,9 +100,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const mainContent = document.getElementById('main-content');
     const optimizedRoutes = document.getElementById('optimized-routes');
     const loading = document.getElementById('loading');
-    console.log(`  - #main-content: ${!!mainContent}`);
-    console.log(`  - #optimized-routes: ${!!optimizedRoutes}`);
-    console.log(`  - #loading: ${!!loading}`);
+    log(`  - #main-content: ${!!mainContent}`);
+    log(`  - #optimized-routes: ${!!optimizedRoutes}`);
+    log(`  - #loading: ${!!loading}`);
 
     if (!mainContent || !optimizedRoutes || !loading) {
       console.error('❌ [INIT] Faltan elementos críticos del DOM - el HTML puede estar corrupto');
@@ -131,7 +143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Esto abre el modal de detalles cuando se hace click en una card de Fiat
     document.addEventListener('routeSelected', function(e) {
       const route = e.detail;
-      console.log('🖱️ [POPUP] routeSelected event recibido:', route.broker || route.buyExchange);
+      log('🖱️ [POPUP] routeSelected event recibido:', route.broker || route.buyExchange);
       showRouteDetailsByType(route);
     });
 
@@ -262,7 +274,7 @@ function setupTabNavigation() {
         targetContent.classList.add('active');
       }
 
-      console.log(`📑 [TABS] Cambiando a tab: ${tabId}`);
+      log(`📑 [TABS] Cambiando a tab: ${tabId}`);
 
       // Si es la pestaña de bancos, cargar los datos
       if (tabId === 'banks') {
@@ -271,7 +283,7 @@ function setupTabNavigation() {
 
       // Si es la pestaña de crypto, cargar rutas de arbitraje crypto
       if (tabId === 'crypto-arbitrage') {
-        console.log('🔄 [CRYPTO] Activando tab de crypto, fetcheando rutas...');
+        log('🔄 [CRYPTO] Activando tab de crypto, fetcheando rutas...');
         fetchAndRenderCryptoRoutes();
       }
     });
@@ -757,7 +769,7 @@ function handleNoData(container) {
 }
 
 function handleInitializationError(container, data, retryCount, maxRetries) {
-  console.log(
+  log(
     `⏳ Background inicializando, reintentando en 2 segundos... (${retryCount + 1}/${maxRetries})`
   );
   container.innerHTML = `
@@ -1056,7 +1068,7 @@ function applyMinProfitFilter(routes, filterMinProfit) {
   const beforeCount = routes.length;
   const filtered = routes.filter(r => r.profitPercentage >= minProfit);
   if (DEBUG_MODE) {
-    console.log(
+    log(
       `🔧 [POPUP] Filtradas por ganancia mínima ${minProfit}%: ${beforeCount} → ${filtered.length} rutas`
     );
   }
@@ -1071,7 +1083,7 @@ function applyPreferredExchangesFilter(routes, preferredExchanges) {
     preferredExchanges.length === 0
   ) {
     if (DEBUG_MODE) {
-      console.log(
+      log(
         '🔍 [POPUP] No hay exchanges preferidos configurados - mostrando todas las rutas'
       );
     }
@@ -1088,7 +1100,7 @@ function applyPreferredExchangesFilter(routes, preferredExchanges) {
   });
 
   if (DEBUG_MODE) {
-    console.log(
+    log(
       `🔧 [POPUP] Exchanges preferidos (${preferredExchanges.join(', ')}): ${beforeCount} → ${filtered.length} rutas`
     );
   }
@@ -1103,10 +1115,10 @@ function applySorting(routes, preferSingleExchange, sortByProfit) {
       }
       return b.profitPercentage - a.profitPercentage;
     });
-    if (DEBUG_MODE) console.log('🔧 [POPUP] Rutas ordenadas priorizando mismo broker');
+    if (DEBUG_MODE) log('🔧 [POPUP] Rutas ordenadas priorizando mismo broker');
   } else if (sortByProfit === true) {
     routes.sort((a, b) => b.profitPercentage - a.profitPercentage);
-    if (DEBUG_MODE) console.log('🔧 [POPUP] Rutas ordenadas por ganancia descendente');
+    if (DEBUG_MODE) log('🔧 [POPUP] Rutas ordenadas por ganancia descendente');
   }
   return routes;
 }
@@ -1114,7 +1126,7 @@ function applySorting(routes, preferSingleExchange, sortByProfit) {
 function applyLimit(routes, maxDisplay) {
   if (routes.length > maxDisplay) {
     const limited = routes.slice(0, maxDisplay);
-    if (DEBUG_MODE) console.log(`🔧 [POPUP] Limitadas a ${maxDisplay} rutas`);
+    if (DEBUG_MODE) log(`🔧 [POPUP] Limitadas a ${maxDisplay} rutas`);
     return limited;
   }
   return routes;
@@ -1412,7 +1424,7 @@ function displayOptimizedRoutes(routes, _official) {
 
       try {
         const route = JSON.parse(decodeURIComponent(routeData));
-        console.log(
+        log(
           `🖱️ [POPUP] Click en route-card tipo ${route.routeType}:`,
           route.broker || route.buyExchange
         );
@@ -1608,7 +1620,7 @@ function setupModalCloseButton(modal) {
     closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
 
     newCloseBtn.addEventListener('click', () => {
-      console.log('🔳 [MODAL] Cerrando modal via botón X');
+      log('🔳 [MODAL] Cerrando modal via botón X');
       modal.style.display = 'none';
       modal.classList.remove('active');
     });
@@ -1617,7 +1629,7 @@ function setupModalCloseButton(modal) {
   // También cerrar al hacer click en el overlay
   modal.onclick = (e) => {
     if (e.target === modal) {
-      console.log('🔳 [MODAL] Cerrando modal via overlay');
+      log('🔳 [MODAL] Cerrando modal via overlay');
       modal.style.display = 'none';
       modal.classList.remove('active');
     }
@@ -1982,7 +1994,7 @@ function showRouteGuideFromData(route) {
 // FUNCIÓN LEGACY v5.0.5: Mostrar guía de una ruta optimizada (POR ÍNDICE - DEPRECADO en v5.0.72)
 // Mantener para compatibilidad pero ya no se usa
 function showRouteGuide(index) {
-  console.log(
+  log(
     '🔍 [POPUP] currentData.optimizedRoutes.length:',
     currentData?.optimizedRoutes?.length
   );
@@ -2833,7 +2845,7 @@ async function loadBankRates() {
     const exchangeRates = await fetchExchangeRatesFromAPIs();
 
     if (exchangeRates && Object.keys(exchangeRates).length > 0) {
-      console.log(
+      log(
         '[POPUP] 📊 Cotizaciones de exchanges obtenidas:',
         Object.keys(exchangeRates).length,
         'exchanges'
@@ -3016,7 +3028,7 @@ function displayDollarInfo(officialData) {
     return;
   }
 
-  console.log(
+  log(
     `💵 [DISPLAY] Actualizando display del dólar: $${officialData.compra} (${officialData.source})`
   );
 
@@ -3567,7 +3579,7 @@ function updateActiveTabSorting() {
   const activeTabButton = document.querySelector('.banks-tab-btn.active');
   const activeTab = activeTabButton ? activeTabButton.dataset.tab : 'usd-oficial';
 
-  console.log(
+  log(
     '🔄 Actualizando ordenamiento para todas las pestañas, manteniendo activa:',
     activeTab
   );
@@ -3659,7 +3671,7 @@ function setupCryptoArbitrageTab() {
   if (cryptoSelector) {
     cryptoSelector.addEventListener('change', e => {
       currentCryptoFilter = e.target.value;
-      console.log(`💎 Filtro de cripto cambiado a: ${currentCryptoFilter}`);
+      log(`💎 Filtro de cripto cambiado a: ${currentCryptoFilter}`);
       filterAndRenderCryptoRoutes();
     });
   }
@@ -3688,13 +3700,13 @@ function setupCryptoArbitrageTab() {
  * Obtener datos de crypto arbitrage desde el background
  */
 function fetchAndRenderCryptoRoutes() {
-  console.log('🔄 [CRYPTO] fetchAndRenderCryptoRoutes() - INICIANDO');
+  log('🔄 [CRYPTO] fetchAndRenderCryptoRoutes() - INICIANDO');
 
   // Mostrar loading animado
   showCryptoLoading('Buscando oportunidades de arbitraje crypto...');
 
   // Enviar mensaje al background script para obtener crypto routes
-  console.log('📤 [CRYPTO] Enviando mensaje GET_CRYPTO_ARBITRAGE al background...');
+  log('📤 [CRYPTO] Enviando mensaje GET_CRYPTO_ARBITRAGE al background...');
 
   chrome.runtime.sendMessage({ type: 'GET_CRYPTO_ARBITRAGE' }, response => {
     if (chrome.runtime.lastError) {
@@ -3703,15 +3715,15 @@ function fetchAndRenderCryptoRoutes() {
       return;
     }
 
-    console.log('📥 [CRYPTO] Respuesta recibida del background:', response);
+    log('📥 [CRYPTO] Respuesta recibida del background:', response);
 
     if (response && response.routes) {
-      console.log(`✅ [CRYPTO] ${response.routes.length} rutas recibidas`);
+      log(`✅ [CRYPTO] ${response.routes.length} rutas recibidas`);
       cryptoRoutes = response.routes;
       filterAndRenderCryptoRoutes();
     } else {
       console.warn('⚠️ [CRYPTO] No se recibieron crypto routes del background');
-      console.log('⚠️ [CRYPTO] Response completo:', response);
+      log('⚠️ [CRYPTO] Response completo:', response);
       showCryptoEmpty('No hay datos de arbitraje crypto disponibles en este momento');
     }
   });
@@ -3739,7 +3751,7 @@ function filterAndRenderCryptoRoutes() {
       }
       return true;
     });
-    console.log(
+    log(
       `🔍 Después de filtro operación (${currentOperationFilter}): ${filtered.length} rutas`
     );
   }
@@ -3757,7 +3769,7 @@ function renderCryptoRoutes(routes) {
     return;
   }
 
-  console.log(`🔍 [CRYPTO] Renderizando ${routes?.length || 0} rutas de cripto`);
+  log(`🔍 [CRYPTO] Renderizando ${routes?.length || 0} rutas de cripto`);
 
   // Limpiar contenedor
   container.innerHTML = '';
@@ -3844,7 +3856,7 @@ function createCryptoRouteCard(route, index) {
     e.preventDefault();
     e.stopPropagation();
 
-    console.log('🖱️ [CRYPTO] Click en card:', route.crypto, route.buyExchange, '→', route.sellExchange);
+    log('🖱️ [CRYPTO] Click en card:', route.crypto, route.buyExchange, '→', route.sellExchange);
 
     // Marcar como seleccionada
     const container = card.parentElement;
