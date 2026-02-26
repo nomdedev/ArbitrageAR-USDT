@@ -289,15 +289,18 @@ describe('bankCalculations', () => {
       expect(normalizeBankName('mibanco')).toBe('Mibanco');
     });
 
-    it('round-trip: getBankCode → normalizeBankName para bancos conocidos', () => {
-      // normalizeBankName(getBankCode('Banco Nación')) === 'Banco Nación'
-      const knownBanks = ['Banco Galicia', 'Banco Santander', 'BBVA', 'ICBC'];
-      knownBanks.forEach(bank => {
-        const code = getBankCode(bank);
+    it('round-trip: getBankCode → normalizeBankName produce nombre legible', () => {
+      // Para bancos con nombre completo, el round-trip debe dar un nombre legible
+      const cases = [
+        { input: 'Banco Galicia',   expectCode: 'galicia',   expectName: 'Banco Galicia'  },
+        { input: 'Banco Nación',    expectCode: 'bna',       expectName: 'Banco Nación'   },
+        { input: 'Banco Santander', expectCode: 'santander', expectName: 'Banco Santander' },
+      ];
+      cases.forEach(({ input, expectCode, expectName }) => {
+        const code = getBankCode(input);
+        expect(code).toBe(expectCode);
         const name = normalizeBankName(code);
-        // No exactamente igual (ej. "Banco Santander Río" se mapea a "Banco Santander")
-        // pero al menos no debe ser el código crudo
-        expect(name.length).toBeGreaterThan(code.length);
+        expect(name).toBe(expectName);
       });
     });
   });

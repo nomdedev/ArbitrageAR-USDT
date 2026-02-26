@@ -161,12 +161,15 @@ describe('ArbitrageCalculator', () => {
   // ============================================================
   describe('calculateInterBrokerRoute', () => {
     it('calcula profit positivo cuando sellPrice > buyPrice', () => {
+      // La función: ARS → USD (dollarPrice) → USDT (buyPrice en USD/USDT) → ARS (sellPrice en ARS/USDT)
+      // Para profit positivo necesitamos: sellPrice > dollarPrice × buyPrice
+      // sellPrice(1100) > dollarPrice(1000) × buyPrice(1.0) = 1000 → +10% bruto
       const result = calc.calculateInterBrokerRoute({
         buyExchange: 'binance',
         sellExchange: 'buenbit',
-        buyPrice: 1480,   // Se compra USDT a $1480
-        sellPrice: 1520,  // Se vende USDT a $1520
-        dollarPrice: 1000,
+        buyPrice: 1.0,    // 1 USD por USDT (tasa de exchange)
+        sellPrice: 1100,  // 1100 ARS por USDT (precio de mercado)
+        dollarPrice: 1000, // 1000 ARS por USD (dólar oficial)
         initialAmount: 1000000
       });
 
@@ -219,22 +222,26 @@ describe('ArbitrageCalculator', () => {
       expect(result.spreadPercent).toBeCloseTo(expectedSpreadPct, 1);
     });
 
-    it('mayor dollarPrice → menos USD disponibles → menos profit', () => {
+    it('mayor dollarPrice reduce el profitPercentage', () => {
+      // profit% = sellPrice/(dollarPrice × buyPrice) - 1
+      // Con más caro el dólar, el ratio baja → menos profit
       const dolarBarato = calc.calculateInterBrokerRoute({
-        buyPrice: 1480,
-        sellPrice: 1520,
-        dollarPrice: 1000
+        buyPrice: 1.0,
+        sellPrice: 1300,
+        dollarPrice: 1000 // sellPrice/dollarPrice = 1.3 → +30% bruto
       });
 
       const dolarCaro = calc.calculateInterBrokerRoute({
-        buyPrice: 1480,
-        sellPrice: 1520,
-        dollarPrice: 1200
+        buyPrice: 1.0,
+        sellPrice: 1300,
+        dollarPrice: 1100 // sellPrice/dollarPrice = 1.18 → +18% bruto
       });
 
-      // Ambos deben ser positivos pero el profitPercentage debe ser similar
-      // (el profit% relativo no cambia con el precio del dólar, ya que todo escala)
-      expect(Math.abs(dolarBarato.profitPercentage - dolarCaro.profitPercentage)).toBeLessThan(0.01);
+      // Con dólar más caro, la oportunidad de arbitraje es menor
+      expect(dolarCaro.profitPercentage).toBeLessThan(dolarBarato.profitPercentage);
+      // Ambas deben seguir siendo positivas (sellPrice > dollarPrice × buyPrice en ambos casos)
+      expect(dolarBarato.profitPercentage).toBeGreaterThan(0);
+      expect(dolarCaro.profitPercentage).toBeGreaterThan(0);
     });
 
     it('incluye todos los campos requeridos en el resultado', () => {
