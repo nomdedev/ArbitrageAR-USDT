@@ -5,7 +5,7 @@
  * @version 1.0.0
  */
 
-(function(window) {
+(function (window) {
   'use strict';
 
   // ==========================================
@@ -105,7 +105,11 @@
    * @returns {Array} Rutas filtradas
    */
   function applyPreferredExchangesFilter(routes, preferredExchanges) {
-    if (!preferredExchanges || !Array.isArray(preferredExchanges) || preferredExchanges.length === 0) {
+    if (
+      !preferredExchanges ||
+      !Array.isArray(preferredExchanges) ||
+      preferredExchanges.length === 0
+    ) {
       return routes;
     }
 
@@ -223,7 +227,9 @@
 
     // Si el filtro actual no tiene rutas, cambiar a uno que sí tenga
     if (currentFilter === 'no-p2p' && noP2pCount === 0 && p2pCount > 0) {
-      window.Logger?.debug('🔄 [FilterManager] Cambiando filtro de "no-p2p" a "all" (no hay rutas no-P2P)');
+      window.Logger?.debug(
+        '🔄 [FilterManager] Cambiando filtro de "no-p2p" a "all" (no hay rutas no-P2P)'
+      );
       currentFilter = 'all';
 
       // Actualizar botones visualmente
@@ -234,7 +240,9 @@
         btn.classList.add('active');
       });
     } else if (currentFilter === 'p2p' && p2pCount === 0 && noP2pCount > 0) {
-      window.Logger?.debug('🔄 [FilterManager] Cambiando filtro de "p2p" a "all" (no hay rutas P2P)');
+      window.Logger?.debug(
+        '🔄 [FilterManager] Cambiando filtro de "p2p" a "all" (no hay rutas P2P)'
+      );
       currentFilter = 'all';
 
       // Actualizar botones visualmente
@@ -335,14 +343,18 @@
     if (interfaceSettings.interfaceShowOnlyProfitable) {
       const antesFiltro = filteredRoutes.length;
       filteredRoutes = filteredRoutes.filter(route => route.profitPercentage >= 0);
-      window.Logger?.debug(`🔍 [FilterManager] Después de filtro solo rentables: ${antesFiltro} → ${filteredRoutes.length}`);
+      window.Logger?.debug(
+        `🔍 [FilterManager] Después de filtro solo rentables: ${antesFiltro} → ${filteredRoutes.length}`
+      );
     }
 
     // Paso 4: Aplicar preferencias de usuario
     filteredRoutes = applyUserPreferences(filteredRoutes);
 
     // Paso 5: Ordenar según configuración
-    const sortBy = interfaceSettings.interfaceSortByProfit ? SORT_OPTIONS.PROFIT_DESC : SORT_OPTIONS.PROFIT_ASC;
+    const sortBy = interfaceSettings.interfaceSortByProfit
+      ? SORT_OPTIONS.PROFIT_DESC
+      : SORT_OPTIONS.PROFIT_ASC;
     filteredRoutes = sortRoutes(filteredRoutes, sortBy);
 
     // Paso 6: Limitar cantidad máxima
@@ -351,7 +363,9 @@
       filteredRoutes = filteredRoutes.slice(0, maxRoutes);
     }
 
-    window.Logger?.debug(`✅ [FilterManager] Filtros aplicados: ${filteredRoutes.length} rutas finales`);
+    window.Logger?.debug(
+      `✅ [FilterManager] Filtros aplicados: ${filteredRoutes.length} rutas finales`
+    );
 
     return filteredRoutes;
   }
@@ -376,7 +390,11 @@
     filtered = applyPreferredExchangesFilter(filtered, userSettings?.preferredExchanges);
 
     // Ordenar rutas
-    filtered = applySorting(filtered, userSettings?.preferSingleExchange, userSettings?.sortByProfit);
+    filtered = applySorting(
+      filtered,
+      userSettings?.preferSingleExchange,
+      userSettings?.sortByProfit
+    );
 
     // Limitar cantidad
     const maxDisplay = userSettings?.maxRoutesDisplay || 20;
@@ -446,7 +464,9 @@
     if (countP2P) countP2P.textContent = p2pCount;
     if (countNoP2P) countNoP2P.textContent = noP2pCount;
 
-    window.Logger?.debug(`📊 [FilterManager] Contadores actualizados - Total: ${allCount}, P2P: ${p2pCount}, No P2P: ${noP2pCount}`);
+    window.Logger?.debug(
+      `📊 [FilterManager] Contadores actualizados - Total: ${allCount}, P2P: ${p2pCount}, No P2P: ${noP2pCount}`
+    );
   }
 
   /**
@@ -470,7 +490,9 @@
       select.appendChild(option);
     });
 
-    window.Logger?.debug(`📊 [FilterManager] Filtro de exchanges poblado con ${exchanges.length} opciones`);
+    window.Logger?.debug(
+      `📊 [FilterManager] Filtro de exchanges poblado con ${exchanges.length} opciones`
+    );
   }
 
   /**
@@ -518,7 +540,9 @@
 
     // Buscar botones tanto en el panel como en el footer
     const filterButtons = document.querySelectorAll('.filter-btn, .filter-btn-footer');
-    window.Logger?.debug(`🔍 [FilterManager] Encontrados ${filterButtons.length} botones de filtro`);
+    window.Logger?.debug(
+      `🔍 [FilterManager] Encontrados ${filterButtons.length} botones de filtro`
+    );
 
     if (filterButtons.length === 0) {
       console.error('❌ [FilterManager] No se encontraron botones de filtro');
@@ -538,9 +562,13 @@
         window.Logger?.debug(`🖱️ [FilterManager] Click en botón con filtro: ${filter}`);
 
         // Actualizar estado activo en todos los botones de filtro (incluyendo footer)
-        document.querySelectorAll('.filter-btn, .filter-btn-footer').forEach(b => b.classList.remove('active'));
+        document
+          .querySelectorAll('.filter-btn, .filter-btn-footer')
+          .forEach(b => b.classList.remove('active'));
         // Marcar todos los botones con el mismo filtro como activos
-        document.querySelectorAll(`[data-filter="${filter}"]`).forEach(b => b.classList.add('active'));
+        document
+          .querySelectorAll(`[data-filter="${filter}"]`)
+          .forEach(b => b.classList.add('active'));
 
         // Aplicar filtro
         setCurrentFilter(filter);
@@ -549,7 +577,9 @@
         // Actualizar UI con rutas filtradas
         if (window.RouteManager && window.RouteManager.displayRoutes) {
           window.RouteManager.displayRoutes(filteredRoutes, 'optimized-routes');
-          window.Logger?.debug(`✅ [FilterManager] UI actualizada con ${filteredRoutes.length} rutas`);
+          window.Logger?.debug(
+            `✅ [FilterManager] UI actualizada con ${filteredRoutes.length} rutas`
+          );
         }
 
         // Actualizar contadores
@@ -560,7 +590,9 @@
     });
 
     // Limpiar cualquier clase active previa del HTML
-    document.querySelectorAll('.filter-btn, .filter-btn-footer').forEach(b => b.classList.remove('active'));
+    document
+      .querySelectorAll('.filter-btn, .filter-btn-footer')
+      .forEach(b => b.classList.remove('active'));
 
     // Auto-ajustar filtro por defecto si es necesario
     autoAdjustDefaultFilter();
@@ -682,5 +714,4 @@
   window.FilterManager = FilterManager;
 
   window.Logger?.debug('✅ [FilterManager] Módulo cargado correctamente');
-
 })(window);

@@ -59,14 +59,14 @@
               </div>
             </div>
             ${
-  hasFees
-    ? `
+              hasFees
+                ? `
             <div class="card-fees">
               <span class="fee-label">📊 Fees totales:</span>
               <span class="fee-value">${formatNumber(arb.fees.total)}%</span>
             </div>`
-    : ''
-  }
+                : ''
+            }
             ${spread ? `<div class="card-meta">${spread}</div>` : ''}
           </div>
         </div>

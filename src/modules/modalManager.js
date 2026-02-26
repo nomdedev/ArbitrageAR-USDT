@@ -5,7 +5,7 @@
  * @version 1.0.0
  */
 
-(function(window) {
+(function (window) {
   'use strict';
 
   // ==========================================
@@ -56,7 +56,7 @@
     const sellPrice = arb.sellPrice || arb.usdtArsBid || 1000;
     const arsFromSale = calc.arsFromSale || usdtAfterFees * sellPrice;
     const finalAmount = calc.finalAmount || arsFromSale;
-    const profit = calc.netProfit || (finalAmount - initial);
+    const profit = calc.netProfit || finalAmount - initial;
 
     return {
       estimatedInvestment: initial,
@@ -68,9 +68,10 @@
       finalAmount,
       profit,
       profitPercentage: correctProfitPercentage,
-      usdToUsdtRate: typeof arb.usdToUsdtRate === 'number' && isFinite(arb.usdToUsdtRate)
-        ? arb.usdToUsdtRate
-        : null,
+      usdToUsdtRate:
+        typeof arb.usdToUsdtRate === 'number' && isFinite(arb.usdToUsdtRate)
+          ? arb.usdToUsdtRate
+          : null,
       usdtArsBid: arb.usdtArsBid || arb.sellPrice || 1000,
       fees: arb.fees || { trading: 0, withdrawal: 0, total: 0 },
       broker: arb.broker || 'Exchange'
@@ -160,14 +161,14 @@
               <span class="calc-result">${Fmt.formatNumber(usdtAfterFees)} USDT</span>
             </div>
             ${
-  typeof usdToUsdtRate === 'number' && isFinite(usdToUsdtRate) && usdToUsdtRate > 1.005
-    ? `
+              typeof usdToUsdtRate === 'number' && isFinite(usdToUsdtRate) && usdToUsdtRate > 1.005
+                ? `
             <div class="step-simple-warning">
               ⚠️ El exchange cobra ${Fmt.formatCommissionPercent ? Fmt.formatCommissionPercent((usdToUsdtRate - 1) * 100) : ((usdToUsdtRate - 1) * 100).toFixed(2)}% para esta conversión
             </div>
             `
-    : ''
-  }
+                : ''
+            }
           </div>
         </div>
 
@@ -297,7 +298,7 @@
    */
   function setupGlobalEventListeners() {
     // Event listener para cerrar modal con Escape
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', e => {
       if (e.key === 'Escape' && activeModal) {
         closeModal();
       }
@@ -327,7 +328,7 @@
     }
 
     // Event listener para cerrar al hacer click en el overlay
-    modal.addEventListener('click', (e) => {
+    modal.addEventListener('click', e => {
       if (e.target === modal) {
         closeModal();
       }
@@ -417,7 +418,7 @@
    * @returns {Promise<boolean>} Promise que resuelve con la elección del usuario
    */
   function showConfirmation(message, onConfirm, onCancel) {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       // Crear modal dinámicamente
       const modal = document.createElement('div');
       modal.className = 'modal-overlay confirmation-modal';
@@ -458,7 +459,7 @@
       cancelBtn.addEventListener('click', handleCancel);
 
       // Cerrar al hacer click fuera
-      modal.addEventListener('click', (e) => {
+      modal.addEventListener('click', e => {
         if (e.target === modal) {
           handleCancel();
         }
@@ -478,7 +479,7 @@
    * @returns {Promise<void>} Promise que resuelve cuando se cierra
    */
   function showAlert(title, message, type = 'info') {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const modal = document.createElement('div');
       modal.className = `modal-overlay alert-modal alert-${type}`;
       modal.innerHTML = `
@@ -504,7 +505,7 @@
       };
 
       closeBtn.addEventListener('click', handleClose);
-      modal.addEventListener('click', (e) => {
+      modal.addEventListener('click', e => {
         if (e.target === modal) {
           handleClose();
         }
@@ -543,7 +544,7 @@
     };
 
     closeBtn.addEventListener('click', handleClose);
-    modal.addEventListener('click', (e) => {
+    modal.addEventListener('click', e => {
       if (e.target === modal) {
         handleClose();
       }
@@ -601,5 +602,4 @@
   window.ModalManager = ModalManager;
 
   window.Logger?.debug('✅ [ModalManager] Módulo cargado correctamente');
-
 })(window);

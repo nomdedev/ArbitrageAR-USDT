@@ -5,7 +5,7 @@
  * @version 1.0.0
  */
 
-(function(window) {
+(function (window) {
   'use strict';
 
   // ==========================================
@@ -486,7 +486,10 @@
 
     // Ordenar rutas por relevancia
     routes.sort((a, b) => {
-      if (a.routeCategory === 'arbitrage' || (!a.routeCategory && a.profitPercentage !== undefined)) {
+      if (
+        a.routeCategory === 'arbitrage' ||
+        (!a.routeCategory && a.profitPercentage !== undefined)
+      ) {
         const profitA = a.profitPercentage || 0;
         const profitB = b.profitPercentage || 0;
         return profitB - profitA;
@@ -513,7 +516,14 @@
       const card = createRouteElement(route, index);
 
       // Agregar clases de animación
-      card.classList.add('stagger-in', 'hover-lift', 'click-shrink', 'magnetic-btn', 'ripple-btn', 'hover-scale-rotate');
+      card.classList.add(
+        'stagger-in',
+        'hover-lift',
+        'click-shrink',
+        'magnetic-btn',
+        'ripple-btn',
+        'hover-scale-rotate'
+      );
       card.style.animationDelay = `${index * 50}ms`;
 
       fragment.appendChild(card);
@@ -541,8 +551,8 @@
   function attachRouteListeners(container) {
     const routeCards = container.querySelectorAll('.route-card');
 
-    routeCards.forEach((card) => {
-      card.addEventListener('click', function(e) {
+    routeCards.forEach(card => {
+      card.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
 
@@ -554,7 +564,10 @@
 
         try {
           const route = JSON.parse(decodeURIComponent(routeData));
-          window.Logger?.debug('🖱️ [RouteManager] Click en ruta:', route.broker || route.buyExchange);
+          window.Logger?.debug(
+            '🖱️ [RouteManager] Click en ruta:',
+            route.broker || route.buyExchange
+          );
 
           // Remover selección previa
           container.querySelectorAll('.route-card').forEach(c => c.classList.remove('selected'));
@@ -563,7 +576,6 @@
           // Emitir evento personalizado
           const event = new CustomEvent('routeSelected', { detail: route });
           document.dispatchEvent(event);
-
         } catch (error) {
           console.error('❌ [RouteManager] Error al parsear data-route:', error);
         }
@@ -640,5 +652,4 @@
   window.RouteManager = RouteManager;
 
   window.Logger?.debug('✅ [RouteManager] Módulo cargado correctamente');
-
 })(window);

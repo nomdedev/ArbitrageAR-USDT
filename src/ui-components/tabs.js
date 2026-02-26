@@ -42,7 +42,7 @@ class TabSystem {
     // Agregar event listeners a los tabs
     this.tabs.forEach(tab => {
       tab.addEventListener('click', () => this.switchTab(tab));
-      tab.addEventListener('keydown', (e) => this.handleKeydown(e, tab));
+      tab.addEventListener('keydown', e => this.handleKeydown(e, tab));
     });
 
     // Actualizar indicador al redimensionar

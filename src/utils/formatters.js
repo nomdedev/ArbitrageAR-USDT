@@ -3,7 +3,7 @@
  * Funciones de formateo unificadas
  */
 
-(function(window) {
+(function (window) {
   'use strict';
 
   // Crear formateador genérico

@@ -4,7 +4,8 @@
 
 let verboseLogsEnabled = window.__ARBITRAGE_DEBUG__ === true;
 try {
-  verboseLogsEnabled = verboseLogsEnabled || window.localStorage?.getItem('arb_debug_logs') === 'true';
+  verboseLogsEnabled =
+    verboseLogsEnabled || window.localStorage?.getItem('arb_debug_logs') === 'true';
 } catch (_) {
   // Ignorar errores de acceso a localStorage
 }
@@ -86,7 +87,7 @@ const DEFAULT_SETTINGS = {
   disabledExchanges: {
     paso1: [], // Bancos desactivados para ARS → USD
     paso2: [], // Exchanges desactivados para USD → USDT
-    paso3: []  // Exchanges desactivados para USDT → ARS
+    paso3: [] // Exchanges desactivados para USDT → ARS
   },
 
   // NUEVO: Validación de datos
@@ -838,9 +839,7 @@ function getCurrentSettings() {
   settings.p2pUsdtArsExchanges = Array.from(p2pUsdtArsCheckboxes).map(cb => cb.value);
 
   // Sincronización: Ambos pasos
-  const p2pSyncCheckboxes = document.querySelectorAll(
-    'input[name="p2p-sync-exchange"]:checked'
-  );
+  const p2pSyncCheckboxes = document.querySelectorAll('input[name="p2p-sync-exchange"]:checked');
   settings.p2pSyncExchanges = Array.from(p2pSyncCheckboxes).map(cb => cb.value);
 
   // Filtro de outliers P2P

@@ -14,11 +14,11 @@ class TooltipSystem {
   constructor(options = {}) {
     // Configuración con valores por defecto
     this.options = {
-      delay: options.delay ?? 300,           // Retraso antes de mostrar (ms)
-      duration: options.duration ?? 200,     // Duración de animación (ms)
-      offset: options.offset ?? 8,           // Distancia del elemento (px)
-      maxWidth: options.maxWidth ?? 280,     // Ancho máximo del tooltip (px)
-      zIndex: options.zIndex ?? 700,         // Z-index del tooltip
+      delay: options.delay ?? 300, // Retraso antes de mostrar (ms)
+      duration: options.duration ?? 200, // Duración de animación (ms)
+      offset: options.offset ?? 8, // Distancia del elemento (px)
+      maxWidth: options.maxWidth ?? 280, // Ancho máximo del tooltip (px)
+      zIndex: options.zIndex ?? 700, // Z-index del tooltip
       showOnHover: options.showOnHover ?? true,
       showOnFocus: options.showOnFocus ?? true
     };
@@ -71,36 +71,52 @@ class TooltipSystem {
    */
   attachEventListeners() {
     // Event delegation para mejor performance
-    document.addEventListener('mouseover', (e) => {
-      if (!this.options.showOnHover) return;
-      const target = e.target.closest('[data-tooltip]');
-      if (target) {
-        this.handleMouseEnter(e);
-      }
-    }, { passive: true });
+    document.addEventListener(
+      'mouseover',
+      e => {
+        if (!this.options.showOnHover) return;
+        const target = e.target.closest('[data-tooltip]');
+        if (target) {
+          this.handleMouseEnter(e);
+        }
+      },
+      { passive: true }
+    );
 
-    document.addEventListener('mouseout', (e) => {
-      if (!this.options.showOnHover) return;
-      const target = e.target.closest('[data-tooltip]');
-      if (target) {
-        this.handleMouseLeave(e);
-      }
-    }, { passive: true });
+    document.addEventListener(
+      'mouseout',
+      e => {
+        if (!this.options.showOnHover) return;
+        const target = e.target.closest('[data-tooltip]');
+        if (target) {
+          this.handleMouseLeave(e);
+        }
+      },
+      { passive: true }
+    );
 
     // Eventos de foco para accesibilidad
-    document.addEventListener('focusin', (e) => {
-      if (!this.options.showOnFocus) return;
-      if (e.target.matches('[data-tooltip]')) {
-        this.handleFocus(e);
-      }
-    }, { passive: true });
+    document.addEventListener(
+      'focusin',
+      e => {
+        if (!this.options.showOnFocus) return;
+        if (e.target.matches('[data-tooltip]')) {
+          this.handleFocus(e);
+        }
+      },
+      { passive: true }
+    );
 
-    document.addEventListener('focusout', (e) => {
-      if (!this.options.showOnFocus) return;
-      if (e.target.matches('[data-tooltip]')) {
-        this.handleBlur(e);
-      }
-    }, { passive: true });
+    document.addEventListener(
+      'focusout',
+      e => {
+        if (!this.options.showOnFocus) return;
+        if (e.target.matches('[data-tooltip]')) {
+          this.handleBlur(e);
+        }
+      },
+      { passive: true }
+    );
 
     // Cerrar con Escape
     document.addEventListener('keydown', this.handleEscape);
@@ -419,9 +435,9 @@ class TooltipSystem {
   getRiskLevelTooltip(element) {
     const risk = element.textContent.trim().toLowerCase();
     const descriptions = {
-      'bajo': 'Riesgo bajo&#10;&#10;Operaciones con exchanges&#10;establecidos y alta liquidez.',
-      'medio': 'Riesgo medio&#10;&#10;Balance entre riesgo y&#10;rentabilidad. Requiere atención.',
-      'alto': 'Riesgo alto&#10;&#10;Operaciones con mayor&#10;volatilidad. Experiencia necesaria.'
+      bajo: 'Riesgo bajo&#10;&#10;Operaciones con exchanges&#10;establecidos y alta liquidez.',
+      medio: 'Riesgo medio&#10;&#10;Balance entre riesgo y&#10;rentabilidad. Requiere atención.',
+      alto: 'Riesgo alto&#10;&#10;Operaciones con mayor&#10;volatilidad. Experiencia necesaria.'
     };
     return descriptions[risk] || `Nivel de riesgo: ${risk}`;
   }
@@ -441,9 +457,9 @@ class TooltipSystem {
     else if (age > 5) level = 'por actualizar';
 
     const messages = {
-      'actualizado': 'Datos actualizados&#10;Hace menos de 5 minutos',
+      actualizado: 'Datos actualizados&#10;Hace menos de 5 minutos',
       'por actualizar': `Datos por actualizar&#10;Hace ${age} minutos`,
-      'desactualizado': `Datos desactualizados&#10;Hace ${age} minutos. Recomendado actualizar.`
+      desactualizado: `Datos desactualizados&#10;Hace ${age} minutos. Recomendado actualizar.`
     };
 
     return messages[level] || `Datos hace ${age} minutos`;
@@ -458,12 +474,15 @@ class TooltipSystem {
 
     const type = badgeType[1];
     const descriptions = {
-      'p2p': 'Operación P2P&#10;&#10;Trading directo entre personas.&#10;Mayor privacidad pero más lento.',
-      'direct': 'Operación Directa&#10;&#10;Sin intermediarios. Más rápido&#10;pero requiere más experiencia.',
-      'express': 'Operación Express&#10;&#10;Ruta optimizada para velocidad.&#10;Ideal para traders activos.',
-      'recommended': 'Recomendado&#10;&#10;Mejor relación rentabilidad/riesgo&#10;para la situación actual.',
-      'hot': '¡Oportunidad!&#10;&#10;Arbitraje con rentabilidad&#10;excepcional. Actuar rápido.',
-      'new': 'Nueva ruta&#10;&#10;Recién descubierta. Puede&#10;desaparecer pronto.'
+      p2p: 'Operación P2P&#10;&#10;Trading directo entre personas.&#10;Mayor privacidad pero más lento.',
+      direct:
+        'Operación Directa&#10;&#10;Sin intermediarios. Más rápido&#10;pero requiere más experiencia.',
+      express:
+        'Operación Express&#10;&#10;Ruta optimizada para velocidad.&#10;Ideal para traders activos.',
+      recommended:
+        'Recomendado&#10;&#10;Mejor relación rentabilidad/riesgo&#10;para la situación actual.',
+      hot: '¡Oportunidad!&#10;&#10;Arbitraje con rentabilidad&#10;excepcional. Actuar rápido.',
+      new: 'Nueva ruta&#10;&#10;Recién descubierta. Puede&#10;desaparecer pronto.'
     };
 
     return descriptions[type] || element.textContent;
@@ -491,10 +510,10 @@ class TooltipSystem {
 
     const statusType = status[1];
     const messages = {
-      'connected': 'Conectado&#10;&#10;Sincronizado con el servidor',
-      'syncing': 'Sincronizando...&#10;&#10;Actualizando datos',
-      'error': 'Error de conexión&#10;&#10;Verifica tu internet',
-      'offline': 'Sin conexión&#10;&#10;Modo offline activado'
+      connected: 'Conectado&#10;&#10;Sincronizado con el servidor',
+      syncing: 'Sincronizando...&#10;&#10;Actualizando datos',
+      error: 'Error de conexión&#10;&#10;Verifica tu internet',
+      offline: 'Sin conexión&#10;&#10;Modo offline activado'
     };
 
     return messages[statusType] || 'Estado de conexión';

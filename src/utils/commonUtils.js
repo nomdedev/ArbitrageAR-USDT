@@ -5,7 +5,7 @@
  * @version 1.0.0
  */
 
-(function(window) {
+(function (window) {
   'use strict';
 
   // ==========================================
@@ -273,7 +273,7 @@
       if (!inThrottle) {
         func(...args);
         inThrottle = true;
-        setTimeout(() => inThrottle = false, limit);
+        setTimeout(() => (inThrottle = false), limit);
       }
     };
   }
@@ -399,7 +399,7 @@
   function memoize(fn) {
     const cache = new Map();
 
-    return function(...args) {
+    return function (...args) {
       const key = JSON.stringify(args);
       if (cache.has(key)) {
         return cache.get(key);
@@ -457,12 +457,13 @@
    * @returns {Object} Objeto con funciones de log
    */
   function createLogger(prefix) {
-    const isDevelopment = process?.env?.NODE_ENV === 'development' ||
-                          window.location?.hostname === 'localhost';
+    const isDevelopment =
+      process?.env?.NODE_ENV === 'development' || window.location?.hostname === 'localhost';
 
     let debugLogsEnabled = isDevelopment || window.__ARBITRAGE_DEBUG__ === true;
     try {
-      debugLogsEnabled = debugLogsEnabled || window.localStorage?.getItem('arb_debug_logs') === 'true';
+      debugLogsEnabled =
+        debugLogsEnabled || window.localStorage?.getItem('arb_debug_logs') === 'true';
     } catch (_) {
       // Ignorar errores de acceso a localStorage
     }
@@ -554,5 +555,4 @@
 
   // Exportar para uso global
   window.CommonUtils = CommonUtils;
-
 })(window);

@@ -5,7 +5,7 @@
  * @version 1.0.0
  */
 
-(function(window) {
+(function (window) {
   'use strict';
 
   // ==========================================
@@ -315,8 +315,14 @@
       bankCommission: document.getElementById('sim-bank-commission')
     };
 
-    if (!elements.usdBuy || !elements.usdSell || !elements.buyFee ||
-        !elements.sellFee || !elements.transferFee || !elements.bankCommission) {
+    if (
+      !elements.usdBuy ||
+      !elements.usdSell ||
+      !elements.buyFee ||
+      !elements.sellFee ||
+      !elements.transferFee ||
+      !elements.bankCommission
+    ) {
       console.warn('⚠️ [Simulator] No se encontraron todos los inputs del simulador');
       return;
     }
@@ -410,10 +416,14 @@
 
     if (useCustomParams) {
       // MODO PERSONALIZADO
-      const usdMinInput = parseFloat(document.getElementById('matrix-usd-min')?.value) ||
-                         currentData?.oficial?.compra || 1000;
-      const usdMaxInput = parseFloat(document.getElementById('matrix-usd-max')?.value) ||
-                         currentData?.oficial?.compra * 1.5 || 1500;
+      const usdMinInput =
+        parseFloat(document.getElementById('matrix-usd-min')?.value) ||
+        currentData?.oficial?.compra ||
+        1000;
+      const usdMaxInput =
+        parseFloat(document.getElementById('matrix-usd-max')?.value) ||
+        currentData?.oficial?.compra * 1.5 ||
+        1500;
       const usdtMinInput = parseFloat(document.getElementById('matrix-usdt-min')?.value) || 1000;
       const usdtMaxInput = parseFloat(document.getElementById('matrix-usdt-max')?.value) || 1100;
 
@@ -495,7 +505,8 @@
     const buyFeePercent = parseFloat(document.getElementById('sim-buy-fee')?.value) || 1.0;
     const sellFeePercent = parseFloat(document.getElementById('sim-sell-fee')?.value) || 1.0;
     const transferFeeUSD = parseFloat(document.getElementById('sim-transfer-fee-usd')?.value) || 0;
-    const bankCommissionPercent = parseFloat(document.getElementById('sim-bank-commission')?.value) || 0;
+    const bankCommissionPercent =
+      parseFloat(document.getElementById('sim-bank-commission')?.value) || 0;
 
     // Validaciones de parámetros
     if (buyFeePercent < 0 || buyFeePercent > 10) {
@@ -571,8 +582,13 @@
 
       usdtPrices.forEach(usdtPrice => {
         const profitPercentage = calculateProfitPercent(
-          amount, usdPrice, usdtPrice, buyFeePercent, sellFeePercent,
-          transferFeeUSD, bankCommissionPercent
+          amount,
+          usdPrice,
+          usdtPrice,
+          buyFeePercent,
+          sellFeePercent,
+          transferFeeUSD,
+          bankCommissionPercent
         );
 
         // Determinar clase CSS según rentabilidad
@@ -607,8 +623,13 @@
    * @returns {number} Porcentaje de ganancia
    */
   function calculateProfitPercent(
-    amount, usdPrice, usdtPrice, buyFeePercent, sellFeePercent,
-    transferFeeUSD, bankCommissionPercent
+    amount,
+    usdPrice,
+    usdtPrice,
+    buyFeePercent,
+    sellFeePercent,
+    transferFeeUSD,
+    bankCommissionPercent
   ) {
     // Paso 1: Aplicar comisión bancaria
     const bankCommissionARS = amount * (bankCommissionPercent / 100);
@@ -742,5 +763,4 @@
   window.Simulator = Simulator;
 
   window.Logger?.debug('✅ [Simulator] Módulo cargado correctamente');
-
 })(window);

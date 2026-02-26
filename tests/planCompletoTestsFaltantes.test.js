@@ -3,29 +3,42 @@
  * Fecha: 26 de febrero de 2026
  * Versión: 6.0.0
  * Prioridad: Crítica
- * 
  * Este archivo contiene la especificación detallada de todos los tests
  * que necesitan ser implementados para alcanzar una cobertura adecuada.
  */
 
 describe('PLAN COMPLETO DE TESTS FALTANTES', () => {
-  
   // ============================================
   // ÍNDICE DE MÓDULOS A TESTEAR
   // ============================================
   describe('ÍNDICE DE MÓDULOS', () => {
     it('debería identificar todos los módulos críticos sin tests', () => {
-      const modulosCriticos = {
+      // ────────────────────────────────────────────────────────────────
+      // ESTADO AL 26/02/2026 — última actualización del plan
+      // ────────────────────────────────────────────────────────────────
+
+      // ✅ IMPLEMENTADOS — ya tienen tests reales importando el módulo
+      const modulosImplementados = {
+        background: [
+          'arbitrageCalculator.js  → tests/arbitrageCalculator.test.js       (42 tests)',
+          'cacheManager.js         → tests/cacheManager.test.js               (26 tests)',
+          'main-simple.js          → tests/background.messageHandler.test.js  (25 tests)',
+        ],
+        utils: [
+          'bankCalculations.js     → tests/bankCalculations.test.js           (42 tests)',
+          'formatters.js           → tests/formatters.test.js                 (43 tests)',
+        ]
+      };
+
+      // ⏳ PENDIENTES — todavía sin tests o con tests de baja calidad
+      const modulosPendientes = {
         background: [
           'apiClient.js',
-          'arbitrageCalculator.js',
-          'cacheManager.js',
-          'main-simple.js'
         ],
         modules: [
           'filterManager.js',
           'modalManager.js',
-          'notificationManager.js',
+          'notificationManager.js',   // notifications.test.js existente reimplementa la lógica inline → reescribir
           'routeManager.js',
           'simulator.js'
         ],
@@ -35,28 +48,33 @@ describe('PLAN COMPLETO DE TESTS FALTANTES', () => {
           'tabs.js'
         ],
         utils: [
-          'bankCalculations.js',
           'commonUtils.js',
-          'formatters.js',
           'logger.js',
           'stateManager.js'
         ]
       };
 
-      Object.values(modulosCriticos).forEach(categoria => {
-        expect(categoria.length).toBeGreaterThan(0);
-      });
+      const totalImplementados = Object.values(modulosImplementados).flat().length;
+      const totalPendientes    = Object.values(modulosPendientes).flat().length;
 
-      console.log('🎯 MÓDULOS CRÍTICOS SIN TESTS:');
-      console.table(modulosCriticos);
+      expect(totalImplementados).toBeGreaterThan(0);
+      expect(totalPendientes).toBeGreaterThan(0);
+
+      console.log('✅ MÓDULOS YA IMPLEMENTADOS:');
+      console.table(modulosImplementados);
+      console.log(`\n⏳ MÓDULOS PENDIENTES (${totalPendientes}):`);
+      console.table(modulosPendientes);
     });
   });
 
   // ============================================
   // BACKGROUND SCRIPTS - ESPECIFICACIONES
+  // ✅ arbitrageCalculator → tests/arbitrageCalculator.test.js       (42 tests)
+  // ✅ cacheManager        → tests/cacheManager.test.js               (26 tests)
+  // ✅ main-simple.js      → tests/background.messageHandler.test.js  (25 tests)
+  // ⏳ apiClient           → pendiente
   // ============================================
   describe('BACKGROUND SCRIPTS - ESPECIFICACIONES', () => {
-    
     describe('ArbitrageCalculator Tests', () => {
       it('debería especificar tests para calculateSimpleArbitrage', () => {
         const especificacion = {
@@ -148,40 +166,56 @@ describe('PLAN COMPLETO DE TESTS FALTANTES', () => {
         console.log(JSON.stringify(especificacion, null, 2));
       });
 
+      // ✅ IMPLEMENTADO — ver tests/arbitrageCalculator.test.js
       it('debería especificar tests para calculateInterBrokerRoute', () => {
+        // IMPORTANTE — semántica real de los parámetros:
+        //   buyPrice    → tasa USD/USDT en el exchange comprador  (ej. 1.02  USD por USDT)
+        //   sellPrice   → precio ARS/USDT en el exchange vendedor (ej. 1100  ARS por USDT)
+        //   dollarPrice → cotización ARS/USD oficial              (ej. 1000  ARS por USD)
+        // NO confundir buyPrice con el precio ARS del USDT — son unidades distintas.
         const especificacion = {
+          archivo: 'tests/arbitrageCalculator.test.js',   // ✅ ya existe
           funcion: 'calculateInterBrokerRoute',
-          queTestea: 'Cálculo entre diferentes exchanges',
+          queTestea: 'Arbitraje inter-broker: compra USD, convierte a USDT y vende en ARS',
+          notaSemantica: 'buyPrice es USD/USDT (~1.0), sellPrice es ARS/USDT (~1100), dollarPrice es ARS/USD',
           casosPositivos: [
             {
-              descripcion: 'ruta Binance→Buenbit',
+              descripcion: 'ruta Binance→Buenbit con profit positivo',
               input: {
                 buyExchange: 'Binance',
                 sellExchange: 'Buenbit',
-                buyPrice: 1080,
-                sellPrice: 1100,
-                dollarPrice: 1000,
+                buyPrice: 1.0,           // 1 USD = 1 USDT (tasa de conversión USD→USDT)
+                sellPrice: 1100,         // 1 USDT = 1100 ARS en Buenbit
+                dollarPrice: 1000,       // 1 USD  = 1000 ARS (tipo de cambio oficial)
                 initialAmount: 1000000,
                 fees: { trading: 0.001 }
               },
               validaciones: [
-                'profitPercentage > 0',
-                'spread === 20',
-                'spreadPercent ≈ 1.85'
+                'profitPercentage > 0  (sellPrice > implied ARS/USDT via dollarPrice)',
+                'profit = finalAmount - initialAmount > 0'
               ]
             }
           ],
           casosError: [
             {
-              descripcion: 'buyPrice >= sellPrice',
+              descripcion: 'precio de venta por debajo del valor implícito (pérdida segura)',
               input: {
                 buyExchange: 'Binance',
                 sellExchange: 'Buenbit',
-                buyPrice: 1100,
-                sellPrice: 1080,
+                buyPrice: 1.0,
+                sellPrice: 900,         // vender USDT a 900 ARS cuando USD oficial vale 1000 → pérdida
                 dollarPrice: 1000,
                 initialAmount: 1000000
               },
+              validacion: 'profitPercentage < 0 (ruta con pérdida)'
+            },
+            {
+              descripcion: 'inputs inválidos',
+              inputsInvalidos: [
+                { buyPrice: 0, sellPrice: 1100, dollarPrice: 1000 },
+                { buyPrice: 1.0, sellPrice: 0, dollarPrice: 1000 },
+                { buyPrice: 1.0, sellPrice: 1100, dollarPrice: 0 }
+              ],
               outputEsperado: 'null'
             }
           ]
@@ -195,34 +229,55 @@ describe('PLAN COMPLETO DE TESTS FALTANTES', () => {
       });
     });
 
+    // ✅ IMPLEMENTADO — ver tests/cacheManager.test.js (26 tests)
     describe('CacheManager Tests', () => {
       it('debería especificar tests para operaciones básicas', () => {
+        // NOTA: el CacheManager real NO tiene LRU ni maxSize.
+        //   Tiene 3 tipos de caché fijos con TTLs distintos:
+        //     dolarOficial → 10 min (600 000 ms)
+        //     usdtArs      →  30 s  (30  000 ms)
+        //     usdtUsd      →  60 s  (60  000 ms)
+        //   La API pública es: set(type, data) / get(type) / clear(type?) / getCachedOrFetch(type, fn) / getCacheStats()
         const especificacion = {
-          archivo: 'tests/cacheManager.test.js',
-          funciones: ['set', 'get', 'clear'],
+          archivo: 'tests/cacheManager.test.js',   // ✅ ya existe
+          funciones: ['set', 'get', 'clear', 'getCachedOrFetch', 'getCacheStats'],
+          tiposCacheValidos: ['dolarOficial', 'usdtArs', 'usdtUsd'],
+          ttls: {
+            dolarOficial: 600000,   // 10 minutos
+            usdtArs: 30000,         // 30 segundos
+            usdtUsd: 60000          // 60 segundos
+          },
           casosPositivos: [
             {
-              descripcion: 'almacenar y recuperar datos',
-              input: { key: 'dolar_oficial', data: { compra: 1000, venta: 1050 }, ttl: 60000 },
-              validacion: 'get(key) === data'
+              descripcion: 'almacenar y recuperar datos dentro del TTL',
+              input: { type: 'dolarOficial', data: { compra: 1000, venta: 1050 } },
+              validacion: 'get("dolarOficial") === data (usando jest.useFakeTimers)'
             },
             {
-              descripcion: 'respetar TTL',
-              input: { key: 'test_ttl', data: { value: 'test' }, ttl: 100 },
-              validacion: 'inmediato existe, después de 150ms es null'
+              descripcion: 'datos expirados retornan null',
+              input: { type: 'usdtArs', data: { price: 1100 } },
+              validacion: 'avanzar 31 000ms con fake timers → get("usdtArs") === null'
+            },
+            {
+              descripcion: 'getCachedOrFetch retorna caché sin llamar a fn',
+              validacion: 'mockFn no fue llamado cuando la caché es válida'
+            },
+            {
+              descripcion: 'getCachedOrFetch llama a fn cuando caché expiró',
+              validacion: 'mockFn fue llamado exactamente una vez'
             }
           ],
-          gestionMemoria: [
+          casosError: [
             {
-              descripcion: 'limitar tamaño máximo',
-              configuracion: { maxSize: 3 },
-              validacion: 'solo los 3 más recientes existen (LRU)'
+              descripcion: 'tipo de caché inválido',
+              input: { type: 'tipoDesconocido' },
+              validacion: 'retorna null en get(), no lanza excepción'
             }
           ]
         };
 
         expect(especificacion.casosPositivos.length).toBeGreaterThan(0);
-        expect(especificacion.gestionMemoria.length).toBeGreaterThan(0);
+        expect(especificacion.casosError.length).toBeGreaterThan(0);
 
         console.log('📋 ESPECIFICACIÓN CacheManager:');
         console.log(JSON.stringify(especificacion, null, 2));
@@ -234,7 +289,6 @@ describe('PLAN COMPLETO DE TESTS FALTANTES', () => {
   // MÓDULOS CORE - ESPECIFICACIONES
   // ============================================
   describe('MÓDULOS CORE - ESPECIFICACIONES', () => {
-    
     describe('FilterManager Tests', () => {
       it('debería especificar tests completos para FilterManager', () => {
         const especificacion = {
@@ -373,7 +427,6 @@ describe('PLAN COMPLETO DE TESTS FALTANTES', () => {
   // COMPONENTES UI - ESPECIFICACIONES
   // ============================================
   describe('COMPONENTES UI - ESPECIFICACIONES', () => {
-    
     describe('ArbitragePanel Tests', () => {
       it('debería especificar tests completos para ArbitragePanel', () => {
         const especificacion = {
@@ -489,7 +542,6 @@ describe('PLAN COMPLETO DE TESTS FALTANTES', () => {
   // UTILIDADES AVANZADAS - ESPECIFICACIONES
   // ============================================
   describe('UTILIDADES AVANZADAS - ESPECIFICACIONES', () => {
-    
     describe('StateManager Tests', () => {
       it('debería especificar tests para StateManager', () => {
         const especificacion = {
@@ -552,46 +604,144 @@ describe('PLAN COMPLETO DE TESTS FALTANTES', () => {
       });
     });
 
+    // ✅ IMPLEMENTADO — ver tests/bankCalculations.test.js (42 tests)
     describe('BankCalculations Tests', () => {
       it('debería especificar tests para BankCalculations', () => {
+        // NOTA: el módulo real exporta estas funciones y constantes (ES6 export):
+        //   getBankCode(bankName)                 → código normalizado (ej. 'bna')
+        //   normalizeBankName(code)               → nombre legible (ej. 'Banco Nación')
+        //   getBankDisplayName(code)              → alias/display (ej. 'BNA')
+        //   getCurrencySymbol(currencyCode)       → símbolo (ej. '$', 'U$S')
+        //   getBankTransactionFee(bank, txType)   → fee decimal (ej. 0.006)
+        //   calculateSpread(buyPrice, sellPrice)  → { percentage, absolute }
+        //   BANK_CODES   (objeto con mapeo nombre→código)
+        //   BANK_FEE_RATES (objeto con fees por banco)
         const especificacion = {
-          archivo: 'tests/bankCalculations.test.js',
-          testsSpread: [
+          archivo: 'tests/bankCalculations.test.js',   // ✅ ya existe
+          funcionesExportadas: [
+            'getBankCode', 'normalizeBankName', 'getBankDisplayName',
+            'getCurrencySymbol', 'getBankTransactionFee', 'calculateSpread'
+          ],
+          constantesExportadas: ['BANK_CODES', 'BANK_FEE_RATES'],
+          testsGetBankCode: [
+            { input: 'Banco Nación', expected: 'bna' },
+            { input: 'Galicia',      expected: 'galicia' },
+            { input: 'ICBC',         expected: 'icbc' }
+          ],
+          testsNormalizeBankName: [
+            { input: 'bna',     expected: 'Banco Nación' },
+            { input: 'galicia', expected: 'Banco Galicia' }
+          ],
+          testsCalculateSpread: [
             {
-              descripcion: 'calcular spread correctamente',
+              descripcion: 'spread positivo (buyPrice > sellPrice)',
               input: { buyPrice: 1050, sellPrice: 1030 },
-              validaciones: [
-                'spread.percentage ≈ 1.90',
-                'spread.absolute === 20'
-              ]
+              validaciones: ['spread.percentage ≈ 1.94', 'spread.absolute === 20']
             },
             {
-              descripcion: 'manejar spread negativo',
-              input: { buyPrice: 1000, sellPrice: 1050 },
-              validacion: 'spread.percentage < 0'
+              descripcion: 'spread cero',
+              input: { buyPrice: 1000, sellPrice: 1000 },
+              validacion: 'spread.percentage === 0'
             }
           ],
-          testsEffectiveRate: [
+          testsGetBankTransactionFee: [
+            { input: { bank: 'bna', txType: 'transfer' }, validacion: 'fee > 0 (número entre 0 y 1)' }
+          ]
+        };
+
+        expect(especificacion.testsCalculateSpread.length).toBeGreaterThan(0);
+        expect(especificacion.testsGetBankCode.length).toBeGreaterThan(0);
+
+        console.log('📋 ESPECIFICACIÓN BankCalculations:');
+        console.log(JSON.stringify(especificacion, null, 2));
+      });
+    });
+  });
+
+  // ============================================
+  // UTILS - ESPECIFICACIONES
+  // ✅ formatters.js  → tests/formatters.test.js  (43 tests)
+  // ⏳ commonUtils.js → pendiente
+  // ⏳ logger.js      → pendiente
+  // ⏳ stateManager.js (listado arriba en MÓDULOS CORE)
+  // ============================================
+  describe('UTILS - ESPECIFICACIONES', () => {
+
+    // ✅ IMPLEMENTADO — ver tests/formatters.test.js (43 tests)
+    describe('Formatters Tests', () => {
+      it('debería especificar tests para formatters', () => {
+        // El módulo usa el patrón IIFE con fallback a module.exports para Jest.
+        // Expone: formatNumber, formatARS, formatUSD, formatProfitPercent,
+        //         formatPercent, formatUsdUsdtRatio, getDollarSourceDisplay,
+        //         formatTimeAgo, formatExchangeName, createFormatter
+        const especificacion = {
+          archivo: 'tests/formatters.test.js',   // ✅ ya existe
+          funcionesExportadas: [
+            'formatNumber', 'formatARS', 'formatUSD', 'formatProfitPercent',
+            'formatPercent', 'formatUsdUsdtRatio', 'getDollarSourceDisplay',
+            'formatTimeAgo', 'formatExchangeName', 'createFormatter'
+          ],
+          testsFormatARS: [
+            { input: 1000,    expected: '$ 1.000'    },
+            { input: 1234.5,  expected: '$ 1.234,50' },
+            { input: 0,       expected: '$ 0'        }
+          ],
+          testsFormatUSD: [
+            { input: 1.5,  expected: 'U$S 1,50' },
+            { input: 1000, expected: 'U$S 1.000,00' }
+          ],
+          testsFormatProfitPercent: [
+            { input: 9.8,  expected: '+9.80%' },
+            { input: -2.1, expected: '-2.10%' },
+            { input: 0,    expected: '0.00%'  }
+          ],
+          testsFormatTimeAgo: [
+            { inputMs: 30000,   expected: 'hace 30 segundos' },
+            { inputMs: 90000,   expected: 'hace 1 minuto'    },
+            { inputMs: 3700000, expected: 'hace 1 hora'      }
+          ],
+          testsCreateFormatter: [
             {
-              descripcion: 'incluir comisiones bancarias',
-              input: { baseRate: 1000, commission: 0.5 },
-              validacion: 'effectiveRate ≈ 1005'
-            },
-            {
-              descripcion: 'manejar comisiones variables',
-              input: { 
-                baseRate: 1000, 
-                commission: { fixed: 10, percentage: 0.3 } 
-              },
-              validacion: 'effectiveRate ≈ 1013'
+              descripcion: 'createFormatter devuelve objeto con todos los formatters',
+              validacion: 'typeof result.formatARS === "function"'
             }
           ]
         };
 
-        expect(especificacion.testsSpread.length).toBeGreaterThan(0);
-        expect(especificacion.testsEffectiveRate.length).toBeGreaterThan(0);
+        expect(especificacion.testsFormatARS.length).toBeGreaterThan(0);
+        expect(especificacion.testsFormatProfitPercent.length).toBeGreaterThan(0);
 
-        console.log('📋 ESPECIFICACIÓN BankCalculations:');
+        console.log('📋 ESPECIFICACIÓN Formatters:');
+        console.log(JSON.stringify(especificacion, null, 2));
+      });
+    });
+
+    // ✅ IMPLEMENTADO — ver tests/background.messageHandler.test.js (25 tests)
+    describe('Background MessageHandler Tests', () => {
+      it('debería especificar tests para el handler getArbitrages y log()', () => {
+        // El handler vive en src/background/main-simple.js.
+        // Expone: lógica de chrome.runtime.onMessage para 'getArbitrages'.
+        // La función log() usa globalThis.__ARBITRAGE_DEBUG__ (NO una variable DEBUG_MODE).
+        const especificacion = {
+          archivo: 'tests/background.messageHandler.test.js',   // ✅ ya existe
+          casosHandler: [
+            { descripcion: 'responde desde caché sin llamar a fetch' },
+            { descripcion: 'llama a fetch cuando la caché expiró y retorna datos frescos' },
+            { descripcion: 'safeSendResponse es idempotente (no lanza al llamarse 2 veces)' },
+            { descripcion: 'timeout interno de 12 s activa respuesta de error si fetch no responde' },
+            { descripcion: 'error en fetch → responde con { success: false, error }' }
+          ],
+          casosLog: [
+            { descripcion: 'log() no lanza cuando __ARBITRAGE_DEBUG__ === false' },
+            { descripcion: 'log() llama console.log cuando __ARBITRAGE_DEBUG__ === true' },
+            { descripcion: 'log() no lanza cuando console.log está indefinido' }
+          ]
+        };
+
+        expect(especificacion.casosHandler.length).toBeGreaterThan(0);
+        expect(especificacion.casosLog.length).toBeGreaterThan(0);
+
+        console.log('📋 ESPECIFICACIÓN Background MessageHandler:');
         console.log(JSON.stringify(especificacion, null, 2));
       });
     });
@@ -929,9 +1079,22 @@ describe('PLAN COMPLETO DE TESTS FALTANTES', () => {
   describe('RESUMEN Y CONCLUSIONES', () => {
     
     it('debería resumir el plan completo', () => {
+      // ── Actualizado al 26/02/2026 ──────────────────────────────────────
       const resumen = {
-        totalModulos: 20,
-        archivosTestsCrear: 25,
+        // Progreso actual
+        modulosTotales: 17,
+        modulosConTests: 5,         // arbitrageCalculator, cacheManager, main-simple, bankCalculations, formatters
+        modulosPendientes: 12,
+
+        // Tests en el repositorio
+        archivosTestNuevosCreados: 5,
+        testsNuevos: 178,           // todos pasan (verde)
+        totalTestsActuales: 271,    // 271 pasan + 2 rotos pre-existentes en auditoria.test.js
+
+        // Archivos pendientes de crear
+        archivosTestsCrear: 12,     // filterManager, routeManager, stateManager, commonUtils, logger,
+                                    // apiClient, notificationManager, modalManager, simulator,
+                                    // arbitrage-panel, animations, tabs
         categoriasTests: [
           'Unit Tests (Módulos Core)',
           'Integration Tests (Flujos completos)',
@@ -940,9 +1103,10 @@ describe('PLAN COMPLETO DE TESTS FALTANTES', () => {
           'Security Tests (Validación y saneamiento)'
         ],
         coberturaObjetivo: {
-          cortoPlazo: '40% en 4 semanas',
-          medianoPlazo: '70% en 8 semanas',
-          largoPlazo: '90% en 12 semanas'
+          alcanzado:    '~9% (tras fase 1 — feb 2026)',
+          cortoPlazo:   '40% en 2 semanas (completar unit tests pendientes)',
+          medianoPlazo: '70% en 6 semanas (integración + UI)',
+          largoPlazo:   '90% en 10 semanas (E2E + performance + security)'
         },
         beneficios: [
           'Confianza en el funcionamiento',
@@ -953,8 +1117,8 @@ describe('PLAN COMPLETO DE TESTS FALTANTES', () => {
         ]
       };
 
-      expect(resumen.totalModulos).toBeGreaterThan(15);
-      expect(resumen.archivosTestsCrear).toBeGreaterThan(20);
+      expect(resumen.modulosConTests).toBeGreaterThan(0);
+      expect(resumen.archivosTestsCrear).toBeGreaterThan(0);
       expect(resumen.categoriasTests.length).toBe(5);
 
       console.log('📊 RESUMEN DEL PLAN COMPLETO:');

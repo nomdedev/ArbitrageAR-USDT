@@ -2,14 +2,14 @@
 // SISTEMA DE CACHÉ INTELIGENTE - ArbitrageAR-USDT
 // ==========================================
 
-(function(window) {
+(function (window) {
   'use strict';
 
   // Configuración de tiempos de caché (en milisegundos)
   const CACHE_CONFIG = {
-    dolarOficial: 10 * 60 * 1000,      // 10 minutos
-    usdtArs: 30 * 1000,                // 30 segundos
-    usdtUsd: 60 * 1000                 // 1 minuto
+    dolarOficial: 10 * 60 * 1000, // 10 minutos
+    usdtArs: 30 * 1000, // 30 segundos
+    usdtUsd: 60 * 1000 // 1 minuto
   };
 
   // Almacenamiento en memoria para el caché
@@ -71,7 +71,9 @@
     const age = Date.now() - cached.timestamp;
     const maxAge = CACHE_CONFIG[cacheType];
 
-    console.log(`✅ [CACHE] Usando datos de caché ${cacheType} (${Math.round(age/1000)}s/${Math.round(maxAge/1000)}s)`);
+    console.log(
+      `✅ [CACHE] Usando datos de caché ${cacheType} (${Math.round(age / 1000)}s/${Math.round(maxAge / 1000)}s)`
+    );
     return cached.data;
   }
 
@@ -190,5 +192,4 @@
   };
 
   console.log('🗄️ [CACHE] CacheManager inicializado');
-
 })(typeof window !== 'undefined' ? window : global);

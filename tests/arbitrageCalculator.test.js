@@ -13,7 +13,7 @@ describe('ArbitrageCalculator', () => {
   let calc;
 
   beforeAll(() => {
-    calc = global.self?.ArbitrageCalculator || global.window?.ArbitrageCalculator;
+    calc = globalThis.self?.ArbitrageCalculator || globalThis.window?.ArbitrageCalculator;
     if (!calc) throw new Error('ArbitrageCalculator no fue expuesto en self/window');
   });
 
@@ -163,11 +163,11 @@ describe('ArbitrageCalculator', () => {
     it('calcula profit positivo cuando sellPrice > buyPrice', () => {
       // La función: ARS → USD (dollarPrice) → USDT (buyPrice en USD/USDT) → ARS (sellPrice en ARS/USDT)
       // Para profit positivo necesitamos: sellPrice > dollarPrice × buyPrice
-      // sellPrice(1100) > dollarPrice(1000) × buyPrice(1.0) = 1000 → +10% bruto
+      // sellPrice(1100) > dollarPrice(1000) × buyPrice(1) = 1000 → +10% bruto
       const result = calc.calculateInterBrokerRoute({
         buyExchange: 'binance',
         sellExchange: 'buenbit',
-        buyPrice: 1.0,    // 1 USD por USDT (tasa de exchange)
+        buyPrice: 1,    // 1 USD por USDT (tasa de exchange)
         sellPrice: 1100,  // 1100 ARS por USDT (precio de mercado)
         dollarPrice: 1000, // 1000 ARS por USD (dólar oficial)
         initialAmount: 1000000
@@ -226,13 +226,13 @@ describe('ArbitrageCalculator', () => {
       // profit% = sellPrice/(dollarPrice × buyPrice) - 1
       // Con más caro el dólar, el ratio baja → menos profit
       const dolarBarato = calc.calculateInterBrokerRoute({
-        buyPrice: 1.0,
+        buyPrice: 1,
         sellPrice: 1300,
         dollarPrice: 1000 // sellPrice/dollarPrice = 1.3 → +30% bruto
       });
 
       const dolarCaro = calc.calculateInterBrokerRoute({
-        buyPrice: 1.0,
+        buyPrice: 1,
         sellPrice: 1300,
         dollarPrice: 1100 // sellPrice/dollarPrice = 1.18 → +18% bruto
       });
@@ -307,11 +307,11 @@ describe('ArbitrageCalculator', () => {
   // ============================================================
   describe('filterRoutes', () => {
     const routes = [
-      { broker: 'binance',    profitPercentage: 5.0,  requiresP2P: false },
+      { broker: 'binance',    profitPercentage: 5,  requiresP2P: false },
       { broker: 'buenbit',    profitPercentage: 1.5,  requiresP2P: false },
-      { broker: 'binancep2p', profitPercentage: 3.0,  requiresP2P: true  },
-      { broker: 'ripio',      profitPercentage: -2.0, requiresP2P: false },
-      { broker: 'fiwind',     profitPercentage: -15.0, requiresP2P: false }, // < minProfit defecto -10
+      { broker: 'binancep2p', profitPercentage: 3,  requiresP2P: true  },
+      { broker: 'ripio',      profitPercentage: -2, requiresP2P: false },
+      { broker: 'fiwind',     profitPercentage: -15, requiresP2P: false }, // < minProfit defecto -10
     ];
 
     it('sin filtros excluye sólo rutas bajo el minProfit por defecto (-10%)', () => {
@@ -322,7 +322,7 @@ describe('ArbitrageCalculator', () => {
     it('hideNegative=true excluye todas las rutas con profit < 0', () => {
       const result = calc.filterRoutes(routes, { hideNegative: true });
       expect(result.every(r => r.profitPercentage >= 0)).toBe(true);
-      expect(result).toHaveLength(3); // 5.0, 1.5, 3.0
+      expect(result).toHaveLength(3); // 5, 1.5, 3
     });
 
     it('hideP2P=true excluye rutas P2P', () => {
@@ -364,22 +364,22 @@ describe('ArbitrageCalculator', () => {
   // ============================================================
   describe('sortRoutes', () => {
     const routes = [
-      { broker: 'ripio',   profitPercentage: 2.0  },
-      { broker: 'buenbit', profitPercentage: 5.0  },
-      { broker: 'binance', profitPercentage: -1.0 },
+      { broker: 'ripio',   profitPercentage: 2  },
+      { broker: 'buenbit', profitPercentage: 5  },
+      { broker: 'binance', profitPercentage: -1 },
     ];
 
     it('profit-desc: mayor profit primero', () => {
       const sorted = calc.sortRoutes(routes, 'profit-desc');
-      expect(sorted[0].profitPercentage).toBe(5.0);
-      expect(sorted[1].profitPercentage).toBe(2.0);
-      expect(sorted[2].profitPercentage).toBe(-1.0);
+      expect(sorted[0].profitPercentage).toBe(5);
+      expect(sorted[1].profitPercentage).toBe(2);
+      expect(sorted[2].profitPercentage).toBe(-1);
     });
 
     it('profit-asc: menor profit primero', () => {
       const sorted = calc.sortRoutes(routes, 'profit-asc');
-      expect(sorted[0].profitPercentage).toBe(-1.0);
-      expect(sorted[sorted.length - 1].profitPercentage).toBe(5.0);
+      expect(sorted[0].profitPercentage).toBe(-1);
+      expect(sorted[sorted.length - 1].profitPercentage).toBe(5);
     });
 
     it('name-asc: orden alfabético por broker', () => {
@@ -437,8 +437,8 @@ describe('ArbitrageCalculator', () => {
     it('calcula count correctamente', () => {
       const routes = [
         { profitPercentage: 3.5 },
-        { profitPercentage: -1.0 },
-        { profitPercentage: 2.0 },
+        { profitPercentage: -1 },
+        { profitPercentage: 2 },
       ];
       expect(calc.getRoutesStats(routes).count).toBe(3);
     });
@@ -447,8 +447,8 @@ describe('ArbitrageCalculator', () => {
       const routes = [
         { profitPercentage: 3.5 },
         { profitPercentage: 0   }, // 0 no es "profitable"
-        { profitPercentage: -1.0 },
-        { profitPercentage: 2.0 },
+        { profitPercentage: -1 },
+        { profitPercentage: 2 },
       ];
       expect(calc.getRoutesStats(routes).profitable).toBe(2);
     });
@@ -456,20 +456,20 @@ describe('ArbitrageCalculator', () => {
     it('calcula maxProfit y minProfit correctamente', () => {
       const routes = [
         { profitPercentage: 3.5 },
-        { profitPercentage: -1.0 },
-        { profitPercentage: 2.0 },
+        { profitPercentage: -1 },
+        { profitPercentage: 2 },
       ];
       const stats = calc.getRoutesStats(routes);
       expect(stats.maxProfit).toBe(3.5);
-      expect(stats.minProfit).toBe(-1.0);
+      expect(stats.minProfit).toBe(-1);
     });
 
     it('calcula avgProfit como promedio de todos (incluyendo negativos)', () => {
       const routes = [
-        { profitPercentage: 4.0 },
-        { profitPercentage: 2.0 },
+        { profitPercentage: 4 },
+        { profitPercentage: 2 },
       ];
-      expect(calc.getRoutesStats(routes).avgProfit).toBeCloseTo(3.0, 2);
+      expect(calc.getRoutesStats(routes).avgProfit).toBeCloseTo(3, 2);
     });
 
     it('statscon una sola ruta', () => {

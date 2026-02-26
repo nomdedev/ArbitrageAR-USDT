@@ -154,7 +154,7 @@
 
 .btn-primary {
   background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
-  color: white;
+  color: var(--color-text-inverse);
   border-color: var(--color-primary);
 }
 
@@ -176,7 +176,7 @@
 
 .btn-success {
   background: linear-gradient(135deg, var(--color-success-dark) 0%, var(--color-success) 100%);
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 .btn-success:hover:not(:disabled) {
@@ -280,25 +280,25 @@
 
 /* === PROFIT INDICATORS === */
 .profit-positive {
-  color: var(--color-success) !important;
+  color: var(--color-success);
 }
 
 .profit-negative {
-  color: var(--color-error) !important;
+  color: var(--color-error);
 }
 
 .profit-neutral {
-  color: var(--text-secondary) !important;
+  color: var(--text-secondary);
 }
 
 /* Clases de estado de profit para route cards */
 .high-profit {
-  border-color: var(--color-success) !important;
+  border-color: var(--color-success);
   box-shadow: var(--shadow-glow-success);
 }
 
 .negative-profit {
-  border-color: var(--color-error) !important;
+  border-color: var(--color-error);
   opacity: 0.85;
 }
 
@@ -423,7 +423,7 @@
 }
 
 .hidden {
-  display: none !important;
+  display: none;
 }
 .visible {
   visibility: visible;

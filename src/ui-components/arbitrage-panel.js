@@ -203,15 +203,15 @@ function createArbitragePanel(data) {
         <span class="calc-value">+${sanitizeHTML(formatCurrency(data.profit))}</span>
       </div>
       ${
-  data.fees
-    ? `
+        data.fees
+          ? `
       <div class="calculation-row">
         <span class="calc-label">Comisiones:</span>
         <span class="calc-value">-${sanitizeHTML(formatCurrency(data.fees))}</span>
       </div>
       `
-    : ''
-}
+          : ''
+      }
     </div>
     
     <div class="panel-actions">

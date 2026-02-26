@@ -13,7 +13,7 @@
   --duration-fast: 150ms;
   --duration-normal: 200ms;
   --duration-slow: 300ms;
-  
+
   /* Easings */
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
@@ -26,8 +26,12 @@
 
 /* 1. Fade In - Entrada suave */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* 2. Slide Up - Entrada desde abajo (para contenido nuevo) */
@@ -56,32 +60,54 @@
 
 /* 4. Spin - Rotación continua (para loading) */
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* 5. Shimmer - Efecto de carga skeleton */
 @keyframes shimmer {
-  to { background-position: 200% 0; }
+  to {
+    background-position: 200% 0;
+  }
 }
 
 /* 6. Pulse - Parpadeo suave (para indicadores) */
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* 7. Flash Update - Feedback de actualización de datos */
 @keyframes flashUpdate {
-  0% { background-color: transparent; }
-  30% { background-color: rgba(59, 130, 246, 0.15); }
-  100% { background-color: transparent; }
+  0% {
+    background-color: transparent;
+  }
+  30% {
+    background-color: rgba(59, 130, 246, 0.15);
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 
 /* 8. Shake - Feedback de error */
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
 }
 
 /* ==========================================
@@ -144,7 +170,7 @@ button,
 a,
 input,
 select {
-  transition: 
+  transition:
     background-color var(--duration-fast) var(--ease-out),
     border-color var(--duration-fast) var(--ease-out),
     color var(--duration-fast) var(--ease-out),
@@ -168,7 +194,7 @@ select {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  
+
   .skeleton {
     animation: none !important;
     background: var(--bg-surface, #161920) !important;

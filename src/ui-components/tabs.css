@@ -96,15 +96,21 @@
 /* Badge con highlight */
 .tab-badge.highlight {
   background: var(--color-brand-primary);
-  color: white;
+  color: var(--color-text-inverse);
   box-shadow: 0 2px 8px var(--color-brand-glow);
   animation: badgeBounce 0.4s var(--ease-out-back);
 }
 
 @keyframes badgeBounce {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* ==========================================
@@ -181,7 +187,8 @@
 }
 
 @keyframes badgePulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
@@ -198,22 +205,22 @@
     padding: var(--space-1);
     gap: var(--space-1);
   }
-  
+
   .tab-item {
     padding: var(--space-2) var(--space-3);
     gap: var(--space-1);
     font-size: var(--font-size-xs);
   }
-  
+
   .tab-icon {
     width: 16px;
     height: 16px;
   }
-  
+
   .tab-label {
     display: none; /* Ocultar label en móviles pequeños */
   }
-  
+
   .tab-badge {
     min-width: 18px;
     height: 18px;
@@ -229,17 +236,17 @@
   .tab-indicator {
     transition: left var(--duration-fast) linear;
   }
-  
+
   .tab-item,
   .tab-item:hover {
     transition: none;
   }
-  
+
   .tab-badge,
   .tab-badge.highlight {
     animation: none !important;
   }
-  
+
   .tab-panel {
     animation: none;
   }

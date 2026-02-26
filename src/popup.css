@@ -66,8 +66,9 @@
   opacity: 0;
   pointer-events: none;
   transform: scale(0.95);
-  transition: opacity var(--duration-normal) var(--ease-out),
-              transform var(--duration-normal) var(--ease-out);
+  transition:
+    opacity var(--duration-normal) var(--ease-out),
+    transform var(--duration-normal) var(--ease-out);
 }
 
 /* Tooltip visible */
@@ -133,7 +134,7 @@
   /* === COLORES HEREDADOS (compatibilidad legacy) === */
   /* NOTA: Los colores base están en design-system.css */
   /* Estas variables son aliases para compatibilidad con código existente */
-  
+
   /* Aliases de marca */
   --primary-blue: var(--color-brand-primary);
   --primary-blue-dark: #1f6feb;
@@ -149,7 +150,7 @@
   --loss-red: var(--color-danger);
   --loss-red-dark: #da3633;
   --loss-red-glow: rgba(239, 68, 68, 0.4);
-  
+
   /* Aliases cortos */
   --success: var(--color-success);
   --warning: var(--color-warning);
@@ -181,7 +182,11 @@
 
   /* === GRADIENTES DE TRADING === */
   --gradient-primary: linear-gradient(135deg, #1f6feb 0%, var(--color-brand-primary) 100%);
-  --gradient-primary-hover: linear-gradient(135deg, var(--color-brand-primary) 0%, var(--color-brand-secondary) 100%);
+  --gradient-primary-hover: linear-gradient(
+    135deg,
+    var(--color-brand-primary) 0%,
+    var(--color-brand-secondary) 100%
+  );
   --gradient-success: linear-gradient(135deg, #059669 0%, var(--color-success) 100%);
   --gradient-success-hover: linear-gradient(135deg, var(--color-success) 0%, #34d399 100%);
   --gradient-warning: linear-gradient(135deg, #d97706 0%, var(--color-warning) 100%);
@@ -293,7 +298,7 @@ a:focus-visible {
 .btn-primary {
   background: var(--gradient-primary);
   border-color: transparent;
-  color: white;
+  color: var(--color-text-inverse);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -459,9 +464,7 @@ a:focus-visible {
   gap: var(--space-2);
   margin-bottom: var(--space-4);
   padding: var(--space-3);
-  background: linear-gradient(135deg, 
-    rgba(59, 130, 246, 0.05) 0%, 
-    rgba(139, 92, 246, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
   border-bottom: 1px solid var(--color-border-muted);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
@@ -495,7 +498,7 @@ a:focus-visible {
 .banks-tab-btn.active {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   border-color: #3b82f6;
-  color: white;
+  color: var(--color-text-inverse);
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
 }
 
@@ -503,7 +506,6 @@ a:focus-visible {
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(59, 130, 246, 0.45);
 }
-
 
 /* CLASES BASE UNIFICADAS */
 .input-base {
@@ -654,7 +656,7 @@ header {
   align-items: center;
   justify-content: center;
   background: var(--color-success);
-  color: white;
+  color: var(--color-text-inverse);
   border-radius: 50%;
   width: 16px;
   height: 16px;
@@ -667,11 +669,12 @@ header {
 }
 
 @keyframes pulse-update {
-  0%, 100% { 
+  0%,
+  100% {
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
   }
-  50% { 
+  50% {
     transform: scale(1.1);
     box-shadow: 0 0 0 4px rgba(16, 185, 129, 0);
   }
@@ -806,7 +809,7 @@ header {
   height: 40px;
   background: linear-gradient(135deg, var(--color-success) 0%, #059669 100%);
   border-radius: var(--radius-md);
-  color: white;
+  color: var(--color-text-inverse);
   flex-shrink: 0;
 }
 
@@ -885,7 +888,7 @@ header {
 
 .tab.active {
   background: var(--color-brand-primary);
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 /* ============================================
@@ -987,7 +990,7 @@ main::-webkit-scrollbar-thumb:hover {
 
 .update-type-badge {
   background: rgba(255, 255, 255, 0.25);
-  color: white;
+  color: var(--color-text-inverse);
   padding: 4px 12px;
   border-radius: var(--radius-full);
   font-size: var(--font-size-xs);
@@ -1002,7 +1005,7 @@ main::-webkit-scrollbar-thumb:hover {
   border-radius: var(--radius-md);
   padding: var(--space-1-5);
   cursor: pointer;
-  color: white;
+  color: var(--color-text-inverse);
   transition: all var(--duration-fast) var(--ease-out);
   display: flex;
   align-items: center;
@@ -1054,7 +1057,7 @@ main::-webkit-scrollbar-thumb:hover {
 
 .new-version {
   background: var(--gradient-success);
-  color: white;
+  color: var(--color-text-inverse);
   padding: 6px 12px;
   border-radius: var(--radius-md);
   font-family: 'Courier New', monospace;
@@ -1104,7 +1107,7 @@ main::-webkit-scrollbar-thumb:hover {
 }
 
 .update-features-list li::before {
-  content: "✓";
+  content: '✓';
   position: absolute;
   left: 0;
   color: var(--color-success);
@@ -1123,7 +1126,7 @@ main::-webkit-scrollbar-thumb:hover {
 .btn-download {
   flex: 1;
   background: var(--gradient-success);
-  color: white;
+  color: var(--color-text-inverse);
   border: none;
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
@@ -1183,7 +1186,7 @@ main::-webkit-scrollbar-thumb:hover {
 
 .route-card.negative-profit:hover,
 .crypto-route-card.profit-negative:hover {
-  box-shadow: 
+  box-shadow:
     0 8px 25px -5px rgba(248, 81, 73, 0.3),
     0 0 0 1px rgba(248, 81, 73, 0.2);
   background: linear-gradient(135deg, rgba(248, 81, 73, 0.08) 0%, var(--card-bg) 100%);
@@ -1196,7 +1199,7 @@ main::-webkit-scrollbar-thumb:hover {
 
 .route-card.low-profit:hover,
 .crypto-route-card.profit-low:hover {
-  box-shadow: 
+  box-shadow:
     0 8px 25px -5px rgba(217, 119, 6, 0.3),
     0 0 0 1px rgba(217, 119, 6, 0.2);
   background: linear-gradient(135deg, rgba(217, 119, 6, 0.08) 0%, var(--card-bg) 100%);
@@ -1211,7 +1214,7 @@ main::-webkit-scrollbar-thumb:hover {
 .route-card.is-direct:hover,
 .route-card.high-profit:hover,
 .crypto-route-card.profit-high:hover {
-  box-shadow: 
+  box-shadow:
     0 8px 25px -5px rgba(16, 185, 129, 0.3),
     0 0 0 1px rgba(16, 185, 129, 0.2);
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, var(--card-bg) 100%);
@@ -1221,12 +1224,7 @@ main::-webkit-scrollbar-thumb:hover {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(88, 166, 255, 0.1) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg, transparent 0%, rgba(88, 166, 255, 0.1) 50%, transparent 100%);
   animation: loadingShimmer 1s ease-in-out infinite;
 }
 
@@ -1247,22 +1245,22 @@ main::-webkit-scrollbar-thumb:hover {
   border-radius: var(--radius-lg);
   padding: var(--space-3);
   margin-bottom: var(--space-2);
-  
+
   /* Delimitación visual */
   border: var(--card-border);
   box-shadow: var(--shadow-sm);
-  
+
   /* Indicador lateral */
   border-left: 3px solid var(--color-border-default);
-  
+
   /* Transiciones suaves */
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  
+
   /* Animación de entrada */
   opacity: 0;
   transform: translateY(8px);
   animation: cardFadeIn var(--duration-fast) var(--ease-out) forwards;
-  
+
   /* Cursor pointer para indicar clickeable */
   cursor: pointer;
 }
@@ -1276,7 +1274,7 @@ main::-webkit-scrollbar-thumb:hover {
 .arbitrage-card:hover {
   border-color: var(--color-brand-primary);
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, var(--card-bg) 100%);
-  box-shadow: 
+  box-shadow:
     0 8px 25px -5px rgba(59, 130, 246, 0.25),
     0 0 0 1px rgba(59, 130, 246, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -1335,7 +1333,7 @@ main::-webkit-scrollbar-thumb:hover {
 .route-card:active,
 .crypto-route-card:active {
   transform: translateY(-2px) scale(0.99);
-  box-shadow: 
+  box-shadow:
     0 4px 15px -3px rgba(59, 130, 246, 0.3),
     inset 0 1px 2px rgba(0, 0, 0, 0.1);
 }
@@ -1345,7 +1343,7 @@ main::-webkit-scrollbar-thumb:hover {
 .crypto-route-card.selected {
   border-color: var(--color-brand-primary);
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, var(--card-bg) 100%);
-  box-shadow: 
+  box-shadow:
     0 0 0 2px rgba(59, 130, 246, 0.3),
     0 8px 20px -5px rgba(59, 130, 246, 0.2);
 }
@@ -1438,7 +1436,7 @@ main::-webkit-scrollbar-thumb:hover {
   align-items: center;
   gap: 8px; /* MISMO que crypto */
   margin-bottom: 8px; /* MISMO que crypto */
-  font-size: 1.0em; /* +10px desde 0.85em */
+  font-size: 1em; /* +10px desde 0.85em */
   color: #e6edf3; /* MISMO que crypto */
 }
 
@@ -1490,7 +1488,7 @@ main::-webkit-scrollbar-thumb:hover {
 .route-card .profit-details .value {
   font-weight: 600; /* MISMO que crypto */
   color: #3fb950; /* MISMO que crypto */
-  font-size: 1.0em; /* +10px desde 0.85em */
+  font-size: 1em; /* +10px desde 0.85em */
 }
 
 .route-card .profit-details .value.negative {
@@ -1607,15 +1605,18 @@ main::-webkit-scrollbar-thumb:hover {
   border: 1px solid rgba(88, 166, 255, 0.25);
 }
 @keyframes profitPulseGlow {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(63, 185, 80, 0.4),
-                0 0 20px rgba(63, 185, 80, 0.2);
+    box-shadow:
+      0 0 0 0 rgba(63, 185, 80, 0.4),
+      0 0 20px rgba(63, 185, 80, 0.2);
   }
   50% {
     transform: scale(1.05);
-    box-shadow: 0 0 0 8px rgba(63, 185, 80, 0),
-                0 0 30px rgba(63, 185, 80, 0.4);
+    box-shadow:
+      0 0 0 8px rgba(63, 185, 80, 0),
+      0 0 30px rgba(63, 185, 80, 0.4);
   }
 }
 .profit-badge.profit-positive,
@@ -1625,14 +1626,11 @@ main::-webkit-scrollbar-thumb:hover {
   border: 1px solid rgba(63, 185, 80, 0.3);
 }
 
-
-
 .profit-amount {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
   color: var(--color-success);
 }
-
 
 /* Resumen de ruta en modal de detalles */
 .route-summary {
@@ -1716,7 +1714,7 @@ main::-webkit-scrollbar-thumb:hover {
   height: 28px;
   min-width: 28px;
   background: var(--gradient-info);
-  color: white;
+  color: var(--color-text-inverse);
   border-radius: var(--radius-full);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
@@ -1800,7 +1798,6 @@ main::-webkit-scrollbar-thumb:hover {
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
 }
-
 
 .card-header h3 {
   font-size: 1.15em;
@@ -1909,7 +1906,6 @@ main::-webkit-scrollbar-thumb:hover {
   opacity: 0.5;
 }
 
-
 .fee-value {
   color: #fbbf24;
   font-weight: 800;
@@ -1928,7 +1924,7 @@ main::-webkit-scrollbar-thumb:hover {
 .error-container {
   text-align: center;
   padding: 24px 16px;
-  color: #f85149;
+  color: #fca5a5;
   background: rgba(248, 81, 73, 0.1);
   border-radius: 8px;
   border: 1px solid rgba(248, 81, 73, 0.3);
@@ -1961,7 +1957,6 @@ main::-webkit-scrollbar-thumb:hover {
   border: 1px dashed rgba(59, 130, 246, 0.3);
 }
 
-
 /* ============================================
    ESTILOS PARA FILAS DE BANCOS (DISEÑO SIMPLE)
    ============================================ */
@@ -1988,7 +1983,7 @@ main::-webkit-scrollbar-thumb:hover {
   padding: 4px 0;
 }
 .bank-row .bank-sell {
-  color: #ef4444;
+  color: #fca5a5;
   background: rgba(239, 68, 68, 0.1);
   border-color: rgba(239, 68, 68, 0.2);
 }
@@ -2004,7 +1999,6 @@ main::-webkit-scrollbar-thumb:hover {
   font-weight: 600;
   flex: 1;
 }
-
 
 /* Las clases .price-label y .price-value SÍ se usan: */
 .price-label {
@@ -2092,7 +2086,7 @@ footer {
 
 .filter-btn-footer.active {
   background: var(--color-brand-primary);
-  color: white;
+  color: var(--color-text-inverse);
   box-shadow: var(--shadow-sm);
 }
 
@@ -2257,7 +2251,8 @@ footer {
   gap: var(--space-2);
 }
 
-.sim-config-row label {
+.sim-config-row label,
+.sim-config-row > span:first-child {
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   min-width: 55px;
@@ -2311,7 +2306,7 @@ footer {
 
 .sim-btn-calc {
   background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 .sim-btn-calc:hover {
@@ -2354,7 +2349,8 @@ footer {
   gap: var(--space-1);
 }
 
-.sim-range-group label {
+.sim-range-group label,
+.sim-range-group > span:first-child {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
@@ -2391,7 +2387,7 @@ footer {
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   border: none;
   border-radius: var(--radius-md);
-  color: white;
+  color: var(--color-text-inverse);
   cursor: pointer;
   transition: all var(--duration-fast);
 }
@@ -2418,7 +2414,8 @@ footer {
   margin-bottom: var(--space-2);
 }
 
-.sim-matrix-filters label {
+.sim-matrix-filters label,
+.sim-matrix-filters > span:first-child {
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }
@@ -2466,7 +2463,7 @@ footer {
 
 .sim-btn-filter {
   background: #10b981;
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 .sim-btn-filter:hover {
@@ -2523,7 +2520,7 @@ footer {
 
 .sim-matrix-table td.positive {
   background: rgba(16, 185, 129, 0.2);
-  color: #10b981;
+  color: #4ade80;
 }
 
 .sim-matrix-table td.neutral {
@@ -2533,7 +2530,7 @@ footer {
 
 .sim-matrix-table td.negative {
   background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  color: #fca5a5;
 }
 
 /* Leyenda compacta */
@@ -2552,9 +2549,15 @@ footer {
   gap: var(--space-1);
 }
 
-.legend-positive { color: #10b981; }
-.legend-neutral { color: #fbbf24; }
-.legend-negative { color: #ef4444; }
+.legend-positive {
+  color: #4ade80;
+}
+.legend-neutral {
+  color: #fbbf24;
+}
+.legend-negative {
+  color: #f87171;
+}
 
 /* ============================================
    FIN SIMULADOR v2.0
@@ -2564,9 +2567,7 @@ footer {
 .simulator-header {
   text-align: center;
   padding: var(--space-4) var(--space-3);
-  background: linear-gradient(135deg, 
-    rgba(59, 130, 246, 0.05) 0%, 
-    rgba(139, 92, 246, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
   border-bottom: 1px solid var(--color-border-muted);
   margin-bottom: var(--space-3);
 }
@@ -2577,9 +2578,7 @@ footer {
   justify-content: center;
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, 
-    rgba(59, 130, 246, 0.15) 0%, 
-    rgba(139, 92, 246, 0.15) 100%);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
   border-radius: 50%;
   margin-bottom: var(--space-2);
 }
@@ -2729,7 +2728,7 @@ footer {
 .btn-apply-filter {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   border-color: #10b981;
-  color: white;
+  color: var(--color-text-inverse);
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
@@ -2808,6 +2807,9 @@ footer {
 .matrix-control-item {
   flex: 1;
   min-width: 110px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
 .config-actions {
@@ -2816,7 +2818,6 @@ footer {
   justify-content: center;
   margin-top: var(--space-3);
 }
-
 
 /* RESPONSIVE */
 @media (max-width: 500px) {
@@ -2833,7 +2834,6 @@ footer {
     padding: 10px 12px;
   }
 }
-
 
 /* ============================================
    GUIDE RESPONSIVE STYLES (Reducido)
@@ -2893,9 +2893,7 @@ footer {
    ============================================ */
 .crypto-selector-wrapper {
   padding: var(--space-3);
-  background: linear-gradient(135deg, 
-    rgba(59, 130, 246, 0.05) 0%, 
-    rgba(139, 92, 246, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
   border-bottom: 1px solid var(--color-border-muted);
   margin-bottom: var(--space-4);
 }
@@ -2979,7 +2977,7 @@ footer {
 .filter-btn-operation.active {
   background: var(--color-brand-primary);
   border-color: var(--color-brand-primary);
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 .filter-btn-operation span {
@@ -3055,9 +3053,7 @@ p.error {
 .risk-matrix-section {
   margin: var(--space-4) var(--space-3);
   padding: var(--space-4);
-  background: linear-gradient(135deg, 
-    rgba(16, 185, 129, 0.05) 0%, 
-    rgba(5, 150, 105, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
   border-radius: var(--radius-xl);
   border: 1px solid rgba(16, 185, 129, 0.2);
 }
@@ -3093,13 +3089,6 @@ p.error {
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border-default);
 }
-
-.matrix-control-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
 
 .matrix-generate-btn {
   grid-column: span 2;
@@ -3176,30 +3165,18 @@ p.error {
 }
 
 .matrix-cell-positive {
-  background: linear-gradient(
-    135deg,
-    rgba(34, 197, 94, 0.3) 0%,
-    rgba(16, 185, 129, 0.2) 100%
-  ) !important;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.3) 0%, rgba(16, 185, 129, 0.2) 100%);
   color: #4ade80 !important;
 }
 
 .matrix-cell-neutral {
-  background: linear-gradient(
-    135deg,
-    rgba(251, 191, 36, 0.3) 0%,
-    rgba(245, 158, 11, 0.2) 100%
-  ) !important;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.3) 0%, rgba(245, 158, 11, 0.2) 100%);
   color: #fbbf24 !important;
 }
 
 .matrix-cell-negative {
-  background: linear-gradient(
-    135deg,
-    rgba(239, 68, 68, 0.3) 0%,
-    rgba(220, 38, 38, 0.2) 100%
-  ) !important;
-  color: #f87171 !important;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(220, 38, 38, 0.2) 100%);
+  color: #fca5a5 !important;
 }
 .matrix-legend {
   display: flex;
@@ -3293,7 +3270,7 @@ p.error {
 
 .btn-apply-filter {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
+  color: var(--color-text-inverse);
   box-shadow: var(--shadow-sm);
 }
 
@@ -3337,9 +3314,15 @@ p.error {
   transition: width var(--duration-slow) var(--ease-out);
 }
 @keyframes progressIndeterminate {
-  0% { transform: translateX(-100%); }
-  50% { transform: translateX(300%); }
-  100% { transform: translateX(-100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(300%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
 }
 
 /* ============================================
@@ -3440,8 +3423,9 @@ p.error {
   overflow: hidden;
   opacity: 0;
   transform: scale(0.95) translateY(20px);
-  transition: opacity var(--duration-normal) var(--ease-out),
-              transform var(--duration-normal) var(--ease-out);
+  transition:
+    opacity var(--duration-normal) var(--ease-out),
+    transform var(--duration-normal) var(--ease-out);
 }
 
 .modal-overlay.active .modal-content {
@@ -3543,7 +3527,6 @@ p.error {
   transition: all var(--duration-fast) var(--ease-default);
 }
 
-
 /* ============================================
   COMPONENTES DE RUTA (Reducido)
   Nota: estructura principal de cards definida en la sección de cards.
@@ -3603,7 +3586,6 @@ p.error {
 .filters-panel-body {
   padding: 16px;
 }
-
 
 /* MODAL DE DETALLES DE RUTA - Scrollbar */
 .modal-content::-webkit-scrollbar {
@@ -3766,7 +3748,7 @@ p.error {
   width: 28px;
   height: 28px;
   background: linear-gradient(135deg, var(--primary-blue-dark) 0%, var(--primary-blue) 100%);
-  color: white;
+  color: var(--color-text-inverse);
   border-radius: 50%;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
@@ -3825,7 +3807,7 @@ p.error {
   border: 1px solid rgba(245, 158, 11, 0.3);
   border-radius: var(--border-radius-sm);
   font-size: var(--font-size-xs);
-  color: #d97706;
+  color: #fbbf24;
   margin-top: var(--space-1);
 }
 /* Responsive para pasos - Consolidado en @media (max-width: 768px) al final del archivo */
@@ -3909,12 +3891,11 @@ p.error {
   gap: var(--space-1);
 }
 
-
 /* ==========================================
    📱 MEDIA QUERIES CONSOLIDADAS (max-width: 768px)
    ========================================== */
 @media (max-width: 768px) {
-/* Variantes legacy de precios de bancos removidas */
+  /* Variantes legacy de precios de bancos removidas */
 
   /* Exchanges */
   .exchanges-list {
@@ -3922,18 +3903,18 @@ p.error {
   }
 
   .filter-section {
-      flex-direction: column;
-      gap: var(--space-2);
-    }
+    flex-direction: column;
+    gap: var(--space-2);
+  }
 
   .filter-buttons {
     justify-content: center;
   }
-.step-number {
+  .step-number {
     align-self: flex-start;
     margin-bottom: var(--space-1);
   }
-.calc-arrow {
+  .calc-arrow {
     display: none;
   }
 }
@@ -4020,7 +4001,9 @@ p.error {
 .crypto-route-card.selected {
   border-color: var(--color-brand-primary);
   background: linear-gradient(135deg, rgba(88, 166, 255, 0.1) 0%, rgba(22, 27, 34, 0.9) 100%);
-  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.3), var(--shadow-lg);
+  box-shadow:
+    0 0 0 2px rgba(88, 166, 255, 0.3),
+    var(--shadow-lg);
 }
 /* Badge de profit */
 .profit-badge {
@@ -4031,7 +4014,7 @@ p.error {
 }
 .profit-badge.profit-negative {
   background: rgba(248, 81, 73, 0.15);
-  color: #f85149;
+  color: #fca5a5;
   border: 1px solid rgba(248, 81, 73, 0.3);
 }
 .crypto-route-card .route-path {
@@ -4051,7 +4034,7 @@ p.error {
 }
 .operation-badge.p2p {
   background: rgba(210, 153, 34, 0.15);
-  color: #d29922;
+  color: #fbbf24;
 }
 .speed-indicator,
 .difficulty-indicator {
@@ -4084,7 +4067,6 @@ p.error {
   line-height: 1.4;
   color: var(--color-text-primary);
 }
-
 
 /* Texto con énfasis */
 .text-emphasis {
@@ -4194,11 +4176,12 @@ header .subtitle {
 
 /* Animación del punto */
 @keyframes pulse-dot {
-  0%, 100% { 
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
-  50% { 
+  50% {
     opacity: 0.6;
     transform: scale(1.2);
   }
@@ -4225,7 +4208,7 @@ header .subtitle {
 
 .badge-primary {
   background: var(--color-brand-primary);
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 .badge-warning {

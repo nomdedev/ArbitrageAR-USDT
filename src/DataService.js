@@ -4,8 +4,9 @@
 // ============================================
 
 function debugLog(...args) {
-  const logger = (typeof window !== 'undefined' ? window.Logger : undefined)
-    || (typeof self !== 'undefined' ? self.Logger : undefined);
+  const logger =
+    (typeof window !== 'undefined' ? window.Logger : undefined) ||
+    (typeof self !== 'undefined' ? self.Logger : undefined);
 
   if (logger?.debug) {
     logger.debug(...args);

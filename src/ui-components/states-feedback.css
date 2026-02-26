@@ -70,7 +70,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Loading overlay */
@@ -99,8 +101,12 @@
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .skeleton-text {
@@ -225,7 +231,7 @@
    ========================================== */
 
 .card-interactive {
-  transition: 
+  transition:
     background var(--duration-fast) var(--ease-out),
     border-color var(--duration-fast) var(--ease-out);
 }
@@ -310,9 +316,7 @@
   flex-direction: column;
   align-items: center;
   padding: var(--space-6);
-  background: linear-gradient(135deg, 
-    rgba(59, 130, 246, 0.05) 0%, 
-    rgba(139, 92, 246, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
   border: 1px solid var(--color-border-muted);
   border-radius: var(--radius-xl, 16px);
   margin: var(--space-4);
@@ -332,9 +336,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, 
-    rgba(59, 130, 246, 0.15) 0%, 
-    rgba(139, 92, 246, 0.15) 100%);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
   border-radius: 50%;
   margin-bottom: var(--space-3);
   animation: pulse-soft 2s ease-in-out infinite;
@@ -469,7 +471,7 @@
 
 .btn-primary-action {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
+  color: var(--color-text-inverse);
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
 }
 
@@ -496,8 +498,15 @@
 }
 
 @keyframes pulse-soft {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.05); opacity: 0.9; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
 }
 
 @keyframes fadeInUp {

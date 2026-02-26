@@ -59,12 +59,24 @@
   animation: fadeInUp var(--duration-normal) var(--ease-out-expo) both;
 }
 
-.stagger-children > *:nth-child(1) { animation-delay: calc(var(--stagger-normal, 100ms) * 0); }
-.stagger-children > *:nth-child(2) { animation-delay: calc(var(--stagger-normal, 100ms) * 1); }
-.stagger-children > *:nth-child(3) { animation-delay: calc(var(--stagger-normal, 100ms) * 2); }
-.stagger-children > *:nth-child(4) { animation-delay: calc(var(--stagger-normal, 100ms) * 3); }
-.stagger-children > *:nth-child(5) { animation-delay: calc(var(--stagger-normal, 100ms) * 4); }
-.stagger-children > *:nth-child(6) { animation-delay: calc(var(--stagger-normal, 100ms) * 5); }
+.stagger-children > *:nth-child(1) {
+  animation-delay: calc(var(--stagger-normal, 100ms) * 0);
+}
+.stagger-children > *:nth-child(2) {
+  animation-delay: calc(var(--stagger-normal, 100ms) * 1);
+}
+.stagger-children > *:nth-child(3) {
+  animation-delay: calc(var(--stagger-normal, 100ms) * 2);
+}
+.stagger-children > *:nth-child(4) {
+  animation-delay: calc(var(--stagger-normal, 100ms) * 3);
+}
+.stagger-children > *:nth-child(5) {
+  animation-delay: calc(var(--stagger-normal, 100ms) * 4);
+}
+.stagger-children > *:nth-child(6) {
+  animation-delay: calc(var(--stagger-normal, 100ms) * 5);
+}
 
 /* Zoom In - Entrada con zoom */
 @keyframes zoomIn {
@@ -140,12 +152,21 @@
   transition: all var(--duration-normal) var(--ease-out-back);
 }
 @keyframes refreshSpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 @keyframes statusPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* ==========================================
@@ -154,15 +175,27 @@
 
 /* Price Flash Up - Flash verde */
 @keyframes priceFlashUp {
-  0% { background-color: transparent; }
-  50% { background-color: rgba(16, 185, 129, 0.2); }
-  100% { background-color: transparent; }
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(16, 185, 129, 0.2);
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 /* Price Flash Down - Flash rojo */
 @keyframes priceFlashDown {
-  0% { background-color: transparent; }
-  50% { background-color: rgba(239, 68, 68, 0.2); }
-  100% { background-color: transparent; }
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(239, 68, 68, 0.2);
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 /* Count Up - Números aumentando */
 @keyframes countUp {
@@ -177,8 +210,12 @@
 }
 /* Progress Ring - Animación SVG */
 @keyframes ringProgress {
-  from { stroke-dashoffset: 283; }
-  to { stroke-dashoffset: var(--progress-offset); }
+  from {
+    stroke-dashoffset: 283;
+  }
+  to {
+    stroke-dashoffset: var(--progress-offset);
+  }
 }
 
 .progress-ring-animated {
@@ -187,8 +224,12 @@
 
 /* Shimmer - Para skeleton loading */
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 .view-exit {
   animation: slideInLeft var(--duration-slow) var(--ease-in-out-expo) both;
@@ -213,19 +254,23 @@
 
 /* Animaciones de entrada */
 .animate-fade-in-up {
-  animation: fadeInUp var(--duration-normal, 250ms) var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1)) both;
+  animation: fadeInUp var(--duration-normal, 250ms)
+    var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1)) both;
 }
 
 .animate-fade-in-scale {
-  animation: fadeInScale var(--duration-normal, 250ms) var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+  animation: fadeInScale var(--duration-normal, 250ms)
+    var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
 }
 
 .animate-slide-in-right {
-  animation: slideInRight var(--duration-normal, 250ms) var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1)) both;
+  animation: slideInRight var(--duration-normal, 250ms)
+    var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1)) both;
 }
 
 .animate-slide-in-left {
-  animation: slideInLeft var(--duration-normal, 250ms) var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1)) both;
+  animation: slideInLeft var(--duration-normal, 250ms)
+    var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1)) both;
 }
 
 /* Animaciones de precio */
@@ -238,7 +283,8 @@
 }
 
 .animate-count-up {
-  animation: countUp var(--duration-normal, 250ms) var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1)) both;
+  animation: countUp var(--duration-normal, 250ms)
+    var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1)) both;
 }
 
 /* Animaciones de microinteracciones */
@@ -315,7 +361,7 @@
 
   .animate-button-hover,
   .animate-card-hover {
-    transition: none !important;
+    transition: none;
     transform: none !important;
   }
 
@@ -331,7 +377,7 @@
   .animate-zoom-in,
   .animate-bounce-in {
     animation: none !important;
-    opacity: 1 !important;
+    opacity: 1;
     transform: none !important;
   }
 }
@@ -493,7 +539,8 @@
 
 /* Dot Pulse - Punto pulsante */
 @keyframes dotPulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.3;
     transform: scale(0.8);
   }
@@ -505,7 +552,8 @@
 
 /* Wave - Onda para loaders */
 @keyframes wave {
-  0%, 100% {
+  0%,
+  100% {
     transform: scaleY(1);
   }
   50% {
@@ -519,13 +567,21 @@
 
 /* Shake - Vibración */
 @keyframes shake {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0);
   }
-  10%, 30%, 50%, 70%, 90% {
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
     transform: translateX(-5px);
   }
-  20%, 40%, 60%, 80% {
+  20%,
+  40%,
+  60%,
+  80% {
     transform: translateX(5px);
   }
 }
@@ -806,8 +862,9 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.5);
   transform: translate(-50%, -50%);
-  transition: width var(--duration-slow) var(--ease-out-expo),
-              height var(--duration-slow) var(--ease-out-expo);
+  transition:
+    width var(--duration-slow) var(--ease-out-expo),
+    height var(--duration-slow) var(--ease-out-expo);
 }
 
 .ripple-btn:active::after {
@@ -851,11 +908,14 @@
 }
 
 @keyframes profitGlow {
-  0%, 100% {
+  0%,
+  100% {
     text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
   }
   50% {
-    text-shadow: 0 0 20px rgba(16, 185, 129, 0.7), 0 0 30px rgba(16, 185, 129, 0.4);
+    text-shadow:
+      0 0 20px rgba(16, 185, 129, 0.7),
+      0 0 30px rgba(16, 185, 129, 0.4);
   }
 }
 
@@ -874,8 +934,9 @@
 
 /* Hover Lift - Elevación sutil al pasar el mouse */
 .hover-lift {
-  transition: transform var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1)),
-              box-shadow var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1));
+  transition:
+    transform var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1)),
+    box-shadow var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1));
 }
 
 .hover-lift:hover {
@@ -885,7 +946,8 @@
 
 /* Hover Scale - Escala sutil */
 .hover-scale {
-  transition: transform var(--duration-fast, 150ms) var(--ease-out-back, cubic-bezier(0.34, 1.56, 0.64, 1));
+  transition: transform var(--duration-fast, 150ms)
+    var(--ease-out-back, cubic-bezier(0.34, 1.56, 0.64, 1));
 }
 
 .hover-scale:hover {
@@ -933,19 +995,23 @@
 /* Focus Ring Animated */
 .focus-ring-animated:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-bg-primary, #0a0e1a),
-              0 0 0 4px var(--color-brand-primary, #3b82f6);
+  box-shadow:
+    0 0 0 2px var(--color-bg-primary, #0a0e1a),
+    0 0 0 4px var(--color-brand-primary, #3b82f6);
   animation: focusPulse 2s ease-in-out infinite;
 }
 
 @keyframes focusPulse {
-  0%, 100% {
-    box-shadow: 0 0 0 2px var(--color-bg-primary, #0a0e1a),
-                0 0 0 4px var(--color-brand-primary, #3b82f6);
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px var(--color-bg-primary, #0a0e1a),
+      0 0 0 4px var(--color-brand-primary, #3b82f6);
   }
   50% {
-    box-shadow: 0 0 0 2px var(--color-bg-primary, #0a0e1a),
-                0 0 0 6px rgba(59, 130, 246, 0.4);
+    box-shadow:
+      0 0 0 2px var(--color-bg-primary, #0a0e1a),
+      0 0 0 6px rgba(59, 130, 246, 0.4);
   }
 }
 
@@ -957,7 +1023,8 @@
 }
 
 @keyframes pulseSoft {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -1033,7 +1100,8 @@
 
 /* Tooltip Appear */
 .tooltip-appear {
-  animation: tooltipAppear var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1)) both;
+  animation: tooltipAppear var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1))
+    both;
 }
 
 @keyframes tooltipAppear {
@@ -1051,9 +1119,10 @@
 
 /* Card Interactive - Combinación de efectos para cards */
 .card-interactive {
-  transition: transform var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1)),
-              box-shadow var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1)),
-              border-color var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1));
+  transition:
+    transform var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1)),
+    box-shadow var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1)),
+    border-color var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1));
 }
 
 .card-interactive:hover {

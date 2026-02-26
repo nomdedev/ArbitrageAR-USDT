@@ -5,7 +5,7 @@
  * @version 1.0.0
  */
 
-(function(window) {
+(function (window) {
   'use strict';
 
   // ==========================================
@@ -304,10 +304,7 @@
    */
   function showUpdateBanner(updateInfo) {
     // Determinar tipo de actualización
-    const updateType = determineUpdateType(
-      updateInfo.currentVersion,
-      updateInfo.latestVersion
-    );
+    const updateType = determineUpdateType(updateInfo.currentVersion, updateInfo.latestVersion);
 
     // Siempre mostrar el indicador no invasivo primero
     showUpdateIndicator(updateInfo, updateType);
@@ -318,7 +315,9 @@
     }
 
     activeBanner = updateInfo;
-    window.Logger?.debug(`📢 [NotificationManager] Actualización ${updateType} detectada: v${updateInfo.latestVersion}`);
+    window.Logger?.debug(
+      `📢 [NotificationManager] Actualización ${updateType} detectada: v${updateInfo.latestVersion}`
+    );
   }
 
   /**
@@ -353,16 +352,21 @@
 
     const tooltipText = `${typeLabels[updateType] || 'Nueva versión'}\nv${updateInfo.latestVersion}\nClick para descargar`;
     versionIndicator.setAttribute('data-update-tooltip', tooltipText.replace(/\n/g, ' • '));
-    versionIndicator.setAttribute('aria-label', `Actualización disponible: v${updateInfo.latestVersion}. Click para descargar.`);
+    versionIndicator.setAttribute(
+      'aria-label',
+      `Actualización disponible: v${updateInfo.latestVersion}. Click para descargar.`
+    );
 
     // Configurar click para descargar
-    versionIndicator.onclick = (e) => {
+    versionIndicator.onclick = e => {
       e.preventDefault();
       e.stopPropagation();
       downloadUpdate(updateInfo);
     };
 
-    window.Logger?.debug(`🔔 [NotificationManager] Indicador de actualización mostrado: ${updateType}`);
+    window.Logger?.debug(
+      `🔔 [NotificationManager] Indicador de actualización mostrado: ${updateType}`
+    );
   }
 
   /**
@@ -377,7 +381,9 @@
     // Usar URL específica si está disponible
     const downloadUrl = updateInfo?.downloadUrl || updateInfo?.url || repoUrl;
 
-    window.Logger?.debug(`⬇️ [NotificationManager] Descargando actualización desde: ${downloadUrl}`);
+    window.Logger?.debug(
+      `⬇️ [NotificationManager] Descargando actualización desde: ${downloadUrl}`
+    );
 
     // Abrir en nueva pestaña
     chrome.tabs.create({ url: downloadUrl });
@@ -428,7 +434,10 @@
 
     if (currentVersionEl) currentVersionEl.textContent = `v${updateInfo.currentVersion}`;
     if (newVersionEl) newVersionEl.textContent = `v${updateInfo.latestVersion}`;
-    if (messageEl) messageEl.textContent = updateInfo.message || 'Nueva versión con mejoras de rendimiento y nuevas funcionalidades.';
+    if (messageEl) {
+      messageEl.textContent =
+        updateInfo.message || 'Nueva versión con mejoras de rendimiento y nuevas funcionalidades.';
+    }
 
     if (typeBadgeEl) {
       typeBadgeEl.textContent = updateType;
@@ -436,9 +445,7 @@
 
     // Actualizar características si están disponibles
     if (featuresListEl && updateInfo.features) {
-      featuresListEl.innerHTML = updateInfo.features
-        .map(feature => `<li>${feature}</li>`)
-        .join('');
+      featuresListEl.innerHTML = updateInfo.features.map(feature => `<li>${feature}</li>`).join('');
     }
 
     // Configurar clase de tipo
@@ -518,10 +525,13 @@
     // Cerrar al hacer clic en el backdrop
     const modal = document.getElementById('update-modal');
     if (modal) {
-      modal.addEventListener('click', (e) => {
+      modal.addEventListener('click', e => {
         const rect = modal.querySelector('.update-modal').getBoundingClientRect();
-        const isInDialog = (rect.top <= e.clientY && e.clientY <= rect.top + rect.height &&
-          rect.left <= e.clientX && e.clientX <= rect.left + rect.width);
+        const isInDialog =
+          rect.top <= e.clientY &&
+          e.clientY <= rect.top + rect.height &&
+          rect.left <= e.clientX &&
+          e.clientX <= rect.left + rect.width;
         if (!isInDialog) {
           hideUpdateBanner();
         }
@@ -653,5 +663,4 @@
   window.NotificationManager = NotificationManager;
 
   window.Logger?.debug('✅ [NotificationManager] Módulo cargado correctamente');
-
 })(window);

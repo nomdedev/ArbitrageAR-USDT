@@ -25,16 +25,16 @@ const {
 // Dataset de prueba representativo (estructura real de CriptoYa)
 // ────────────────────────────────────────────────────
 const BANK_DATA = {
-  bna:       { ask: 1050.0, bid: 980.0 },
-  galicia:   { ask: 1060.0, bid: 990.0 },
-  santander: { ask: 1040.0, bid: 970.0 },
-  bbva:      { ask: 1070.0, bid: 1000.0 },
-  icbc:      { ask: 1080.0, bid: 1010.0 },
+  bna:       { ask: 1050, bid: 980 },
+  galicia:   { ask: 1060, bid: 990 },
+  santander: { ask: 1040, bid: 970 },
+  bbva:      { ask: 1070, bid: 1000 },
+  icbc:      { ask: 1080, bid: 1010 },
 };
 
 // Dataset mínimo para tests de casos borde
 const SINGLE_BANK_DATA = {
-  bna: { ask: 1050.0, bid: 980.0 }
+  bna: { ask: 1050, bid: 980 }
 };
 
 describe('bankCalculations', () => {
@@ -56,7 +56,7 @@ describe('bankCalculations', () => {
       // Precios ordenados: [1040, 1050, 1060, 1070, 1080]
       // Mediana (índice 2) = 1060
       const result = calculateBankConsensus(BANK_DATA);
-      expect(result.price).toBe(1060.0);
+      expect(result.price).toBe(1060);
     });
 
     it('calcula la mediana correctamente con número par de bancos (4)', () => {
@@ -68,7 +68,7 @@ describe('bankCalculations', () => {
         bbva:      { ask: 1070 }
       };
       const result = calculateBankConsensus(fourBanks);
-      expect(result.price).toBe(1055.0);
+      expect(result.price).toBe(1055);
     });
 
     it('banksCount refleja el número de bancos con datos válidos', () => {
@@ -80,14 +80,14 @@ describe('bankCalculations', () => {
       // Solo usar bna y galicia
       const result = calculateBankConsensus(BANK_DATA, ['bna', 'galicia']);
       // Precios: [1050, 1060] → (1050+1060)/2 = 1055
-      expect(result.price).toBe(1055.0);
+      expect(result.price).toBe(1055);
       expect(result.banksCount).toBe(2);
     });
 
     it('ignora bancos en selectedBanks que no existen en bankData', () => {
       const result = calculateBankConsensus(BANK_DATA, ['bna', 'banco_inexistente']);
       expect(result.banksCount).toBe(1);
-      expect(result.price).toBe(1050.0);
+      expect(result.price).toBe(1050);
     });
 
     it('retorna null cuando todos los bancos filtrados quedan vacíos', () => {
@@ -109,7 +109,7 @@ describe('bankCalculations', () => {
       };
       const result = calculateBankConsensus(dataConInvalidos);
       expect(result.banksCount).toBe(1);
-      expect(result.price).toBe(1050.0);
+      expect(result.price).toBe(1050);
     });
   });
 
@@ -124,18 +124,18 @@ describe('bankCalculations', () => {
     it('calcula el promedio simple correcto', () => {
       // (1050 + 1060 + 1040 + 1070 + 1080) / 5 = 5300/5 = 1060
       const result = calculateBankAverage(BANK_DATA);
-      expect(result.price).toBe(1060.0);
+      expect(result.price).toBe(1060);
     });
 
     it('promedio con 2 bancos', () => {
       const data = { a: { ask: 1000 }, b: { ask: 1100 } };
-      expect(calculateBankAverage(data).price).toBe(1050.0);
+      expect(calculateBankAverage(data).price).toBe(1050);
     });
 
     it('filtra bancos seleccionados correctamente', () => {
       const result = calculateBankAverage(BANK_DATA, ['bna', 'galicia']);
       // (1050 + 1060) / 2 = 1055
-      expect(result.price).toBe(1055.0);
+      expect(result.price).toBe(1055);
     });
 
     it('retorna null si bankData está vacío', () => {
@@ -150,7 +150,7 @@ describe('bankCalculations', () => {
     it('retorna el precio ASK más bajo (mejor para comprar dólar)', () => {
       // Precio más bajo = santander con $1040
       const result = calculateBestBuy(BANK_DATA);
-      expect(result.price).toBe(1040.0);
+      expect(result.price).toBe(1040);
     });
 
     it('retorna method="mejor-compra"', () => {
@@ -160,7 +160,7 @@ describe('bankCalculations', () => {
     it('filtra bancos seleccionados', () => {
       // Entre bna(1050) y bbva(1070), el más barato es bna
       const result = calculateBestBuy(BANK_DATA, ['bna', 'bbva']);
-      expect(result.price).toBe(1050.0);
+      expect(result.price).toBe(1050);
     });
 
     it('retorna null para bankData vacío', () => {
@@ -175,7 +175,7 @@ describe('bankCalculations', () => {
     it('retorna el precio ASK más alto (mejor para vender)', () => {
       // Precio más alto = icbc con $1080
       const result = calculateBestSell(BANK_DATA);
-      expect(result.price).toBe(1080.0);
+      expect(result.price).toBe(1080);
     });
 
     it('retorna method="mejor-venta"', () => {
@@ -185,7 +185,7 @@ describe('bankCalculations', () => {
     it('filtra bancos seleccionados', () => {
       // Entre bna(1050) y galicia(1060), el más caro es galicia
       const result = calculateBestSell(BANK_DATA, ['bna', 'galicia']);
-      expect(result.price).toBe(1060.0);
+      expect(result.price).toBe(1060);
     });
 
     it('retorna null para bankData vacío', () => {
@@ -199,7 +199,7 @@ describe('bankCalculations', () => {
   describe('calculateSingleBank', () => {
     it('retorna datos del banco específico', () => {
       const result = calculateSingleBank(BANK_DATA, 'bna');
-      expect(result.price).toBe(1050.0);
+      expect(result.price).toBe(1050);
       expect(result.method).toBe('solo-bna');
       expect(result.banksCount).toBe(1);
     });
@@ -241,7 +241,7 @@ describe('bankCalculations', () => {
 
     it('delega a calculateSingleBank para código de banco', () => {
       const result = calculateDollarPrice(BANK_DATA, 'bna');
-      expect(result.price).toBe(1050.0);
+      expect(result.price).toBe(1050);
       expect(result.method).toBe('solo-bna');
     });
 

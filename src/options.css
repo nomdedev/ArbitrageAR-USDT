@@ -375,7 +375,7 @@ input:checked + .slider {
 
 input:checked + .slider::before {
   transform: translateX(16px);
-  background: white;
+  background: var(--color-bg-primary);
 }
 
 /* ===== EXCHANGE GROUPS ===== */
@@ -510,7 +510,7 @@ input:checked + .slider::before {
 .btn.primary,
 .btn-primary {
   background: var(--color-brand-primary);
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 .btn.primary:hover,
@@ -573,7 +573,7 @@ input:checked + .slider::before {
 
 /* ===== HIDDEN ===== */
 .hidden {
-  display: none !important;
+  display: none;
 }
 
 /* ===== BROKER FEES - NUEVA INTERFAZ ===== */
@@ -739,7 +739,7 @@ input:checked + .slider::before {
 
 .btn-edit {
   background: var(--color-warning);
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 .btn-edit:hover {
@@ -748,7 +748,7 @@ input:checked + .slider::before {
 
 .btn-remove {
   background: var(--color-danger);
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 .btn-remove:hover {

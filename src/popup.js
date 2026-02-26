@@ -72,7 +72,8 @@ let allRoutes = []; // NUEVO: Cache de todas las rutas sin filtrar
 const DEBUG_MODE = false; // PRODUCCIÓN: Desactivado después de diagnosticar problema
 let verboseLogsEnabled = DEBUG_MODE || window.__ARBITRAGE_DEBUG__ === true;
 try {
-  verboseLogsEnabled = verboseLogsEnabled || window.localStorage?.getItem('arb_debug_logs') === 'true';
+  verboseLogsEnabled =
+    verboseLogsEnabled || window.localStorage?.getItem('arb_debug_logs') === 'true';
 } catch (_) {
   // Ignorar errores de acceso a localStorage
 }
@@ -141,7 +142,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // NUEVO: Listener para evento routeSelected (desde RouteManager)
     // Esto abre el modal de detalles cuando se hace click en una card de Fiat
-    document.addEventListener('routeSelected', function(e) {
+    document.addEventListener('routeSelected', function (e) {
       const route = e.detail;
       log('🖱️ [POPUP] routeSelected event recibido:', route.broker || route.buyExchange);
       showRouteDetailsByType(route);
@@ -155,7 +156,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (typeof window.initTooltips === 'function') {
       window.initTooltips();
     } else {
-      console.warn('⚠️ [INIT] initTooltips no está disponible - tooltipSystem.js no se cargó correctamente');
+      console.warn(
+        '⚠️ [INIT] initTooltips no está disponible - tooltipSystem.js no se cargó correctamente'
+      );
     }
 
     // NUEVO FASE 8: Inicializar componentes UI del design system
@@ -216,7 +219,9 @@ function initUIComponents() {
         console.error('❌ [INIT UI] Error inicializando ArbitragePanel:', error);
       }
     } else {
-      console.warn('⚠️ [INIT UI] window.ArbitragePanel no está disponible - ui-components/arbitrage-panel.js no se cargó correctamente');
+      console.warn(
+        '⚠️ [INIT UI] window.ArbitragePanel no está disponible - ui-components/arbitrage-panel.js no se cargó correctamente'
+      );
     }
 
     // Inicializar TabSystem si está disponible
@@ -230,7 +235,9 @@ function initUIComponents() {
         console.error('❌ [INIT UI] Error inicializando TabSystem:', error);
       }
     } else {
-      console.warn('⚠️ [INIT UI] window.TabSystem no está disponible - ui-components/tabs.js no se cargó correctamente');
+      console.warn(
+        '⚠️ [INIT UI] window.TabSystem no está disponible - ui-components/tabs.js no se cargó correctamente'
+      );
     }
 
     // Inicializar AnimationUtils si está disponible
@@ -243,7 +250,9 @@ function initUIComponents() {
         console.error('❌ [INIT UI] Error inicializando AnimationUtils:', error);
       }
     } else {
-      console.warn('⚠️ [INIT UI] window.AnimationUtils no está disponible - ui-components/animations.js no se cargó correctamente');
+      console.warn(
+        '⚠️ [INIT UI] window.AnimationUtils no está disponible - ui-components/animations.js no se cargó correctamente'
+      );
     }
   } catch (error) {
     console.error('❌ [INIT UI] Error crítico en inicialización de componentes UI:', error);
@@ -494,7 +503,11 @@ function updateConnectionStatus(data) {
     const now = Date.now();
     const ageMinutes = Math.floor((now - data.lastUpdate) / 60000);
     const date = new Date(data.lastUpdate);
-    timeText = date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    timeText = date.toLocaleTimeString('es-AR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
 
     // Cambiar estado si datos son antiguos (> 5 min)
     if (ageMinutes > 5) {
@@ -590,7 +603,10 @@ function applyP2PFilter() {
   if (filteredRoutes && filteredRoutes.length > 0 && currentData) {
     RteMgr.displayRoutes(filteredRoutes, 'optimized-routes');
   } else if (filteredRoutes && filteredRoutes.length === 0) {
-    RteMgr.showEmptyState('optimized-routes', 'No se encontraron rutas que cumplan con tus criterios de filtrado.');
+    RteMgr.showEmptyState(
+      'optimized-routes',
+      'No se encontraron rutas que cumplan con tus criterios de filtrado.'
+    );
   }
 }
 
@@ -1099,9 +1115,7 @@ function applyPreferredExchangesFilter(routes, preferredExchanges) {
     preferredExchanges.length === 0
   ) {
     if (DEBUG_MODE) {
-      log(
-        '🔍 [POPUP] No hay exchanges preferidos configurados - mostrando todas las rutas'
-      );
+      log('🔍 [POPUP] No hay exchanges preferidos configurados - mostrando todas las rutas');
     }
     return routes;
   }
@@ -1183,15 +1197,15 @@ function displayArbitrages(arbitrages, official) {
             <span class="price-value">$${Fmt.formatNumber(arb.officialPrice)}</span>
           </div>
           ${
-  official?.source
-    ? `
+            official?.source
+              ? `
           <div class="price-row source-row">
             <span class="price-label">📍 Fuente</span>
             <span class="price-value source-value">${Fmt.getDollarSourceDisplay(official)}</span>
           </div>
           `
-    : ''
-}
+              : ''
+          }
           <div class="price-row">
             <span class="price-label">💱 USD → USDT</span>
             <span class="price-value">${Fmt.formatUsdUsdtRatio(arb.usdToUsdtRate)} USD/USDT</span>
@@ -1201,8 +1215,8 @@ function displayArbitrages(arbitrages, official) {
             <span class="price-value highlight">$${Fmt.formatNumber(arb.usdtArsBid)}</span>
           </div>
           ${
-  hasFees
-    ? `
+            hasFees
+              ? `
           <div class="price-row fees-row">
             <span class="price-label">📊 Comisiones</span>
             <span class="price-value fee-value">${Fmt.formatNumber(arb.fees.total)}%</span>
@@ -1212,8 +1226,8 @@ function displayArbitrages(arbitrages, official) {
             <span class="price-value net-profit">+${Fmt.formatNumber(arb.profitPercentage)}%</span>
           </div>
           `
-    : ''
-}
+              : ''
+          }
         </div>
       </div>
     `;
@@ -1643,7 +1657,7 @@ function setupModalCloseButton(modal) {
   }
 
   // También cerrar al hacer click en el overlay
-  modal.onclick = (e) => {
+  modal.onclick = e => {
     if (e.target === modal) {
       log('🔳 [MODAL] Cerrando modal via overlay');
       modal.style.display = 'none';
@@ -1727,7 +1741,9 @@ function generateDirectUsdtArsModal(route) {
         </div>
       </div>
 
-      ${fees.total > 0 ? `
+      ${
+        fees.total > 0
+          ? `
       <details class="fees-details">
         <summary>💸 Ver detalle de comisiones</summary>
         <div class="fees-content">
@@ -1745,7 +1761,9 @@ function generateDirectUsdtArsModal(route) {
           </div>
         </div>
       </details>
-      ` : ''}
+      `
+          : ''
+      }
     </div>
   `;
 }
@@ -1832,7 +1850,7 @@ function generateArbitrageModal(route) {
   const profitPercentage = route.profitPercentage || calc.profitPercentage || 0;
   const netProfit = calc.netProfit || 0;
   const isProfitable = profitPercentage >= 0;
-  const finalAmount = calc.finalAmount || (initial + netProfit);
+  const finalAmount = calc.finalAmount || initial + netProfit;
 
   const buyExchange = route.buyExchange || 'N/A';
   const sellExchange = route.sellExchange || route.buyExchange || 'N/A';
@@ -1872,7 +1890,9 @@ function generateArbitrageModal(route) {
           <span class="step-exchange">${buyExchange}</span>
           <span class="step-action">USD → USDT</span>
         </div>
-        ${!isSingleExchange ? `
+        ${
+          !isSingleExchange
+            ? `
         <div class="route-arrow">
           <span class="arrow-icon">→</span>
           <span class="arrow-label">Transfer</span>
@@ -1882,7 +1902,8 @@ function generateArbitrageModal(route) {
           <span class="step-exchange">${sellExchange}</span>
           <span class="step-action">USDT → ARS</span>
         </div>
-        ` : `
+        `
+            : `
         <div class="route-arrow">
           <span class="arrow-icon">→</span>
           <span class="arrow-label">$${Fmt.formatNumber(usdtArsBid)}</span>
@@ -1892,7 +1913,8 @@ function generateArbitrageModal(route) {
           <span class="step-exchange">ARS</span>
           <span class="step-action">Recibir</span>
         </div>
-        `}
+        `
+        }
       </div>
 
       <!-- Desglose de operación -->
@@ -1917,12 +1939,16 @@ function generateArbitrageModal(route) {
 
         <div class="breakdown-section">
           <div class="section-header">2. Convierte USD → USDT en ${buyExchange}</div>
-          ${usdToUsdtRate && isFinite(usdToUsdtRate) ? `
+          ${
+            usdToUsdtRate && isFinite(usdToUsdtRate)
+              ? `
           <div class="breakdown-row">
             <span class="label">Tasa de conversión</span>
             <span class="value">${usdToUsdtRate.toFixed(4)} USD = 1 USDT</span>
           </div>
-          ` : ''}
+          `
+              : ''
+          }
           <div class="breakdown-row highlight">
             <span class="label">USDT obtenidos</span>
             <span class="value">${Fmt.formatNumber(calc.usdtAfterFees || 0)} USDT</span>
@@ -2010,10 +2036,7 @@ function showRouteGuideFromData(route) {
 // FUNCIÓN LEGACY v5.0.5: Mostrar guía de una ruta optimizada (POR ÍNDICE - DEPRECADO en v5.0.72)
 // Mantener para compatibilidad pero ya no se usa
 function showRouteGuide(index) {
-  log(
-    '🔍 [POPUP] currentData.optimizedRoutes.length:',
-    currentData?.optimizedRoutes?.length
-  );
+  log('🔍 [POPUP] currentData.optimizedRoutes.length:', currentData?.optimizedRoutes?.length);
 
   if (!currentData?.optimizedRoutes?.[index]) {
     console.warn(`❌ [POPUP] No hay ruta disponible para el índice: ${index}`);
@@ -2210,14 +2233,14 @@ function generateGuideSteps(values) {
             <span class="calc-result">${Fmt.formatNumber(usdtAfterFees)} USDT</span>
           </div>
           ${
-  typeof usdToUsdtRate === 'number' && isFinite(usdToUsdtRate) && usdToUsdtRate > 1.005
-    ? `
+            typeof usdToUsdtRate === 'number' && isFinite(usdToUsdtRate) && usdToUsdtRate > 1.005
+              ? `
           <div class="step-simple-warning">
             ⚠️ El exchange cobra ${Fmt.formatCommissionPercent((usdToUsdtRate - 1) * 100)}% para esta conversión
           </div>
           `
-    : ''
-}
+              : ''
+          }
         </div>
       </div>
 
@@ -2630,7 +2653,13 @@ async function displayExchangeRates(exchangeRates) {
   // NUEVO v6.0.0: Aplicar animaciones a las tarjetas de exchanges
   const exchangeCards = container.querySelectorAll('.exchange-card');
   exchangeCards.forEach((card, index) => {
-    card.classList.add('stagger-in', 'hover-lift', 'magnetic-btn', 'ripple-btn', 'hover-scale-rotate');
+    card.classList.add(
+      'stagger-in',
+      'hover-lift',
+      'magnetic-btn',
+      'ripple-btn',
+      'hover-scale-rotate'
+    );
     card.style.animationDelay = `${index * 30}ms`;
   });
 
@@ -2673,40 +2702,40 @@ function setupExchangeFilters(allExchanges) {
       exchangesList.innerHTML =
         filtered.length > 0
           ? filtered
-            .map(([_code, data]) => {
-              const { name, type, rates, usdRates, source } = data;
+              .map(([_code, data]) => {
+                const { name, type, rates, usdRates, source } = data;
 
-              let displayRates = '';
-              let rateType = '';
+                let displayRates = '';
+                let rateType = '';
 
-              if (type === 'oficial' && rates) {
-                displayRates = `
+                if (type === 'oficial' && rates) {
+                  displayRates = `
               <div class="exchange-rate">
                 <span class="rate-label">ARS/USD:</span>
                 <span class="rate-value">$${Fmt.formatNumber(rates.compra)} / $${Fmt.formatNumber(rates.venta)}</span>
               </div>
             `;
-                rateType = 'Oficial';
-              } else if (type === 'usdt_ars' && rates) {
-                displayRates = `
+                  rateType = 'Oficial';
+                } else if (type === 'usdt_ars' && rates) {
+                  displayRates = `
               <div class="exchange-rate">
                 <span class="rate-label">USDT/ARS:</span>
                 <span class="rate-value">$${Fmt.formatNumber(rates.compra)} / $${Fmt.formatNumber(rates.venta)}</span>
               </div>
             `;
-                rateType = 'USDT/ARS';
-              } else if (type === 'usdt_usd' && usdRates) {
-                displayRates = `
+                  rateType = 'USDT/ARS';
+                } else if (type === 'usdt_usd' && usdRates) {
+                  displayRates = `
               <div class="exchange-rate">
                 <span class="rate-label">USDT/USD:</span>
                 <span class="rate-value">$${Fmt.formatNumber(usdRates.compra)} / $${Fmt.formatNumber(usdRates.venta)}</span>
               </div>
             `;
-                rateType = 'USDT/USD';
-              }
+                  rateType = 'USDT/USD';
+                }
 
-              if (rates && usdRates) {
-                displayRates = `
+                if (rates && usdRates) {
+                  displayRates = `
               <div class="exchange-rate">
                 <span class="rate-label">USDT/ARS:</span>
                 <span class="rate-value">$${Fmt.formatNumber(rates.compra)} / $${Fmt.formatNumber(rates.venta)}</span>
@@ -2716,10 +2745,10 @@ function setupExchangeFilters(allExchanges) {
                 <span class="rate-value">$${Fmt.formatNumber(usdRates.compra)} / $${Fmt.formatNumber(usdRates.venta)}</span>
               </div>
             `;
-                rateType = 'USDT/ARS + USD';
-              }
+                  rateType = 'USDT/ARS + USD';
+                }
 
-              return `
+                return `
             <div class="exchange-card" data-type="${type}" data-name="${name.toLowerCase()}">
               <div class="exchange-header">
                 <div class="exchange-name">${name}</div>
@@ -2731,8 +2760,8 @@ function setupExchangeFilters(allExchanges) {
               <div class="exchange-source">Fuente: ${source}</div>
             </div>
           `;
-            })
-            .join('')
+              })
+              .join('')
           : '<div class="no-results">No se encontraron exchanges que coincidan con los filtros</div>';
     }
   };
@@ -3606,10 +3635,7 @@ function updateActiveTabSorting() {
   const activeTabButton = document.querySelector('.banks-tab-btn.active');
   const activeTab = activeTabButton ? activeTabButton.dataset.tab : 'usd-oficial';
 
-  log(
-    '🔄 Actualizando ordenamiento para todas las pestañas, manteniendo activa:',
-    activeTab
-  );
+  log('🔄 Actualizando ordenamiento para todas las pestañas, manteniendo activa:', activeTab);
 
   // Obtener preferencia de ordenamiento actual
   // Si no tenemos datos almacenados, recargar todo
@@ -3778,9 +3804,7 @@ function filterAndRenderCryptoRoutes() {
       }
       return true;
     });
-    log(
-      `🔍 Después de filtro operación (${currentOperationFilter}): ${filtered.length} rutas`
-    );
+    log(`🔍 Después de filtro operación (${currentOperationFilter}): ${filtered.length} rutas`);
   }
 
   renderCryptoRoutes(filtered);
@@ -3879,7 +3903,7 @@ function createCryptoRouteCard(route, index) {
   `;
 
   // Hacer toda la card clickeable para mostrar detalles
-  card.addEventListener('click', (e) => {
+  card.addEventListener('click', e => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -4262,55 +4286,63 @@ function initMagneticButtons() {
     let animationFrameId = null;
 
     // OPTIMIZACIÓN: Usar passive event listener para mejor rendimiento
-    button.addEventListener('mousemove', (e) => {
-      const rect = button.getBoundingClientRect();
-      const x = e.clientX - rect.left - rect.width / 2;
-      const y = e.clientY - rect.top - rect.height / 2;
+    button.addEventListener(
+      'mousemove',
+      e => {
+        const rect = button.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
 
-      // Guardar valores para el próximo frame
-      lastX = x;
-      lastY = y;
+        // Guardar valores para el próximo frame
+        lastX = x;
+        lastY = y;
 
-      // OPTIMIZACIÓN: Usar requestAnimationFrame para debouncing
-      // Cancelar el RAF anterior si existe
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
+        // OPTIMIZACIÓN: Usar requestAnimationFrame para debouncing
+        // Cancelar el RAF anterior si existe
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+        }
 
-      // Programar la actualización para el próximo frame de animación
-      animationFrameId = requestAnimationFrame(() => {
-        // Movimiento sutil (máximo 10px)
-        const moveX = lastX * 0.2;
-        const moveY = lastY * 0.2;
+        // Programar la actualización para el próximo frame de animación
+        animationFrameId = requestAnimationFrame(() => {
+          // Movimiento sutil (máximo 10px)
+          const moveX = lastX * 0.2;
+          const moveY = lastY * 0.2;
 
-        // Aplicar transformación usando willChange para optimización
-        button.style.willChange = 'transform';
-        button.style.transform = `translate(${moveX}px, ${moveY}px)`;
+          // Aplicar transformación usando willChange para optimización
+          button.style.willChange = 'transform';
+          button.style.transform = `translate(${moveX}px, ${moveY}px)`;
 
-        // Limpiar RAF ID
-        animationFrameId = null;
-      });
-    }, { passive: true }); // OPTIMIZACIÓN: Event listener pasivo
+          // Limpiar RAF ID
+          animationFrameId = null;
+        });
+      },
+      { passive: true }
+    ); // OPTIMIZACIÓN: Event listener pasivo
 
-    button.addEventListener('mouseleave', () => {
-      // Cancelar cualquier RAF pendiente
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-        animationFrameId = null;
-      }
+    button.addEventListener(
+      'mouseleave',
+      () => {
+        // Cancelar cualquier RAF pendiente
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+          animationFrameId = null;
+        }
 
-      // Resetear transformación
-      button.style.transform = 'translate(0, 0)';
+        // Resetear transformación
+        button.style.transform = 'translate(0, 0)';
 
-      // Limpiar willChange después de la transición
-      setTimeout(() => {
-        button.style.willChange = '';
-      }, 300);
-    }, { passive: true }); // OPTIMIZACIÓN: Event listener pasivo
+        // Limpiar willChange después de la transición
+        setTimeout(() => {
+          button.style.willChange = '';
+        }, 300);
+      },
+      { passive: true }
+    ); // OPTIMIZACIÓN: Event listener pasivo
 
     // Limpieza: Cancelar RAF si el elemento se remueve del DOM
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
+    const observer = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
         if (mutation.type === 'childList' || mutation.type === 'removedNodes') {
           if (animationFrameId && !document.contains(button)) {
             cancelAnimationFrame(animationFrameId);
@@ -4461,7 +4493,7 @@ function initMicroInteractions() {
   // Agregar efecto ripple a botones con clase ripple-btn
   const rippleButtons = document.querySelectorAll('.ripple-btn');
   rippleButtons.forEach(button => {
-    button.addEventListener('click', (e) => createRipple(e, button));
+    button.addEventListener('click', e => createRipple(e, button));
   });
 
   // Inicializar contadores con clase counter-animate
@@ -4472,14 +4504,17 @@ function initMicroInteractions() {
     const duration = parseInt(counter.dataset.duration) || 1000;
 
     // Usar IntersectionObserver para animar solo cuando sea visible
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          animateCounter(entry.target, targetValue, duration, decimals);
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.5 });
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            animateCounter(entry.target, targetValue, duration, decimals);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
 
     observer.observe(counter);
   });
@@ -4550,7 +4585,10 @@ function diagnoseSVGIcons() {
     });
 
     if (missingIcons.length > 0) {
-      console.error(`❌ [SVG DIAGNOSIS] Faltan ${missingIcons.length} iconos críticos:`, missingIcons);
+      console.error(
+        `❌ [SVG DIAGNOSIS] Faltan ${missingIcons.length} iconos críticos:`,
+        missingIcons
+      );
     }
 
     // 4. Verificar referencias de iconos en botones de filtro
@@ -4565,7 +4603,9 @@ function diagnoseSVGIcons() {
           const exists = symbolIds.includes(iconId);
 
           if (!exists) {
-            console.error(`❌ [SVG DIAGNOSIS] Botón ${index + 1} referencia icono inexistente: ${iconId}`);
+            console.error(
+              `❌ [SVG DIAGNOSIS] Botón ${index + 1} referencia icono inexistente: ${iconId}`
+            );
           }
         } else {
           console.warn(`⚠️ [SVG DIAGNOSIS] Botón ${index + 1} no tiene referencia SVG`);
@@ -4586,7 +4626,9 @@ function diagnoseSVGIcons() {
           const exists = symbolIds.includes(iconId);
 
           if (!exists) {
-            console.error(`❌ [SVG DIAGNOSIS] Botón header ${index + 1} referencia icono inexistente: ${iconId}`);
+            console.error(
+              `❌ [SVG DIAGNOSIS] Botón header ${index + 1} referencia icono inexistente: ${iconId}`
+            );
           }
         }
       }

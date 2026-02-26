@@ -37,7 +37,7 @@
 }
 
 /* Estado best: glow verde + badge destacado */
-.exchange-card[data-best="true"]::before {
+.exchange-card[data-best='true']::before {
   background: var(--color-success);
   width: 4px;
   box-shadow: 0 0 8px var(--color-success);
@@ -53,13 +53,13 @@
   color: var(--color-text-primary);
 }
 /* Up: color verde, icono ▲ */
-.variation-badge[data-trend="up"] {
+.variation-badge[data-trend='up'] {
   background: var(--color-success-muted);
   color: var(--color-success-text);
 }
 
 /* Down: color rojo, icono ▼ */
-.variation-badge[data-trend="down"] {
+.variation-badge[data-trend='down'] {
   background: var(--color-danger-muted);
   color: var(--color-danger-text);
 }
@@ -95,8 +95,12 @@
 }
 
 @keyframes drawLine {
-  from { stroke-dashoffset: 1000; }
-  to { stroke-dashoffset: 0; }
+  from {
+    stroke-dashoffset: 1000;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 /* Sparkline con tendencia bajista */
@@ -124,7 +128,7 @@
   display: none;
   padding: var(--space-1) var(--space-2);
   background: var(--color-success);
-  color: white;
+  color: var(--color-text-inverse);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
@@ -144,25 +148,20 @@
   border-color: var(--color-border-emphasis);
 }
 
-.exchange-card[data-best="true"]:hover {
+.exchange-card[data-best='true']:hover {
   box-shadow: 0 12px 40px rgba(16, 185, 129, 0.3);
 }
 
 /* Estado loading: skeleton shimmer */
-.exchange-card[data-loading="true"] {
+.exchange-card[data-loading='true'] {
   pointer-events: none;
   opacity: 0.6;
 }
-.exchange-card[data-loading="true"]::after {
+.exchange-card[data-loading='true']::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(59, 130, 246, 0.1) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.1) 50%, transparent 100%);
   animation: shimmer 1.5s ease-in-out infinite;
 }
 
@@ -171,12 +170,24 @@
    ========================================== */
 
 /* Animación de entrada con stagger */
-.exchange-card:nth-child(1) { animation-delay: 0ms; }
-.exchange-card:nth-child(2) { animation-delay: 50ms; }
-.exchange-card:nth-child(3) { animation-delay: 100ms; }
-.exchange-card:nth-child(4) { animation-delay: 150ms; }
-.exchange-card:nth-child(5) { animation-delay: 200ms; }
-.exchange-card:nth-child(n+6) { animation-delay: 250ms; }
+.exchange-card:nth-child(1) {
+  animation-delay: 0ms;
+}
+.exchange-card:nth-child(2) {
+  animation-delay: 50ms;
+}
+.exchange-card:nth-child(3) {
+  animation-delay: 100ms;
+}
+.exchange-card:nth-child(4) {
+  animation-delay: 150ms;
+}
+.exchange-card:nth-child(5) {
+  animation-delay: 200ms;
+}
+.exchange-card:nth-child(n + 6) {
+  animation-delay: 250ms;
+}
 
 @keyframes fadeInUp {
   from {
@@ -201,7 +212,8 @@
 
 /* Glow pulsante para best price */
 @keyframes glowPulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
   }
   50% {
@@ -213,15 +225,27 @@
 }
 
 @keyframes priceFlashUp {
-  0% { background-color: transparent; }
-  50% { background-color: rgba(16, 185, 129, 0.2); }
-  100% { background-color: transparent; }
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(16, 185, 129, 0.2);
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 
 @keyframes priceFlashDown {
-  0% { background-color: transparent; }
-  50% { background-color: rgba(239, 68, 68, 0.2); }
-  100% { background-color: transparent; }
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(239, 68, 68, 0.2);
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 /* ==========================================
    10. VARIANTES DE TARJETAS
@@ -386,13 +410,17 @@
   outline: 2px solid var(--color-brand-primary);
   outline-offset: 2px;
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md), 0 0 0 4px rgba(59, 130, 246, 0.2);
+  box-shadow:
+    var(--shadow-md),
+    0 0 0 4px rgba(59, 130, 246, 0.2);
 }
 
 /* Estado focus con best price */
-.exchange-card[data-best="true"]:focus-visible {
+.exchange-card[data-best='true']:focus-visible {
   outline-color: var(--color-success);
-  box-shadow: var(--shadow-md), 0 0 0 4px rgba(16, 185, 129, 0.3);
+  box-shadow:
+    var(--shadow-md),
+    0 0 0 4px rgba(16, 185, 129, 0.3);
 }
 
 /* ==========================================
@@ -439,7 +467,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ==========================================
@@ -476,10 +506,10 @@
    ========================================== */
 
 @media (max-width: 480px) {
-.exchange-card {
+  .exchange-card {
     padding: var(--space-3);
   }
-.best-price-badge {
+  .best-price-badge {
     font-size: 0.65rem;
     padding: 2px 6px;
   }
@@ -495,7 +525,7 @@
     transform: none !important;
     animation: none !important;
   }
-.exchange-card[data-loading="true"]::after {
+  .exchange-card[data-loading='true']::after {
     animation: none !important;
   }
 }

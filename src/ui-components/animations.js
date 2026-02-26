@@ -49,14 +49,17 @@ const AnimationUtils = {
   observe(elements, animationName, threshold = 0.1) {
     if (!elements || elements.length === 0) return;
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add(animationName);
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold });
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add(animationName);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold }
+    );
 
     elements.forEach(el => observer.observe(el));
 
@@ -76,7 +79,7 @@ const AnimationUtils = {
     const startTime = performance.now();
     const isFloat = finalValue % 1 !== 0;
 
-    const animate = (currentTime) => {
+    const animate = currentTime => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
 
@@ -106,13 +109,10 @@ const AnimationUtils = {
     // Calcular stroke-dashoffset
     // stroke-dasharray: 283 (2 * PI * 45)
     const circumference = 283;
-    const targetOffset = circumference - (circumference * percent / 100);
+    const targetOffset = circumference - (circumference * percent) / 100;
 
     // Animar usando Web Animations API
-    ring.animate([
-      { strokeDashoffset: circumference },
-      { strokeDashoffset: targetOffset }
-    ], {
+    ring.animate([{ strokeDashoffset: circumference }, { strokeDashoffset: targetOffset }], {
       duration: duration,
       easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
       fill: 'forwards'
@@ -395,7 +395,7 @@ function initAnimations() {
 
     animationController.observe(
       el,
-      (entries) => {
+      entries => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             entry.target.classList.add(animationName);

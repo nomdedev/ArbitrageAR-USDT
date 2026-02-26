@@ -63,19 +63,21 @@
   stroke-linecap: round;
   stroke-dasharray: 283; /* 2 * PI * 45 */
   stroke-dashoffset: 283;
-  transition: stroke-dashoffset 1s var(--ease-out-expo), stroke 0.3s ease;
+  transition:
+    stroke-dashoffset 1s var(--ease-out-expo),
+    stroke 0.3s ease;
 }
 
 /* Niveles de rentabilidad */
-.arbitrage-panel[data-profitability="low"] .progress-ring-fill {
+.arbitrage-panel[data-profitability='low'] .progress-ring-fill {
   stroke: #9ca3af; /* neutral */
 }
 
-.arbitrage-panel[data-profitability="medium"] .progress-ring-fill {
+.arbitrage-panel[data-profitability='medium'] .progress-ring-fill {
   stroke: var(--color-warning);
 }
 
-.arbitrage-panel[data-profitability="high"] .progress-ring-fill {
+.arbitrage-panel[data-profitability='high'] .progress-ring-fill {
   stroke: var(--color-success);
   filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.5));
 }
@@ -185,7 +187,7 @@
   flex: 1;
   padding: var(--space-3) var(--space-4);
   background: linear-gradient(135deg, var(--color-success) 0%, #059669 100%);
-  color: white;
+  color: var(--color-text-inverse);
   border: none;
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
@@ -297,12 +299,13 @@
 }
 
 /* Glow pulsante para best opportunities */
-.arbitrage-panel[data-profitability="high"] {
+.arbitrage-panel[data-profitability='high'] {
   animation: panelGlow 2s ease-in-out infinite;
 }
 
 @keyframes panelGlow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: var(--shadow-md);
   }
   50% {
@@ -334,25 +337,25 @@
   .arbitrage-panel {
     padding: var(--space-4);
   }
-  
+
   .panel-header {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .profit-ring {
     width: 70px;
     height: 70px;
   }
-  
+
   .profit-percent {
     font-size: var(--font-size-base);
   }
-  
+
   .panel-actions {
     flex-direction: column;
   }
-  
+
   .btn-details {
     width: 100%;
   }
@@ -368,11 +371,13 @@
     transform: none !important;
     animation: none !important;
   }
-  
+
   .progress-ring-fill {
-    transition: stroke-dashoffset 0.3s ease, stroke 0.3s ease;
+    transition:
+      stroke-dashoffset 0.3s ease,
+      stroke 0.3s ease;
   }
-  
+
   .panel-details-expandable {
     transition: max-height 0.3s ease;
   }
