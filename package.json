@@ -53,6 +53,7 @@
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.29.0",
     "@playwright/test": "^1.58.1",
     "archiver": "^7.0.1",
     "clean-css": "^5.3.3",

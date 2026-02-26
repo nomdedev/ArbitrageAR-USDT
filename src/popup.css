@@ -752,7 +752,8 @@ header {
 
 .dollar-actions {
   display: flex;
-  gap: var(--space-2);
+  flex-direction: column;
+  gap: var(--space-1);
   margin-left: auto;
 }
 
@@ -761,11 +762,19 @@ header {
   background: rgba(16, 185, 129, 0.12);
   color: var(--color-success);
   border-radius: var(--radius-md);
-  padding: var(--space-1) var(--space-2);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   transition: all var(--duration-fast) var(--ease-out);
+}
+
+.dollar-action-btn svg {
+  width: 14px;
+  height: 14px;
 }
 
 .dollar-action-btn:hover {

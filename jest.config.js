@@ -6,7 +6,6 @@ module.exports = {
   testEnvironment: 'jsdom',
   roots: ['<rootDir>/tests', '<rootDir>/src'],
   testMatch: [
-    '**/__tests__/**/*.js',
     '**/*.test.js',
     '**/*.spec.js'
   ],
@@ -31,7 +30,9 @@ module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1'
   },
-  transform: {},
+  transform: {
+    '^.+\\.js$': 'babel-jest'
+  },
   verbose: true,
   testTimeout: 10000,
   globals: {

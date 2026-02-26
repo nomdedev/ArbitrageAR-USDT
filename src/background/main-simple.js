@@ -1,5 +1,11 @@
 /* global importScripts */
 
+function log(...args) {
+  if (globalThis.__ARBITRAGE_DEBUG__ === true) {
+    console.info(...args);
+  }
+}
+
 // ============================================
 // MAIN BACKGROUND SCRIPT - ArbitrageAR v5.0.84
 // Service Worker para Chrome Extension
@@ -264,7 +270,6 @@ async function updateBanksData() {
   }
 }
 
-const DEBUG_MODE = false; // PRODUCCIÓN: Desactivado después de diagnosticar problema
 // Variables globales para cache de datos de bancos
 let cachedDollarTypes = {};
 let cachedUsdtUsdData = {};
@@ -276,12 +281,6 @@ let REQUEST_TIMEOUT = 10000; // ms - valor por defecto
 const ENABLE_RATE_LIMIT = false; // NUEVO v5.0.61: Desactivar rate limit por defecto
 
 let lastRequestTime = 0;
-
-function log(...args) {
-  if (DEBUG_MODE) {
-    console.info(...args);
-  }
-}
 
 async function getUserSettings() {
   try {
@@ -2319,9 +2318,34 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       // DIAGNÓSTICO: Loggear que no hay datos en cache
       log('🔍 [DIAGNÓSTICO] getArbitrages - No hay datos en cache, actualizando...');
 
+      const MESSAGE_TIMEOUT_MS = 12000;
+      let hasResponded = false;
+
+      const safeSendResponse = payload => {
+        if (hasResponded) {
+          return;
+        }
+        hasResponded = true;
+        sendResponse(payload);
+      };
+
+      const responseTimeoutId = setTimeout(() => {
+        console.error(
+          `⏰ [BACKGROUND] TIMEOUT: getArbitrages excedió ${MESSAGE_TIMEOUT_MS}ms sin responder`
+        );
+        safeSendResponse({
+          timeout: true,
+          backgroundUnhealthy: true,
+          error: `Timeout interno del background (${MESSAGE_TIMEOUT_MS}ms)`,
+          optimizedRoutes: [],
+          arbitrages: []
+        });
+      }, MESSAGE_TIMEOUT_MS);
+
       // Actualizar datos de forma asíncrona
       updateData()
         .then(data => {
+          clearTimeout(responseTimeoutId);
           // DIAGNÓSTICO: Loggear resultado de actualización
           log('🔍 [DIAGNÓSTICO] getArbitrages - Datos frescos obtenidos:', {
             hasData: !!data,
@@ -2339,7 +2363,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             rutasCount: data?.optimizedRoutes?.length || 0,
             lastUpdate: new Date(data?.lastUpdate).toLocaleString()
           });
-          sendResponse(
+          safeSendResponse(
             data || {
               error: 'Error obteniendo datos',
               optimizedRoutes: [],
@@ -2348,8 +2372,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           );
         })
         .catch(error => {
+          clearTimeout(responseTimeoutId);
           console.error('❌ [BACKGROUND] Error:', error);
-          sendResponse({
+          safeSendResponse({
             error: error.message,
             optimizedRoutes: [],
             arbitrages: []
