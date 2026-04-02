@@ -34,71 +34,55 @@ describe('Simulator', () => {
   });
 
   // ============================================================
-  // PRESETS — estructura y contenido
+  // PRESETS — estructura, contenido y valores
   // ============================================================
-  describe('getPresets', () => {
-    it('retorna objeto con los 3 presets', () => {
+  describe('Presets', () => {
+    it('retorna los 3 presets con estructura y valores correctos', () => {
       const presets = Sim.getPresets();
+
+      // Estructura: existen los 3 presets
       expect(presets).toHaveProperty('conservative');
       expect(presets).toHaveProperty('moderate');
       expect(presets).toHaveProperty('aggressive');
-    });
 
-    it('cada preset tiene las propiedades requeridas', () => {
-      const presets = Sim.getPresets();
+      // Cada preset tiene todas las propiedades requeridas
+      const requiredProps = ['name', 'description', 'buyFee', 'sellFee', 'transferFee', 'bankCommission', 'spreadMultiplier'];
       ['conservative', 'moderate', 'aggressive'].forEach(name => {
         const p = presets[name];
-        expect(p).toHaveProperty('name');
-        expect(p).toHaveProperty('description');
-        expect(p).toHaveProperty('buyFee');
-        expect(p).toHaveProperty('sellFee');
-        expect(p).toHaveProperty('transferFee');
-        expect(p).toHaveProperty('bankCommission');
-        expect(p).toHaveProperty('spreadMultiplier');
+        requiredProps.forEach(prop => {
+          expect(p).toHaveProperty(prop);
+        });
       });
-    });
 
-    it('conservative tiene fees más altos que aggressive', () => {
-      const p = Sim.getPresets();
-      expect(p.conservative.buyFee).toBeGreaterThan(p.aggressive.buyFee);
-      expect(p.conservative.sellFee).toBeGreaterThan(p.aggressive.sellFee);
-    });
+      // Valores: conservative tiene fees más altos que aggressive
+      expect(presets.conservative.buyFee).toBeGreaterThan(presets.aggressive.buyFee);
+      expect(presets.conservative.sellFee).toBeGreaterThan(presets.aggressive.sellFee);
 
-    it('spreadMultiplier > 1 en todos los presets', () => {
-      const presets = Sim.getPresets();
+      // Valores: spreadMultiplier > 1 en todos los presets
       Object.values(presets).forEach(p => {
         expect(p.spreadMultiplier).toBeGreaterThan(1);
       });
-    });
 
-    it('moderate es del tipo Moderado', () => {
-      expect(Sim.getPresets().moderate.name).toBe('Moderado');
+      // Nombre del preset moderate
+      expect(presets.moderate.name).toBe('Moderado');
+
+      // Alias Simulator.PRESETS coincide con getPresets()
+      expect(Sim.PRESETS).toEqual(presets);
     });
   });
 
   // ============================================================
-  // applyPreset — sin DOM retorna false
+  // CALCULATE — applyPreset con y sin DOM
   // ============================================================
-  describe('applyPreset — sin elementos DOM', () => {
-    it('retorna false para preset conocido pero sin elementos DOM', () => {
-      const result = Sim.applyPreset('conservative');
-      expect(result).toBe(false);
-    });
-
-    it('retorna false para preset conocido "aggressive"', () => {
+  describe('Calculate', () => {
+    it('retorna false cuando no hay elementos DOM (sin calcular)', () => {
+      // Sin DOM, cualquier preset retorna false
+      expect(Sim.applyPreset('conservative')).toBe(false);
       expect(Sim.applyPreset('aggressive')).toBe(false);
-    });
-
-    it('retorna false para preset desconocido', () => {
       expect(Sim.applyPreset('inexistente')).toBe(false);
     });
-  });
 
-  // ============================================================
-  // applyPreset — con DOM completo retorna true
-  // ============================================================
-  describe('applyPreset — con elementos DOM', () => {
-    beforeEach(() => {
+    it('aplica preset correctamente cuando existe el DOM', () => {
       // Crear los elementos que applyPreset necesita
       document.body.innerHTML = `
         <input id="sim-usd-buy-price" />
@@ -108,30 +92,24 @@ describe('Simulator', () => {
         <input id="sim-transfer-fee-usd" />
         <input id="sim-bank-commission" />
       `;
-    });
 
-    it('retorna true para preset "moderate" con DOM completo', () => {
       Sim.updateData({ oficial: { compra: 1000 } });
-      const result = Sim.applyPreset('moderate');
-      expect(result).toBe(true);
-    });
 
-    it('aplica los valores del preset "conservative" al DOM', () => {
-      Sim.updateData({ oficial: { compra: 1000 } });
+      // Aplicar preset moderate retorna true
+      const resultModerate = Sim.applyPreset('moderate');
+      expect(resultModerate).toBe(true);
+
+      // Aplicar preset conservative y verificar valores
       Sim.applyPreset('conservative');
       const buyFee = document.getElementById('sim-buy-fee').value;
       expect(Number.parseFloat(buyFee)).toBe(1.5); // conservative.buyFee = 1.5
-    });
 
-    it('aplica los valores del preset "aggressive" al DOM', () => {
-      Sim.updateData({ oficial: { compra: 1000 } });
+      // Aplicar preset aggressive y verificar valores
       Sim.applyPreset('aggressive');
       const sellFee = document.getElementById('sim-sell-fee').value;
       expect(Number.parseFloat(sellFee)).toBe(0.5); // aggressive.sellFee = 0.5
-    });
 
-    it('usd-sell-price = usdBuy * spreadMultiplier', () => {
-      Sim.updateData({ oficial: { compra: 1000 } });
+      // Verificar usd-sell-price = usdBuy * spreadMultiplier
       Sim.applyPreset('conservative'); // spreadMultiplier = 1.03
       const buy = Number.parseFloat(document.getElementById('sim-usd-buy-price').value);
       const sell = Number.parseFloat(document.getElementById('sim-usd-sell-price').value);
@@ -140,32 +118,57 @@ describe('Simulator', () => {
   });
 
   // ============================================================
-  // updateData / updateSettings — no lanzan
+  // VALIDATE — updateData y updateSettings
   // ============================================================
-  describe('updateData / updateSettings', () => {
-    it('updateData acepta null sin lanzar', () => {
+  describe('Validate', () => {
+    it('updateData y updateSettings aceptan null y objetos válidos sin lanzar errores', () => {
+      // updateData con null
       expect(() => Sim.updateData(null)).not.toThrow();
-    });
 
-    it('updateData acepta objeto con campos de datos', () => {
+      // updateData con objeto válido
       expect(() => Sim.updateData({ oficial: { compra: 1100 }, usdt: {} })).not.toThrow();
-    });
 
-    it('updateSettings acepta null sin lanzar', () => {
+      // updateSettings con null
       expect(() => Sim.updateSettings(null)).not.toThrow();
-    });
 
-    it('updateSettings acepta objeto de configuración', () => {
+      // updateSettings con objeto válido
       expect(() => Sim.updateSettings({ simulatorDefaultAmount: 500000 })).not.toThrow();
     });
   });
 
   // ============================================================
-  // PRESETS — objeto expuesto (alias Simulator.PRESETS)
+  // EDGE CASES — comportamiento con datos límite
   // ============================================================
-  describe('Simulator.PRESETS', () => {
-    it('Simulator.PRESETS coincide con getPresets()', () => {
-      expect(Sim.PRESETS).toEqual(Sim.getPresets());
+  describe('Edge cases', () => {
+    it('maneja preset inexistente sin lanzar errores', () => {
+      // Sin DOM
+      expect(Sim.applyPreset('inexistente')).toBe(false);
+
+      // Con DOM
+      document.body.innerHTML = `
+        <input id="sim-usd-buy-price" />
+        <input id="sim-usd-sell-price" />
+        <input id="sim-buy-fee" />
+        <input id="sim-sell-fee" />
+        <input id="sim-transfer-fee-usd" />
+        <input id="sim-bank-commission" />
+      `;
+      Sim.updateData({ oficial: { compra: 1000 } });
+      expect(Sim.applyPreset('inexistente')).toBe(false);
+    });
+
+    it('maneja datos nulos o indefinidos sin lanzar errores', () => {
+      // updateData con undefined
+      expect(() => Sim.updateData(undefined)).not.toThrow();
+
+      // updateSettings con undefined
+      expect(() => Sim.updateSettings(undefined)).not.toThrow();
+
+      // updateData con objeto vacío
+      expect(() => Sim.updateData({})).not.toThrow();
+
+      // updateSettings con objeto vacío
+      expect(() => Sim.updateSettings({})).not.toThrow();
     });
   });
 });

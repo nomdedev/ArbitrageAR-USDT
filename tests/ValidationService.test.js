@@ -1,5 +1,5 @@
 /**
- * Tests for ValidationService
+ * Tests for ValidationService (refactorizado)
  */
 
 // Simular ValidationService en entorno de test
@@ -21,7 +21,7 @@ const ValidationServiceModule = (() => {
 
     getDataFreshnessLevel(timestamp) {
       if (!timestamp) {
-        return { level: 'unknown', ageMinutes: null, color: '#94a3b8', icon: '❓' };
+        return { level: 'unknown', ageMinutes: null, color: '#94a3b8', icon: '?' };
       }
 
       const dataDate = new Date(timestamp);
@@ -30,11 +30,11 @@ const ValidationServiceModule = (() => {
       const ageMinutes = Math.floor(ageMs / 60000);
 
       if (ageMinutes < 5) {
-        return { level: 'fresh', ageMinutes, color: '#4ade80', icon: '🟢' };
+        return { level: 'fresh', ageMinutes, color: '#4ade80', icon: 'verde' };
       } else if (ageMinutes < 15) {
-        return { level: 'warning', ageMinutes, color: '#fbbf24', icon: '🟡' };
+        return { level: 'warning', ageMinutes, color: '#fbbf24', icon: 'amarillo' };
       } else {
-        return { level: 'stale', ageMinutes, color: '#f87171', icon: '🔴' };
+        return { level: 'stale', ageMinutes, color: '#f87171', icon: 'rojo' };
       }
     }
 
@@ -43,7 +43,7 @@ const ValidationServiceModule = (() => {
       let riskScore = 0;
 
       if (profitPercent < 0) {
-        risks.push('Operación con pérdida');
+        risks.push('Operacion con perdida');
         riskScore += 40;
       } else if (profitPercent < this.MIN_PROFIT_THRESHOLD) {
         risks.push('Rentabilidad muy baja (< 0.5%)');
@@ -64,15 +64,15 @@ const ValidationServiceModule = (() => {
       if (riskScore >= 50) {
         level = 'high';
         color = '#ef4444';
-        icon = '🔴';
+        icon = 'rojo';
       } else if (riskScore >= 25) {
         level = 'medium';
         color = '#f59e0b';
-        icon = '🟡';
+        icon = 'amarillo';
       } else {
         level = 'low';
         color = '#10b981';
-        icon = '🟢';
+        icon = 'verde';
       }
 
       return {
@@ -101,115 +101,100 @@ describe('ValidationService', () => {
   });
 
   describe('isDataFresh', () => {
-    it('debería retornar true para datos recientes (< 5 min)', () => {
-      const recentTimestamp = new Date().toISOString();
-      expect(validationService.isDataFresh(recentTimestamp)).toBe(true);
-    });
-
-    it('debería retornar false para datos antiguos (> 5 min)', () => {
-      const oldTimestamp = new Date(Date.now() - 10 * 60 * 1000).toISOString();
-      expect(validationService.isDataFresh(oldTimestamp)).toBe(false);
-    });
-
-    it('debería retornar false si no hay timestamp', () => {
+    it('deberia retornar el nivel de frescura correcto para diferentes timestamps (fresh/warning/stale/unknown)', () => {
+      // Unknown - sin timestamp
       expect(validationService.isDataFresh(null)).toBe(false);
       expect(validationService.isDataFresh(undefined)).toBe(false);
+
+      // Fresh - datos recientes (< 5 min)
+      const freshTimestamp = new Date().toISOString();
+      expect(validationService.isDataFresh(freshTimestamp)).toBe(true);
+
+      // Stale - datos antiguos (> 5 min)
+      const staleTimestamp = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+      expect(validationService.isDataFresh(staleTimestamp)).toBe(false);
     });
   });
 
   describe('getDataFreshnessLevel', () => {
-    it('debería retornar "fresh" para datos < 5 min', () => {
-      const timestamp = new Date().toISOString();
-      const result = validationService.getDataFreshnessLevel(timestamp);
-      
-      expect(result.level).toBe('fresh');
-      expect(result.icon).toBe('🟢');
-      expect(result.ageMinutes).toBeLessThan(5);
-    });
+    it('deberia retornar el nivel correcto segun antiguedad del dato (fresh/warning/stale/unknown)', () => {
+      // Unknown - sin timestamp
+      const unknownResult = validationService.getDataFreshnessLevel(null);
+      expect(unknownResult.level).toBe('unknown');
+      expect(unknownResult.ageMinutes).toBeNull();
 
-    it('debería retornar "warning" para datos 5-15 min', () => {
-      const timestamp = new Date(Date.now() - 7 * 60 * 1000).toISOString();
-      const result = validationService.getDataFreshnessLevel(timestamp);
-      
-      expect(result.level).toBe('warning');
-      expect(result.icon).toBe('🟡');
-    });
+      // Fresh - datos < 5 min
+      const freshTimestamp = new Date().toISOString();
+      const freshResult = validationService.getDataFreshnessLevel(freshTimestamp);
+      expect(freshResult.level).toBe('fresh');
+      expect(freshResult.ageMinutes).toBeLessThan(5);
 
-    it('debería retornar "stale" para datos > 15 min', () => {
-      const timestamp = new Date(Date.now() - 20 * 60 * 1000).toISOString();
-      const result = validationService.getDataFreshnessLevel(timestamp);
-      
-      expect(result.level).toBe('stale');
-      expect(result.icon).toBe('🔴');
-    });
+      // Warning - datos entre 5-15 min
+      const warningTimestamp = new Date(Date.now() - 7 * 60 * 1000).toISOString();
+      const warningResult = validationService.getDataFreshnessLevel(warningTimestamp);
+      expect(warningResult.level).toBe('warning');
 
-    it('debería retornar "unknown" si no hay timestamp', () => {
-      const result = validationService.getDataFreshnessLevel(null);
-      
-      expect(result.level).toBe('unknown');
-      expect(result.icon).toBe('❓');
-      expect(result.ageMinutes).toBeNull();
-    });
-  });
-
-  describe('calculateRouteRiskLevel', () => {
-    it('debería retornar riesgo bajo para ruta rentable en mismo exchange', () => {
-      const route = { isSingleExchange: true, isP2P: false };
-      const result = validationService.calculateRouteRiskLevel(route, 5);
-      
-      expect(result.level).toBe('low');
-      expect(result.isAcceptable).toBe(true);
-      expect(result.reasons).toHaveLength(0);
-    });
-
-    it('debería retornar riesgo alto para operación con pérdida', () => {
-      const route = { isSingleExchange: true, isP2P: false };
-      const result = validationService.calculateRouteRiskLevel(route, -5);
-      
-      expect(result.level).toBe('medium'); // 40 puntos
-      expect(result.reasons).toContain('Operación con pérdida');
-    });
-
-    it('debería aumentar riesgo para rutas P2P', () => {
-      const route = { isSingleExchange: true, isP2P: true };
-      const result = validationService.calculateRouteRiskLevel(route, 2);
-      
-      expect(result.score).toBeGreaterThanOrEqual(20);
-      expect(result.reasons).toContain('Involucra operaciones P2P');
-    });
-
-    it('debería aumentar riesgo para transferencias entre exchanges', () => {
-      const route = { isSingleExchange: false, isP2P: false };
-      const result = validationService.calculateRouteRiskLevel(route, 2);
-      
-      expect(result.reasons).toContain('Requiere transferencia entre exchanges');
-    });
-
-    it('debería retornar riesgo alto para múltiples factores de riesgo', () => {
-      const route = { isSingleExchange: false, isP2P: true };
-      const result = validationService.calculateRouteRiskLevel(route, -2);
-      
-      expect(result.level).toBe('high');
-      expect(result.isAcceptable).toBe(false);
-      expect(result.score).toBeGreaterThanOrEqual(50);
+      // Stale - datos > 15 min
+      const staleTimestamp = new Date(Date.now() - 20 * 60 * 1000).toISOString();
+      const staleResult = validationService.getDataFreshnessLevel(staleTimestamp);
+      expect(staleResult.level).toBe('stale');
     });
   });
 
   describe('isValidNumber', () => {
-    it('debería retornar true para números válidos', () => {
+    it('deberia validar correctamente numeros validos e invalidos', () => {
+      // Numeros validos
       expect(validationService.isValidNumber(100)).toBe(true);
       expect(validationService.isValidNumber(0)).toBe(true);
       expect(validationService.isValidNumber(-50)).toBe(true);
       expect(validationService.isValidNumber(3.14)).toBe(true);
-    });
 
-    it('debería retornar false para valores inválidos', () => {
+      // Valores invalidos
       expect(validationService.isValidNumber(NaN)).toBe(false);
       expect(validationService.isValidNumber(Infinity)).toBe(false);
       expect(validationService.isValidNumber(-Infinity)).toBe(false);
       expect(validationService.isValidNumber('100')).toBe(false);
       expect(validationService.isValidNumber(null)).toBe(false);
       expect(validationService.isValidNumber(undefined)).toBe(false);
+    });
+  });
+
+  describe('calculateRouteRiskLevel', () => {
+    it('deberia calcular riesgo bajo para rutas rentables en mismo exchange', () => {
+      const route = { isSingleExchange: true, isP2P: false };
+      const result = validationService.calculateRouteRiskLevel(route, 5);
+
+      expect(result.level).toBe('low');
+      expect(result.isAcceptable).toBe(true);
+      expect(result.reasons).toHaveLength(0);
+      expect(result.score).toBe(0);
+    });
+
+    it('deberia aumentar riesgo segun factores: perdida, P2P, transferencias entre exchanges', () => {
+      // Riesgo medio por operacion con perdida
+      const routeWithLoss = { isSingleExchange: true, isP2P: false };
+      const lossResult = validationService.calculateRouteRiskLevel(routeWithLoss, -5);
+      expect(lossResult.level).toBe('medium');
+      expect(lossResult.reasons).toContain('Operacion con perdida');
+      expect(lossResult.score).toBe(40);
+
+      // Riesgo por P2P
+      const p2pRoute = { isSingleExchange: true, isP2P: true };
+      const p2pResult = validationService.calculateRouteRiskLevel(p2pRoute, 2);
+      expect(p2pResult.reasons).toContain('Involucra operaciones P2P');
+      expect(p2pResult.score).toBeGreaterThanOrEqual(20);
+
+      // Riesgo por transferencia entre exchanges
+      const transferRoute = { isSingleExchange: false, isP2P: false };
+      const transferResult = validationService.calculateRouteRiskLevel(transferRoute, 2);
+      expect(transferResult.reasons).toContain('Requiere transferencia entre exchanges');
+
+      // Riesgo alto por multiples factores combinados
+      const highRiskRoute = { isSingleExchange: false, isP2P: true };
+      const highResult = validationService.calculateRouteRiskLevel(highRiskRoute, -2);
+      expect(highResult.level).toBe('high');
+      expect(highResult.isAcceptable).toBe(false);
+      expect(highResult.score).toBeGreaterThanOrEqual(50);
     });
   });
 });

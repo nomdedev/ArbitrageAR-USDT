@@ -2,8 +2,9 @@
  * Tests para CommonUtils
  *
  * CommonUtils provee funciones puras usadas en toda la app:
- * formatting, validación, throttle/debounce, memoize, retry.
+ * formatting, validacion, throttle/debounce, memoize, retry.
  *
+ * NOTA: formatNumber y formatPercent ya estan cubiertos en formatters.test.js
  * Patrón: IIFE que expone window.CommonUtils (jsdom disponible).
  */
 
@@ -30,273 +31,158 @@ describe('CommonUtils', () => {
   // ============================================================
   // Constantes expuestas
   // ============================================================
-  describe('constantes', () => {
-    it('PROFIT_THRESHOLDS tiene HIGH=2, POSITIVE=0, LOW_NEGATIVE=-2', () => {
+  describe('PROFIT_THRESHOLDS', () => {
+    it('define umbrales HIGH=2, POSITIVE=0, LOW_NEGATIVE=-2', () => {
       expect(CU.PROFIT_THRESHOLDS.HIGH).toBe(2);
       expect(CU.PROFIT_THRESHOLDS.POSITIVE).toBe(0);
       expect(CU.PROFIT_THRESHOLDS.LOW_NEGATIVE).toBe(-2);
     });
+  });
 
-    it('MAX_RETRIES es 3', () => {
+  describe('constantes adicionales', () => {
+    it('define MAX_RETRIES=3 y TOAST_DURATION_MS=3000', () => {
       expect(CU.MAX_RETRIES).toBe(3);
-    });
-
-    it('TOAST_DURATION_MS es 3000', () => {
       expect(CU.TOAST_DURATION_MS).toBe(3000);
     });
   });
 
   // ============================================================
-  // formatNumber
-  // ============================================================
-  describe('formatNumber', () => {
-    it('formatea número entero con separador de miles (es-AR)', () => {
-      const result = CU.formatNumber(1000);
-      expect(result).toContain('1');
-      expect(result).toContain('000');
-    });
-
-    it('formatea decimales cuando se pide', () => {
-      const result = CU.formatNumber(1234.5, 2);
-      expect(result).toContain('1.234');
-    });
-
-    it('retorna "0" para Number.NaN', () => {
-      expect(CU.formatNumber(Number.NaN)).toBe('0');
-    });
-
-    it('retorna "0" para string', () => {
-      expect(CU.formatNumber('abc')).toBe('0');
-    });
-  });
-
-  // ============================================================
-  // formatPercent
-  // ============================================================
-  describe('formatPercent', () => {
-    it('formatea porcentaje positivo con 2 decimales por defecto', () => {
-      expect(CU.formatPercent(5)).toBe('5.00%');
-    });
-
-    it('formatea porcentaje negativo', () => {
-      expect(CU.formatPercent(-3.5)).toBe('-3.50%');
-    });
-
-    it('retorna "0%" para Number.NaN', () => {
-      expect(CU.formatPercent(Number.NaN)).toBe('0%');
-    });
-
-    it('acepta cantidad de decimales personalizada', () => {
-      expect(CU.formatPercent(1.23456, 4)).toBe('1.2346%');
-    });
-  });
-
-  // ============================================================
-  // capitalizeFirst
-  // ============================================================
-  describe('capitalizeFirst', () => {
-    it('capitaliza la primera letra', () => {
-      expect(CU.capitalizeFirst('binance')).toBe('Binance');
-    });
-
-    it('no modifica el resto del string', () => {
-      expect(CU.capitalizeFirst('hello WORLD')).toBe('Hello WORLD');
-    });
-
-    it('retorna "" para null', () => {
-      expect(CU.capitalizeFirst(null)).toBe('');
-    });
-
-    it('retorna "" para string vacío', () => {
-      expect(CU.capitalizeFirst('')).toBe('');
-    });
-  });
-
-  // ============================================================
-  // getProfitClasses
+  // getProfitClasses - clasificacion de ganancias
   // ============================================================
   describe('getProfitClasses', () => {
-    it('≥ 2% → profit-high / badge-high', () => {
-      const r = CU.getProfitClasses(2.5);
-      expect(r.profitClass).toBe('profit-high');
-      expect(r.profitBadgeClass).toBe('badge-high');
-      expect(r.isNegative).toBe(false);
-    });
+    it('retorna clases correctas para los 4 niveles de ganancia', () => {
+      // HIGH: >= 2%
+      const high = CU.getProfitClasses(2.5);
+      expect(high.profitClass).toBe('profit-high');
+      expect(high.profitBadgeClass).toBe('badge-high');
+      expect(high.isNegative).toBe(false);
 
-    it('0 a 1.99% → profit-positive / badge-positive', () => {
-      const r = CU.getProfitClasses(1.5);
-      expect(r.profitClass).toBe('profit-positive');
-      expect(r.profitBadgeClass).toBe('badge-positive');
-    });
+      // POSITIVE: 0 a 1.99%
+      const positive = CU.getProfitClasses(1.5);
+      expect(positive.profitClass).toBe('profit-positive');
+      expect(positive.profitBadgeClass).toBe('badge-positive');
+      expect(positive.isNegative).toBe(false);
 
-    it('-1.99% a 0 → profit-low-negative / badge-low-negative', () => {
-      const r = CU.getProfitClasses(-1);
-      expect(r.profitClass).toBe('profit-low-negative');
-      expect(r.isNegative).toBe(true);
-    });
+      // LOW_NEGATIVE: -1.99% a 0%
+      const lowNegative = CU.getProfitClasses(-1);
+      expect(lowNegative.profitClass).toBe('profit-low-negative');
+      expect(lowNegative.isNegative).toBe(true);
 
-    it('< -2% → profit-negative / badge-negative', () => {
-      const r = CU.getProfitClasses(-5);
-      expect(r.profitClass).toBe('profit-negative');
-      expect(r.profitBadgeClass).toBe('badge-negative');
+      // NEGATIVE: < -2%
+      const negative = CU.getProfitClasses(-5);
+      expect(negative.profitClass).toBe('profit-negative');
+      expect(negative.profitBadgeClass).toBe('badge-negative');
+      expect(negative.isNegative).toBe(true);
     });
   });
 
   // ============================================================
-  // getDataFreshnessLevel
+  // getDataFreshnessLevel - frescura de datos
   // ============================================================
   describe('getDataFreshnessLevel', () => {
-    it('retorna "stale" cuando timestamp es null/undefined', () => {
+    it('retorna niveles correctos segun antiguedad: fresh, moderate, stale', () => {
+      // Stale para null/undefined
       expect(CU.getDataFreshnessLevel(null).level).toBe('stale');
       expect(CU.getDataFreshnessLevel(undefined).level).toBe('stale');
-    });
 
-    it('retorna "fresh" para timestamp de hace 1 minuto', () => {
-      const ts = Date.now() - 60000;
-      const result = CU.getDataFreshnessLevel(ts);
-      expect(result.level).toBe('fresh');
-    });
+      // Fresh: < 2 minutos
+      const freshTs = Date.now() - 60000;
+      expect(CU.getDataFreshnessLevel(freshTs).level).toBe('fresh');
 
-    it('retorna "moderate" para timestamp de hace 4 minutos', () => {
-      const ts = Date.now() - 4 * 60000;
-      const result = CU.getDataFreshnessLevel(ts);
-      expect(result.level).toBe('moderate');
-    });
+      // Moderate: 2-5 minutos
+      const moderateTs = Date.now() - 4 * 60000;
+      expect(CU.getDataFreshnessLevel(moderateTs).level).toBe('moderate');
 
-    it('retorna "stale" para timestamp de hace 10 minutos', () => {
-      const ts = Date.now() - 10 * 60000;
-      const result = CU.getDataFreshnessLevel(ts);
-      expect(result.level).toBe('stale');
-    });
+      // Stale: > 5 minutos
+      const staleTs = Date.now() - 10 * 60000;
+      expect(CU.getDataFreshnessLevel(staleTs).level).toBe('stale');
 
-    it('incluye ageMinutes en el resultado', () => {
-      const ts = Date.now() - 90000; // 1.5 minutos
-      const result = CU.getDataFreshnessLevel(ts);
-      expect(result.ageMinutes).toBe(1);
+      // Incluye ageMinutes en el resultado
+      const ts15min = Date.now() - 90000;
+      expect(CU.getDataFreshnessLevel(ts15min).ageMinutes).toBe(1);
     });
   });
 
   // ============================================================
-  // isValidNumber / isPositiveNumber
+  // Validacion de numeros
   // ============================================================
-  describe('isValidNumber', () => {
-    it('retorna true para número válido', () => {
+  describe('Validacion', () => {
+    it('isValidNumber e isPositiveNumber validan correctamente', () => {
+      // isValidNumber: acepta numeros finitos
       expect(CU.isValidNumber(42)).toBe(true);
       expect(CU.isValidNumber(-3.14)).toBe(true);
       expect(CU.isValidNumber(0)).toBe(true);
-    });
-
-    it('retorna false para Number.NaN, Infinity, string, null', () => {
       expect(CU.isValidNumber(Number.NaN)).toBe(false);
       expect(CU.isValidNumber(Infinity)).toBe(false);
       expect(CU.isValidNumber('42')).toBe(false);
       expect(CU.isValidNumber(null)).toBe(false);
       expect(CU.isValidNumber(undefined)).toBe(false);
-    });
-  });
 
-  describe('isPositiveNumber', () => {
-    it('retorna true solo para números positivos y finitos', () => {
+      // isPositiveNumber: solo positivos
       expect(CU.isPositiveNumber(1)).toBe(true);
       expect(CU.isPositiveNumber(0.001)).toBe(true);
-    });
-
-    it('retorna false para cero y negativos', () => {
       expect(CU.isPositiveNumber(0)).toBe(false);
       expect(CU.isPositiveNumber(-1)).toBe(false);
-    });
-
-    it('retorna false para Number.NaN e Infinity', () => {
       expect(CU.isPositiveNumber(Number.NaN)).toBe(false);
       expect(CU.isPositiveNumber(Infinity)).toBe(false);
     });
   });
 
   // ============================================================
-  // hasRequiredProperties
+  // capitalizeFirst y hasRequiredProperties
   // ============================================================
-  describe('hasRequiredProperties', () => {
-    it('retorna true cuando el objeto tiene todas las propiedades', () => {
-      const obj = { a: 1, b: 'x', c: true };
-      expect(CU.hasRequiredProperties(obj, ['a', 'b'])).toBe(true);
+  describe('capitalizeFirst y hasRequiredProperties', () => {
+    it('capitalizeFirst capitaliza la primera letra y maneja edge cases', () => {
+      expect(CU.capitalizeFirst('binance')).toBe('Binance');
+      expect(CU.capitalizeFirst('hello WORLD')).toBe('Hello WORLD');
+      expect(CU.capitalizeFirst(null)).toBe('');
+      expect(CU.capitalizeFirst('')).toBe('');
     });
 
-    it('retorna false cuando falta una propiedad', () => {
-      const obj = { a: 1 };
-      expect(CU.hasRequiredProperties(obj, ['a', 'b'])).toBe(false);
-    });
-
-    it('retorna false para null/undefined', () => {
+    it('hasRequiredProperties valida existencia de propiedades', () => {
+      expect(CU.hasRequiredProperties({ a: 1, b: 'x' }, ['a', 'b'])).toBe(true);
+      expect(CU.hasRequiredProperties({ a: 1 }, ['a', 'b'])).toBe(false);
       expect(CU.hasRequiredProperties(null, ['a'])).toBe(false);
       expect(CU.hasRequiredProperties(undefined, ['a'])).toBe(false);
-    });
-
-    it('retorna false si el valor de una propiedad es undefined', () => {
-      const obj = { a: undefined };
-      expect(CU.hasRequiredProperties(obj, ['a'])).toBe(false);
+      expect(CU.hasRequiredProperties({ a: undefined }, ['a'])).toBe(false);
     });
   });
 
   // ============================================================
-  // debounce
+  // debounce y throttle
   // ============================================================
-  describe('debounce', () => {
-    it('no llama la función inmediatamente', () => {
+  describe('debounce y throttle', () => {
+    it('debounce retrasa ejecucion y cancela llamadas previas', () => {
       jest.useFakeTimers();
       const fn = jest.fn();
       const debounced = CU.debounce(fn, 100);
+
+      // No llama inmediatamente
       debounced();
       expect(fn).not.toHaveBeenCalled();
-    });
 
-    it('llama la función después del delay', () => {
-      jest.useFakeTimers();
-      const fn = jest.fn();
-      const debounced = CU.debounce(fn, 100);
-      debounced();
-      jest.advanceTimersByTime(100);
-      expect(fn).toHaveBeenCalledTimes(1);
-    });
-
-    it('cancela llamadas previas si se llama múltiples veces', () => {
-      jest.useFakeTimers();
-      const fn = jest.fn();
-      const debounced = CU.debounce(fn, 100);
-      debounced();
+      // Multiples llamadas cancelan las previas
       debounced();
       debounced();
       jest.advanceTimersByTime(100);
       expect(fn).toHaveBeenCalledTimes(1);
     });
-  });
 
-  // ============================================================
-  // throttle
-  // ============================================================
-  describe('throttle', () => {
-    it('llama la función la primera vez de inmediato', () => {
+    it('throttle limita ejecucion a una por periodo', () => {
       jest.useFakeTimers();
       const fn = jest.fn();
       const throttled = CU.throttle(fn, 200);
+
+      // Primera llamada inmediata
       throttled();
       expect(fn).toHaveBeenCalledTimes(1);
-    });
 
-    it('ignora llamadas subsiguientes dentro del período', () => {
-      jest.useFakeTimers();
-      const fn = jest.fn();
-      const throttled = CU.throttle(fn, 200);
-      throttled();
+      // Ignora llamadas dentro del periodo
       throttled();
       throttled();
       expect(fn).toHaveBeenCalledTimes(1);
-    });
 
-    it('permite otra llamada después del período', () => {
-      jest.useFakeTimers();
-      const fn = jest.fn();
-      const throttled = CU.throttle(fn, 200);
-      throttled();
+      // Permite otra llamada despues del periodo
       jest.advanceTimersByTime(200);
       throttled();
       expect(fn).toHaveBeenCalledTimes(2);
@@ -307,20 +193,14 @@ describe('CommonUtils', () => {
   // memoize
   // ============================================================
   describe('memoize', () => {
-    it('retorna el mismo resultado para los mismos argumentos', () => {
+    it('cachea resultados para argumentos identicos', () => {
       const fn = jest.fn(x => x * 2);
       const memoized = CU.memoize(fn);
 
       expect(memoized(5)).toBe(10);
       expect(memoized(5)).toBe(10);
-      expect(fn).toHaveBeenCalledTimes(1); // solo una vez
-    });
+      expect(fn).toHaveBeenCalledTimes(1);
 
-    it('llama la función para argumentos distintos', () => {
-      const fn = jest.fn(x => x * 3);
-      const memoized = CU.memoize(fn);
-
-      memoized(2);
       memoized(4);
       expect(fn).toHaveBeenCalledTimes(2);
     });
@@ -330,91 +210,74 @@ describe('CommonUtils', () => {
   // retryAsync
   // ============================================================
   describe('retryAsync', () => {
-    it('retorna el resultado si la función tiene éxito a la primera', async () => {
-      const fn = jest.fn().mockResolvedValue(42);
-      const result = await CU.retryAsync(fn, 3, 0);
-      expect(result).toBe(42);
-      expect(fn).toHaveBeenCalledTimes(1);
-    });
+    it('reintenta hasta exito o agotar intentos', async () => {
+      // Exito inmediato
+      const fn1 = jest.fn().mockResolvedValue(42);
+      const result1 = await CU.retryAsync(fn1, 3, 0);
+      expect(result1).toBe(42);
+      expect(fn1).toHaveBeenCalledTimes(1);
 
-    it('reintenta cuando la función falla y eventualmente tiene éxito', async () => {
+      // Exito despues de reintentos
       let attempts = 0;
-      const fn = jest.fn(() => {
+      const fn2 = jest.fn(() => {
         attempts++;
         if (attempts < 3) throw new Error('fallo');
         return Promise.resolve('ok');
       });
-      const result = await CU.retryAsync(fn, 3, 0);
-      expect(result).toBe('ok');
-      expect(fn).toHaveBeenCalledTimes(3);
-    });
+      const result2 = await CU.retryAsync(fn2, 3, 0);
+      expect(result2).toBe('ok');
+      expect(fn2).toHaveBeenCalledTimes(3);
 
-    it('lanza el error si se agotan los reintentos', async () => {
-      const fn = jest.fn().mockRejectedValue(new Error('siempre falla'));
-      await expect(CU.retryAsync(fn, 2, 0)).rejects.toThrow('siempre falla');
-      expect(fn).toHaveBeenCalledTimes(3); // 1 initial + 2 retries
+      // Agota reintentos
+      const fn3 = jest.fn().mockRejectedValue(new Error('siempre falla'));
+      await expect(CU.retryAsync(fn3, 2, 0)).rejects.toThrow('siempre falla');
+      expect(fn3).toHaveBeenCalledTimes(3); // 1 initial + 2 retries
     });
   });
 
   // ============================================================
-  // getMinutesAgo
+  // Formateo de tiempo
   // ============================================================
-  describe('getMinutesAgo', () => {
-    it('retorna la diferencia en minutos correctamente', () => {
-      const fiveMinutesAgo = Date.now() - 5 * 60000;
-      expect(CU.getMinutesAgo(fiveMinutesAgo)).toBe(5);
-    });
+  describe('Formateo de tiempo', () => {
+    it('formatTimestamp, formatTime y getMinutesAgo formatean correctamente', () => {
+      // formatTimestamp
+      expect(CU.formatTimestamp(null)).toBe('N/A');
+      const tsResult = CU.formatTimestamp(Date.now());
+      expect(typeof tsResult).toBe('string');
+      expect(tsResult.length).toBeGreaterThan(0);
+      expect(tsResult).not.toBe('N/A');
 
-    it('retorna null para timestamp falsy', () => {
+      // formatTime
+      expect(CU.formatTime(null)).toBe('N/A');
+      const timeResult = CU.formatTime(Date.now());
+      expect(typeof timeResult).toBe('string');
+      expect(timeResult).not.toBe('N/A');
+
+      // getMinutesAgo
+      const fiveMinAgo = Date.now() - 5 * 60000;
+      expect(CU.getMinutesAgo(fiveMinAgo)).toBe(5);
       expect(CU.getMinutesAgo(null)).toBeNull();
       expect(CU.getMinutesAgo(0)).toBeNull();
     });
   });
 
   // ============================================================
-  // formatTimestamp / formatTime
-  // ============================================================
-  describe('formatTimestamp / formatTime', () => {
-    it('formatTimestamp retorna "N/A" para null', () => {
-      expect(CU.formatTimestamp(null)).toBe('N/A');
-    });
-
-    it('formatTimestamp retorna string no vacío para timestamp válido', () => {
-      const result = CU.formatTimestamp(Date.now());
-      expect(typeof result).toBe('string');
-      expect(result.length).toBeGreaterThan(0);
-      expect(result).not.toBe('N/A');
-    });
-
-    it('formatTime retorna "N/A" para null', () => {
-      expect(CU.formatTime(null)).toBe('N/A');
-    });
-
-    it('formatTime retorna string de hora para timestamp válido', () => {
-      const result = CU.formatTime(Date.now());
-      expect(typeof result).toBe('string');
-      expect(result).not.toBe('N/A');
-    });
-  });
-
-  // ============================================================
-  // sanitizeHTML (requiere jsdom)
+  // sanitizeHTML
   // ============================================================
   describe('sanitizeHTML', () => {
-    it('escapa etiquetas HTML', () => {
-      const result = CU.sanitizeHTML('<script>alert("xss")</script>');
-      expect(result).not.toContain('<script>');
-      expect(result).toContain('&lt;script&gt;');
-    });
+    it('escapa etiquetas HTML y maneja inputs invalidos', () => {
+      // Escapa tags
+      const escaped = CU.sanitizeHTML('<script>alert("xss")</script>');
+      expect(escaped).not.toContain('<script>');
+      expect(escaped).toContain('&lt;script&gt;');
 
-    it('retorna "" para argumentos no string', () => {
+      // Texto sin HTML permanece igual
+      expect(CU.sanitizeHTML('hola mundo')).toBe('hola mundo');
+
+      // Inputs invalidos retornan string vacio
       expect(CU.sanitizeHTML(null)).toBe('');
       expect(CU.sanitizeHTML(42)).toBe('');
       expect(CU.sanitizeHTML(undefined)).toBe('');
-    });
-
-    it('texto sin HTML permanece sin cambios', () => {
-      expect(CU.sanitizeHTML('hola mundo')).toBe('hola mundo');
     });
   });
 });

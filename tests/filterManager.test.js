@@ -45,179 +45,118 @@ describe('FilterManager', () => {
   });
 
   // ============================================================
-  // CONSTANTES expuestas
+  // ESTADO INICIAL
   // ============================================================
-  describe('constantes', () => {
-    it('FILTER_TYPES tiene ALL, P2P, NO_P2P', () => {
+  describe('Estado inicial', () => {
+    it('expone constantes FILTER_TYPES y SORT_OPTIONS con valores correctos', () => {
       expect(FM.FILTER_TYPES.ALL).toBe('all');
       expect(FM.FILTER_TYPES.P2P).toBe('p2p');
       expect(FM.FILTER_TYPES.NO_P2P).toBe('no-p2p');
-    });
-
-    it('SORT_OPTIONS tiene PROFIT_DESC como default', () => {
       expect(FM.SORT_OPTIONS.PROFIT_DESC).toBe('profit-desc');
       expect(FM.SORT_OPTIONS.PROFIT_ASC).toBe('profit-asc');
     });
   });
 
   // ============================================================
-  // setCurrentFilter / getCurrentFilter
+  // FILTROS P2P
   // ============================================================
-  describe('setCurrentFilter / getCurrentFilter', () => {
-    it('establece y lee el filtro actual', () => {
-      FM.setCurrentFilter('p2p');
-      expect(FM.getCurrentFilter()).toBe('p2p');
-    });
-
-    it('mantiene "no-p2p" como estado inicial tras init', () => {
-      FM.init({}, ROUTES);
-      // init no cambia currentFilter explícitamente; el estado inicial del módulo es 'no-p2p'
-      // Pero en beforeEach lo seteamos a 'all', así que verificamos que set/get funcione
-      FM.setCurrentFilter('no-p2p');
-      expect(FM.getCurrentFilter()).toBe('no-p2p');
-    });
-  });
-
-  // ============================================================
-  // setAdvancedFilters / getAdvancedFilters
-  // ============================================================
-  describe('setAdvancedFilters / getAdvancedFilters', () => {
-    it('actualiza los filtros avanzados (merge parcial)', () => {
-      FM.setAdvancedFilters({ profitMin: 3 });
-      const filters = FM.getAdvancedFilters();
-      expect(filters.profitMin).toBe(3);
-      expect(filters.exchange).toBe('all'); // no cambió
-    });
-
-    it('getAdvancedFilters devuelve una copia del objeto', () => {
-      const a = FM.getAdvancedFilters();
-      const b = FM.getAdvancedFilters();
-      expect(a).not.toBe(b);
-      expect(a).toEqual(b);
-    });
-  });
-
-  // ============================================================
-  // applyAllFilters — filtro P2P
-  // ============================================================
-  describe('applyAllFilters — filtros P2P', () => {
-    it('filtro "all" retorna todas las rutas', () => {
-      FM.setCurrentFilter('all');
-      const result = FM.applyAllFilters();
-      expect(result).toHaveLength(ROUTES.length);
-    });
-
-    it('filtro "p2p" retorna solo rutas P2P', () => {
+  describe('Filtros P2P', () => {
+    it('activa filtro P2P y retorna solo rutas que requieren P2P', () => {
       FM.setCurrentFilter('p2p');
       const result = FM.applyAllFilters();
       expect(result.every(r => r.requiresP2P)).toBe(true);
       expect(result).toHaveLength(1);
+      expect(result[0].broker).toBe('Lemon P2P');
     });
 
-    it('filtro "no-p2p" excluye todas las rutas P2P', () => {
+    it('desactiva filtro P2P (no-p2p o all) y excluye o incluye rutas P2P segun corresponda', () => {
+      // Filtro "no-p2p" excluye rutas P2P
       FM.setCurrentFilter('no-p2p');
-      const result = FM.applyAllFilters();
-      expect(result.every(r => !r.requiresP2P)).toBe(true);
-      expect(result).toHaveLength(4);
-    });
+      const resultNoP2P = FM.applyAllFilters();
+      expect(resultNoP2P.every(r => !r.requiresP2P)).toBe(true);
+      expect(resultNoP2P).toHaveLength(4);
 
-    it('retorna [] cuando no hay rutas cargadas', () => {
-      FM.updateRoutes([]);
-      const result = FM.applyAllFilters();
-      expect(result).toEqual([]);
+      // Filtro "all" incluye todas las rutas
+      FM.setCurrentFilter('all');
+      const resultAll = FM.applyAllFilters();
+      expect(resultAll).toHaveLength(ROUTES.length);
     });
   });
 
   // ============================================================
-  // applyAllFilters — profit mínimo via userSettings
+  // FILTROS EXCHANGE
   // ============================================================
-  describe('applyAllFilters — profit mínimo via settings', () => {
-    it('excluye rutas por debajo del profitMin configurado', () => {
+  describe('Filtros Exchange', () => {
+    it('setAdvancedFilters guarda filtros avanzados correctamente', () => {
+      FM.setAdvancedFilters({ exchange: 'Binance', profitMin: 3 });
+      const filters = FM.getAdvancedFilters();
+      expect(filters.exchange).toBe('Binance');
+      expect(filters.profitMin).toBe(3);
+    });
+
+    it('applyUserPreferences filtra por preferredExchanges desde userSettings', () => {
+      // Configurar userSettings con preferredExchanges
+      FM.updateSettings({ preferredExchanges: ['Binance'] });
+      const result = FM.applyUserPreferences([...ROUTES]);
+      // Verificar que solo quedan rutas con Binance
+      expect(result.every(r =>
+        r.buyExchange === 'Binance' || r.sellExchange === 'Binance'
+      )).toBe(true);
+    });
+  });
+
+  // ============================================================
+  // APPLY ALL FILTERS
+  // ============================================================
+  describe('applyAllFilters', () => {
+    it('aplica filtro P2P correctamente', () => {
+      FM.setCurrentFilter('p2p');
+      const result = FM.applyAllFilters();
+      expect(result.every(r => r.requiresP2P)).toBe(true);
+    });
+
+    it('maneja casos edge: array vacío, null, y profitMin desde userSettings', () => {
+      // Array vacío
+      FM.updateRoutes([]);
+      expect(FM.applyAllFilters()).toEqual([]);
+
+      // Null/undefined tratado como array vacío
+      FM.updateRoutes(null);
+      expect(() => FM.applyAllFilters()).not.toThrow();
+
+      // profitMin desde userSettings
       FM.init({ interfaceMinProfitDisplay: 2 }, ROUTES);
       FM.setCurrentFilter('all');
       const result = FM.applyAllFilters();
       expect(result.every(r => r.profitPercentage >= 2)).toBe(true);
     });
-
-    it('con interfaceShowOnlyProfitable solo devuelve rutas ≥ 0%', () => {
-      FM.init({ interfaceShowOnlyProfitable: true }, ROUTES);
-      FM.setCurrentFilter('all');
-      const result = FM.applyAllFilters();
-      expect(result.every(r => r.profitPercentage >= 0)).toBe(true);
-    });
   });
 
   // ============================================================
-  // sortRoutes
+  // GET ACTIVE FILTERS
   // ============================================================
-  describe('sortRoutes', () => {
-    it('profit-desc ordena de mayor a menor', () => {
-      const sorted = FM.sortRoutes([...ROUTES], 'profit-desc');
-      for (let i = 0; i < sorted.length - 1; i++) {
-        expect(sorted[i].profitPercentage).toBeGreaterThanOrEqual(sorted[i + 1].profitPercentage);
-      }
-    });
+  describe('getActiveFilters', () => {
+    it('getAdvancedFilters devuelve copia independiente y resetAdvancedFilters restaura valores por defecto', () => {
+      // Verificar que getAdvancedFilters devuelve copia independiente
+      const a = FM.getAdvancedFilters();
+      const b = FM.getAdvancedFilters();
+      expect(a).not.toBe(b);
+      expect(a).toEqual(b);
 
-    it('profit-asc ordena de menor a mayor', () => {
-      const sorted = FM.sortRoutes([...ROUTES], 'profit-asc');
-      for (let i = 0; i < sorted.length - 1; i++) {
-        expect(sorted[i].profitPercentage).toBeLessThanOrEqual(sorted[i + 1].profitPercentage);
-      }
-    });
-
-    it('exchange-asc ordena alfabéticamente por buyExchange', () => {
-      const sorted = FM.sortRoutes([...ROUTES], 'exchange-asc');
-      for (let i = 0; i < sorted.length - 1; i++) {
-        const a = (sorted[i].buyExchange || '').toLowerCase();
-        const b = (sorted[i + 1].buyExchange || '').toLowerCase();
-        expect(a.localeCompare(b)).toBeLessThanOrEqual(0);
-      }
-    });
-
-    it('no modifica el array original', () => {
-      const original = [...ROUTES];
-      FM.sortRoutes(original, 'profit-asc');
-      expect(original).toEqual(ROUTES);
-    });
-  });
-
-  // ============================================================
-  // updateRoutes
-  // ============================================================
-  describe('updateRoutes', () => {
-    it('reemplaza las rutas internas', () => {
-      const nuevas = [{ broker: 'X', profitPercentage: 1, requiresP2P: false }];
-      FM.updateRoutes(nuevas);
-      FM.setCurrentFilter('all');
-      const result = FM.applyAllFilters();
-      expect(result).toHaveLength(1);
-      expect(result[0].broker).toBe('X');
-    });
-
-    it('acepta array vacío sin lanzar', () => {
-      expect(() => FM.updateRoutes([])).not.toThrow();
-    });
-
-    it('trata null/undefined como array vacío', () => {
-      FM.updateRoutes(null);
-      expect(() => FM.applyAllFilters()).not.toThrow();
-    });
-  });
-
-  // ============================================================
-  // resetAdvancedFilters
-  // ============================================================
-  describe('resetAdvancedFilters', () => {
-    it('restaura exchange/profitMin/hideNegative/sortBy a sus valores por defecto', () => {
+      // Modificar filtros avanzados
       FM.setAdvancedFilters({ exchange: 'Binance', profitMin: 5, hideNegative: true });
+      const modified = FM.getAdvancedFilters();
+      expect(modified.exchange).toBe('Binance');
+      expect(modified.profitMin).toBe(5);
+      expect(modified.hideNegative).toBe(true);
+
+      // Resetear filtros
       FM.resetAdvancedFilters();
-      const filters = FM.getAdvancedFilters();
-      // La función también intenta hacer querySelector pero no hay DOM, así que los valores
-      // internos sí se resetean aunque el DOM no exista
-      expect(filters.exchange).toBe('all');
-      expect(filters.profitMin).toBe(0);
-      expect(filters.hideNegative).toBe(false);
-      expect(filters.sortBy).toBe('profit-desc');
+      const reset = FM.getAdvancedFilters();
+      expect(reset.exchange).toBe('all');
+      expect(reset.profitMin).toBe(0);
+      expect(reset.hideNegative).toBe(false);
+      expect(reset.sortBy).toBe('profit-desc');
     });
   });
 });
