@@ -497,7 +497,7 @@
 
       // CORREGIDO v6.0.2: Agregar event listeners delegation para botones inline (CSP fix)
       container.querySelectorAll('[data-action]').forEach(btn => {
-        btn.addEventListener('click', e => {
+        btn.addEventListener('click', () => {
           const action = btn.dataset.action;
           if (action === 'reload') {
             window.dispatchEvent(new CustomEvent('routeManager:reload'));

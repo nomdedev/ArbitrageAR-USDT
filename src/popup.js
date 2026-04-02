@@ -183,7 +183,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
       `;
       // CORREGIDO v6.0.2: Event listener delegation (CSP fix)
-      mainContent.querySelector('.btn-critical-retry')?.addEventListener('click', () => location.reload());
+      mainContent
+        .querySelector('.btn-critical-retry')
+        ?.addEventListener('click', () => location.reload());
     }
   }
 });
@@ -405,81 +407,81 @@ function loadUserSettings() {
     chrome.storage.local.get('notificationSettings', result => {
       const settings = result.notificationSettings || {};
 
-    log(`⚙️ Cargando configuración: manualDollarPrice = ${settings.manualDollarPrice}`);
+      log(`⚙️ Cargando configuración: manualDollarPrice = ${settings.manualDollarPrice}`);
 
-    userSettings = {
-      // Notificaciones
-      notificationsEnabled: settings.notificationsEnabled !== false,
-      alertType: settings.alertType || 'all',
-      customThreshold: settings.customThreshold || 5,
-      notificationFrequency: settings.notificationFrequency || '1min',
-      soundEnabled: settings.soundEnabled !== false,
-      quietHours: settings.quietHours || false,
-      quietStart: settings.quietStart || '22:00',
-      quietEnd: settings.quietEnd || '08:00',
+      userSettings = {
+        // Notificaciones
+        notificationsEnabled: settings.notificationsEnabled !== false,
+        alertType: settings.alertType || 'all',
+        customThreshold: settings.customThreshold || 5,
+        notificationFrequency: settings.notificationFrequency || '1min',
+        soundEnabled: settings.soundEnabled !== false,
+        quietHours: settings.quietHours || false,
+        quietStart: settings.quietStart || '22:00',
+        quietEnd: settings.quietEnd || '08:00',
 
-      // Exchanges preferidos
-      preferredExchanges: settings.preferredExchanges || [],
+        // Exchanges preferidos
+        preferredExchanges: settings.preferredExchanges || [],
 
-      // Validación y seguridad
-      dataFreshnessWarning: settings.dataFreshnessWarning !== false,
-      riskAlertsEnabled: settings.riskAlertsEnabled !== false,
-      requireConfirmHighAmount: settings.requireConfirmHighAmount !== false,
-      highAmountThreshold: settings.highAmountThreshold || 500000,
-      minProfitWarning: settings.minProfitWarning || 0.5,
+        // Validación y seguridad
+        dataFreshnessWarning: settings.dataFreshnessWarning !== false,
+        riskAlertsEnabled: settings.riskAlertsEnabled !== false,
+        requireConfirmHighAmount: settings.requireConfirmHighAmount !== false,
+        highAmountThreshold: settings.highAmountThreshold || 500000,
+        minProfitWarning: settings.minProfitWarning || 0.5,
 
-      // Preferencias de rutas
-      showNegativeRoutes: settings.showNegativeRoutes !== false, // Por defecto MOSTRAR rutas negativas
-      preferSingleExchange: settings.preferSingleExchange || false,
-      maxRoutesDisplay: settings.maxRoutesDisplay || 20,
-      profitThreshold: settings.profitThreshold || 1.0, // Por defecto 1% - configurable en options
+        // Preferencias de rutas
+        showNegativeRoutes: settings.showNegativeRoutes !== false, // Por defecto MOSTRAR rutas negativas
+        preferSingleExchange: settings.preferSingleExchange || false,
+        maxRoutesDisplay: settings.maxRoutesDisplay || 20,
+        profitThreshold: settings.profitThreshold || 1.0, // Por defecto 1% - configurable en options
 
-      // NUEVO v5.0.56: Modos de display adicionales
-      sortByProfit: settings.sortByProfit !== false, // Por defecto ordenar por profit
-      showOnlyProfitable: settings.showOnlyProfitable || false, // Por defecto mostrar todas
+        // NUEVO v5.0.56: Modos de display adicionales
+        sortByProfit: settings.sortByProfit !== false, // Por defecto ordenar por profit
+        showOnlyProfitable: settings.showOnlyProfitable || false, // Por defecto mostrar todas
 
-      // Simulador
-      defaultSimAmount: settings.defaultSimAmount || 1000000,
+        // Simulador
+        defaultSimAmount: settings.defaultSimAmount || 1000000,
 
-      // Fees personalizados
-      extraTradingFee: settings.extraTradingFee || 0,
-      extraWithdrawalFee: settings.extraWithdrawalFee || 0,
-      extraTransferFee: settings.extraTransferFee || 0,
-      bankCommissionFee: settings.bankCommissionFee || 0,
-      brokerFees: settings.brokerFees || [], // Array de fees por broker
+        // Fees personalizados
+        extraTradingFee: settings.extraTradingFee || 0,
+        extraWithdrawalFee: settings.extraWithdrawalFee || 0,
+        extraTransferFee: settings.extraTransferFee || 0,
+        bankCommissionFee: settings.bankCommissionFee || 0,
+        brokerFees: settings.brokerFees || [], // Array de fees por broker
 
-      // APIs configurables
-      dolarApiUrl: settings.dolarApiUrl || 'https://dolarapi.com/v1/dolares/oficial',
-      criptoyaUsdtArsUrl: settings.criptoyaUsdtArsUrl || 'https://criptoya.com/api/usdt/ars/1',
-      criptoyaUsdtUsdUrl: settings.criptoyaUsdtUsdUrl || 'https://criptoya.com/api/usdt/usd/1',
-      updateIntervalMinutes: settings.updateIntervalMinutes || 5,
-      requestTimeoutSeconds: settings.requestTimeoutSeconds || 10,
+        // APIs configurables
+        dolarApiUrl: settings.dolarApiUrl || 'https://dolarapi.com/v1/dolares/oficial',
+        criptoyaUsdtArsUrl: settings.criptoyaUsdtArsUrl || 'https://criptoya.com/api/usdt/ars/1',
+        criptoyaUsdtUsdUrl: settings.criptoyaUsdtUsdUrl || 'https://criptoya.com/api/usdt/usd/1',
+        updateIntervalMinutes: settings.updateIntervalMinutes || 5,
+        requestTimeoutSeconds: settings.requestTimeoutSeconds || 10,
 
-      // Configuración de precio del dólar
-      dollarPriceSource: settings.dollarPriceSource || 'auto',
-      manualDollarPrice: settings.manualDollarPrice || 1400,
-      preferredBank: settings.preferredBank || 'consenso',
+        // Configuración de precio del dólar
+        dollarPriceSource: settings.dollarPriceSource || 'auto',
+        manualDollarPrice: settings.manualDollarPrice || 1400,
+        preferredBank: settings.preferredBank || 'consenso',
 
-      // Configuración de bancos
-      showBestBankPrice: settings.showBestBankPrice || false,
-      selectedBanks: settings.selectedBanks || ['bna', 'galicia', 'santander', 'bbva', 'icbc'],
+        // Configuración de bancos
+        showBestBankPrice: settings.showBestBankPrice || false,
+        selectedBanks: settings.selectedBanks || ['bna', 'galicia', 'santander', 'bbva', 'icbc'],
 
-      // NUEVO v5.0.76: Configuración de interfaz consolidada
-      simulatorDefaultAmount: settings.simulatorDefaultAmount || 100000,
-      interfaceMinProfitDisplay: settings.interfaceMinProfitDisplay || -10,
-      interfaceMaxRoutesDisplay: settings.interfaceMaxRoutesDisplay || 20,
-      interfaceSortByProfit: settings.interfaceSortByProfit !== false,
-      interfaceShowOnlyProfitable: settings.interfaceShowOnlyProfitable || false,
-      interfacePreferSingleExchange: settings.interfacePreferSingleExchange || false,
-      interfaceShowProfitColors: settings.interfaceShowProfitColors !== false,
-      interfaceCompactView: settings.interfaceCompactView || false,
-      interfaceShowExchangeIcons: settings.interfaceShowExchangeIcons !== false,
-      interfaceShowTimestamps: settings.interfaceShowTimestamps || false,
-      interfaceShowBankPrices: settings.interfaceShowBankPrices !== false,
-      interfaceBankDisplayMode: settings.interfaceBankDisplayMode || 'top-3',
-      interfaceBankUpdateInterval: settings.interfaceBankUpdateInterval || 10
-    };
-    resolve();
+        // NUEVO v5.0.76: Configuración de interfaz consolidada
+        simulatorDefaultAmount: settings.simulatorDefaultAmount || 100000,
+        interfaceMinProfitDisplay: settings.interfaceMinProfitDisplay || -10,
+        interfaceMaxRoutesDisplay: settings.interfaceMaxRoutesDisplay || 20,
+        interfaceSortByProfit: settings.interfaceSortByProfit !== false,
+        interfaceShowOnlyProfitable: settings.interfaceShowOnlyProfitable || false,
+        interfacePreferSingleExchange: settings.interfacePreferSingleExchange || false,
+        interfaceShowProfitColors: settings.interfaceShowProfitColors !== false,
+        interfaceCompactView: settings.interfaceCompactView || false,
+        interfaceShowExchangeIcons: settings.interfaceShowExchangeIcons !== false,
+        interfaceShowTimestamps: settings.interfaceShowTimestamps || false,
+        interfaceShowBankPrices: settings.interfaceShowBankPrices !== false,
+        interfaceBankDisplayMode: settings.interfaceBankDisplayMode || 'top-3',
+        interfaceBankUpdateInterval: settings.interfaceBankUpdateInterval || 10
+      };
+      resolve();
     });
   });
 }
@@ -800,7 +802,9 @@ function handleNoData(container) {
     </div>
   `;
   // CORREGIDO v6.0.2: Event listener delegation (CSP fix)
-  container.querySelector('[data-action="retry-fetch"]')?.addEventListener('click', () => fetchAndDisplay(0));
+  container
+    .querySelector('[data-action="retry-fetch"]')
+    ?.addEventListener('click', () => fetchAndDisplay(0));
 }
 
 function handleInitializationError(container, data, retryCount, maxRetries) {
@@ -844,7 +848,9 @@ function handleMaxRetriesError(container, data) {
     </div>
   `;
   // CORREGIDO v6.0.2: Event listener delegation (CSP fix)
-  container.querySelector('[data-action="retry-now"]')?.addEventListener('click', () => fetchAndDisplay(0));
+  container
+    .querySelector('[data-action="retry-now"]')
+    ?.addEventListener('click', () => fetchAndDisplay(0));
 }
 
 function handleCacheIndicator(data, retryCount) {
@@ -2534,7 +2540,9 @@ async function displayExchangeRates(exchangeRates) {
       </div>
     `;
     // CORREGIDO v6.0.2: Event listener delegation (CSP fix)
-    container.querySelector('[data-action="open-settings"]')?.addEventListener('click', () => chrome.runtime.openOptionsPage());
+    container
+      .querySelector('[data-action="open-settings"]')
+      ?.addEventListener('click', () => chrome.runtime.openOptionsPage());
     return;
   }
 
@@ -2985,7 +2993,9 @@ function showDataFreshnessWarning(ageMinutes) {
     </div>
   `;
   // CORREGIDO v6.0.2: Event listener delegation (CSP fix)
-  warningContainer.querySelector('[data-action="refresh-data"]')?.addEventListener('click', () => fetchAndDisplay());
+  warningContainer
+    .querySelector('[data-action="refresh-data"]')
+    ?.addEventListener('click', () => fetchAndDisplay());
   warningContainer.style.display = 'block';
 }
 
@@ -3144,7 +3154,9 @@ async function showRecalculateDialog() {
     await chrome.storage.local.set({ notificationSettings: newSettings });
 
     // Mostrar confirmación
-    alert(`✅ Precio actualizado a $${price.toFixed(2)}\n\nLas rutas se recalcularán automáticamente.`);
+    alert(
+      `✅ Precio actualizado a $${price.toFixed(2)}\n\nLas rutas se recalcularán automáticamente.`
+    );
 
     // No necesitamos setTimeout — el storage listener en background disparará updateData()
     // y el storage listener en popup actualizará la UI
@@ -3287,7 +3299,9 @@ async function loadBanksData() {
       </div>
     `;
     // CORREGIDO v6.0.2: Event listener delegation (CSP fix)
-    banksList.querySelector('[data-action="retry-banks"]')?.addEventListener('click', () => loadBanksData());
+    banksList
+      .querySelector('[data-action="retry-banks"]')
+      ?.addEventListener('click', () => loadBanksData());
   }
 }
 
@@ -4210,7 +4224,9 @@ function showCryptoError(message) {
     </div>
   `;
   // CORREGIDO v6.0.2: Event listener delegation (CSP fix)
-  container.querySelector('[data-action="retry-crypto"]')?.addEventListener('click', () => fetchAndRenderCryptoRoutes());
+  container
+    .querySelector('[data-action="retry-crypto"]')
+    ?.addEventListener('click', () => fetchAndRenderCryptoRoutes());
 }
 
 /**
@@ -4234,7 +4250,9 @@ function showCryptoEmpty(message) {
     </div>
   `;
   // CORREGIDO v6.0.2: Event listener delegation (CSP fix)
-  container.querySelector('[data-action="refresh-crypto"]')?.addEventListener('click', () => fetchAndRenderCryptoRoutes());
+  container
+    .querySelector('[data-action="refresh-crypto"]')
+    ?.addEventListener('click', () => fetchAndRenderCryptoRoutes());
 }
 
 /**

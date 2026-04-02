@@ -199,7 +199,11 @@
   // 2. window para navegadores
   // 3. global para Node.js
   // 4. Objeto vacío como último fallback
-  typeof self !== 'undefined' ? self :
-  typeof window !== 'undefined' ? window :
-  typeof global !== 'undefined' ? global : {}
+  typeof self !== 'undefined'
+    ? self
+    : typeof window !== 'undefined'
+      ? window
+      : typeof global !== 'undefined'
+        ? global
+        : {}
 );

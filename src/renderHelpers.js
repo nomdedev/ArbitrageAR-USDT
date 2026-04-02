@@ -170,7 +170,9 @@
 
     // Ruta intra-broker o rutas antiguas con steps
     if (route.steps) {
-      return route.steps.map(s => `${escapeHtml(s.exchange || s.from)}->${escapeHtml(s.to)}`).join(' → ');
+      return route.steps
+        .map(s => `${escapeHtml(s.exchange || s.from)}->${escapeHtml(s.to)}`)
+        .join(' → ');
     }
 
     // Fallback: usar el campo broker si existe

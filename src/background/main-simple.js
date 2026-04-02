@@ -677,11 +677,7 @@ function buildFilteredUsdtMap(usdt, userSettings) {
   const allDisabled = new Set([...disabledP2pUsdtArs, ...disabledP2pUsdUsdt, ...disabledP2pSync]);
 
   // Todos los exchanges P2P seleccionados (unión de todas las categorías)
-  const allEnabled = new Set([
-    ...p2pUsdtArsExchanges,
-    ...p2pUsdUsdtExchanges,
-    ...p2pSyncExchanges
-  ]);
+  const allEnabled = new Set([...p2pUsdtArsExchanges, ...p2pUsdUsdtExchanges, ...p2pSyncExchanges]);
 
   const result = {};
   for (const [exchange, data] of Object.entries(base)) {
@@ -693,7 +689,11 @@ function buildFilteredUsdtMap(usdt, userSettings) {
   return result;
 }
 
-function tryCalculateInterBrokerPair(buyExchange, sellExchange, { buyData, sellData, initialAmount, officialPrice, usdtUsd, applyFees, userSettings }) {
+function tryCalculateInterBrokerPair(
+  buyExchange,
+  sellExchange,
+  { buyData, sellData, initialAmount, officialPrice, usdtUsd, applyFees, userSettings }
+) {
   if (!buyData?.totalAsk || !sellData?.totalBid) return null;
 
   const usdPurchased = initialAmount / officialPrice;
@@ -741,14 +741,16 @@ function tryCalculateInterBrokerPair(buyExchange, sellExchange, { buyData, sellD
   const netProfit = finalAmount - initialAmount;
   const grossPercent = (grossProfit / initialAmount) * 100;
   const netPercent = (netProfit / initialAmount) * 100;
-  const totalFees = tradingFeeAmount * sellPrice + sellFeeAmount + withdrawalFee + transferFee + bankFee;
+  const totalFees =
+    tradingFeeAmount * sellPrice + sellFeeAmount + withdrawalFee + transferFee + bankFee;
 
   return {
     broker: `${buyExchange}→${sellExchange}`,
     buyExchange,
     sellExchange,
     isSingleExchange: false,
-    requiresP2P: buyExchange.toLowerCase().includes('p2p') || sellExchange.toLowerCase().includes('p2p'),
+    requiresP2P:
+      buyExchange.toLowerCase().includes('p2p') || sellExchange.toLowerCase().includes('p2p'),
     profitPercent: netPercent,
     profitPercentage: netPercent,
     grossProfitPercent: grossPercent,
@@ -757,8 +759,15 @@ function tryCalculateInterBrokerPair(buyExchange, sellExchange, { buyData, sellD
     usdToUsdtRate,
     usdtArsBid: sellPrice,
     calculation: {
-      initialAmount, usdPurchased, usdtPurchased, usdtAfterFees,
-      arsFromSale, arsAfterSellFee, finalAmount, netProfit, grossProfit
+      initialAmount,
+      usdPurchased,
+      usdtPurchased,
+      usdtAfterFees,
+      arsFromSale,
+      arsAfterSellFee,
+      finalAmount,
+      netProfit,
+      grossProfit
     },
     fees: {
       trading: tradingFeeAmount * sellPrice,
@@ -834,9 +843,14 @@ async function calculateInterBrokerRoutes(
           applyFees,
           userSettings
         });
-        if (!route) { skippedCount++; continue; }
+        if (!route) {
+          skippedCount++;
+          continue;
+        }
         routes.push(route);
-        log(`✅ [INTER-BROKER] ${buyExchange}→${sellExchange}: ${route.profitPercentage.toFixed(2)}%`);
+        log(
+          `✅ [INTER-BROKER] ${buyExchange}→${sellExchange}: ${route.profitPercentage.toFixed(2)}%`
+        );
       } catch (error) {
         log(`❌ [INTER-BROKER] Error calculando ${buyExchange}→${sellExchange}:`, error.message);
         skippedCount++;
@@ -855,7 +869,11 @@ async function calculateInterBrokerRoutes(
 // CÁLCULO DE RUTA DE UN SOLO EXCHANGE
 // ============================================
 
-function calculateSingleExchangeRoute(exchange, data, { initialAmount, officialPrice, usdtUsd, applyFees, userSettings }) {
+function calculateSingleExchangeRoute(
+  exchange,
+  data,
+  { initialAmount, officialPrice, usdtUsd, applyFees, userSettings }
+) {
   if (!data || typeof data !== 'object' || !data.totalAsk || !data.totalBid) return null;
   if (exchange === 'time' || exchange === 'timestamp') return null;
 
@@ -904,7 +922,8 @@ function calculateSingleExchangeRoute(exchange, data, { initialAmount, officialP
   const netProfit = finalAmount - initialAmount;
   const grossPercent = (grossProfit / initialAmount) * 100;
   const netPercent = (netProfit / initialAmount) * 100;
-  const totalFees = tradingFeeAmount * sellPrice + sellFeeAmount + withdrawalFee + transferFee + bankFee;
+  const totalFees =
+    tradingFeeAmount * sellPrice + sellFeeAmount + withdrawalFee + transferFee + bankFee;
 
   return {
     broker: exchange,
@@ -920,8 +939,15 @@ function calculateSingleExchangeRoute(exchange, data, { initialAmount, officialP
     usdToUsdtRate,
     usdtArsBid: sellPrice,
     calculation: {
-      initialAmount, usdPurchased, usdtPurchased, usdtAfterFees,
-      arsFromSale, arsAfterSellFee, finalAmount, netProfit, grossProfit
+      initialAmount,
+      usdPurchased,
+      usdtPurchased,
+      usdtAfterFees,
+      arsFromSale,
+      arsAfterSellFee,
+      finalAmount,
+      netProfit,
+      grossProfit
     },
     fees: {
       trading: tradingFeeAmount * sellPrice,
@@ -934,9 +960,13 @@ function calculateSingleExchangeRoute(exchange, data, { initialAmount, officialP
     config: {
       applyFees,
       tradingFeePercent: userSettings.extraTradingFee || 0,
-      brokerSpecificFees: (userSettings.brokerFees || []).some(f => f.broker.toLowerCase() === exchange.toLowerCase()),
+      brokerSpecificFees: (userSettings.brokerFees || []).some(
+        f => f.broker.toLowerCase() === exchange.toLowerCase()
+      ),
       usdtUsdSource: usdtUsd?.[exchange]?.totalAsk ? 'api' : 'calculated',
-      usdtUsdWarning: usingFallback ? 'Tasa USDT/USD calculada indirectamente. Verificar en CriptoYa.' : null
+      usdtUsdWarning: usingFallback
+        ? 'Tasa USDT/USD calculada indirectamente. Verificar en CriptoYa.'
+        : null
     }
   };
 }
@@ -1133,7 +1163,9 @@ async function calculateDirectUsdtToArsRoutes(usdt, userSettings = {}) {
       },
       config: {
         applyFees: userSettings.applyFeesInCalculation || false,
-        brokerSpecificFees: (userSettings.brokerFees || []).some(f => f.broker.toLowerCase() === exchange.toLowerCase())
+        brokerSpecificFees: (userSettings.brokerFees || []).some(
+          f => f.broker.toLowerCase() === exchange.toLowerCase()
+        )
       }
     });
   }
@@ -1225,7 +1257,9 @@ async function calculateUsdToUsdtRoutes(oficial, usdt, usdtUsd, userSettings = {
       },
       config: {
         applyFees: userSettings.applyFeesInCalculation || false,
-        brokerSpecificFees: (userSettings.brokerFees || []).some(f => f.broker.toLowerCase() === exchange.toLowerCase())
+        brokerSpecificFees: (userSettings.brokerFees || []).some(
+          f => f.broker.toLowerCase() === exchange.toLowerCase()
+        )
       }
     });
   }
@@ -1249,7 +1283,12 @@ async function calculateUsdToUsdtRoutes(oficial, usdt, usdtUsd, userSettings = {
  * @param {Object} userSettings - Configuración del usuario
  * @returns {Array} Rutas de arbitraje crypto-to-crypto
  */
-function tryCalculateCryptoPair(symbol, buyExchange, sellExchange, { buyData, sellData, initialAmount, applyFees, userSettings }) {
+function tryCalculateCryptoPair(
+  symbol,
+  buyExchange,
+  sellExchange,
+  { buyData, sellData, initialAmount, applyFees, userSettings }
+) {
   if (!buyData?.totalAsk || !sellData?.totalBid) return null;
 
   const buyPriceARS = buyData.totalAsk;
@@ -1261,8 +1300,17 @@ function tryCalculateCryptoPair(symbol, buyExchange, sellExchange, { buyData, se
     networkFee = globalThis.self.dataService.getNetworkFee(buyExchange, symbol);
   } else {
     const defaultFees = {
-      BTC: 0.0002, ETH: 0.003, USDC: 1, USDT: 1, DAI: 1,
-      BNB: 0.001, SOL: 0.01, ADA: 1, XRP: 0.25, MATIC: 0.1, DOGE: 5
+      BTC: 0.0002,
+      ETH: 0.003,
+      USDC: 1,
+      USDT: 1,
+      DAI: 1,
+      BNB: 0.001,
+      SOL: 0.01,
+      ADA: 1,
+      XRP: 0.25,
+      MATIC: 0.1,
+      DOGE: 5
     };
     networkFee = defaultFees[symbol] || 0;
   }
@@ -1304,15 +1352,21 @@ function tryCalculateCryptoPair(symbol, buyExchange, sellExchange, { buyData, se
   const grossProfit = arsFromSale - initialAmount;
   const grossProfitPercent = (grossProfit / initialAmount) * 100;
 
-  const buyIsP2P = buyExchange.toLowerCase().includes('p2p') || buyExchange.toLowerCase().includes('peer');
-  const sellIsP2P = sellExchange.toLowerCase().includes('p2p') || sellExchange.toLowerCase().includes('peer');
+  const buyIsP2P =
+    buyExchange.toLowerCase().includes('p2p') || buyExchange.toLowerCase().includes('peer');
+  const sellIsP2P =
+    sellExchange.toLowerCase().includes('p2p') || sellExchange.toLowerCase().includes('peer');
   let operationType = 'DIRECT';
   let speed = 'FAST';
   let difficulty = 'EASY';
   if (buyIsP2P || sellIsP2P) {
-    operationType = 'P2P'; speed = 'MEDIUM'; difficulty = 'HARD';
+    operationType = 'P2P';
+    speed = 'MEDIUM';
+    difficulty = 'HARD';
   } else if (buyExchange !== sellExchange) {
-    operationType = 'TRANSFER'; speed = 'MEDIUM'; difficulty = 'MEDIUM';
+    operationType = 'TRANSFER';
+    speed = 'MEDIUM';
+    difficulty = 'MEDIUM';
   }
 
   return {
@@ -1335,9 +1389,17 @@ function tryCalculateCryptoPair(symbol, buyExchange, sellExchange, { buyData, se
     spread: sellPriceARS - buyPriceARS,
     spreadPercent: ((sellPriceARS - buyPriceARS) / buyPriceARS) * 100,
     calculation: {
-      initialAmount, cryptoPurchased, cryptoAfterBuyFee,
-      networkFee, networkFeeARS, cryptoAfterNetworkFee,
-      arsFromSale, arsAfterSellFee, finalAmount, netProfit, grossProfit
+      initialAmount,
+      cryptoPurchased,
+      cryptoAfterBuyFee,
+      networkFee,
+      networkFeeARS,
+      cryptoAfterNetworkFee,
+      arsFromSale,
+      arsAfterSellFee,
+      finalAmount,
+      netProfit,
+      grossProfit
     },
     fees: {
       buy: buyFeeARS,
@@ -1365,8 +1427,14 @@ function tryCalculateCryptoPair(symbol, buyExchange, sellExchange, { buyData, se
 function getValidCryptoExchanges(data) {
   return Object.keys(data).filter(
     ex =>
-      ex !== 'time' && ex !== 'timestamp' && ex !== 'symbol' && ex !== 'fiatCurrency' &&
-      data[ex] && typeof data[ex] === 'object' && data[ex].totalAsk && data[ex].totalBid
+      ex !== 'time' &&
+      ex !== 'timestamp' &&
+      ex !== 'symbol' &&
+      ex !== 'fiatCurrency' &&
+      data[ex] &&
+      typeof data[ex] === 'object' &&
+      data[ex].totalAsk &&
+      data[ex].totalBid
   );
 }
 
@@ -1389,9 +1457,14 @@ function calculateCryptoSymbolRoutes(symbol, data, { initialAmount, applyFees, u
         });
         if (!route) continue;
         routes.push(route);
-        log(`✅ [CRYPTO-ARB] ${symbol} ${buyExchange}→${sellExchange}: ${route.profitPercentage.toFixed(2)}% (${route.operationType})`);
+        log(
+          `✅ [CRYPTO-ARB] ${symbol} ${buyExchange}→${sellExchange}: ${route.profitPercentage.toFixed(2)}% (${route.operationType})`
+        );
       } catch (error) {
-        log(`❌ [CRYPTO-ARB] Error calculando ${symbol} ${buyExchange}→${sellExchange}:`, error.message);
+        log(
+          `❌ [CRYPTO-ARB] Error calculando ${symbol} ${buyExchange}→${sellExchange}:`,
+          error.message
+        );
       }
     }
   }
@@ -1778,9 +1851,13 @@ async function resolveDollarPrice(userSettings) {
           timestamp: Date.now()
         };
       }
-      log('⚠️ [BACKGROUND] No se pudo calcular precio de bancos, usando API oficial como fallback...');
+      log(
+        '⚠️ [BACKGROUND] No se pudo calcular precio de bancos, usando API oficial como fallback...'
+      );
     } else {
-      log('⚠️ [BACKGROUND] No se pudieron obtener datos de bancos, usando API oficial como fallback...');
+      log(
+        '⚠️ [BACKGROUND] No se pudieron obtener datos de bancos, usando API oficial como fallback...'
+      );
     }
 
     // Fallback: API oficial
@@ -1982,12 +2059,19 @@ function handleGetArbitrages(request, sendResponse) {
   updateData()
     .then(data => {
       clearTimeout(responseTimeoutId);
-      safeSendResponse(data || { error: 'Error obteniendo datos', optimizedRoutes: [], arbitrages: [] });
+      safeSendResponse(
+        data || { error: 'Error obteniendo datos', optimizedRoutes: [], arbitrages: [] }
+      );
     })
     .catch(error => {
       clearTimeout(responseTimeoutId);
       console.error('❌ [BACKGROUND] Error:', error);
-      safeSendResponse({ error: error.message, optimizedRoutes: [], arbitrages: [] });
+      // CORREGIDO v6.0.2: Generic error message (S-15 security fix)
+      safeSendResponse({
+        error: 'Error interno al obtener arbitrajes. Intenta nuevamente.',
+        optimizedRoutes: [],
+        arbitrages: []
+      });
     });
   return true;
 }
@@ -2039,25 +2123,36 @@ function handleGetBanksData(request, sendResponse) {
         fetchBinanceP2P_USDT_USD(userSettings)
       ]);
     })
-    .then(([banksData, dollarTypes, usdtData, usdtUsdData, usdtUsdBrokers, binanceP2PArs, binanceP2PUsd]) => {
-      sendResponse({
-        success: true,
-        data: {
-          banksData: banksData || {},
-          dollarTypes: dollarTypes || {},
-          usdtData: usdtData || {},
-          usdtUsdData: usdtUsdData || {},
-          usdtUsdBrokers: usdtUsdBrokers || {},
-          binanceP2PArs: binanceP2PArs || {},
-          binanceP2PUsd: binanceP2PUsd || {}
-        }
-      });
-    })
+    .then(
+      ([
+        banksData,
+        dollarTypes,
+        usdtData,
+        usdtUsdData,
+        usdtUsdBrokers,
+        binanceP2PArs,
+        binanceP2PUsd
+      ]) => {
+        sendResponse({
+          success: true,
+          data: {
+            banksData: banksData || {},
+            dollarTypes: dollarTypes || {},
+            usdtData: usdtData || {},
+            usdtUsdData: usdtUsdData || {},
+            usdtUsdBrokers: usdtUsdBrokers || {},
+            binanceP2PArs: binanceP2PArs || {},
+            binanceP2PUsd: binanceP2PUsd || {}
+          }
+        });
+      }
+    )
     .catch(error => {
       console.error('[BACKGROUND] ❌ Error obteniendo datos de bancos:', error);
       sendResponse({
         success: false,
-        error: error.message,
+        // CORREGIDO v6.0.2: Generic error message (S-15 security fix)
+        error: 'Error interno al obtener cotizaciones bancarias. Intenta nuevamente.',
         data: {
           banksData: {},
           dollarTypes: {},

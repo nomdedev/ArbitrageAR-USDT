@@ -28,7 +28,6 @@
     "no-multiple-empty-lines": ["warn", { "max": 2 }],
     "semi": ["warn", "always"],
     "quotes": ["warn", "single", { "avoidEscape": true }],
-    "indent": ["warn", 2, { "SwitchCase": 1 }],
     "comma-dangle": ["warn", "never"],
     "no-trailing-spaces": "warn",
     "eol-last": ["warn", "always"],
