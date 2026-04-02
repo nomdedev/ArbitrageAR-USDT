@@ -523,8 +523,11 @@ class TooltipSystem {
    * Actualiza el contenido del tooltip
    */
   updateContent(content) {
-    // Convertir &#10; a <br> para multi-línea
-    const formattedContent = content.replace(/&#10;/g, '<br>');
+    // Convertir &#10; a <br> para multi-línea, sanitizando primero
+    const sanitized = typeof content === 'string'
+      ? content.replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>').replace(/"/g, '"')
+      : '';
+    const formattedContent = sanitized.replace(/&#10;/g, '<br>');
     this.container.innerHTML = `
       <div id="tooltip-content" class="tooltip-content">
         ${formattedContent}

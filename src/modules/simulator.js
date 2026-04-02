@@ -79,7 +79,11 @@
 
     const tooltip = document.createElement('div');
     tooltip.className = 'preset-tooltip';
-    tooltip.innerHTML = `<strong>${name}</strong>: ${description}`;
+    // CORREGIDO v6.0.2: Usar DOM API segura en vez de innerHTML (XSS fix)
+    const strong = document.createElement('strong');
+    strong.textContent = name;
+    tooltip.appendChild(strong);
+    tooltip.appendChild(document.createTextNode(': ' + (description || '')));
     tooltip.style.cssText = `
       position: fixed;
       bottom: 20px;

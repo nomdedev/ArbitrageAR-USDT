@@ -163,13 +163,14 @@
     if (!route) return '---';
 
     // Manejar rutas inter-broker (buyExchange !== sellExchange)
+    // CORREGIDO v6.0.2: Aplicar escapeHtml a nombres de exchange (XSS fix)
     if (route.buyExchange && route.sellExchange && route.buyExchange !== route.sellExchange) {
-      return `${route.buyExchange} → ${route.sellExchange}`;
+      return `${escapeHtml(route.buyExchange)} → ${escapeHtml(route.sellExchange)}`;
     }
 
     // Ruta intra-broker o rutas antiguas con steps
     if (route.steps) {
-      return route.steps.map(s => `${s.exchange || s.from}->${s.to}`).join(' → ');
+      return route.steps.map(s => `${escapeHtml(s.exchange || s.from)}->${escapeHtml(s.to)}`).join(' → ');
     }
 
     // Fallback: usar el campo broker si existe

@@ -445,7 +445,13 @@
 
     // Actualizar características si están disponibles
     if (featuresListEl && updateInfo.features) {
-      featuresListEl.innerHTML = updateInfo.features.map(feature => `<li>${feature}</li>`).join('');
+      // CORREGIDO v6.0.2: Usar DOM API segura en vez de innerHTML (XSS fix)
+      featuresListEl.innerHTML = '';
+      updateInfo.features.forEach(feature => {
+        const li = document.createElement('li');
+        li.textContent = feature;
+        featuresListEl.appendChild(li);
+      });
     }
 
     // Configurar clase de tipo

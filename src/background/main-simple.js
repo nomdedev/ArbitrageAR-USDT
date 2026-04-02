@@ -656,19 +656,8 @@ function filterExchangesBySelection(usdt, selectedBrokers) {
   return filtered;
 }
 
-/**
- * Calcula ganancias brutas y netas a partir de los montos de la operación.
- */
-function calculateProfits(initialAmount, arsFromSale, finalAmount) {
-  const grossProfit = arsFromSale - initialAmount;
-  const netProfit = finalAmount - initialAmount;
-  return {
-    grossProfit,
-    netProfit,
-    grossPercent: (grossProfit / initialAmount) * 100,
-    netPercent: (netProfit / initialAmount) * 100
-  };
-}
+// calculateProfits eliminado en v6.0.2 — era código muerto (nunca invocado)
+// El cálculo de ganancias se realiza inline en tryCalculateInterBrokerPair() y calculateSingleExchangeRoute()
 
 // ============================================
 // CÁLCULO DE RUTAS INTER-BROKER (entre diferentes exchanges)
@@ -2020,7 +2009,7 @@ function handleSettingsUpdated(request, sendResponse) {
     })
     .catch(error => {
       console.error('[BACKGROUND] ❌ Error recalculando datos:', error);
-      sendResponse({ success: false, error: error.message });
+      sendResponse({ success: false, error: 'Error interno. Intenta nuevamente.' });
     });
   return true;
 }
@@ -2113,12 +2102,12 @@ function handleGetCryptoArbitrage(request, sendResponse) {
         sendResponse({ routes: routes || [] });
       } catch (error) {
         console.error('[CRYPTO-ARB] ❌ Error calculando crypto arbitrage:', error);
-        sendResponse({ routes: [], error: error.message });
+        sendResponse({ routes: [], error: 'Error calculando arbitraje cripto.' });
       }
     })
     .catch(error => {
       console.error('[CRYPTO-ARB] ❌ Error obteniendo criptos activas:', error);
-      sendResponse({ routes: [], error: error.message });
+      sendResponse({ routes: [], error: 'Error obteniendo datos de criptomonedas.' });
     });
   return true;
 }
@@ -2127,13 +2116,19 @@ const MESSAGE_HANDLERS = {
   getArbitrages: handleGetArbitrages,
   refresh: handleRefresh,
   settingsUpdated: handleSettingsUpdated,
-  getBankRates: handleNotImplemented,
+  getBankRates: handleGetBanksData, // CORREGIDO v6.0.2: mapear a handler implementado
   recalculateWithCustomPrice: handleNotImplemented,
   getBanksData: handleGetBanksData,
   GET_CRYPTO_ARBITRAGE: handleGetCryptoArbitrage
 };
 
+// CORREGIDO v6.0.2: Validar origen de mensajes (A-01 security fix)
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  // Validar que el mensaje proviene de la propia extensión
+  if (sender.id && sender.id !== chrome.runtime.id) {
+    console.warn('[BACKGROUND] Mensaje rechazado de origen no autorizado:', sender.id);
+    return false;
+  }
   log('[BACKGROUND] Mensaje recibido:', request.action);
   const action = request.type || request.action;
   const handler = MESSAGE_HANDLERS[action];

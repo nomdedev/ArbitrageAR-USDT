@@ -106,8 +106,17 @@ const DEFAULT_SETTINGS = {
   disabledP2pSync: [] // Exchanges P2P desactivados para sincronización
 };
 
+const isChromeExtension = typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local;
+
 // Cargar configuración al iniciar
 document.addEventListener('DOMContentLoaded', async () => {
+  if (!isChromeExtension) {
+    console.warn('⚠️ Options: chrome.storage no disponible (fuera de contexto de extensión)');
+    setupEventListeners();
+    setupMainEventListeners();
+    setupCollapsibleSections();
+    return;
+  }
   await loadSettings();
   setupEventListeners();
   initializeBrokerFeesImproved();
@@ -595,6 +604,7 @@ function initializeBrokerFeesImproved() {
   }
 
   function loadBrokerFees() {
+    if (!isChromeExtension) return;
     chrome.storage.local.get('notificationSettings', result => {
       const settings = result.notificationSettings || {};
       const brokerFees = settings.brokerFees || [];
@@ -709,6 +719,7 @@ function initializeBrokerFeesImproved() {
       sellFee: parseFloat(item.dataset.sellFee) || 0
     }));
 
+    if (!isChromeExtension) return;
     chrome.storage.local.get('notificationSettings', result => {
       const settings = result.notificationSettings || DEFAULT_SETTINGS;
       settings.brokerFees = brokerFees;
@@ -730,6 +741,7 @@ async function saveSettings(settings = null) {
   try {
     const settingsToSave = settings || getCurrentSettings();
 
+    if (!isChromeExtension) return;
     await chrome.storage.local.set({ notificationSettings: settingsToSave });
 
     log('✅ Configuración guardada:', settingsToSave);
