@@ -108,6 +108,49 @@
     }, 2500);
   }
 
+  // CORREGIDO v6.0.2: Migrado de alert() a inline message (R-04)
+  /**
+   * Mostrar mensaje inline de validación cerca de un campo del simulador
+   * @private
+   * @param {HTMLElement|null} element - Elemento DOM cerca del cual mostrar el mensaje
+   * @param {string} message - Mensaje a mostrar
+   * @param {string} type - Tipo de mensaje ('error' o 'warning')
+   */
+  function showSimulatorMessage(element, message, type = 'warning') {
+    // Remover mensaje inline existente del simulador
+    const existing = document.querySelector('.sim-inline-message');
+    if (existing) existing.remove();
+
+    // Crear elemento de mensaje inline
+    const msgEl = document.createElement('div');
+    msgEl.className = `sim-inline-message sim-inline-${type}`;
+    msgEl.textContent = message;
+    msgEl.setAttribute('role', 'alert');
+
+    // Insertar cerca del elemento o en el contenedor del simulador
+    const container = element?.parentElement || document.querySelector('.simulator-container');
+    if (container) {
+      element ? container.insertBefore(msgEl, element.nextSibling) : container.prepend(msgEl);
+      // Scroll al mensaje
+      msgEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+      // Fallback a NotificationManager toast si no hay contenedor
+      if (window.NotificationManager?.showWarning) {
+        window.NotificationManager.showWarning(message);
+      }
+      return;
+    }
+
+    // Auto-remover después de 4 segundos
+    setTimeout(() => {
+      msgEl.style.opacity = '0';
+      msgEl.style.transition = 'opacity 0.3s ease';
+      setTimeout(() => {
+        if (msgEl.parentNode) msgEl.remove();
+      }, 300);
+    }, 4000);
+  }
+
   /**
    * Generar precios USD equidistantes
    * @private
@@ -409,9 +452,10 @@
     const amountInput = document.getElementById('sim-amount');
     const amount = parseFloat(amountInput?.value) || 1000000;
 
+    // CORREGIDO v6.0.2: Migrado de alert() a inline message (R-04)
     // Validar monto
     if (!amount || amount < 1000) {
-      alert('⚠️ Ingresa un monto válido (mínimo $1,000 ARS)');
+      showSimulatorMessage(amountInput, '⚠️ Ingresa un monto válido (mínimo $1,000 ARS)', 'error');
       return false;
     }
 
@@ -431,13 +475,16 @@
       const usdtMinInput = parseFloat(document.getElementById('matrix-usdt-min')?.value) || 1000;
       const usdtMaxInput = parseFloat(document.getElementById('matrix-usdt-max')?.value) || 1100;
 
+      // CORREGIDO v6.0.2: Migrado de alert() a inline message (R-04)
       // Validaciones
       if (usdMinInput >= usdMaxInput) {
-        alert('⚠️ El USD mínimo debe ser menor que el USD máximo');
+        const usdMinEl = document.getElementById('matrix-usd-min');
+        showSimulatorMessage(usdMinEl, '⚠️ El USD mínimo debe ser menor que el USD máximo', 'error');
         return false;
       }
       if (usdtMinInput >= usdtMaxInput) {
-        alert('⚠️ El USDT mínimo debe ser menor que el USDT máximo');
+        const usdtMinEl = document.getElementById('matrix-usdt-min');
+        showSimulatorMessage(usdtMinEl, '⚠️ El USDT mínimo debe ser menor que el USDT máximo', 'error');
         return false;
       }
 
@@ -496,12 +543,15 @@
     const finalUsdtMin = Math.min(...usdtPrices);
     const finalUsdtMax = Math.max(...usdtPrices);
 
+    // CORREGIDO v6.0.2: Migrado de alert() a inline message (R-04)
     if (finalUsdMin >= finalUsdMax) {
-      alert('⚠️ Error: Los precios USD no son válidos');
+      const usdMinEl = document.getElementById('matrix-usd-min');
+      showSimulatorMessage(usdMinEl, '⚠️ Error: Los precios USD no son válidos', 'error');
       return false;
     }
     if (finalUsdtMin >= finalUsdtMax) {
-      alert('⚠️ Error: Los precios USDT no son válidos');
+      const usdtMinEl = document.getElementById('matrix-usdt-min');
+      showSimulatorMessage(usdtMinEl, '⚠️ Error: Los precios USDT no son válidos', 'error');
       return false;
     }
 
@@ -512,13 +562,16 @@
     const bankCommissionPercent =
       parseFloat(document.getElementById('sim-bank-commission')?.value) || 0;
 
+    // CORREGIDO v6.0.2: Migrado de alert() a inline message (R-04)
     // Validaciones de parámetros
     if (buyFeePercent < 0 || buyFeePercent > 10) {
-      alert('⚠️ El fee de compra debe estar entre 0% y 10%');
+      const buyFeeEl = document.getElementById('sim-buy-fee');
+      showSimulatorMessage(buyFeeEl, '⚠️ El fee de compra debe estar entre 0% y 10%', 'error');
       return false;
     }
     if (sellFeePercent < 0 || sellFeePercent > 10) {
-      alert('⚠️ El fee de venta debe estar entre 0% y 10%');
+      const sellFeeEl = document.getElementById('sim-sell-fee');
+      showSimulatorMessage(sellFeeEl, '⚠️ El fee de venta debe estar entre 0% y 10%', 'error');
       return false;
     }
 
@@ -537,8 +590,9 @@
     const matrixTable = document.getElementById('risk-matrix-table');
     const matrixResult = document.getElementById('risk-matrix-result');
 
+    // CORREGIDO v6.0.2: Migrado de alert() a inline message (R-04)
     if (!matrixTable || !matrixResult) {
-      alert('⚠️ Error: elementos de la matriz no encontrados');
+      showSimulatorMessage(null, '⚠️ Error: elementos de la matriz no encontrados', 'error');
       return false;
     }
 

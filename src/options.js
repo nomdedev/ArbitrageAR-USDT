@@ -655,9 +655,10 @@ function initializeBrokerFeesImproved() {
     item.dataset.buyFee = buyFee;
     item.dataset.sellFee = sellFee;
 
+    // CORREGIDO v6.0.2: Unificado con CommonUtils.sanitizeHTML (R-02)
     item.innerHTML = `
       <div class="broker-fee-info">
-        <span class="broker-fee-name">${escapeHtml(label)}</span>
+        <span class="broker-fee-name">${CommonUtils.sanitizeHTML(label)}</span>
         <div class="broker-fee-values">
           <div class="fee-value">
             <span class="fee-label">Compra:</span>
@@ -729,11 +730,7 @@ function initializeBrokerFeesImproved() {
     });
   }
 
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
+  // CORREGIDO v6.0.2: escapeHtml eliminado — unificado con CommonUtils.sanitizeHTML (R-02)
 }
 
 // Guardar configuración

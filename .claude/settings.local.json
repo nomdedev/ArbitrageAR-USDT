@@ -5,7 +5,10 @@
       "Bash(node:*)",
       "Bash(rm:*)",
       "Bash(npm audit:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(git restore:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

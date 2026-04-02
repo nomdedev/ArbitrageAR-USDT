@@ -1,5 +1,5 @@
 # 🔒 AUDITORÍA COMPLETA POST-FIX — ArbitrageAR-USDT v6.0.0
-**Fecha:** 2026-04-01  
+**Fecha:** 2026-04-01 · **Última actualización:** 2026-04-02
 **Auditor:** Roo Code (automated)  
 **Modo:** Code + Puppeteer DevTools  
 
@@ -9,7 +9,7 @@
 
 | Área | Estado | Detalle |
 |------|--------|---------|
-| **Tests** | ✅ 496/496 | 21 suites, 0 failures |
+| **Tests** | ✅ 203/203 | 16 suites, 0 failures |
 | **Build** | ✅ OK | 2365.33 KB |
 | **Seguridad** | ✅ Mejorada | 0 vectores XSS críticos restantes |
 | **Módulos JS** | ✅ 11/11 | Todos cargan correctamente |
@@ -21,10 +21,12 @@
 ## 🧪 TESTS — Resultado Final
 
 ```
-Test Suites: 21 passed, 21 total
-Tests:       496 passed, 496 total
+Test Suites: 16 passed, 16 total
+Tests:       203 passed, 203 total
 Time:        ~13s
 ```
+
+> **Nota (2026-04-02):** Cifras corregidas. 15 suites originales con 132 tests + 1 suite nueva de modalManager con 71 tests = **16 suites, 203 tests**.
 
 ### Tests corregidos en esta sesión:
 - `auditoria.test.js:60` — `toBeGreaterThan(25)` → `toBeGreaterThan(15)` (refleja módulos actuales)
@@ -44,7 +46,7 @@ Time:        ~13s
 | S-04 | `popup.js:401` | Race condition en `loadUserSettings()` → Promise | Crítica |
 | S-05 | `popup.js:3071` | `displayDollarInfo` muestra `venta` en vez de `compra` | Crítica |
 | S-06 | `popup.js:3093` | `showRecalculateDialog` con warning claro + venta price | Alta |
-| S-07 | `popup.js:175` | Removido stack trace exposure en error display | Alta |
+| S-07 | `popup.js:175` | ✅ Removido stack trace exposure en error display — Stack trace solo en `console.error` (DevTools), no visible al usuario. Aceptable para debugging. | Alta |
 | S-08 | `popup.js:568+` | XSS sanitizado en `displayMarketHealth` (DOM API) | Crítica |
 | S-09 | `popup.js:3877-3889` | Crypto cards: `sanitizeHTML()` en exchange names | Alta |
 | S-10 | `popup.js:4031-4096` | Crypto modal: `sanitizeHTML()` en crypto symbol + exchanges | Alta |
@@ -52,7 +54,7 @@ Time:        ~13s
 | S-12 | `background/main-simple.js` | `getBankRates` mapeado a handler correcto | Crítica |
 | S-13 | `background/main-simple.js` | Removido dead code `calculateProfits` | Baja |
 | S-14 | `background/main-simple.js` | `sender.id` validation en `onMessage` | Alta |
-| S-15 | `background/main-simple.js` | Generic error messages (no `error.message` leak) | Media |
+| S-15 | `background/main-simple.js` | ✅ VERIFICADO — CORREGIDO: Todos los handlers ahora usan mensajes genéricos. Fix aplicado en `handleGetArbitrages` (línea 2069) y `handleGetBanksData` (línea 2154). | Media |
 | S-16 | `background/apiClient.js` | Timeout 12s → 8s | Media |
 | S-17 | `background/apiClient.js` | Removido User-Agent spoofing | Media |
 | S-18 | `background/apiClient.js` | Whitelist validation en `setConfig` | Alta |
@@ -160,9 +162,19 @@ Time:        ~13s
 |---|------|-----------|---------------|
 | R-01 | ~62 `innerHTML` restantes | Baja | Migrar gradualmente a DOM API segura |
 | R-02 | `options.js` usa `escapeHtml` local (div.textContent) | Baja | Unificar con `CommonUtils.sanitizeHTML` |
-| R-03 | Tests de cobertura siguen en ~0% para módulos core | Media | Implementar tests unitarios para routeManager, modalManager, filterManager |
+| R-03 | Tests de cobertura para módulos core: routeManager (8 tests), filterManager (11 tests), modalManager (71 tests) — ✅ PARCIALMENTE RESUELTO | Media | Faltan tests para otros módulos |
 | R-04 | `simulator.js` usa `alert()` para validación | Baja | Migrar a toasts/inline messages |
-| R-05 | No hay Content Security Policy report URI | Baja | Considerar agregar CSP reporting |
+| R-05 | No Aplica — Chrome Extension MV3 no soporta report-uri/report-to sin servidor de reporting externo. CSP actual ya es restrictivo. | Baja | — |
+
+---
+
+## 📝 CORRECCIONES ADICIONALES (2026-04-02)
+
+| # | Archivo | Fix | Severidad |
+|---|---------|-----|-----------|
+| S-15b | `main-simple.js:2069` | Generic error message en `handleGetArbitrages` | Media |
+| S-15c | `main-simple.js:2154` | Generic error message en `handleGetBanksData` | Media |
+| R-03 | `tests/modalManager.test.js` | 71 tests unitarios para modalManager (13 suites) | Media |
 
 ---
 
@@ -170,11 +182,11 @@ Time:        ~13s
 
 **La extensión ArbitrageAR-USDT v6.0.0 se encuentra en estado OPERATIVO:**
 
-1. **496/496 tests pasan** sin errores
+1. **203/203 tests pasan** (16 suites) sin errores
 2. **Build exitoso** (2365.33 KB)
 3. **0 vectores XSS críticos** restantes
 4. **5 bugs críticos corregidos** (race condition, precio incorrecto, handler faltante)
-5. **24 correcciones de seguridad** aplicadas
+5. **26 correcciones de seguridad** aplicadas (incluyendo S-15b y S-15c)
 6. **11/11 módulos JS** cargan correctamente
 7. **CSP endurecido** sin eval/unsafe
 8. **Permisos minimizados** sin wildcards excesivos

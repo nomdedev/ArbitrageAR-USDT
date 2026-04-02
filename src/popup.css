@@ -2559,6 +2559,41 @@ footer {
   color: #f87171;
 }
 
+/* CORREGIDO v6.0.2: Inline messages para simulador - reemplazo de alert() (R-04) */
+.sim-inline-message {
+  padding: var(--space-2) var(--space-3);
+  margin: var(--space-2) 0;
+  border-radius: var(--radius-md, 6px);
+  font-size: var(--font-size-xs, 0.75rem);
+  font-weight: 500;
+  line-height: 1.4;
+  animation: simMessageFadeIn 0.3s ease-out;
+  transition: opacity 0.3s ease;
+}
+
+.sim-inline-error {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
+
+.sim-inline-warning {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fcd34d;
+}
+
+@keyframes simMessageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ============================================
    FIN SIMULADOR v2.0
    ============================================ */
