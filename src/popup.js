@@ -176,15 +176,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="critical-error" style="padding: 20px; text-align: center;">
           <h2 style="color: #ef4444;">⚠️ Error al cargar la extensión</h2>
           <p>La extensión no pudo inicializarse correctamente.</p>
-          <details style="margin-top: 10px; text-align: left;">
-            <summary>Detalles técnicos</summary>
-            <pre style="background: #1e293b; padding: 10px; border-radius: 4px; overflow: auto;">${error.message}\n${error.stack}</pre>
-          </details>
-          <button onclick="location.reload()" style="margin-top: 15px; padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          <p style="margin-top: 10px; font-size: 14px; opacity: 0.7;">Intenta recargar la extensión.</p>
+          <button class="btn-critical-retry" style="margin-top: 15px; padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">
             🔄 Reintentar
           </button>
         </div>
       `;
+      // CORREGIDO v6.0.2: Event listener delegation (CSP fix)
+      mainContent.querySelector('.btn-critical-retry')?.addEventListener('click', () => location.reload());
     }
   }
 });
@@ -402,8 +401,9 @@ function validateRouteCalculations(route) {
  * Cargar configuración del usuario
  */
 function loadUserSettings() {
-  chrome.storage.local.get('notificationSettings', result => {
-    const settings = result.notificationSettings || {};
+  return new Promise(resolve => {
+    chrome.storage.local.get('notificationSettings', result => {
+      const settings = result.notificationSettings || {};
 
     log(`⚙️ Cargando configuración: manualDollarPrice = ${settings.manualDollarPrice}`);
 
@@ -479,6 +479,8 @@ function loadUserSettings() {
       interfaceBankDisplayMode: settings.interfaceBankDisplayMode || 'top-3',
       interfaceBankUpdateInterval: settings.interfaceBankUpdateInterval || 10
     };
+    resolve();
+    });
   });
 }
 
@@ -565,11 +567,16 @@ function displayMarketHealth(health) {
   container.style.backgroundColor = `${health.color}15`; // 15 = opacity
   container.style.borderColor = `${health.color}40`;
 
-  // Versión compacta: solo icono + status en una línea
-  container.innerHTML = `
-    <span class="market-icon">${health.icon}</span>
-    <span class="market-status-compact">${health.status}</span>
-  `;
+  // CORREGIDO v6.0.2: Usar DOM API segura (XSS fix)
+  container.innerHTML = '';
+  const iconSpan = document.createElement('span');
+  iconSpan.className = 'market-icon';
+  iconSpan.textContent = health.icon;
+  const statusSpan = document.createElement('span');
+  statusSpan.className = 'market-status-compact';
+  statusSpan.textContent = health.status;
+  container.appendChild(iconSpan);
+  container.appendChild(statusSpan);
 }
 
 // REEMPLAZO v6.0.0: Configurar botones de filtro usando FilterManager
@@ -785,13 +792,15 @@ function handleNoData(container) {
       <h3 class="error-state-title">Sin conexión</h3>
       <p class="error-state-message">No se pudo comunicar con el servicio de fondo</p>
       <div class="error-state-cta">
-        <button class="btn-retry" onclick="fetchAndDisplay(0)">
+        <button class="btn-retry" data-action="retry-fetch">
           <span>🔄</span>
           <span>Reintentar</span>
         </button>
       </div>
     </div>
   `;
+  // CORREGIDO v6.0.2: Event listener delegation (CSP fix)
+  container.querySelector('[data-action="retry-fetch"]')?.addEventListener('click', () => fetchAndDisplay(0));
 }
 
 function handleInitializationError(container, data, retryCount, maxRetries) {
@@ -827,13 +836,15 @@ function handleMaxRetriesError(container, data) {
       <h3 class="error-state-title">Error de inicialización</h3>
       <p class="error-state-message">${sanitizeHTML(data.error)}<br><br>Intenta actualizar manualmente en unos segundos</p>
       <div class="error-state-cta">
-        <button class="btn-retry" onclick="fetchAndDisplay(0)">
+        <button class="btn-retry" data-action="retry-now">
           <span>🔄</span>
           <span>Reintentar ahora</span>
         </button>
       </div>
     </div>
   `;
+  // CORREGIDO v6.0.2: Event listener delegation (CSP fix)
+  container.querySelector('[data-action="retry-now"]')?.addEventListener('click', () => fetchAndDisplay(0));
 }
 
 function handleCacheIndicator(data, retryCount) {
@@ -979,7 +990,7 @@ async function fetchAndDisplay(retryCount = 0) {
           container.innerHTML = `
             <div class="error-container">
               <h3>❌ Error de Comunicación</h3>
-              <p>Error: ${chrome.runtime.lastError.message}</p>
+              <p>Error: ${sanitizeHTML(chrome.runtime.lastError.message)}</p>
               <button class="retry-btn" data-action="reload">🔄 Reintentar</button>
             </div>
           `;
@@ -1187,7 +1198,7 @@ function displayArbitrages(arbitrages, official) {
     html += `
       <div class="arbitrage-card ${profitClass}" data-index="${index}">
         <div class="card-header">
-          <h3>🏦 ${arb.broker}</h3>
+          <h3>🏦 ${sanitizeHTML(arb.broker)}</h3>
           ${negativeIndicator ? `<div class="broker-loss-indicator">${negativeIndicator}</div>` : ''}
           <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${Fmt.formatNumber(arb.profitPercentage)}% ${lowProfitIndicator}</div>
         </div>
@@ -1321,13 +1332,24 @@ function displayOptimizedRoutes(routes, _official) {
             <span class="btn-icon">🔄</span>
             Actualizar
           </button>
-          <button class="btn-action btn-secondary-action" onclick="chrome.runtime.openOptionsPage()">
+          <button class="btn-action btn-secondary-action" data-action="open-options">
             <span class="btn-icon">⚙️</span>
             Configuración
           </button>
         </div>
       </div>
     `;
+    // CORREGIDO v6.0.2: Event listeners delegation (CSP fix)
+    container.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const action = btn.dataset.action;
+        if (action === 'reload') {
+          fetchAndDisplay(0);
+        } else if (action === 'open-options') {
+          chrome.runtime.openOptionsPage();
+        }
+      });
+    });
     return;
   }
 
@@ -1553,16 +1575,17 @@ function getP2PBadge(route) {
 }
 
 function getRouteDescription(route, routeType) {
+  // CORREGIDO v6.0.2: Sanitizar datos de API externa (XSS fix)
   switch (routeType) {
     case 'direct_usdt_ars':
-      return `<strong>${route.broker}</strong> - Venta directa`;
+      return `<strong>${sanitizeHTML(route.broker)}</strong> - Venta directa`;
     case 'usd_to_usdt':
-      return `<strong>${route.broker}</strong> - Compra USDT`;
+      return `<strong>${sanitizeHTML(route.broker)}</strong> - Compra USDT`;
     default: // arbitrage
       if (route.isSingleExchange) {
-        return `<strong>${route.buyExchange}</strong>`;
+        return `<strong>${sanitizeHTML(route.buyExchange)}</strong>`;
       } else {
-        return `<strong>${route.buyExchange}</strong> → <strong>${route.sellExchange}</strong>`;
+        return `<strong>${sanitizeHTML(route.buyExchange)}</strong> → <strong>${sanitizeHTML(route.sellExchange)}</strong>`;
       }
   }
 }
@@ -1700,7 +1723,7 @@ function generateDirectUsdtArsModal(route) {
         </div>
         <div class="route-arrow">
           <span class="arrow-icon">→</span>
-          <span class="arrow-label">${route.broker}</span>
+          <span class="arrow-label">${sanitizeHTML(route.broker)}</span>
         </div>
         <div class="route-step buy">
           <span class="step-icon">💸</span>
@@ -1714,7 +1737,7 @@ function generateDirectUsdtArsModal(route) {
         <h4 class="breakdown-title">📋 Cómo realizar la operación</h4>
         
         <div class="breakdown-section">
-          <div class="section-header">1. Accede a ${route.broker}</div>
+          <div class="section-header">1. Accede a ${sanitizeHTML(route.broker)}</div>
           <div class="breakdown-row">
             <span class="label">Inicia sesión en la plataforma</span>
           </div>
@@ -1800,7 +1823,7 @@ function generateUsdToUsdtModal(route) {
         </div>
         <div class="route-arrow">
           <span class="arrow-icon">→</span>
-          <span class="arrow-label">${route.broker}</span>
+          <span class="arrow-label">${sanitizeHTML(route.broker)}</span>
         </div>
         <div class="route-step sell">
           <span class="step-icon">💲</span>
@@ -1814,7 +1837,7 @@ function generateUsdToUsdtModal(route) {
         <h4 class="breakdown-title">📋 Cómo realizar la operación</h4>
         
         <div class="breakdown-section">
-          <div class="section-header">1. Deposita USD en ${route.broker}</div>
+          <div class="section-header">1. Deposita USD en ${sanitizeHTML(route.broker)}</div>
           <div class="breakdown-row">
             <span class="label">Cantidad a depositar</span>
             <span class="value">${usdAmount} USD</span>
@@ -1887,7 +1910,7 @@ function generateArbitrageModal(route) {
         </div>
         <div class="route-step transfer">
           <span class="step-icon">🔄</span>
-          <span class="step-exchange">${buyExchange}</span>
+          <span class="step-exchange">${sanitizeHTML(buyExchange)}</span>
           <span class="step-action">USD → USDT</span>
         </div>
         ${
@@ -1899,7 +1922,7 @@ function generateArbitrageModal(route) {
         </div>
         <div class="route-step sell">
           <span class="step-icon">💸</span>
-          <span class="step-exchange">${sellExchange}</span>
+          <span class="step-exchange">${sanitizeHTML(sellExchange)}</span>
           <span class="step-action">USDT → ARS</span>
         </div>
         `
@@ -1938,7 +1961,7 @@ function generateArbitrageModal(route) {
         </div>
 
         <div class="breakdown-section">
-          <div class="section-header">2. Convierte USD → USDT en ${buyExchange}</div>
+          <div class="section-header">2. Convierte USD → USDT en ${sanitizeHTML(buyExchange)}</div>
           ${
             usdToUsdtRate && isFinite(usdToUsdtRate)
               ? `
@@ -1956,7 +1979,7 @@ function generateArbitrageModal(route) {
         </div>
 
         <div class="breakdown-section">
-          <div class="section-header">3. Vende USDT → ARS ${!isSingleExchange ? `en ${sellExchange}` : ''}</div>
+          <div class="section-header">3. Vende USDT → ARS ${!isSingleExchange ? `en ${sanitizeHTML(sellExchange)}` : ''}</div>
           <div class="breakdown-row">
             <span class="label">Precio venta</span>
             <span class="value">$${Fmt.formatNumber(usdtArsBid)}/USDT</span>
@@ -2503,13 +2526,15 @@ async function displayExchangeRates(exchangeRates) {
           <p class="empty-state-subtitle">Los precios de exchanges están deshabilitados</p>
         </div>
         <div class="empty-state-actions">
-          <button class="btn-action btn-primary-action" onclick="chrome.runtime.openOptionsPage()">
+          <button class="btn-action btn-primary-action" data-action="open-settings">
             <span class="btn-icon">⚙️</span>
             Ir a Configuración
           </button>
         </div>
       </div>
     `;
+    // CORREGIDO v6.0.2: Event listener delegation (CSP fix)
+    container.querySelector('[data-action="open-settings"]')?.addEventListener('click', () => chrome.runtime.openOptionsPage());
     return;
   }
 
@@ -2626,15 +2651,15 @@ async function displayExchangeRates(exchangeRates) {
       }
 
       html += `
-        <div class="exchange-card" data-type="${type}" data-name="${name.toLowerCase()}">
+        <div class="exchange-card" data-type="${type}" data-name="${sanitizeHTML(name.toLowerCase())}">
           <div class="exchange-header">
-            <div class="exchange-name">${name}</div>
+            <div class="exchange-name">${sanitizeHTML(name)}</div>
             <div class="exchange-type">${rateType}</div>
           </div>
           <div class="exchange-rates">
             ${displayRates}
           </div>
-          <div class="exchange-source">Fuente: ${source}</div>
+          <div class="exchange-source">Fuente: ${sanitizeHTML(source)}</div>
         </div>
       `;
     });
@@ -2749,15 +2774,15 @@ function setupExchangeFilters(allExchanges) {
                 }
 
                 return `
-            <div class="exchange-card" data-type="${type}" data-name="${name.toLowerCase()}">
+            <div class="exchange-card" data-type="${type}" data-name="${sanitizeHTML(name.toLowerCase())}">
               <div class="exchange-header">
-                <div class="exchange-name">${name}</div>
+                <div class="exchange-name">${sanitizeHTML(name)}</div>
                 <div class="exchange-type">${rateType}</div>
               </div>
               <div class="exchange-rates">
                 ${displayRates}
               </div>
-              <div class="exchange-source">Fuente: ${source}</div>
+              <div class="exchange-source">Fuente: ${sanitizeHTML(source)}</div>
             </div>
           `;
               })
@@ -2956,9 +2981,11 @@ function showDataFreshnessWarning(ageMinutes) {
     <div class="warning-banner stale-data">
       <span class="warning-icon">⚠️</span>
       <span class="warning-text">Los datos tienen más de ${ageMinutes} minutos. Actualiza para ver precios frescos.</span>
-      <button class="warning-refresh-btn" onclick="fetchAndDisplay()">🔄 Actualizar</button>
+      <button class="warning-refresh-btn" data-action="refresh-data">🔄 Actualizar</button>
     </div>
   `;
+  // CORREGIDO v6.0.2: Event listener delegation (CSP fix)
+  warningContainer.querySelector('[data-action="refresh-data"]')?.addEventListener('click', () => fetchAndDisplay());
   warningContainer.style.display = 'block';
 }
 
@@ -3074,31 +3101,32 @@ function displayDollarInfo(officialData) {
   }
 
   log(
-    `💵 [DISPLAY] Actualizando display del dólar: $${officialData.compra} (${officialData.source})`
+    `💵 [DISPLAY] Actualizando display del dólar: $${officialData.venta} (${officialData.source})`
   );
 
-  // CORREGIDO v5.0.35: Después del fix de campos API, mostrar precio de COMPRA (lo que pagamos por comprar USD)
-  dollarPrice.textContent = `$${Fmt.formatNumber(officialData.compra)}`;
+  // CORREGIDO v6.0.2: Mostrar precio de VENTA (ask) — es lo que el banco nos cobra por comprar USD
+  dollarPrice.textContent = `$${Fmt.formatNumber(officialData.venta)}`;
   dollarSource.textContent = `Fuente: ${Fmt.getDollarSourceDisplay(officialData)}`;
   // Mostrar la información
   dollarInfo.style.display = 'block';
 }
 
-// MEJORADO v5.0.48: Recálculo funcional con opción de cambiar precio
+// MEJORADO v6.0.2: Recálculo funcional con opción de cambiar precio temporalmente
 async function showRecalculateDialog() {
   // Obtener configuración actual
   const settings = await chrome.storage.local.get('notificationSettings');
   const userSettings = settings.notificationSettings || {};
 
-  const currentPrice = currentData?.oficial?.compra || 1000;
+  const currentPrice = currentData?.oficial?.venta || 1000;
   const isManual = userSettings.dollarPriceSource === 'manual';
 
   const message = isManual
     ? `💵 Precio manual actual: $${currentPrice.toFixed(2)}\n\n` +
-      'Puedes cambiarlo en Configuración o ingresa un nuevo valor temporal:'
+      'Ingresa un nuevo valor (esto actualizará tu precio manual):'
     : `💵 Precio automático actual: $${currentPrice.toFixed(2)}\n\n` +
-      'Para usar un precio personalizado, activa "Precio manual" en Configuración.\n\n' +
-      'Por ahora, ¿quieres cambiar temporalmente a modo manual?';
+      '⚠️ ATENCIÓN: Esto cambiará permanentemente a modo manual.\n' +
+      'Para volver a modo automático, ve a Configuración.\n\n' +
+      'Ingresa el nuevo precio o cancela para solo refrescar:';
 
   const customPrice = prompt(message, currentPrice.toFixed(2));
 
@@ -3116,12 +3144,10 @@ async function showRecalculateDialog() {
     await chrome.storage.local.set({ notificationSettings: newSettings });
 
     // Mostrar confirmación
-    alert(`✅ Precio actualizado a $${price.toFixed(2)}\n\nRecalculando rutas...`);
+    alert(`✅ Precio actualizado a $${price.toFixed(2)}\n\nLas rutas se recalcularán automáticamente.`);
 
-    // Esperar un momento para que el background procese
-    setTimeout(() => {
-      fetchAndDisplay(true); // Forzar actualización
-    }, 500);
+    // No necesitamos setTimeout — el storage listener en background disparará updateData()
+    // y el storage listener en popup actualizará la UI
   } else if (!customPrice) {
     // Usuario canceló, solo refrescar datos actuales
     fetchAndDisplay(true);
@@ -3257,9 +3283,11 @@ async function loadBanksData() {
       <div class="error-message">
         <p>❌ Error al cargar cotizaciones</p>
         <p>${error.message}</p>
-        <button onclick="loadBanksData()" class="retry-btn">Reintentar</button>
+        <button data-action="retry-banks" class="retry-btn">Reintentar</button>
       </div>
     `;
+    // CORREGIDO v6.0.2: Event listener delegation (CSP fix)
+    banksList.querySelector('[data-action="retry-banks"]')?.addEventListener('click', () => loadBanksData());
   }
 }
 
@@ -3408,7 +3436,7 @@ function generateUSDTUSDTTab(usdtUsdData, sortPreference, userSettings = null) {
 
     html += `
       <div class="bank-row stagger-in hover-lift" style="animation-delay: ${index * 30}ms">
-        <div class="bank-name">${exchangeName}</div>
+        <div class="bank-name">${sanitizeHTML(exchangeName)}</div>
         <div class="bank-buy">$${Fmt.formatNumber(bidPrice)}</div>
         <div class="bank-sell">$${Fmt.formatNumber(askPrice)}</div>
       </div>
@@ -3454,7 +3482,7 @@ function generateUSDTARSTab(usdtData, sortPreference, userSettings = null) {
 
     html += `
       <div class="bank-row stagger-in hover-lift" style="animation-delay: ${index * 30}ms">
-        <div class="bank-name">${exchangeName}</div>
+        <div class="bank-name">${sanitizeHTML(exchangeName)}</div>
         <div class="bank-buy">$${Fmt.formatNumber(bidPrice)}</div>
         <div class="bank-sell">$${Fmt.formatNumber(askPrice)}</div>
       </div>
@@ -3871,7 +3899,7 @@ function createCryptoRouteCard(route, index) {
     <div class="crypto-card-header">
       <div class="crypto-info">
         <span class="crypto-icon">${getCryptoIcon(route.crypto)}</span>
-        <span class="crypto-name">${route.crypto}</span>
+        <span class="crypto-name">${sanitizeHTML(route.crypto)}</span>
       </div>
       <div class="profit-badge ${route.profitPercent >= 0 ? 'profit-positive' : 'profit-negative'} text-underline-animated glow-pulse">
         ${route.profitPercent >= 0 ? '+' : ''}${route.profitPercent.toFixed(2)}%
@@ -3880,9 +3908,9 @@ function createCryptoRouteCard(route, index) {
     
     <div class="crypto-card-body">
       <div class="route-path">
-        <span class="exchange-badge">${capitalizeFirst(route.buyExchange)}</span>
+        <span class="exchange-badge">${sanitizeHTML(capitalizeFirst(route.buyExchange))}</span>
         <span class="arrow">→</span>
-        <span class="exchange-badge">${capitalizeFirst(route.sellExchange)}</span>
+        <span class="exchange-badge">${sanitizeHTML(capitalizeFirst(route.sellExchange))}</span>
       </div>
       
       <div class="operation-meta">
@@ -4025,7 +4053,7 @@ function showCryptoRouteDetails(route) {
       <div class="crypto-detail-header ${isProfitable ? 'profitable' : 'loss'}">
         <div class="crypto-symbol">
           <span class="symbol-icon">${getCryptoIcon(route.crypto)}</span>
-          <span class="symbol-name">${route.crypto}</span>
+          <span class="symbol-name">${sanitizeHTML(route.crypto)}</span>
         </div>
         <div class="profit-highlight">
           <span class="profit-value">${isProfitable ? '+' : ''}${route.profitPercent?.toFixed(2) || 0}%</span>
@@ -4037,7 +4065,7 @@ function showCryptoRouteDetails(route) {
       <div class="route-visualization">
         <div class="route-step buy">
           <span class="step-icon">🛒</span>
-          <span class="step-exchange">${capitalizeFirst(route.buyExchange)}</span>
+          <span class="step-exchange">${sanitizeHTML(capitalizeFirst(route.buyExchange))}</span>
           <span class="step-action">Comprar</span>
         </div>
         <div class="route-arrow">
@@ -4046,7 +4074,7 @@ function showCryptoRouteDetails(route) {
         </div>
         <div class="route-step sell">
           <span class="step-icon">💰</span>
-          <span class="step-exchange">${capitalizeFirst(route.sellExchange)}</span>
+          <span class="step-exchange">${sanitizeHTML(capitalizeFirst(route.sellExchange))}</span>
           <span class="step-action">Vender</span>
         </div>
       </div>
@@ -4063,7 +4091,7 @@ function showCryptoRouteDetails(route) {
         <h4 class="breakdown-title">📊 Desglose de la Operación</h4>
         
         <div class="breakdown-section">
-          <div class="section-header">1. Compra de ${route.crypto}</div>
+          <div class="section-header">1. Compra de ${sanitizeHTML(route.crypto)}</div>
           <div class="breakdown-row">
             <span class="label">Inversión inicial</span>
             <span class="value">$${Fmt.formatNumber(initialAmount)} ARS</span>
@@ -4073,7 +4101,7 @@ function showCryptoRouteDetails(route) {
             <span class="value">$${Fmt.formatNumber(route.buyPriceARS)} ARS</span>
           </div>
           <div class="breakdown-row highlight">
-            <span class="label">${route.crypto} comprados</span>
+            <span class="label">${sanitizeHTML(route.crypto)} comprados</span>
             <span class="value">${cryptoPurchased.toFixed(8)}</span>
           </div>
         </div>
@@ -4082,14 +4110,14 @@ function showCryptoRouteDetails(route) {
           <div class="section-header">2. Transferencia</div>
           <div class="breakdown-row fee">
             <span class="label">Network fee</span>
-            <span class="value negative">-${networkFee.toFixed(8)} ${route.crypto}</span>
+            <span class="value negative">-${networkFee.toFixed(8)} ${sanitizeHTML(route.crypto)}</span>
           </div>
           <div class="breakdown-row">
             <span class="label">Fee en ARS</span>
             <span class="value muted">≈ $${Fmt.formatNumber(networkFeeARS)}</span>
           </div>
           <div class="breakdown-row highlight">
-            <span class="label">${route.crypto} a vender</span>
+            <span class="label">${sanitizeHTML(route.crypto)} a vender</span>
             <span class="value">${cryptoAfterFee.toFixed(8)}</span>
           </div>
         </div>
@@ -4172,15 +4200,17 @@ function showCryptoError(message) {
     <div class="error-state animate-scale-in">
       <div class="error-state-icon animate-pulse">❌</div>
       <h3 class="error-state-title">Error de conexión</h3>
-      <p class="error-state-message">${message}</p>
+      <p class="error-state-message">${sanitizeHTML(message)}</p>
       <div class="error-state-cta">
-        <button class="btn-retry" onclick="fetchAndRenderCryptoRoutes()">
+        <button class="btn-retry" data-action="retry-crypto">
           <span>🔄</span>
           <span>Reintentar</span>
         </button>
       </div>
     </div>
   `;
+  // CORREGIDO v6.0.2: Event listener delegation (CSP fix)
+  container.querySelector('[data-action="retry-crypto"]')?.addEventListener('click', () => fetchAndRenderCryptoRoutes());
 }
 
 /**
@@ -4194,15 +4224,17 @@ function showCryptoEmpty(message) {
     <div class="empty-state animate-scale-in">
       <div class="empty-state-icon">🔍</div>
       <h3 class="empty-state-title">Sin oportunidades</h3>
-      <p class="empty-state-message">${message || 'No hay oportunidades de arbitraje disponibles en este momento'}</p>
+      <p class="empty-state-message">${sanitizeHTML(message || 'No hay oportunidades de arbitraje disponibles en este momento')}</p>
       <div class="empty-state-cta">
-        <button class="btn-primary" onclick="fetchAndRenderCryptoRoutes()">
+        <button class="btn-primary" data-action="refresh-crypto">
           <span>🔄</span>
           <span>Actualizar</span>
         </button>
       </div>
     </div>
   `;
+  // CORREGIDO v6.0.2: Event listener delegation (CSP fix)
+  container.querySelector('[data-action="refresh-crypto"]')?.addEventListener('click', () => fetchAndRenderCryptoRoutes());
 }
 
 /**
@@ -4219,7 +4251,7 @@ function showCryptoLoading(message = 'Buscando oportunidades...') {
         <div class="spinner-ring"></div>
         <div class="spinner-ring"></div>
       </div>
-      <p class="loading-text">${message}</p>
+      <p class="loading-text">${sanitizeHTML(message)}</p>
       <div class="loading-dots">
         <span></span>
         <span></span>

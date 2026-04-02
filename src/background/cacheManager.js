@@ -1,8 +1,9 @@
 // ==========================================
 // SISTEMA DE CACHÉ INTELIGENTE - ArbitrageAR-USDT
+// Compatible con Service Workers (Manifest V3)
 // ==========================================
 
-(function (window) {
+(function (globalScope) {
   'use strict';
 
   // Configuración de tiempos de caché (en milisegundos)
@@ -171,8 +172,8 @@
     return await getCachedOrFetch(cacheType, fetchFunction, args);
   }
 
-  // Exponer la API del Cache Manager
-  window.CacheManager = {
+  // Exponer la API del Cache Manager en el scope global
+  globalScope.CacheManager = {
     // Funciones principales
     getCachedOrFetch,
     getCache,
@@ -192,4 +193,13 @@
   };
 
   console.log('🗄️ [CACHE] CacheManager inicializado');
-})(typeof window !== 'undefined' ? window : global);
+})(
+  // Detectar el scope global correcto:
+  // 1. self para Service Workers
+  // 2. window para navegadores
+  // 3. global para Node.js
+  // 4. Objeto vacío como último fallback
+  typeof self !== 'undefined' ? self :
+  typeof window !== 'undefined' ? window :
+  typeof global !== 'undefined' ? global : {}
+);

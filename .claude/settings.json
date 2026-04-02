@@ -1,0 +1,95 @@
+{
+  "project": {
+    "name": "ArbitrageAR-USDT",
+    "type": "chrome-extension",
+    "manifest_version": 3,
+    "version": "6.0.0",
+    "language": "javascript",
+    "test_framework": "jest",
+    "e2e_framework": "playwright"
+  },
+  "permissions": {
+    "auto_read": ["src/**/*.js", "src/**/*.html", "src/**/*.css", "manifest.json", "package.json", "docs/**/*.md"],
+    "auto_edit": ["src/**/*.js", "src/**/*.html", "src/**/*.css"],
+    "require_confirmation": ["manifest.json", "package.json", "scripts/**/*"]
+  },
+  "defaults": {
+    "commit_language": "es",
+    "test_runner": "jest",
+    "lint_fix": true,
+    "format_on_save": false
+  },
+  "env": {
+    "node_version": ">=18.0.0",
+    "browsers": ["Chrome >= 88", "Edge >= 88", "Brave"]
+  },
+  "commands": {
+    "test": "npm run test",
+    "lint": "npm run lint",
+    "lint_fix": "npm run lint:fix",
+    "format": "npm run format",
+    "validate": "npm run validate",
+    "build": "npm run build",
+    "build_prod": "npm run build:prod",
+    "package": "npm run package"
+  },
+  "git": {
+    "main_branch": "main",
+    "commit_format": {
+      "types": ["feat", "fix", "refactor", "test", "docs", "style", "chore"],
+      "language": "es",
+      "example": "fix: corregir cálculo de fees en arbitrageCalculator"
+    }
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '🔍 Validando archivo antes de editar...'",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx prettier --write \"$CLAUDE_PROJECT_DIR\"/src/**/*.{js,css,html} 2>/dev/null || true",
+            "timeout": 30,
+            "statusMessage": "Formateando código..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"$(date '+%Y-%m-%d %H:%M:%S') - Comando ejecutado\" >> \"$CLAUDE_PROJECT_DIR\"/.claude/metrics/commands.log",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '🚀 ArbitrageAR-USDT iniciado. Recuerda: commits en español, validar antes de push.'"
+          }
+        ]
+      }
+    ]
+  },
+  "mcp": {
+    "servers": []
+  }
+}

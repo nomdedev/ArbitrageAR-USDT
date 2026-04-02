@@ -12,12 +12,12 @@ const ApiClient = (() => {
 
   // Configuración
   const config = {
-    timeout: 12000,
+    timeout: 8000, // CORREGIDO v6.0.2: Reducido de 12s a 8s (M-03)
     rateLimit: 600, // ms entre requests
-    enableRateLimit: false,
+    enableRateLimit: true, // Habilitado por defecto para evitar rate limiting de APIs
     headers: {
-      Accept: 'application/json',
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      Accept: 'application/json'
+      // CORREGIDO v6.0.2: Eliminado User-Agent spoofing (M-04)
     }
   };
 
@@ -170,9 +170,17 @@ const ApiClient = (() => {
     };
   };
 
-  // Configuración
+  // CORREGIDO v6.0.2: Validar propiedades permitidas en setConfig (M-08)
+  const ALLOWED_CONFIG_KEYS = ['timeout', 'rateLimit', 'enableRateLimit'];
   const setConfig = newConfig => {
-    Object.assign(config, newConfig);
+    if (!newConfig || typeof newConfig !== 'object') return;
+    const filtered = {};
+    for (const key of ALLOWED_CONFIG_KEYS) {
+      if (key in newConfig) {
+        filtered[key] = newConfig[key];
+      }
+    }
+    Object.assign(config, filtered);
   };
 
   // API pública

@@ -8,6 +8,18 @@
 (function (window) {
   'use strict';
 
+  // Sanitización XSS - CORREGIDO v6.0.2: Entidades HTML correctas
+  const escapeHtml = text => {
+    if (text === null || text === undefined) return '';
+    if (typeof text !== 'string') return String(text);
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  };
+
   // ==========================================
   // ESTADO DEL MÓDULO
   // ==========================================
@@ -160,16 +172,17 @@
    * @returns {string} Descripción HTML
    */
   function getRouteDescription(route, routeType) {
+    // CORREGIDO v6.0.2: Sanitizar datos de API externa (XSS fix)
     switch (routeType) {
       case ROUTE_TYPES.DIRECT_USDT_ARS:
-        return `<strong>${route.broker}</strong> - Venta directa`;
+        return `<strong>${escapeHtml(route.broker)}</strong> - Venta directa`;
       case ROUTE_TYPES.USD_TO_USDT:
-        return `<strong>${route.broker}</strong> - Compra USDT`;
+        return `<strong>${escapeHtml(route.broker)}</strong> - Compra USDT`;
       default:
         if (route.isSingleExchange) {
-          return `<strong>${route.buyExchange}</strong>`;
+          return `<strong>${escapeHtml(route.buyExchange)}</strong>`;
         } else {
-          return `<strong>${route.buyExchange}</strong> → <strong>${route.sellExchange}</strong>`;
+          return `<strong>${escapeHtml(route.buyExchange)}</strong> → <strong>${escapeHtml(route.sellExchange)}</strong>`;
         }
     }
   }
@@ -474,13 +487,27 @@
               <span class="btn-icon">🔄</span>
               Actualizar
             </button>
-            <button class="btn-action btn-secondary-action" onclick="chrome.runtime.openOptionsPage()">
+            <button class="btn-action btn-secondary-action" data-action="open-options">
               <span class="btn-icon">⚙️</span>
               Configuración
             </button>
           </div>
         </div>
       `;
+
+      // CORREGIDO v6.0.2: Agregar event listeners delegation para botones inline (CSP fix)
+      container.querySelectorAll('[data-action]').forEach(btn => {
+        btn.addEventListener('click', e => {
+          const action = btn.dataset.action;
+          if (action === 'reload') {
+            window.dispatchEvent(new CustomEvent('routeManager:reload'));
+          } else if (action === 'open-options') {
+            if (typeof chrome !== 'undefined' && chrome.runtime) {
+              chrome.runtime.openOptionsPage();
+            }
+          }
+        });
+      });
       return;
     }
 
@@ -593,10 +620,11 @@
     const container = document.getElementById(containerId);
     if (!container) return;
 
+    // CORREGIDO v6.0.2: Sanitizar message (XSS fix)
     container.innerHTML = `
       <div class="empty-state">
         <div class="empty-state-icon">🔍</div>
-        <div class="empty-state-text">${message || 'No hay oportunidades de arbitraje disponibles'}</div>
+        <div class="empty-state-text">${escapeHtml(message || 'No hay oportunidades de arbitraje disponibles')}</div>
       </div>
     `;
   }
@@ -611,9 +639,10 @@
     const container = document.getElementById(containerId);
     if (!container) return;
 
+    // CORREGIDO v6.0.2: Sanitizar message (XSS fix)
     container.innerHTML = `
       <div class="error-message">
-        <p>❌ ${message || 'Error al cargar los datos'}</p>
+        <p>❌ ${escapeHtml(message || 'Error al cargar los datos')}</p>
       </div>
     `;
   }

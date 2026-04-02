@@ -11,6 +11,8 @@ const path = require('path');
  */
 
 const POPUP_PATH = `file://${path.resolve(__dirname, '../../../src/popup.html')}`;
+const LOAD_DELAY = 1000; // 1 segundo entre acciones
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 test.describe('Flujo E2E: Filtros P2P', () => {
 
@@ -37,10 +39,10 @@ test.describe('Flujo E2E: Filtros P2P', () => {
         }
       };
     });
-    
+
     await page.goto(POPUP_PATH);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await delay(LOAD_DELAY); // Esperar a que cargue todo
   });
 
   test.describe('1. Estado Inicial', () => {
@@ -98,8 +100,9 @@ test.describe('Flujo E2E: Filtros P2P', () => {
       await expect(noP2pButton).toHaveClass(/active/);
 
       // Click en P2P
+      await delay(LOAD_DELAY);
       await p2pButton.click();
-      await page.waitForTimeout(300);
+      await delay(LOAD_DELAY);
 
       // Verificar nuevo estado
       await expect(p2pButton).toHaveClass(/active/);
@@ -116,8 +119,9 @@ test.describe('Flujo E2E: Filtros P2P', () => {
       await expect(noP2pButton).toHaveClass(/active/);
 
       // Click en Todas
+      await delay(LOAD_DELAY);
       await allButton.click();
-      await page.waitForTimeout(300);
+      await delay(LOAD_DELAY);
 
       // Verificar estado
       await expect(allButton).toHaveClass(/active/);
@@ -132,8 +136,9 @@ test.describe('Flujo E2E: Filtros P2P', () => {
       await expect(noP2pButton).toHaveClass(/active/);
 
       // Click en el mismo
+      await delay(LOAD_DELAY);
       await noP2pButton.click();
-      await page.waitForTimeout(300);
+      await delay(LOAD_DELAY);
 
       // Debe seguir activo
       await expect(noP2pButton).toHaveClass(/active/);
@@ -150,20 +155,23 @@ test.describe('Flujo E2E: Filtros P2P', () => {
       await expect(noP2pButton).toHaveClass(/active/);
 
       // Paso 2: Cambiar a P2P
+      await delay(LOAD_DELAY);
       await p2pButton.click();
-      await page.waitForTimeout(200);
+      await delay(LOAD_DELAY);
       await expect(p2pButton).toHaveClass(/active/);
       await expect(noP2pButton).not.toHaveClass(/active/);
 
       // Paso 3: Cambiar a Todas
+      await delay(LOAD_DELAY);
       await allButton.click();
-      await page.waitForTimeout(200);
+      await delay(LOAD_DELAY);
       await expect(allButton).toHaveClass(/active/);
       await expect(p2pButton).not.toHaveClass(/active/);
 
       // Paso 4: Volver a No P2P
+      await delay(LOAD_DELAY);
       await noP2pButton.click();
-      await page.waitForTimeout(200);
+      await delay(LOAD_DELAY);
       await expect(noP2pButton).toHaveClass(/active/);
       await expect(allButton).not.toHaveClass(/active/);
     });
@@ -173,13 +181,16 @@ test.describe('Flujo E2E: Filtros P2P', () => {
       const p2pButton = page.locator('.filter-btn-footer[data-filter="p2p"]');
       const noP2pButton = page.locator('.filter-btn-footer[data-filter="no-p2p"]');
 
-      // Cambios rápidos
+      // Cambios con delay entre cada uno
+      await delay(LOAD_DELAY);
       await p2pButton.click();
+      await delay(LOAD_DELAY);
       await noP2pButton.click();
+      await delay(LOAD_DELAY);
       await allButton.click();
+      await delay(LOAD_DELAY);
       await p2pButton.click();
-      
-      await page.waitForTimeout(500);
+      await delay(LOAD_DELAY);
 
       // Solo un botón debe estar activo
       const activeCount = await page.locator('.filter-btn-footer.active').count();

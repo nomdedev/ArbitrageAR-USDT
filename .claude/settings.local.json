@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(node:*)",
+      "Bash(rm:*)",
+      "Bash(npm audit:*)",
+      "mcp__ide__getDiagnostics"
+    ]
+  }
+}

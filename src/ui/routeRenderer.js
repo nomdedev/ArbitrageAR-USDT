@@ -7,6 +7,14 @@ const RouteRenderer = (() => {
   // Obtener referencias a utilidades
   const getFormatters = () => window.Formatters || {};
 
+  // CORREGIDO v6.0.2: Función de sanitización para prevenir XSS
+  const escapeHtml = text => {
+    if (typeof text !== 'string') return String(text || '');
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  };
+
   /**
    * Obtener clases CSS basadas en el porcentaje de ganancia
    */
@@ -116,11 +124,11 @@ const RouteRenderer = (() => {
     const routeTypeClass = route.isSingleExchange ? 'single' : 'multi';
 
     return `
-      <div class="route-card ${profitClass}" data-route-id="${route.id || index}" data-exchange="${exchangeName.toLowerCase()}">
+      <div class="route-card ${profitClass}" data-route-id="${route.id || index}" data-exchange="${escapeHtml(exchangeName.toLowerCase())}">
         <div class="route-header">
           <div class="exchange-info">
             <span class="exchange-icon">${exchangeIcon}</span>
-            <span class="exchange-name">${exchangeName}</span>
+            <span class="exchange-name">${escapeHtml(exchangeName)}</span>
             ${p2pBadge}
             <span class="route-type ${routeTypeClass}">${routeType}</span>
           </div>
@@ -210,12 +218,18 @@ const RouteRenderer = (() => {
     container.innerHTML = `
       <div class="error-state">
         <span class="error-icon">⚠️</span>
-        <p>${message}</p>
-        <button class="btn-retry" onclick="window.fetchAndDisplay && window.fetchAndDisplay(true)">
+        <p>${escapeHtml(message)}</p>
+        <button class="btn-retry" data-action="retry-render">
           🔄 Reintentar
         </button>
       </div>
     `;
+    // CORREGIDO v6.0.2: Event listener delegation (CSP fix)
+    container.querySelector('[data-action="retry-render"]')?.addEventListener('click', () => {
+      if (typeof window.fetchAndDisplay === 'function') {
+        window.fetchAndDisplay(true);
+      }
+    });
   };
 
   /**

@@ -519,9 +519,13 @@
    * Mostrar modal de información
    * @public
    * @param {string} title - Título
-   * @param {string} content - Contenido HTML
+   * @param {string} content - Contenido HTML (DEBE ser sanitizado por el llamador)
+   * @security El parámetro content se inserta directamente como HTML.
+   *           El llamador ES RESPONSABLE de sanitizar cualquier contenido dinámico.
+   *           Para contenido de usuario o APIs externas, usar sanitizeHTML() antes de llamar.
    */
   function showInfo(title, content) {
+    // CORREGIDO v6.0.2: Agregar nota de seguridad - content debe ser sanitizado por el llamador
     const modal = document.createElement('div');
     modal.className = 'modal-overlay info-modal';
     modal.innerHTML = `

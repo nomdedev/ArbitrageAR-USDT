@@ -11,9 +11,10 @@
   ],
   "options_page": "src/options.html",
   "host_permissions": [
-    "https://*.dolarapi.com/*",
-    "https://*.criptoya.com/*",
-    "https://*.dolarito.ar/*"
+    "https://dolarapi.com/*",
+    "https://criptoya.com/*",
+    "https://dolarito.ar/*",
+    "https://api.github.com/*"
   ],
   "background": {
     "service_worker": "src/background/main-simple.js"
@@ -34,6 +35,6 @@
     "128": "icons/icon128.png"
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+    "extension_pages": "script-src 'self'; object-src 'self';"
   }
 }

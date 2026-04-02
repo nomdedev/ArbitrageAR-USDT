@@ -3399,7 +3399,7 @@ p.error {
   background: rgba(1, 4, 9, 0.85);
   backdrop-filter: blur(8px);
   z-index: 1000;
-  display: flex;
+  display: none; /* CORREGIDO v6.0.2: display none por defecto para evitar interceptar clics */
   align-items: center;
   justify-content: center;
   opacity: 0;
@@ -3407,6 +3407,7 @@ p.error {
 }
 
 .modal-overlay.active {
+  display: flex; /* CORREGIDO v6.0.2: solo mostrar cuando tiene clase active */
   opacity: 1;
 }
 

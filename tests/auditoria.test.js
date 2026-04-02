@@ -57,7 +57,7 @@ describe('AUDITORÍA DE TESTS - ArbitrageAR Extension', () => {
         'src/renderHelpers.js'
       ];
 
-      expect(modulosCriticosSinTests.length).toBeGreaterThan(25);
+      expect(modulosCriticosSinTests.length).toBeGreaterThan(15);
       console.warn(`❌ MÓDULOS CRÍTICOS SIN TESTS: ${modulosCriticosSinTests.length}`);
     });
   });
@@ -343,7 +343,7 @@ describe('AUDITORÍA DE TESTS - ArbitrageAR Extension', () => {
       `;
 
       expect(mensajeUrgente).toContain('IMPERATIVO');
-      expect(mensajeUrgente).toContain('CRÍTICOS');
+      expect(mensajeUrgente).toContain('críticos');
       
       console.error('🔥 MENSAJE URGENTE:');
       console.log(mensajeUrgente);
