@@ -143,26 +143,78 @@
    * Cerrar modal activo
    * @public
    */
+  /**
+   * Registra un modal como abierto.
+   * @private
+   * Bug corregido: sin esto, activeModal quedaba siempre en null, hasActiveModal() mentia y el
+   * listener de Escape (que esta guardado con && activeModal) no cerraba nada.
+   */
+  function registrarApertura(modal) {
+    activeModal = modal;
+    modalHistory.push(modal);
+  }
+
+  /**
+   * Registra el cierre de un modal y devuelve el foco al anterior si habia uno.
+   * @private
+   */
+  function registrarCierre(modal) {
+    const i = modalHistory.lastIndexOf(modal);
+    if (i !== -1) {
+      modalHistory.splice(i, 1);
+    }
+    activeModal = modalHistory.length > 0 ? modalHistory[modalHistory.length - 1] : null;
+  }
+
   function closeModal() {
-    if (!activeModal) {
+    // El modal de detalles de ruta es un <dialog> estatico que el popup abre con showModal(), asi que no
+    // pasa por registrarApertura(): si no hay ninguno registrado y ese esta abierto, es el que hay que
+    // cerrar. Su boton X (#modal-close) y el click en el overlay llaman a esta funcion.
+    let modal = activeModal;
+    if (!modal) {
+      // El popup abre este modal con display:flex + la clase .active (popup.js:1682), no con
+      // showModal(): el atributo open del <dialog> queda en false, por eso la visibilidad se mira por
+      // esos dos y no por open.
+      const estatico = document.getElementById('route-details-modal');
+      const visible =
+        estatico &&
+        (estatico.open === true ||
+          estatico.classList.contains('active') ||
+          (estatico.style.display && estatico.style.display !== 'none'));
+      if (visible) {
+        modal = estatico;
+      }
+    }
+
+    if (!modal) {
       console.warn('⚠️ [ModalManager] No hay modal activo para cerrar');
       return;
     }
 
-    window.Logger?.debug(' [ModalManager] Cerrando modal:', activeModal);
+    window.Logger?.debug(' [ModalManager] Cerrando modal:', modal);
 
-    const modal = document.getElementById('route-details-modal');
-    if (modal) {
-      modal.style.display = 'none';
+    // Los modales dinamicos (alert/info/confirmacion) se cierran delegando en su propio boton, para que
+    // corran sus limpiezas: resolver la promise y sacar el elemento del DOM. Antes se escondia a mano
+    // #route-details-modal, un id fijo que no es el modal abierto.
+    if (modalHistory.includes(modal)) {
+      const cierrePropio = modal.querySelector(
+        '[data-action="cancel"], [data-action="close"], .modal-close, .modal-close-btn'
+      );
+      if (cierrePropio) {
+        cierrePropio.click();
+        window.Logger?.debug(' [ModalManager] Modal cerrado por su propio boton');
+        return;
+      }
     }
 
-    // Remover del historial
-    if (modalHistory.length > 0) {
-      modalHistory.pop();
+    // Se cierra por los mismos mecanismos con los que popup.js lo abre: quitar .active y el display.
+    // Si ademas fuera un <dialog> abierto de verdad (open=true), se usa su API.
+    if (modal.tagName === 'DIALOG' && typeof modal.close === 'function' && modal.open) {
+      modal.close();
     }
-
-    // Establecer modal activo anterior
-    activeModal = modalHistory.length > 0 ? modalHistory[modalHistory.length - 1] : null;
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+    registrarCierre(modal);
 
     window.Logger?.debug(' [ModalManager] Modal cerrado');
   }
@@ -196,19 +248,30 @@
       `;
 
       document.body.appendChild(modal);
+      registrarApertura(modal);
 
       // Configurar event listeners
       const confirmBtn = modal.querySelector('[data-action="confirm"]');
       const cancelBtn = modal.querySelector('[data-action="cancel"]');
 
       const handleConfirm = () => {
-        document.body.removeChild(modal);
+        // Idempotente: cerrar dos veces (Escape + click, o doble click) tiraba
+        // "The node to be removed is not a child of this node".
+        if (modal.parentNode === document.body) {
+          document.body.removeChild(modal);
+        }
+        registrarCierre(modal);
         if (onConfirm) onConfirm();
         resolve(true);
       };
 
       const handleCancel = () => {
-        document.body.removeChild(modal);
+        // Idempotente: cerrar dos veces (Escape + click, o doble click) tiraba
+        // "The node to be removed is not a child of this node".
+        if (modal.parentNode === document.body) {
+          document.body.removeChild(modal);
+        }
+        registrarCierre(modal);
         if (onCancel) onCancel();
         resolve(false);
       };
@@ -255,10 +318,16 @@
       `;
 
       document.body.appendChild(modal);
+      registrarApertura(modal);
 
       const closeBtn = modal.querySelector('[data-action="close"]');
       const handleClose = () => {
-        document.body.removeChild(modal);
+        // Idempotente: cerrar dos veces (Escape + click, o doble click) tiraba
+        // "The node to be removed is not a child of this node".
+        if (modal.parentNode === document.body) {
+          document.body.removeChild(modal);
+        }
+        registrarCierre(modal);
         resolve();
       };
 
@@ -299,10 +368,16 @@
     `;
 
     document.body.appendChild(modal);
+    registrarApertura(modal);
 
     const closeBtn = modal.querySelector('.modal-close');
     const handleClose = () => {
-      document.body.removeChild(modal);
+      // Idempotente: cerrar dos veces (Escape + click, o doble click) tiraba
+      // "The node to be removed is not a child of this node".
+      if (modal.parentNode === document.body) {
+        document.body.removeChild(modal);
+      }
+      registrarCierre(modal);
     };
 
     closeBtn.addEventListener('click', handleClose);

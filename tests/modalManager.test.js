@@ -36,12 +36,12 @@ beforeAll(() => {
 // SUITE PRINCIPAL
 // ============================================================
 describe('ModalManager', () => {
-  // PENDIENTE: hay tests de cierre (closeModal / Escape) en skip: abrian el modal con la funcion
-  // openRouteDetailsModal(), que se borro por inalcanzable, y sus asserts miran el elemento de ese
-  // modal. Hay que reapuntarlos al modal real del popup (showRouteDetailsByType).
   // NOTA: los describes de openRouteDetailsModal() y de los calculos de su guia se quitaron junto con
   // esa funcion, que era codigo inalcanzable (ver docs/auditoria-2026-09/codigo-muerto-guia-borrado.txt).
-  // Los tests de closeModal() y de cierre con Escape se reapuntaron a showAlert(), que si existe.
+  // Los tests de cierre (closeModal / Escape / click en overlay) abren con showAlert(), que si existe, y
+  // asertan sobre el modal real (.alert-modal). Al reapuntarlos aparecio un bug real del modulo: nadie
+  // registraba activeModal al abrir, asi que hasActiveModal() devolvia siempre false y el listener de
+  // Escape —guardado con && activeModal— no cerraba ningun modal.
   let MM;
 
   beforeAll(() => {
@@ -225,15 +225,17 @@ describe('ModalManager', () => {
   // CLOSE MODAL
   // ============================================================
   describe('closeModal()', () => {
-    it.skip('cierra el modal activo y oculta el elemento (display none)', () => {
-      const arb = createMockArbitrage();
+    it('cierra el modal activo y lo saca del DOM', () => {
       MM.showAlert('Setup', 'modal abierto para el test');
       expect(MM.hasActiveModal()).toBe(true);
+      expect(document.querySelector('.alert-modal')).not.toBeNull();
 
       MM.closeModal();
 
-      const modal = document.getElementById('route-details-modal');
-      expect(modal.style.display).toBe('none');
+      // El modal real es .alert-modal (el dinamico que se acaba de abrir), no #route-details-modal:
+      // closeModal() escondia ese id fijo y dejaba el modal abierto tapando la pantalla.
+      expect(document.querySelector('.alert-modal')).toBeNull();
+      expect(MM.hasActiveModal()).toBe(false);
     });
 
     it('establece activeModal a null cuando no hay historial previo', () => {
@@ -245,21 +247,26 @@ describe('ModalManager', () => {
       expect(MM.hasActiveModal()).toBe(false);
     });
 
-    it.skip('restaura el modal anterior del historial cuando hay múltiples', () => {
-      const arb = createMockArbitrage();
-      // Abrir dos veces (simula historial con múltiples entradas)
-      MM.showAlert('Setup', 'modal abierto para el test');
-      MM.showAlert('Setup', 'modal abierto para el test');
+    it('restaura el modal anterior del historial cuando hay múltiples', () => {
+      // Abrir dos: el segundo queda activo y el primero espera en el historial
+      MM.showAlert('Uno', 'primero');
+      const primero = document.querySelector('.alert-modal');
+      MM.showAlert('Dos', 'segundo');
+      const segundo = document.querySelectorAll('.alert-modal')[1];
 
-      expect(MM.getActiveModal()).toBe('route-details');
+      expect(MM.hasActiveModal()).toBe(true);
+      // getActiveModal() devuelve el elemento del modal, no un string tipo 'route-details'
+      expect(MM.getActiveModal()).toBe(segundo);
 
-      // Cerrar una vez: debería restaurar la entrada anterior del historial
+      // Cerrar una vez: el activo vuelve a ser el anterior
       MM.closeModal();
-      expect(MM.getActiveModal()).toBe('route-details');
+      expect(document.querySelectorAll('.alert-modal').length).toBe(1);
+      expect(MM.getActiveModal()).toBe(primero);
 
       // Cerrar de nuevo: historial vacío
       MM.closeModal();
       expect(MM.getActiveModal()).toBeNull();
+      expect(MM.hasActiveModal()).toBe(false);
     });
 
     it('no lanza error cuando no hay modal activo', () => {
@@ -564,7 +571,7 @@ describe('ModalManager', () => {
   // CIERRE CON TECLA ESCAPE
   // ============================================================
   describe('Cierre con tecla Escape', () => {
-    it.skip('cierra el modal activo al presionar Escape', () => {
+    it('cierra el modal activo al presionar Escape', () => {
       // Inicializar para configurar event listeners
       MM.init({});
 
@@ -590,7 +597,7 @@ describe('ModalManager', () => {
       expect(() => document.dispatchEvent(escapeEvent)).not.toThrow();
     });
 
-    it.skip('no cierra el modal al presionar otra tecla', () => {
+    it('no cierra el modal al presionar otra tecla', () => {
       MM.init({});
 
       const arb = createMockArbitrage();
@@ -607,17 +614,15 @@ describe('ModalManager', () => {
   // CLICK EN OVERLAY DEL ROUTE DETAILS MODAL
   // ============================================================
   describe('Click en overlay para cerrar', () => {
-    it.skip('cierra el modal al hacer click directo en el overlay', () => {
-      MM.setupRouteDetailsModal();
-
-      const arb = createMockArbitrage();
+    it('cierra el modal al hacer click directo en el overlay', () => {
       MM.showAlert('Setup', 'modal abierto para el test');
       expect(MM.hasActiveModal()).toBe(true);
 
-      const modal = document.getElementById('route-details-modal');
-      // Click directo en el overlay (target === currentTarget)
-      modal.click();
+      // El overlay es el propio .alert-modal: el click directo sobre el (target === currentTarget)
+      // dispara su cierre, y ahora ademas desregistra el modal activo.
+      document.querySelector('.alert-modal').click();
 
+      expect(document.querySelector('.alert-modal')).toBeNull();
       expect(MM.hasActiveModal()).toBe(false);
     });
   });
