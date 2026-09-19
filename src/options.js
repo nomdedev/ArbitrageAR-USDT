@@ -124,11 +124,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupCollapsibleSections(); // Configurar secciones colapsables
 });
 
+// Última configuración leída de storage. Es la BASE sobre la que se construye lo que se
+// guarda: así, guardar NO pisa las claves que la UI no sabe leer (`brokerFees` y otras 17
+// que sólo escribe otro camino). Antes la base eran los DEFAULTS y cada "Guardar" borraba
+// en silencio todo lo que la página no supiera reconstruir (hallazgo O-01/O-13).
+let persistedSettings = null;
+
 // Cargar configuración guardada
 async function loadSettings() {
   try {
     const result = await chrome.storage.local.get('notificationSettings');
-    const settings = result.notificationSettings || DEFAULT_SETTINGS;
+    const settings = { ...DEFAULT_SETTINGS, ...(result.notificationSettings || {}) };
+    persistedSettings = { ...settings };
 
     // Aplicar configuración a los elementos
     const notifEnabledEl = document.getElementById('notify-enabled');
@@ -203,6 +210,13 @@ async function loadSettings() {
     document.getElementById('withdrawal-fee').value = settings.extraWithdrawalFee ?? 0;
     document.getElementById('transfer-fee').value = settings.extraTransferFee ?? 0;
     document.getElementById('bank-fee').value = settings.bankCommissionFee ?? 0;
+
+    // F-02/O-02: interruptor maestro — sin esto el usuario no tenía forma de pedir que las
+    // comisiones se descontaran, y el resultado que veía era el spread bruto.
+    const applyFeesEl = document.getElementById('apply-fees');
+    if (applyFeesEl) {
+      applyFeesEl.checked = settings.applyFeesInCalculation === true;
+    }
 
     // NUEVO v5.0.28: Opciones de seguridad y validación
     const freshnessWarningEl = document.getElementById('freshness-warning');
@@ -614,7 +628,7 @@ function initializeBrokerFeesImproved() {
       if (brokerFees.length === 0) {
         feesList.innerHTML = `
           <div class="empty-state">
-            <p>🎯 No hay brokers configurados</p>
+ <p> No hay brokers configurados</p>
             <p class="text-muted">Agrega brokers arriba para personalizar sus fees</p>
           </div>
         `;
@@ -671,8 +685,8 @@ function initializeBrokerFeesImproved() {
         </div>
       </div>
       <div class="broker-fee-actions">
-        <button class="btn-edit" title="Editar">✏️</button>
-        <button class="btn-remove" title="Eliminar">🗑️</button>
+ <button class="btn-edit" title="Editar"></button>
+ <button class="btn-remove" title="Eliminar"></button>
       </div>
     `;
 
@@ -700,7 +714,7 @@ function initializeBrokerFeesImproved() {
         if (feesList.children.length === 0) {
           feesList.innerHTML = `
             <div class="empty-state">
-              <p>🎯 No hay brokers configurados</p>
+ <p> No hay brokers configurados</p>
               <p class="text-muted">Agrega brokers arriba para personalizar sus fees</p>
             </div>
           `;
@@ -722,9 +736,11 @@ function initializeBrokerFeesImproved() {
 
     if (!isChromeExtension) return;
     chrome.storage.local.get('notificationSettings', result => {
-      const settings = result.notificationSettings || DEFAULT_SETTINGS;
+      const settings = { ...DEFAULT_SETTINGS, ...(result.notificationSettings || {}) };
       settings.brokerFees = brokerFees;
       chrome.storage.local.set({ notificationSettings: settings }, () => {
+        // Refrescar la base: si no, el próximo "Guardar" pisaría los fees recién agregados.
+        persistedSettings = { ...settings };
         log('✅ Broker fees guardados:', brokerFees);
       });
     });
@@ -740,6 +756,7 @@ async function saveSettings(settings = null) {
 
     if (!isChromeExtension) return;
     await chrome.storage.local.set({ notificationSettings: settingsToSave });
+    persistedSettings = { ...settingsToSave }; // mantener la base al día
 
     log('✅ Configuración guardada:', settingsToSave);
     showNotification('Configuración guardada correctamente', 'success');
@@ -748,7 +765,7 @@ async function saveSettings(settings = null) {
     try {
       log('📤 [OPTIONS] Enviando settingsUpdated al background...');
       log(
-        '📤 [OPTIONS] Configuración a enviar:',
+        ' [OPTIONS] Configuración a enviar:',
         JSON.stringify(
           {
             dollarPriceSource: settingsToSave.dollarPriceSource,
@@ -791,7 +808,8 @@ async function saveSettings(settings = null) {
 
 // Obtener configuración actual de la UI
 function getCurrentSettings() {
-  const settings = { ...DEFAULT_SETTINGS };
+  // Base = lo persistido (no los defaults), para no perder claves que la UI no maneja.
+  const settings = { ...DEFAULT_SETTINGS, ...(persistedSettings || {}) };
 
   // Notificaciones
   settings.notificationsEnabled = document.getElementById('notify-enabled')?.checked ?? true;
@@ -822,6 +840,10 @@ function getCurrentSettings() {
   settings.extraWithdrawalFee = parseFloat(document.getElementById('withdrawal-fee')?.value) || 0;
   settings.extraTransferFee = parseFloat(document.getElementById('transfer-fee')?.value) || 0;
   settings.bankCommissionFee = parseFloat(document.getElementById('bank-fee')?.value) || 0;
+  // F-02/O-02: el interruptor maestro que gobierna los 4 motores de cálculo.
+  // Sólo se pisa si el control existe: si faltara, sobrevive lo persistido (no el default).
+  const applyFeesControl = document.getElementById('apply-fees');
+  if (applyFeesControl) settings.applyFeesInCalculation = applyFeesControl.checked;
 
   // Configuración del dólar
   const dollarSourceRadio = document.querySelector('input[name="dollar-price-source"]:checked');

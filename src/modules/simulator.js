@@ -190,16 +190,33 @@
   // ==========================================
 
   /**
-   * Inicializar el módulo de simulador
+   * Inicializar el módulo de simulador.
+   *
+   * IDEMPOTENTE (P-01): `popup.js` llama a `Sim.init()` en dos lugares de su arranque
+   * (`:116` y, vía `setupAdvancedSimulator()`, `:3059`). Sin esta guarda, los listeners de
+   * `setupEventListeners()` quedaban registrados DOS veces sobre el mismo elemento, y el
+   * toggle de "configuración avanzada" —que decide según el estado actual del panel— se
+   * ejecutaba dos veces por click: el primero abría, el segundo lo volvía a cerrar. El panel
+   * no se abría nunca: parecía un botón roto.
+   *
    * @public
    * @param {Object} data - Datos actuales de la aplicación
    * @param {Object} settings - Configuración del usuario
    */
+  let listenersReady = false;
+
   function init(data, settings) {
     currentData = data;
     userSettings = settings;
+
+    if (listenersReady) {
+      window.Logger?.debug(' [Simulator] Ya inicializado: se actualizan los datos, sin re-registrar listeners');
+      return;
+    }
+
     setupEventListeners();
-    window.Logger?.debug('✅ [Simulator] Módulo inicializado con event listeners');
+    listenersReady = true;
+    window.Logger?.debug(' [Simulator] Módulo inicializado con event listeners');
   }
 
   /**
@@ -214,7 +231,7 @@
       toggleAdvanced.addEventListener('click', () => {
         const isHidden = advancedConfig.style.display === 'none';
         advancedConfig.style.display = isHidden ? 'block' : 'none';
-        window.Logger?.debug('⚙️ [Simulator] Config avanzada:', isHidden ? 'visible' : 'oculta');
+        window.Logger?.debug(' [Simulator] Config avanzada:', isHidden ? 'visible' : 'oculta');
       });
     }
 
@@ -222,7 +239,7 @@
     const btnCalculateMatrix = document.getElementById('btn-calculate-matrix');
     if (btnCalculateMatrix) {
       btnCalculateMatrix.addEventListener('click', () => {
-        window.Logger?.debug('🎯 [Simulator] Botón calcular matriz presionado');
+        window.Logger?.debug(' [Simulator] Botón calcular matriz presionado');
         generateRiskMatrix(false);
       });
     }
@@ -231,7 +248,7 @@
     const btnGenerateMatrix = document.getElementById('generate-risk-matrix');
     if (btnGenerateMatrix) {
       btnGenerateMatrix.addEventListener('click', () => {
-        window.Logger?.debug('🎯 [Simulator] Botón regenerar matriz presionado');
+        window.Logger?.debug(' [Simulator] Botón regenerar matriz presionado');
         generateRiskMatrix(true);
       });
     }
@@ -240,7 +257,7 @@
     const btnResetConfig = document.getElementById('btn-reset-config');
     if (btnResetConfig) {
       btnResetConfig.addEventListener('click', () => {
-        window.Logger?.debug('🔄 [Simulator] Reseteando configuración');
+        window.Logger?.debug(' [Simulator] Reseteando configuración');
         resetConfig();
       });
     }
@@ -249,7 +266,7 @@
     const btnApplyFilter = document.getElementById('apply-matrix-filter');
     if (btnApplyFilter) {
       btnApplyFilter.addEventListener('click', () => {
-        window.Logger?.debug('🔍 [Simulator] Aplicando filtro de matriz');
+        window.Logger?.debug(' [Simulator] Aplicando filtro de matriz');
         applyMatrixFilter();
       });
     }
@@ -258,12 +275,12 @@
     const btnResetFilter = document.getElementById('reset-matrix-filter');
     if (btnResetFilter) {
       btnResetFilter.addEventListener('click', () => {
-        window.Logger?.debug('🔄 [Simulator] Reseteando filtro de matriz');
+        window.Logger?.debug(' [Simulator] Reseteando filtro de matriz');
         resetMatrixFilter();
       });
     }
 
-    window.Logger?.debug('✅ [Simulator] Event listeners configurados correctamente');
+    window.Logger?.debug(' [Simulator] Event listeners configurados correctamente');
   }
 
   /**
@@ -336,7 +353,7 @@
     elements.transferFee.value = preset.transferFee.toFixed(2);
     elements.bankCommission.value = preset.bankCommission.toFixed(2);
 
-    window.Logger?.debug(`✅ [Simulator] Preset "${preset.name}" aplicado:`, preset);
+    window.Logger?.debug(` [Simulator] Preset "${preset.name}" aplicado:`, preset);
 
     // Mostrar tooltip de confirmación
     showPresetTooltip(preset.name, preset.description);
@@ -394,7 +411,7 @@
     elements.transferFee.value = transferFee.toFixed(2);
     elements.bankCommission.value = bankCommission.toFixed(2);
 
-    window.Logger?.debug('✅ [Simulator] Valores por defecto cargados');
+    window.Logger?.debug(' [Simulator] Valores por defecto cargados');
   }
 
   /**
@@ -437,7 +454,7 @@
     // Recargar valores desde configuración
     loadDefaultValues();
 
-    window.Logger?.debug('✅ [Simulator] Configuración reseteada');
+    window.Logger?.debug(' [Simulator] Configuración reseteada');
   }
 
   /**
@@ -447,7 +464,7 @@
    * @returns {Promise<boolean>} True si se generó correctamente
    */
   async function generateRiskMatrix(useCustomParams = false) {
-    window.Logger?.debug('🔍 [Simulator] Generando matriz de riesgo...');
+    window.Logger?.debug(' [Simulator] Generando matriz de riesgo...');
 
     const amountInput = document.getElementById('sim-amount');
     const amount = parseFloat(amountInput?.value) || 1000000;
@@ -455,7 +472,7 @@
     // CORREGIDO v6.0.2: Migrado de alert() a inline message (R-04)
     // Validar monto
     if (!amount || amount < 1000) {
-      showSimulatorMessage(amountInput, '⚠️ Ingresa un monto válido (mínimo $1,000 ARS)', 'error');
+      showSimulatorMessage(amountInput, ' Ingresa un monto válido (mínimo $1,000 ARS)', 'error');
       return false;
     }
 
@@ -479,12 +496,12 @@
       // Validaciones
       if (usdMinInput >= usdMaxInput) {
         const usdMinEl = document.getElementById('matrix-usd-min');
-        showSimulatorMessage(usdMinEl, '⚠️ El USD mínimo debe ser menor que el USD máximo', 'error');
+        showSimulatorMessage(usdMinEl, ' El USD mínimo debe ser menor que el USD máximo', 'error');
         return false;
       }
       if (usdtMinInput >= usdtMaxInput) {
         const usdtMinEl = document.getElementById('matrix-usdt-min');
-        showSimulatorMessage(usdtMinEl, '⚠️ El USDT mínimo debe ser menor que el USDT máximo', 'error');
+        showSimulatorMessage(usdtMinEl, ' El USDT mínimo debe ser menor que el USDT máximo', 'error');
         return false;
       }
 
@@ -546,12 +563,12 @@
     // CORREGIDO v6.0.2: Migrado de alert() a inline message (R-04)
     if (finalUsdMin >= finalUsdMax) {
       const usdMinEl = document.getElementById('matrix-usd-min');
-      showSimulatorMessage(usdMinEl, '⚠️ Error: Los precios USD no son válidos', 'error');
+      showSimulatorMessage(usdMinEl, ' Error: Los precios USD no son válidos', 'error');
       return false;
     }
     if (finalUsdtMin >= finalUsdtMax) {
       const usdtMinEl = document.getElementById('matrix-usdt-min');
-      showSimulatorMessage(usdtMinEl, '⚠️ Error: Los precios USDT no son válidos', 'error');
+      showSimulatorMessage(usdtMinEl, ' Error: Los precios USDT no son válidos', 'error');
       return false;
     }
 
@@ -566,12 +583,12 @@
     // Validaciones de parámetros
     if (buyFeePercent < 0 || buyFeePercent > 10) {
       const buyFeeEl = document.getElementById('sim-buy-fee');
-      showSimulatorMessage(buyFeeEl, '⚠️ El fee de compra debe estar entre 0% y 10%', 'error');
+      showSimulatorMessage(buyFeeEl, ' El fee de compra debe estar entre 0% y 10%', 'error');
       return false;
     }
     if (sellFeePercent < 0 || sellFeePercent > 10) {
       const sellFeeEl = document.getElementById('sim-sell-fee');
-      showSimulatorMessage(sellFeeEl, '⚠️ El fee de venta debe estar entre 0% y 10%', 'error');
+      showSimulatorMessage(sellFeeEl, ' El fee de venta debe estar entre 0% y 10%', 'error');
       return false;
     }
 
@@ -592,7 +609,7 @@
 
     // CORREGIDO v6.0.2: Migrado de alert() a inline message (R-04)
     if (!matrixTable || !matrixResult) {
-      showSimulatorMessage(null, '⚠️ Error: elementos de la matriz no encontrados', 'error');
+      showSimulatorMessage(null, ' Error: elementos de la matriz no encontrados', 'error');
       return false;
     }
 
@@ -697,7 +714,18 @@
     const step1_usd = amountAfterBankCommission / usdPrice;
 
     // Paso 3: Comprar USDT con USD
-    const usdToUsdtRate = usdPrice / usdtPrice;
+    //
+    // La conversión NO se deriva de los dos precios en pesos. USDT es un stablecoin del
+    // dólar: se compra ~1:1, y lo que cotiza en pesos (el "precio USDT" de la matriz) es su
+    // VENTA, que se aplica recién en el paso 6.
+    //
+    // Antes esto era `usdPrice / usdtPrice`, o sea el recíproco de la tasa que usa el motor
+    // (`main-simple.js resolveUsdToUsdtRate`). Con esa relación, cuanto más caro estaba el
+    // USDT en pesos MÁS USDT decía el simulador que compraba el usuario: la economía al
+    // revés, que sobreestimaba la ganancia entre 2,5 y 10,8 puntos porcentuales (P-03).
+    // Criterio de aceptación del informe: USD 1000, USDT 1050, fees 1%/1%, 1.000.000 ARS
+    // debe dar ≈ +2,91% (daba +8,06%).
+    const usdToUsdtRate = 1;
     const step2_usdt = step1_usd / usdToUsdtRate;
 
     // Paso 4: Aplicar fee de compra
@@ -820,5 +848,5 @@
   // Exportar para uso global
   window.Simulator = Simulator;
 
-  window.Logger?.debug('✅ [Simulator] Módulo cargado correctamente');
+  window.Logger?.debug(' [Simulator] Módulo cargado correctamente');
 })(window);

@@ -36,9 +36,9 @@
 .loading-dots span {
   width: 8px;
   height: 8px;
-  background: var(--primary-color, #3b82f6);
+  background: var(--primary-color, #0071e3);
   border-radius: 50%;
-  animation: loadingDotBounce 1.4s infinite ease-in-out both;
+  /* Apple: sin bucles decorativos (era: animation: loadingDotBounce 1.4s infinite ease-in-out both;) */
 }
 
 .loading-dots span:nth-child(1) {
@@ -137,7 +137,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.1) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 113, 227, 0.1) 50%, transparent 100%);
   animation: shimmer 1.5s ease-in-out infinite;
 }
 
@@ -245,7 +245,7 @@
   background: linear-gradient(90deg, var(--color-brand-primary), var(--color-brand-accent));
   border-radius: var(--radius-full);
   transition: width var(--duration-normal) var(--ease-out);
-  animation: progressPulse 2s ease-in-out infinite;
+  /* Apple: sin bucles decorativos (era: animation: progressPulse 2s ease-in-out infinite;) */
 }
 
 @keyframes progressPulse {
@@ -321,7 +321,7 @@
   text-align: center;
   gap: var(--space-4);
   background: var(--color-danger-muted);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  border: 1px solid rgba(255, 69, 58, 0.3);
   border-radius: var(--radius-lg);
 }
 
@@ -361,19 +361,19 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all var(--duration-fast) var(--ease-out);
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+  transition: transform var(--duration-fast) var(--ease-out), opacity var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
+  box-shadow: 0 2px 8px rgba(255, 69, 58, 0.3);
 }
 
 .btn-retry:hover {
   background: #dc2626;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 4px 12px rgba(255, 69, 58, 0.4);
 }
 
 .btn-retry:active {
   transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 2px 6px rgba(255, 69, 58, 0.3);
 }
 
 /* Botón para empty state */
@@ -382,26 +382,26 @@
   align-items: center;
   gap: 8px;
   padding: var(--space-2) var(--space-4);
-  background: var(--primary-color, #3b82f6);
+  background: var(--primary-color, #0071e3);
   color: var(--color-text-inverse);
   border: none;
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all var(--duration-fast) var(--ease-out);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  transition: transform var(--duration-fast) var(--ease-out), opacity var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
 }
 
 .empty-state .btn-primary:hover {
-  background: #2563eb;
+  background: #0071e3;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 113, 227, 0.4);
 }
 
 .empty-state .btn-primary:active {
   transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 2px 6px rgba(0, 113, 227, 0.3);
 }
 
 /* ==========================================
@@ -447,7 +447,7 @@
 }
 
 .animate-pulse {
-  animation: pulse 2s ease-in-out infinite;
+  /* Apple: sin bucles decorativos (era: animation: pulse 2s ease-in-out infinite;) */
 }
 
 /* Fade-in animation */

@@ -41,17 +41,17 @@ const RouteRenderer = (() => {
    */
   const getExchangeIcon = exchangeName => {
     const icons = {
-      binance: '🟡',
-      binancep2p: '🟡',
-      buenbit: '🔵',
-      lemoncash: '🍋',
-      ripio: '🟣',
-      fiwind: '🌊',
-      letsbit: '💜',
-      satoshitango: '🟠',
-      decrypto: '🔷',
-      bitsoalpha: '🔶',
-      default: '💱'
+      binance: '●',
+      binancep2p: '●',
+      buenbit: '●',
+      lemoncash: '',
+      ripio: '●',
+      fiwind: '',
+      letsbit: '',
+      satoshitango: '●',
+      decrypto: '',
+      bitsoalpha: '',
+      default: ''
     };
 
     const name = (exchangeName || '').toLowerCase().replace(/\s+/g, '');
@@ -63,23 +63,23 @@ const RouteRenderer = (() => {
    */
   const createRiskIndicator = (route, profitPercent) => {
     let riskLevel = 'low';
-    let riskIcon = '🟢';
+    let riskIcon = '●';
     const riskReasons = [];
 
     // Calcular riesgo
     if (profitPercent < 0) {
       riskLevel = 'high';
-      riskIcon = '🔴';
+      riskIcon = '●';
       riskReasons.push('Operación con pérdida');
     } else if (profitPercent < 0.5) {
       riskLevel = 'medium';
-      riskIcon = '🟡';
+      riskIcon = '●';
       riskReasons.push('Rentabilidad muy baja');
     }
 
     if (route.isP2P || route.requiresP2P) {
       riskLevel = riskLevel === 'low' ? 'medium' : 'high';
-      riskIcon = riskLevel === 'high' ? '🔴' : '🟡';
+      riskIcon = riskLevel === 'high' ? '●' : '●';
       riskReasons.push('Involucra P2P');
     }
 
@@ -151,7 +151,7 @@ const RouteRenderer = (() => {
         <div class="route-footer">
           ${risk.html}
           <button class="btn-details" data-route-index="${index}" title="Ver detalles">
-            📊 Detalles
+             Detalles
           </button>
         </div>
       </div>
@@ -171,7 +171,7 @@ const RouteRenderer = (() => {
     if (!routes || routes.length === 0) {
       container.innerHTML = `
         <div class="no-routes">
-          <span class="no-routes-icon">🔍</span>
+ <span class="no-routes-icon">●</span>
           <p>No se encontraron rutas de arbitraje</p>
           <small>Intenta ajustar los filtros o espera a la próxima actualización</small>
         </div>
@@ -217,10 +217,10 @@ const RouteRenderer = (() => {
 
     container.innerHTML = `
       <div class="error-state">
-        <span class="error-icon">⚠️</span>
+ <span class="error-icon">●</span>
         <p>${escapeHtml(message)}</p>
         <button class="btn-retry" data-action="retry-render">
-          🔄 Reintentar
+           Reintentar
         </button>
       </div>
     `;

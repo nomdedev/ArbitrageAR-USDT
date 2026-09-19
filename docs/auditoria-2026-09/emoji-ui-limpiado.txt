@@ -1,0 +1,711 @@
+Emoji de la interfaz: 326 lineas en 18 archivos.
+
+Criterio: los de estado (color) pasan a ●; el resto se quitan; los iconos que quedaban vacios se
+rellenan con ● para que no aparezca una caja vacia. Los console.*/log() no se tocan (no se muestran).
+
+
+===== D:\martin\Proyectos\ArbitrageAR-USDT\src\background\apiClient.js =====
+87: debugLog('✅ [ApiClient] USDT/ARS obtenido:', Object.keys(data).length, 'exchanges');
+   -> debugLog(' [ApiClient] USDT/ARS obtenido:', Object.keys(data).length, 'exchanges');
+101: debugLog('✅ [ApiClient] USDT/USD obtenido:', Object.keys(data).length, 'exchanges');
+   -> debugLog(' [ApiClient] USDT/USD obtenido:', Object.keys(data).length, 'exchanges');
+115: debugLog('✅ [ApiClient] Bancos obtenido:', Object.keys(data).length, 'bancos');
+   -> debugLog(' [ApiClient] Bancos obtenido:', Object.keys(data).length, 'bancos');
+129: debugLog('✅ [ApiClient] Tipos de dólar obtenido');
+   -> debugLog(' [ApiClient] Tipos de dólar obtenido');
+143: debugLog('✅ [ApiClient] DolarAPI oficial obtenido');
+   -> debugLog(' [ApiClient] DolarAPI oficial obtenido');
+155: debugLog('📡 [ApiClient] Obteniendo todos los datos...');
+   -> debugLog(' [ApiClient] Obteniendo todos los datos...');
+
+
+===== D:\martin\Proyectos\ArbitrageAR-USDT\src\background\cacheManager.js =====
+76: `✅ [CACHE] Usando datos de caché ${cacheType} (${Math.round(age / 1000)}s/${Math.round(maxAge / 1000)}s)`
+   -> ` [CACHE] Usando datos de caché ${cacheType} (${Math.round(age / 1000)}s/${Math.round(maxAge / 1000)}s)`
+
+
+===== D:\martin\Proyectos\ArbitrageAR-USDT\src\background\main-simple.js =====
+306: `⚙️ Configuración global actualizada: intervalo=${REQUEST_INTERVAL}ms, timeout=${REQUEST_TIMEOUT}ms`
+   -> ` Configuración global actualizada: intervalo=${REQUEST_INTERVAL}ms, timeout=${REQUEST_TIMEOUT}ms`
+343: '🔍 [DIAGNÓSTICO] fetchWithRateLimit() - Respuesta recibida, status:',
+   -> ' [DIAGNÓSTICO] fetchWithRateLimit() - Respuesta recibida, status:',
+374: '🔍 [DIAGNÓSTICO] fetchDolarOficial() - data.oficial.ask:',
+   -> ' [DIAGNÓSTICO] fetchDolarOficial() - data.oficial.ask:',
+380: '🔍 [DIAGNÓSTICO] fetchDolarOficial() - data.oficial.bid:',
+   -> ' [DIAGNÓSTICO] fetchDolarOficial() - data.oficial.bid:',
+421: '[BACKGROUND] 📊 Bancos data received:',
+   -> '[BACKGROUND]  Bancos data received:',
+464: `⚠️ [VALIDACIÓN] ${key}: Spread ${spreadPercent.toFixed(2)}% muy bajo (sospechoso)`
+   -> ` [VALIDACIÓN] ${key}: Spread ${spreadPercent.toFixed(2)}% muy bajo (sospechoso)`
+473: `⚠️ [VALIDACIÓN] ${key}: Spread ${spreadPercent.toFixed(2)}% muy alto (sospechoso)`
+   -> ` [VALIDACIÓN] ${key}: Spread ${spreadPercent.toFixed(2)}% muy alto (sospechoso)`
+495: `❌ [VALIDACIÓN] ${invalidBanks.length} bancos con datos inválidos:`,
+   -> ` [VALIDACIÓN] ${invalidBanks.length} bancos con datos inválidos:`,
+503: `⚠️ [VALIDACIÓN] ${suspiciousBanks.length} bancos con spreads anómalos:`,
+   -> ` [VALIDACIÓN] ${suspiciousBanks.length} bancos con spreads anómalos:`,
+512: '[BACKGROUND] 📤 Processed bancos data:',
+   -> '[BACKGROUND]  Processed bancos data:',
+573: '⚠️ [BANKS] URL legacy detectada en configuración (DolarAPI /v1/bancos/*). Se usa fallback a CriptoYa bancostodos.'
+   -> ' [BANKS] URL legacy detectada en configuración (DolarAPI /v1/bancos/*). Se usa fallback a CriptoYa bancostodos.'
+590: '🔍 [DIAGNÓSTICO] fetchBankDollarRates() - ✅ Devolviendo datos válidos, keys:',
+   -> ' [DIAGNÓSTICO] fetchBankDollarRates() -  Devolviendo datos válidos, keys:',
+871: `✅ [INTER-BROKER] ${buyExchange}→${sellExchange}: ${route.profitPercentage.toFixed(2)}%`
+   -> ` [INTER-BROKER] ${buyExchange}→${sellExchange}: ${route.profitPercentage.toFixed(2)}%`
+881: `✅ [INTER-BROKER] Completado: ${processedCount} procesadas, ${skippedCount} saltadas, ${routes.length} rutas generadas`
+   -> ` [INTER-BROKER] Completado: ${processedCount} procesadas, ${skippedCount} saltadas, ${routes.length} rutas generadas`
+1093: `✅ [CALC] Rutas totales: ${routes.length} (Intra: ${processedCount}, Inter: ${interBrokerRoutes.length})`
+   -> ` [CALC] Rutas totales: ${routes.length} (Intra: ${processedCount}, Inter: ${interBrokerRoutes.length})`
+1130: `💰 [${exchange}] Venta directa: ${initialUsdtAmount} USDT × ${sellPrice} = $${arsFromSale.toFixed(2)} ARS`
+   -> ` [${exchange}] Venta directa: ${initialUsdtAmount} USDT × ${sellPrice} = $${arsFromSale.toFixed(2)} ARS`
+1498: `✅ [CRYPTO-ARB] ${symbol} ${buyExchange}→${sellExchange}: ${route.profitPercentage.toFixed(2)}% (${route.operationType})`
+   -> ` [CRYPTO-ARB] ${symbol} ${buyExchange}→${sellExchange}: ${route.profitPercentage.toFixed(2)}% (${route.operationType})`
+1502: `❌ [CRYPTO-ARB] Error calculando ${symbol} ${buyExchange}→${sellExchange}:`,
+   -> ` [CRYPTO-ARB] Error calculando ${symbol} ${buyExchange}→${sellExchange}:`,
+1689: `[NOTIF] ❌ Intervalo mínimo no cumplido (${Math.round((minInterval - (now - lastNotificationTime)) / 1000)}s restantes)`
+   -> `[NOTIF]  Intervalo mínimo no cumplido (${Math.round((minInterval - (now - lastNotificationTime)) / 1000)}s restantes)`
+1750: extreme: { icon: '🚀', label: '¡OPORTUNIDAD EXCEPCIONAL!' },
+   -> extreme: { icon: '', label: '¡OPORTUNIDAD EXCEPCIONAL!' },
+1751: high: { icon: '💎', label: '¡Gran oportunidad!' },
+   -> high: { icon: '', label: '¡Gran oportunidad!' },
+1752: moderate: { icon: '💰', label: 'Oportunidad interesante' },
+   -> moderate: { icon: '', label: 'Oportunidad interesante' },
+1753: normal: { icon: '📊', label: 'Oportunidad detectada' }
+   -> normal: { icon: '', label: 'Oportunidad detectada' }
+1900: `💵 Precio calculado (${calculatedPrice.method}): $${calculatedPrice.price} (${calculatedPrice.banksCount} bancos)`
+   -> ` Precio calculado (${calculatedPrice.method}): $${calculatedPrice.price} (${calculatedPrice.banksCount} bancos)`
+1912: '⚠️ [BACKGROUND] No se pudo calcular precio de bancos, usando API oficial como fallback...'
+   -> ' [BACKGROUND] No se pudo calcular precio de bancos, usando API oficial como fallback...'
+1916: '⚠️ [BACKGROUND] No se pudieron obtener datos de bancos, usando API oficial como fallback...'
+   -> ' [BACKGROUND] No se pudieron obtener datos de bancos, usando API oficial como fallback...'
+2060: '🔍 [DIAGNÓSTICO] Esto significa que NO se pudo obtener precio del dólar oficial'
+   -> ' [DIAGNÓSTICO] Esto significa que NO se pudo obtener precio del dólar oficial'
+2342: `⏱️ Timeout cambió: ${oldSettings.requestTimeoutSeconds}s → ${newSettings.requestTimeoutSeconds}s`
+   -> `⏱ Timeout cambió: ${oldSettings.requestTimeoutSeconds}s → ${newSettings.requestTimeoutSeconds}s`
+
+
+===== D:\martin\Proyectos\ArbitrageAR-USDT\src\DataService.js =====
+138: `💎 Datos ${symbol}/${fiatCurrency} obtenidos:`,
+   -> ` Datos ${symbol}/${fiatCurrency} obtenidos:`,
+167: `🔄 Datos ${symbolFrom}/${symbolTo} obtenidos:`,
+   -> ` Datos ${symbolFrom}/${symbolTo} obtenidos:`,
+248: debugLog(`🔄 Obteniendo datos para ${cryptos.length} criptomonedas...`);
+   -> debugLog(` Obteniendo datos para ${cryptos.length} criptomonedas...`);
+269: `✅ Datos obtenidos para ${Object.keys(cryptoData).length}/${cryptos.length} criptomonedas`
+   -> ` Datos obtenidos para ${Object.keys(cryptoData).length}/${cryptos.length} criptomonedas`
+444: debugLog('✅ Criptos activas guardadas:', cryptoList);
+   -> debugLog(' Criptos activas guardadas:', cryptoList);
+496: `💰 Precios bancarios obtenidos (dolarito): ${Object.keys(bankRates).length} bancos`
+   -> ` Precios bancarios obtenidos (dolarito): ${Object.keys(bankRates).length} bancos`
+535: `💰 Precios bancarios obtenidos (criptoya): ${Object.keys(bankRates).length} bancos`
+   -> ` Precios bancarios obtenidos (criptoya): ${Object.keys(bankRates).length} bancos`
+633: debugLog(`💰 Precios bancarios combinados: ${Object.keys(combined).length} bancos`);
+   -> debugLog(` Precios bancarios combinados: ${Object.keys(combined).length} bancos`);
+
+
+===== D:\martin\Proyectos\ArbitrageAR-USDT\src\modules\filterManager.js =====
+200: window.Logger?.debug('✅ [FilterManager] Módulo inicializado con', allRoutes.length, 'rutas');
+   -> window.Logger?.debug(' [FilterManager] Módulo inicializado con', allRoutes.length, 'rutas');
+210: window.Logger?.debug('✅ [FilterManager] Rutas actualizadas:', allRoutes.length);
+   -> window.Logger?.debug(' [FilterManager] Rutas actualizadas:', allRoutes.length);
+226: window.Logger?.debug(`🔍 [FilterManager] Auto-ajuste: ${p2pCount} P2P, ${noP2pCount} No-P2P`);
+   -> window.Logger?.debug(` [FilterManager] Auto-ajuste: ${p2pCount} P2P, ${noP2pCount} No-P2P`);
+231: '🔄 [FilterManager] Cambiando filtro de "no-p2p" a "all" (no hay rutas no-P2P)'
+   -> ' [FilterManager] Cambiando filtro de "no-p2p" a "all" (no hay rutas no-P2P)'
+244: '🔄 [FilterManager] Cambiando filtro de "p2p" a "all" (no hay rutas P2P)'
+   -> ' [FilterManager] Cambiando filtro de "p2p" a "all" (no hay rutas P2P)'
+347: `🔍 [FilterManager] Después de filtro solo rentables: ${antesFiltro} → ${filteredRoutes.length}`
+   -> ` [FilterManager] Después de filtro solo rentables: ${antesFiltro} → ${filteredRoutes.length}`
+367: `✅ [FilterManager] Filtros aplicados: ${filteredRoutes.length} rutas finales`
+   -> ` [FilterManager] Filtros aplicados: ${filteredRoutes.length} rutas finales`
+468: `📊 [FilterManager] Contadores actualizados - Total: ${allCount}, P2P: ${p2pCount}, No P2P: ${noP2pCount}`
+   -> ` [FilterManager] Contadores actualizados - Total: ${allCount}, P2P: ${p2pCount}, No P2P: ${noP2pCount}`
+494: `📊 [FilterManager] Filtro de exchanges poblado con ${exchanges.length} opciones`
+   -> ` [FilterManager] Filtro de exchanges poblado con ${exchanges.length} opciones`
+523: window.Logger?.debug('🔄 [FilterManager] Filtros avanzados reseteados');
+   -> window.Logger?.debug(' [FilterManager] Filtros avanzados reseteados');
+539: window.Logger?.debug('🔧 [FilterManager] Configurando botones de filtro P2P...');
+   -> window.Logger?.debug(' [FilterManager] Configurando botones de filtro P2P...');
+544: `🔍 [FilterManager] Encontrados ${filterButtons.length} botones de filtro`
+   -> ` [FilterManager] Encontrados ${filterButtons.length} botones de filtro`
+554: window.Logger?.debug(`🔍 [FilterManager] Botón ${index + 1}: data-filter="${filter}"`);
+   -> window.Logger?.debug(` [FilterManager] Botón ${index + 1}: data-filter="${filter}"`);
+562: window.Logger?.debug(`🖱️ [FilterManager] Click en botón con filtro: ${filter}`);
+   -> window.Logger?.debug(` [FilterManager] Click en botón con filtro: ${filter}`);
+581: `✅ [FilterManager] UI actualizada con ${filteredRoutes.length} rutas`
+   -> ` [FilterManager] UI actualizada con ${filteredRoutes.length} rutas`
+589: window.Logger?.debug(`✅ [FilterManager] Event listener adjuntado al botón ${index + 1}`);
+   -> window.Logger?.debug(` [FilterManager] Event listener adjuntado al botón ${index + 1}`);
+604: window.Logger?.debug(`✅ [FilterManager] Filtro activo: ${currentFilter}`);
+   -> window.Logger?.debug(` [FilterManager] Filtro activo: ${currentFilter}`);
+607: window.Logger?.debug('✅ [FilterManager] Botones de filtro configurados correctamente');
+   -> window.Logger?.debug(' [FilterManager] Botones de filtro configurados correctamente');
+716: window.Logger?.debug('✅ [FilterManager] Módulo cargado correctamente');
+   -> window.Logger?.debug(' [FilterManager] Módulo cargado correctamente');
+
+
+===== D:\martin\Proyectos\ArbitrageAR-USDT\src\modules\modalManager.js =====
+89: window.Logger?.debug('✅ [ModalManager] Módulo inicializado');
+   -> window.Logger?.debug(' [ModalManager] Módulo inicializado');
+113: window.Logger?.debug('📱 [ModalManager] Configurando modal de detalles de ruta');
+   -> window.Logger?.debug(' [ModalManager] Configurando modal de detalles de ruta');
+134: window.Logger?.debug('✅ [ModalManager] Modal de detalles configurado');
+   -> window.Logger?.debug(' [ModalManager] Modal de detalles configurado');
+152: window.Logger?.debug('📱 [ModalManager] Cerrando modal:', activeModal);
+   -> window.Logger?.debug(' [ModalManager] Cerrando modal:', activeModal);
+167: window.Logger?.debug('✅ [ModalManager] Modal cerrado');
+   -> window.Logger?.debug(' [ModalManager] Modal cerrado');
+186: <h3>⚠️ Confirmación</h3>
+   -> <h3> Confirmación</h3>
+365: window.Logger?.debug('✅ [ModalManager] Módulo cargado correctamente');
+   -> window.Logger?.debug(' [ModalManager] Módulo cargado correctamente');
+
+
+===== D:\martin\Proyectos\ArbitrageAR-USDT\src\modules\notificationManager.js =====
+165: window.Logger?.debug('✅ [NotificationManager] Módulo inicializado');
+   -> window.Logger?.debug(' [NotificationManager] Módulo inicializado');
+213: window.Logger?.debug(`🔔 [NotificationManager] Toast mostrado: ${type} - ${message}`);
+   -> window.Logger?.debug(` [NotificationManager] Toast mostrado: ${type} - ${message}`);
+268: window.Logger?.debug('🔕 [NotificationManager] Todos los toasts cerrados');
+   -> window.Logger?.debug(' [NotificationManager] Todos los toasts cerrados');
+286: window.Logger?.debug('✅ [NotificationManager] No hay actualizaciones pendientes');
+   -> window.Logger?.debug(' [NotificationManager] No hay actualizaciones pendientes');
+292: window.Logger?.debug('✅ [NotificationManager] Actualización ya descartada');
+   -> window.Logger?.debug(' [NotificationManager] Actualización ya descartada');
+319: `📢 [NotificationManager] Actualización ${updateType} detectada: v${updateInfo.latestVersion}`
+   -> ` [NotificationManager] Actualización ${updateType} detectada: v${updateInfo.latestVersion}`
+348: [UPDATE_TYPES.MAJOR]: '🚀 ¡Actualización importante!',
+   -> [UPDATE_TYPES.MAJOR]: ' ¡Actualización importante!',
+349: [UPDATE_TYPES.MINOR]: '✨ Nueva versión disponible',
+   -> [UPDATE_TYPES.MINOR]: ' Nueva versión disponible',
+350: [UPDATE_TYPES.PATCH]: '🔧 Correcciones disponibles'
+   -> [UPDATE_TYPES.PATCH]: ' Correcciones disponibles'
+368: `🔔 [NotificationManager] Indicador de actualización mostrado: ${updateType}`
+   -> ` [NotificationManager] Indicador de actualización mostrado: ${updateType}`
+385: `⬇️ [NotificationManager] Descargando actualización desde: ${downloadUrl}`
+   -> ` [NotificationManager] Descargando actualización desde: ${downloadUrl}`
+413: window.Logger?.debug('🔕 [NotificationManager] Indicador de actualización oculto');
+   -> window.Logger?.debug(' [NotificationManager] Indicador de actualización oculto');
+467: window.Logger?.debug(`📢 [NotificationManager] Modal de actualización mostrado: ${updateType}`);
+   -> window.Logger?.debug(` [NotificationManager] Modal de actualización mostrado: ${updateType}`);
+486: window.Logger?.debug('🖱️ [NotificationManager] Click en "Descargar actualización"');
+   -> window.Logger?.debug(' [NotificationManager] Click en "Descargar actualización"');
+498: window.Logger?.debug('🖱️ [NotificationManager] Click en "Ver más detalles"');
+   -> window.Logger?.debug(' [NotificationManager] Click en "Ver más detalles"');
+511: window.Logger?.debug('🖱️ [NotificationManager] Click en "Cerrar"');
+   -> window.Logger?.debug(' [NotificationManager] Click en "Cerrar"');
+525: window.Logger?.debug('💾 [NotificationManager] Actualización descartada');
+   -> window.Logger?.debug(' [NotificationManager] Actualización descartada');
+566: window.Logger?.debug('🔽 [NotificationManager] Modal de actualización oculto');
+   -> window.Logger?.debug(' [NotificationManager] Modal de actualización oculto');
+585: window.Logger?.debug('✅ [NotificationManager] No hay actualizaciones pendientes');
+   -> window.Logger?.debug(' [NotificationManager] No hay actualizaciones pendientes');
+591: window.Logger?.debug('✅ [NotificationManager] Actualización ya descartada');
+   -> window.Logger?.debug(' [NotificationManager] Actualización ya descartada');
+671: window.Logger?.debug('✅ [NotificationManager] Módulo cargado correctamente');
+   -> window.Logger?.debug(' [NotificationManager] Módulo cargado correctamente');
+
+
+===== D:\martin\Proyectos\ArbitrageAR-USDT\src\modules\routeManager.js =====
+163: ? '<span class="p2p-badge">🤝 P2P</span>'
+   -> ? '<span class="p2p-badge"> P2P</span>'
+164: : '<span class="no-p2p-badge">⚡ Directo</span>';
+   -> : '<span class="no-p2p-badge"> Directo</span>';
+200: return '💰';
+   -> return '';
+202: return '💎';
+   -> return '';
+204: return route?.isSingleExchange ? '🎯' : '🔀';
+   -> return route?.isSingleExchange ? '' : '';
+221: window.Logger?.debug('✅ [RouteManager] Módulo inicializado con', allRoutes.length, 'rutas');
+   -> window.Logger?.debug(' [RouteManager] Módulo inicializado con', allRoutes.length, 'rutas');
+231: window.Logger?.debug('✅ [RouteManager] Datos actualizados:', allRoutes.length, 'rutas');
+   -> window.Logger?.debug(' [RouteManager] Datos actualizados:', allRoutes.length, 'rutas');
+399: ${timestampInfo ? `<span class="time-indicator">🕐 ${new Date(route.timestamp).toLocaleTimeString()}</span>` : ''}
+   -> ${timestampInfo ? `<span class="time-indicator"> ${new Date(route.timestamp).toLocaleTimeString()}</span>` : ''}
+438: <span class="empty-state-emoji">📊</span>
+   -> <span class="empty-state-emoji"></span>
+448: <span class="reason-icon">🎯</span>
+   -> <span class="reason-icon">●</span>
+455: <span class="reason-icon">🏦</span>
+   -> <span class="reason-icon">●</span>
+462: <span class="reason-icon">🔄</span>
+   -> <span class="reason-icon">●</span>
+469: <span class="reason-icon">🤝</span>
+   -> <span class="reason-icon">●</span>
+480: <span class="config-icon">⚙️</span>
+   -> <span class="config-icon">●</span>
+487: <span class="btn-icon">🔄</span>
+   -> <span class="btn-icon">●</span>
+491: <span class="btn-icon">⚙️</span>
+   -> <span class="btn-icon">●</span>
+569: window.Logger?.debug(`✅ [RouteManager] Renderizadas ${routes.length} rutas`);
+   -> window.Logger?.debug(` [RouteManager] Renderizadas ${routes.length} rutas`);
+595: '🖱️ [RouteManager] Click en ruta:',
+   -> ' [RouteManager] Click en ruta:',
+626: <div class="empty-state-icon">🔍</div>
+   -> <div class="empty-state-icon">●</div>
+645: <p>❌ ${escapeHtml(message || 'Error al cargar los datos')}</p>
+   -> <p> ${escapeHtml(message || 'Error al cargar los datos')}</p>
+683: window.Logger?.debug('✅ [RouteManager] Módulo cargado correctamente');
+   -> window.Logger?.debug(' [RouteManager] Módulo cargado correctamente');
+
+
+===== D:\martin\Proyectos\ArbitrageAR-USDT\src\modules\simulator.js =====
+213: window.Logger?.debug('✅ [Simulator] Ya inicializado: se actualizan los datos, sin re-registrar listeners');
+   -> window.Logger?.debug(' [Simulator] Ya inicializado: se actualizan los datos, sin re-registrar listeners');
+219: window.Logger?.debug('✅ [Simulator] Módulo inicializado con event listeners');
+   -> window.Logger?.debug(' [Simulator] Módulo inicializado con event listeners');
+234: window.Logger?.debug('⚙️ [Simulator] Config avanzada:', isHidden ? 'visible' : 'oculta');
+   -> window.Logger?.debug(' [Simulator] Config avanzada:', isHidden ? 'visible' : 'oculta');
+242: window.Logger?.debug('🎯 [Simulator] Botón calcular matriz presionado');
+   -> window.Logger?.debug(' [Simulator] Botón calcular matriz presionado');
+251: window.Logger?.debug('🎯 [Simulator] Botón regenerar matriz presionado');
+   -> window.Logger?.debug(' [Simulator] Botón regenerar matriz presionado');
+260: window.Logger?.debug('🔄 [Simulator] Reseteando configuración');
+   -> window.Logger?.debug(' [Simulator] Reseteando configuración');
+269: window.Logger?.debug('🔍 [Simulator] Aplicando filtro de matriz');
+   -> window.Logger?.debug(' [Simulator] Aplicando filtro de matriz');
+278: window.Logger?.debug('🔄 [Simulator] Reseteando filtro de matriz');
+   -> window.Logger?.debug(' [Simulator] Reseteando filtro de matriz');
+283: window.Logger?.debug('✅ [Simulator] Event listeners configurados correctamente');
+   -> window.Logger?.debug(' [Simulator] Event listeners configurados correctamente');
+356: window.Logger?.debug(`✅ [Simulator] Preset "${preset.name}" aplicado:`, preset);
+   -> window.Logger?.debug(` [Simulator] Preset "${preset.name}" aplicado:`, preset);
+414: window.Logger?.debug('✅ [Simulator] Valores por defecto cargados');
+   -> window.Logger?.debug(' [Simulator] Valores por defecto cargados');
+457: window.Logger?.debug('✅ [Simulator] Configuración reseteada');
+   -> window.Logger?.debug(' [Simulator] Configuración reseteada');
+467: window.Logger?.debug('🔍 [Simulator] Generando matriz de riesgo...');
+   -> window.Logger?.debug(' [Simulator] Generando matriz de riesgo...');
+475: showSimulatorMessage(amountInput, '⚠️ Ingresa un monto válido (mínimo $1,000 ARS)', 'error');
+   -> showSimulatorMessage(amountInput, ' Ingresa un monto válido (mínimo $1,000 ARS)', 'error');
+499: showSimulatorMessage(usdMinEl, '⚠️ El USD mínimo debe ser menor que el USD máximo', 'error');
+   -> showSimulatorMessage(usdMinEl, ' El USD mínimo debe ser menor que el USD máximo', 'error');
+504: showSimulatorMessage(usdtMinEl, '⚠️ El USDT mínimo debe ser menor que el USDT máximo', 'error');
+   -> showSimulatorMessage(usdtMinEl, ' El USDT mínimo debe ser menor que el USDT máximo', 'error');
+566: showSimulatorMessage(usdMinEl, '⚠️ Error: Los precios USD no son válidos', 'error');
+   -> showSimulatorMessage(usdMinEl, ' Error: Los precios USD no son válidos', 'error');
+571: showSimulatorMessage(usdtMinEl, '⚠️ Error: Los precios USDT no son válidos', 'error');
+   -> showSimulatorMessage(usdtMinEl, ' Error: Los precios USDT no son válidos', 'error');
+586: showSimulatorMessage(buyFeeEl, '⚠️ El fee de compra debe estar entre 0% y 10%', 'error');
+   -> showSimulatorMessage(buyFeeEl, ' El fee de compra debe estar entre 0% y 10%', 'error');
+591: showSimulatorMessage(sellFeeEl, '⚠️ El fee de venta debe estar entre 0% y 10%', 'error');
+   -> showSimulatorMessage(sellFeeEl, ' El fee de venta debe estar entre 0% y 10%', 'error');
+612: showSimulatorMessage(null, '⚠️ Error: elementos de la matriz no encontrados', 'error');
+   -> showSimulatorMessage(null, ' Error: elementos de la matriz no encontrados', 'error');
+851: window.Logger?.debug('✅ [Simulator] Módulo cargado correctamente');
+   -> window.Logger?.debug(' [Simulator] Módulo cargado correctamente');
+
+
+===== D:\martin\Proyectos\ArbitrageAR-USDT\src\options.html =====
+19: <!-- 💵 PRECIO DEL DÓLAR -->
+   -> <!--  PRECIO DEL DÓLAR -->
+35: 🌐 Automático
+   -> Automático
+39: ✏️ Manual
+   -> Manual
+63: <option value="consenso" selected>🔥 Consenso (recomendado)</option>
+   -> <option value="consenso" selected> Consenso (recomendado)</option>
+64: <option value="promedio">📊 Promedio simple</option>
+   -> <option value="promedio"> Promedio simple</option>
+65: <option value="mejor-compra">📉 Mejor compra</option>
+   -> <option value="mejor-compra"> Mejor compra</option>
+66: <option value="mejor-venta">📈 Mejor venta</option>
+   -> <option value="mejor-venta"> Mejor venta</option>
+67: <option value="bna">🏛️ Banco Nación</option>
+   -> <option value="bna"> Banco Nación</option>
+68: <option value="galicia">🏦 Galicia</option>
+   -> <option value="galicia"> Galicia</option>
+69: <option value="santander">🏦 Santander</option>
+   -> <option value="santander"> Santander</option>
+70: <option value="bbva">🏦 BBVA</option>
+   -> <option value="bbva"> BBVA</option>
+71: <option value="icbc">🏦 ICBC</option>
+   -> <option value="icbc"> ICBC</option>
+164: <!-- 🔄 EXCHANGES P2P -->
+   -> <!--  EXCHANGES P2P -->
+396: <!-- 🏛️ EXCHANGES TRADICIONALES -->
+   -> <!--  EXCHANGES TRADICIONALES -->
+571: <!-- 💎 EXCHANGES USDT PARA RUTAS -->
+   -> <!--  EXCHANGES USDT PARA RUTAS -->
+583: ℹ️ Solo se usarán los exchanges seleccionados para calcular rutas. Si no seleccionas
+   -> ℹ Solo se usarán los exchanges seleccionados para calcular rutas. Si no seleccionas
+755: <!-- 🎨 INTERFAZ -->
+   -> <!--  INTERFAZ -->
+873: <!-- 💸 FEES -->
+   -> <!--  FEES -->
+889: ⚠️ Con esto apagado, la ganancia que muestra la extensión es el spread
+   -> Con esto apagado, la ganancia que muestra la extensión es el spread
+929: ℹ️ El fee de trading es un porcentaje por operación. Retiro, transferencia y
+   -> ℹ El fee de trading es un porcentaje por operación. Retiro, transferencia y
+941: <option value="lemoncash">🍋 Lemon</option>
+   -> <option value="lemoncash"> Lemon</option>
+942: <option value="fiwind">💰 Fiwind</option>
+   -> <option value="fiwind"> Fiwind</option>
+943: <option value="buenbit">🪙 Buenbit</option>
+   -> <option value="buenbit"> Buenbit</option>
+944: <option value="letsbit">⚡ Letsbit</option>
+   -> <option value="letsbit"> Letsbit</option>
+945: <option value="other">🔧 Otro</option>
+   -> <option value="other"> Otro</option>
+1011: <!-- 🔔 NOTIFICACIONES -->
+   -> <!--  NOTIFICACIONES -->
+1154: <!-- 🔧 AVANZADO -->
+   -> <!--  AVANZADO -->
+1161: <h4>🌐 APIs</h4>
+   -> <h4> APIs</h4>
+1186: <h4>⏱️ Tiempos</h4>
+   -> <h4>⏱ Tiempos</h4>
+1203: <h4>🛡️ Seguridad</h4>
+   -> <h4> Seguridad</h4>
+
+
+===== D:\martin\Proyectos\ArbitrageAR-USDT\src\options.js =====
+631: <p>🎯 No hay brokers configurados</p>
+   -> <p> No hay brokers configurados</p>
+688: <button class="btn-edit" title="Editar">✏️</button>
+   -> <button class="btn-edit" title="Editar"></button>
+689: <button class="btn-remove" title="Eliminar">🗑️</button>
+   -> <button class="btn-remove" title="Eliminar"></button>
+717: <p>🎯 No hay brokers configurados</p>
+   -> <p> No hay brokers configurados</p>
+768: '📤 [OPTIONS] Configuración a enviar:',
+   -> ' [OPTIONS] Configuración a enviar:',
+
+
+===== D:\martin\Proyectos\ArbitrageAR-USDT\src\popup.js =====
+159: '⚠️ [INIT] initTooltips no está disponible - tooltipSystem.js no se cargó correctamente'
+   -> ' [INIT] initTooltips no está disponible - tooltipSystem.js no se cargó correctamente'
+176: <h2 style="color: #ef4444;">⚠️ Error al cargar la extensión</h2>
+   -> <h2 style="color: #ef4444;"> Error al cargar la extensión</h2>
+180: 🔄 Reintentar
+   -> Reintentar
+223: '⚠️ [INIT UI] window.ArbitragePanel no está disponible - ui-components/arbitrage-panel.js no se cargó correctamente'
+   -> ' [INIT UI] window.ArbitragePanel no está disponible - ui-components/arbitrage-panel.js no se cargó correctamente'
+239: '⚠️ [INIT UI] window.TabSystem no está disponible - ui-components/tabs.js no se cargó correctamente'
+   -> ' [INIT UI] window.TabSystem no está disponible - ui-components/tabs.js no se cargó correctamente'
+254: '⚠️ [INIT UI] window.AnimationUtils no está disponible - ui-components/animations.js no se cargó correctamente'
+   -> ' [INIT UI] window.AnimationUtils no está disponible - ui-components/animations.js no se cargó correctamente'
+320: icon: '🔴',
+   -> icon: '●',
+335: icon: '🟢',
+   -> icon: '●',
+343: icon: '🟡',
+   -> icon: '●',
+351: icon: '🔴',
+   -> icon: '●',
+792: <div class="error-state-icon animate-pulse">⚠️</div>
+   -> <div class="error-state-icon animate-pulse">●</div>
+797: <span>🔄</span>
+   -> <span></span>
+838: <div class="error-state-icon animate-pulse">❌</div>
+   -> <div class="error-state-icon animate-pulse">●</div>
+843: <span>🔄</span>
+   -> <span></span>
+861: cacheIndicator.textContent = data.error ? `⚠️ ${data.error}` : '📱 Datos cacheados';
+   -> cacheIndicator.textContent = data.error ? ` ${data.error}` : ' Datos cacheados';
+894: setSafeHTML(container, `<p class="${errorClass}">❌ ${sanitizeHTML(data.error)}</p>`);
+   -> setSafeHTML(container, `<p class="${errorClass}"> ${sanitizeHTML(data.error)}</p>`);
+912: '<p class="info">📊 No se encontraron rutas rentables en este momento.</p>';
+   -> '<p class="info"> No se encontraron rutas rentables en este momento.</p>';
+965: <button class="retry-btn" data-action="reload">🔄 Reintentar</button>
+   -> <button class="retry-btn" data-action="reload"> Reintentar</button>
+981: '<p class="error">❌ Chrome Runtime no disponible. Recarga la extensión.</p>';
+   -> '<p class="error"> Chrome Runtime no disponible. Recarga la extensión.</p>';
+997: <h3>❌ Error de Comunicación</h3>
+   -> <h3> Error de Comunicación</h3>
+999: <button class="retry-btn" data-action="reload">🔄 Reintentar</button>
+   -> <button class="retry-btn" data-action="reload"> Reintentar</button>
+1019: <button class="retry-btn" data-action="reload">🔄 Reintentar</button>
+   -> <button class="retry-btn" data-action="reload"> Reintentar</button>
+1031: <button class="retry-btn" data-action="reload">🔄 Reintentar</button>
+   -> <button class="retry-btn" data-action="reload"> Reintentar</button>
+1041: <h3>🏥 Background No Saludable</h3>
+   -> <h3> Background No Saludable</h3>
+1043: <button class="retry-btn" data-action="reload">🔄 Reintentar</button>
+   -> <button class="retry-btn" data-action="reload"> Reintentar</button>
+1072: <h3>❌ Error de Envío</h3>
+   -> <h3> Error de Envío</h3>
+1074: <button class="retry-btn" data-action="reload">🔄 Reintentar</button>
+   -> <button class="retry-btn" data-action="reload"> Reintentar</button>
+1082: '<p class="error">❌ Error interno: ' + sanitizeHTML(error.message) + '</p>';
+   -> '<p class="error"> Error interno: ' + sanitizeHTML(error.message) + '</p>';
+1120: `🔧 [POPUP] Filtradas por ganancia mínima ${minProfit}%: ${beforeCount} → ${filtered.length} rutas`
+   -> ` [POPUP] Filtradas por ganancia mínima ${minProfit}%: ${beforeCount} → ${filtered.length} rutas`
+1150: `🔧 [POPUP] Exchanges preferidos (${preferredExchanges.join(', ')}): ${beforeCount} → ${filtered.length} rutas`
+   -> ` [POPUP] Exchanges preferidos (${preferredExchanges.join(', ')}): ${beforeCount} → ${filtered.length} rutas`
+1164: if (DEBUG_MODE) log('🔧 [POPUP] Rutas ordenadas priorizando mismo broker');
+   -> if (DEBUG_MODE) log(' [POPUP] Rutas ordenadas priorizando mismo broker');
+1167: if (DEBUG_MODE) log('🔧 [POPUP] Rutas ordenadas por ganancia descendente');
+   -> if (DEBUG_MODE) log(' [POPUP] Rutas ordenadas por ganancia descendente');
+1175: if (DEBUG_MODE) log(`🔧 [POPUP] Limitadas a ${maxDisplay} rutas`);
+   -> if (DEBUG_MODE) log(` [POPUP] Limitadas a ${maxDisplay} rutas`);
+1218: ? '<span class="low-profit-tag">👁️ Solo vista</span>'
+   -> ? '<span class="low-profit-tag"> Solo vista</span>'
+1220: const negativeIndicator = isNegative ? '<span class="negative-tag">⚠️ Pérdida</span>' : '';
+   -> const negativeIndicator = isNegative ? '<span class="negative-tag"> Pérdida</span>' : '';
+1231: <h3>🏦 ${sanitizeHTML(arb.broker)}</h3>
+   -> <h3> ${sanitizeHTML(arb.broker)}</h3>
+1237: <span class="price-label">💵 Dólar Oficial</span>
+   -> <span class="price-label"> Dólar Oficial</span>
+1244: <span class="price-label">📍 Fuente</span>
+   -> <span class="price-label"> Fuente</span>
+1251: <span class="price-label">💱 USD → USDT</span>
+   -> <span class="price-label"> USD → USDT</span>
+1255: <span class="price-label">💸 USDT → ARS</span>
+   -> <span class="price-label"> USDT → ARS</span>
+1262: <span class="price-label">📊 Comisiones</span>
+   -> <span class="price-label"> Comisiones</span>
+1309: <span class="empty-state-emoji">📊</span>
+   -> <span class="empty-state-emoji"></span>
+1319: <span class="reason-icon">🎯</span>
+   -> <span class="reason-icon">●</span>
+1326: <span class="reason-icon">🏦</span>
+   -> <span class="reason-icon">●</span>
+1333: <span class="reason-icon">🔄</span>
+   -> <span class="reason-icon">●</span>
+1340: <span class="reason-icon">🤝</span>
+   -> <span class="reason-icon">●</span>
+1351: <span class="config-icon">⚙️</span>
+   -> <span class="config-icon">●</span>
+1358: <span class="btn-icon">🔄</span>
+   -> <span class="btn-icon">●</span>
+1362: <span class="btn-icon">⚙️</span>
+   -> <span class="btn-icon">●</span>
+1427: ? `<div class="route-timestamp">🕐 ${new Date(route.timestamp).toLocaleTimeString()}</div>`
+   -> ? `<div class="route-timestamp"> ${new Date(route.timestamp).toLocaleTimeString()}</div>`
+1461: ${timestampInfo ? `<span class="time-indicator">🕐 ${new Date(route.timestamp).toLocaleTimeString()}</span>` : ''}
+   -> ${timestampInfo ? `<span class="time-indicator"> ${new Date(route.timestamp).toLocaleTimeString()}</span>` : ''}
+1506: `🖱️ [POPUP] Click en route-card tipo ${route.routeType}:`,
+   -> ` [POPUP] Click en route-card tipo ${route.routeType}:`,
+1588: return '<span class="route-type-badge direct-sale">💰 USDT→ARS</span>';
+   -> return '<span class="route-type-badge direct-sale"> USDT→ARS</span>';
+1590: return '<span class="route-type-badge purchase">💎 USD→USDT</span>';
+   -> return '<span class="route-type-badge purchase"> USD→USDT</span>';
+1599: ? '<span class="p2p-badge">🤝 P2P</span>'
+   -> ? '<span class="p2p-badge"> P2P</span>'
+1600: : '<span class="no-p2p-badge">⚡ Directo</span>';
+   -> : '<span class="no-p2p-badge"> Directo</span>';
+1622: return '💰';
+   -> return '';
+1624: return '💎';
+   -> return '';
+1626: return route?.isSingleExchange ? '🎯' : '🔀';
+   -> return route?.isSingleExchange ? '' : '';
+1646: window.RouteRenderer?.getExchangeIcon?.(exchangeName) || '🏦';
+   -> window.RouteRenderer?.getExchangeIcon?.(exchangeName) || '';
+2081: <span class="empty-state-emoji">🏦</span>
+   -> <span class="empty-state-emoji"></span>
+2088: <span class="btn-icon">⚙️</span>
+   -> <span class="btn-icon">●</span>
+2106: <span class="empty-state-emoji">📊</span>
+   -> <span class="empty-state-emoji"></span>
+2113: <span class="btn-icon">🔄</span>
+   -> <span class="btn-icon">●</span>
+2479: '[POPUP] 📊 Cotizaciones de exchanges obtenidas:',
+   -> '[POPUP]  Cotizaciones de exchanges obtenidas:',
+2488: <p>📊 No hay cotizaciones disponibles</p>
+   -> <p> No hay cotizaciones disponibles</p>
+2502: <p>⚠️ Error al cargar cotizaciones</p>
+   -> <p> Error al cargar cotizaciones</p>
+2515: //   refreshBtn.textContent = '🔄 Actualizar';
+   -> //   refreshBtn.textContent = ' Actualizar';
+2542: <span class="warning-icon">⚠️</span>
+   -> <span class="warning-icon">●</span>
+2544: <button class="warning-refresh-btn" data-action="refresh-data">🔄 Actualizar</button>
+   -> <button class="warning-refresh-btn" data-action="refresh-data"> Actualizar</button>
+2666: `💵 [DISPLAY] Actualizando display del dólar: $${officialData.venta} (${officialData.source})`
+   -> ` [DISPLAY] Actualizando display del dólar: $${officialData.venta} (${officialData.source})`
+2686: ? `💵 Precio manual actual: $${currentPrice.toFixed(2)}\n\n` +
+   -> ? ` Precio manual actual: $${currentPrice.toFixed(2)}\n\n` +
+2688: : `💵 Precio automático actual: $${currentPrice.toFixed(2)}\n\n` +
+   -> : ` Precio automático actual: $${currentPrice.toFixed(2)}\n\n` +
+2689: '⚠️ ATENCIÓN: Esto cambiará permanentemente a modo manual.\n' +
+   -> ' ATENCIÓN: Esto cambiará permanentemente a modo manual.\n' +
+2710: `✅ Precio actualizado a $${price.toFixed(2)}\n\nLas rutas se recalcularán automáticamente.`
+   -> ` Precio actualizado a $${price.toFixed(2)}\n\nLas rutas se recalcularán automáticamente.`
+2843: <p>❌ Error al cargar cotizaciones</p>
+   -> <p> Error al cargar cotizaciones</p>
+2868: 🏢 Empresa ↑
+   -> Empresa ↑
+2871: 💰 Compra ↓
+   -> Compra ↓
+2874: 💸 Venta ↓
+   -> Venta ↓
+3132: name: '🏢',
+   -> name: '',
+3133: buy: '💰',
+   -> buy: '',
+3134: sell: '💸'
+   -> sell: ''
+3533: USDC: '💵',
+   -> USDC: '',
+3534: USDT: '💲',
+   -> USDT: '',
+3536: BNB: '🔶',
+   -> BNB: '',
+3539: XRP: '✕',
+   -> XRP: '',
+3540: MATIC: '🔷',
+   -> MATIC: '',
+3541: DOGE: '🐕'
+   -> DOGE: ''
+3543: return icons[symbol] || '💎';
+   -> return icons[symbol] || '';
+3573: fast: '<span class="speed-indicator fast">⚡ Rápido</span>',
+   -> fast: '<span class="speed-indicator fast"> Rápido</span>',
+3574: medium: '<span class="speed-indicator medium">⏱️ Medio</span>',
+   -> medium: '<span class="speed-indicator medium">⏱ Medio</span>',
+3575: slow: '<span class="speed-indicator slow">🐌 Lento</span>'
+   -> slow: '<span class="speed-indicator slow"> Lento</span>'
+3586: easy: '<span class="difficulty-indicator easy">✅ Fácil</span>',
+   -> easy: '<span class="difficulty-indicator easy"> Fácil</span>',
+3587: medium: '<span class="difficulty-indicator medium">⚠️ Medio</span>',
+   -> medium: '<span class="difficulty-indicator medium"> Medio</span>',
+3588: hard: '<span class="difficulty-indicator hard">🔴 Difícil</span>'
+   -> hard: '<span class="difficulty-indicator hard">● Difícil</span>'
+3728: <div class="error-state-icon animate-pulse">❌</div>
+   -> <div class="error-state-icon animate-pulse">●</div>
+3733: <span>🔄</span>
+   -> <span></span>
+3754: <div class="empty-state-icon">🔍</div>
+   -> <div class="empty-state-icon">●</div>
+3759: <span>🔄</span>
+   -> <span></span>
+4161: `❌ [SVG DIAGNOSIS] Faltan ${missingIcons.length} iconos críticos:`,
+   -> ` [SVG DIAGNOSIS] Faltan ${missingIcons.length} iconos críticos:`,
+4179: `❌ [SVG DIAGNOSIS] Botón ${index + 1} referencia icono inexistente: ${iconId}`
+   -> ` [SVG DIAGNOSIS] Botón ${index + 1} referencia icono inexistente: ${iconId}`
+4202: `❌ [SVG DIAGNOSIS] Botón header ${index + 1} referencia icono inexistente: ${iconId}`
+   -> ` [SVG DIAGNOSIS] Botón header ${index + 1} referencia icono inexistente: ${iconId}`
+
+
+===== D:\martin\Proyectos\ArbitrageAR-USDT\src\renderHelpers.js =====
+24: ? '<span class="status-indicator loss" title="Pérdida">⚠️</span>'
+   -> ? '<span class="status-indicator loss" title="Pérdida"></span>'
+26: ? '<span class="status-indicator high" title="Alta ganancia">🔥</span>'
+   -> ? '<span class="status-indicator high" title="Alta ganancia"></span>'
+28: ? '<span class="status-indicator ok" title="Ganancia moderada">✓</span>'
+   -> ? '<span class="status-indicator ok" title="Ganancia moderada"></span>'
+29: : '<span class="status-indicator low" title="Ganancia baja">👁️</span>';
+   -> : '<span class="status-indicator low" title="Ganancia baja"></span>';
+42: <span class="exchange-icon">🏦</span>
+   -> <span class="exchange-icon">●</span>
+53: <span class="price-label">💵 Compra USD</span>
+   -> <span class="price-label"> Compra USD</span>
+57: <span class="price-label">💸 Venta USDT</span>
+   -> <span class="price-label"> Venta USDT</span>
+65: <span class="fee-label">📊 Fees totales:</span>
+   -> <span class="fee-label"> Fees totales:</span>
+102: <span class="fiat-icon">💵</span>
+   -> <span class="fiat-icon">●</span>
+119: ${hasVolume ? `<span class="volume-indicator">📊 ${volumeDisplay}</span>` : ''}
+   -> ${hasVolume ? `<span class="volume-indicator"> ${volumeDisplay}</span>` : ''}
+
+
+===== D:\martin\Proyectos\ArbitrageAR-USDT\src\ui\routeRenderer.js =====
+44: binance: '🟡',
+   -> binance: '●',
+45: binancep2p: '🟡',
+   -> binancep2p: '●',
+46: buenbit: '🔵',
+   -> buenbit: '●',
+47: lemoncash: '🍋',
+   -> lemoncash: '',
+48: ripio: '🟣',
+   -> ripio: '●',
+49: fiwind: '🌊',
+   -> fiwind: '',
+50: letsbit: '💜',
+   -> letsbit: '',
+51: satoshitango: '🟠',
+   -> satoshitango: '●',
+52: decrypto: '🔷',
+   -> decrypto: '',
+53: bitsoalpha: '🔶',
+   -> bitsoalpha: '',
+54: default: '💱'
+   -> default: ''
+66: let riskIcon = '🟢';
+   -> let riskIcon = '●';
+72: riskIcon = '🔴';
+   -> riskIcon = '●';
+76: riskIcon = '🟡';
+   -> riskIcon = '●';
+82: riskIcon = riskLevel === 'high' ? '🔴' : '🟡';
+   -> riskIcon = riskLevel === 'high' ? '●' : '●';
+154: 📊 Detalles
+   -> Detalles
+174: <span class="no-routes-icon">🔍</span>
+   -> <span class="no-routes-icon">●</span>
+220: <span class="error-icon">⚠️</span>
+   -> <span class="error-icon">●</span>
+223: 🔄 Reintentar
+   -> Reintentar
+
+
+===== D:\martin\Proyectos\ArbitrageAR-USDT\src\utils\commonUtils.js =====
+170: icon: '🔴',
+   -> icon: '●',
+185: icon: '🟢',
+   -> icon: '●',
+193: icon: '🟡',
+   -> icon: '●',
+201: icon: '🔴',
+   -> icon: '●',
+
+
+===== D:\martin\Proyectos\ArbitrageAR-USDT\src\utils\formatters.js =====
+69: manual: '👤 Manual',
+   -> manual: ' Manual',
+70: dolarapi_fallback: '🔄 DolarAPI (fallback)',
+   -> dolarapi_fallback: ' DolarAPI (fallback)',
+71: dolarapi_oficial: '🌐 DolarAPI (oficial)',
+   -> dolarapi_oficial: ' DolarAPI (oficial)',
+72: manual_fallback: '🔄 Manual (fallback)',
+   -> manual_fallback: ' Manual (fallback)',
+73: hardcoded_fallback: '⚠️ Fallback fijo'
+   -> hardcoded_fallback: ' Fallback fijo'
+81: return `🏦 ${official.bank}`;
+   -> return ` ${official.bank}`;
+85: return `📊 Mediana (${official.banksCount || 0} bancos)`;
+   -> return ` Mediana (${official.banksCount || 0} bancos)`;
+89: return `📊 Prom. Recortado (${official.usedBanks || 0}/${official.banksCount || 0} bancos)`;
+   -> return ` Prom. Recortado (${official.usedBanks || 0}/${official.banksCount || 0} bancos)`;
+93: return `📊 Promedio (${official.banksCount || 0} bancos)`;
+   -> return ` Promedio (${official.banksCount || 0} bancos)`;
+97: return `💰 ${official.bank} (menor precio)`;
+   -> return ` ${official.bank} (menor precio)`;
+108: return `🏦 Bancos CriptoYa (${methodText})`;
+   -> return ` Bancos CriptoYa (${methodText})`;
+
+
+===== D:\martin\Proyectos\ArbitrageAR-USDT\src\utils\logger.js =====
+114: console.group(formatMessage('📁', label));
+   -> console.group(formatMessage('', label));
+
+
+===== D:\martin\Proyectos\ArbitrageAR-USDT\src\ValidationService.js =====
+36: return { level: 'unknown', ageMinutes: null, color: '#94a3b8', icon: '❓' };
+   -> return { level: 'unknown', ageMinutes: null, color: '#94a3b8', icon: '' };
+45: return { level: 'fresh', ageMinutes, color: '#4ade80', icon: '🟢' };
+   -> return { level: 'fresh', ageMinutes, color: '#4ade80', icon: '●' };
+47: return { level: 'warning', ageMinutes, color: '#fbbf24', icon: '🟡' };
+   -> return { level: 'warning', ageMinutes, color: '#fbbf24', icon: '●' };
+49: return { level: 'stale', ageMinutes, color: '#f87171', icon: '🔴' };
+   -> return { level: 'stale', ageMinutes, color: '#f87171', icon: '●' };
+104: icon = '🔴';
+   -> icon = '●';
+108: icon = '🟡';
+   -> icon = '●';
+112: icon = '🟢';
+   -> icon = '●';
+242: let message = '⚠️ CONFIRMACIÓN REQUERIDA\n\n';
+   -> let message = ' CONFIRMACIÓN REQUERIDA\n\n';
+248: message += '⚠️ Este es un monto considerable.\n';
+   -> message += ' Este es un monto considerable.\n';
+252: message += '⚠️ Esta operación resultaría en PÉRDIDA.\n';
+   -> message += ' Esta operación resultaría en PÉRDIDA.\n';
+254: message += '⚠️ La rentabilidad es muy baja.\n';
+   -> message += ' La rentabilidad es muy baja.\n';
+

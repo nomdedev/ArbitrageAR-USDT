@@ -1,0 +1,266 @@
+{
+  "estructura": {
+    "tamanoDocumento": {
+      "ancho": 430,
+      "alto": 760
+    },
+    "pestanias": [
+      {
+        "texto": "Fiat",
+        "tab": "routes",
+        "activa": true
+      },
+      {
+        "texto": "Cripto",
+        "tab": "crypto-arbitrage",
+        "activa": false
+      },
+      {
+        "texto": "Simular",
+        "tab": "simulator",
+        "activa": false
+      },
+      {
+        "texto": "Exchanges",
+        "tab": "banks",
+        "activa": false
+      }
+    ],
+    "botonesVisibles": [
+      {
+        "clase": "version-indicator",
+        "texto": "v6.0.0",
+        "ancho": 52,
+        "alto": 15,
+        "radio": "4px",
+        "fondo": "rgb(39, 39, 42)",
+        "color": "rgb(113, 113, 122)",
+        "fuente": "10px/500",
+        "transicion": "all"
+      },
+      {
+        "clase": "btn-header-icon",
+        "texto": "",
+        "ancho": 32,
+        "alto": 32,
+        "radio": "6px",
+        "fondo": "rgb(39, 39, 42)",
+        "color": "rgb(113, 113, 122)",
+        "fuente": "13.3333px/400",
+        "transicion": "all"
+      },
+      {
+        "clase": "btn-header-icon btn-refresh",
+        "texto": "",
+        "ancho": 32,
+        "alto": 32,
+        "radio": "6px",
+        "fondo": "rgb(39, 39, 42)",
+        "color": "rgb(113, 113, 122)",
+        "fuente": "13.3333px/400",
+        "transicion": "all"
+      },
+      {
+        "clase": "dollar-action-btn",
+        "texto": "",
+        "ancho": 28,
+        "alto": 28,
+        "radio": "6px",
+        "fondo": "rgba(16, 185, 129, 0.12)",
+        "color": "rgb(34, 197, 94)",
+        "fuente": "13.3333px/400",
+        "transicion": "all"
+      },
+      {
+        "clase": "dollar-action-btn secondary",
+        "texto": "",
+        "ancho": 28,
+        "alto": 28,
+        "radio": "6px",
+        "fondo": "rgb(39, 39, 42)",
+        "color": "rgb(161, 161, 170)",
+        "fuente": "13.3333px/400",
+        "transicion": "all"
+      },
+      {
+        "clase": "tab active",
+        "texto": "Fiat",
+        "ancho": 103,
+        "alto": 36,
+        "radio": "6px",
+        "fondo": "rgb(59, 130, 246)",
+        "color": "rgb(9, 9, 11)",
+        "fuente": "8.97812px/500",
+        "transicion": "all"
+      },
+      {
+        "clase": "tab",
+        "texto": "Cripto",
+        "ancho": 103,
+        "alto": 36,
+        "radio": "6px",
+        "fondo": "rgba(0, 0, 0, 0)",
+        "color": "rgb(113, 113, 122)",
+        "fuente": "8.97812px/500",
+        "transicion": "all"
+      },
+      {
+        "clase": "tab",
+        "texto": "Simular",
+        "ancho": 103,
+        "alto": 36,
+        "radio": "6px",
+        "fondo": "rgba(0, 0, 0, 0)",
+        "color": "rgb(113, 113, 122)",
+        "fuente": "8.97812px/500",
+        "transicion": "all"
+      },
+      {
+        "clase": "tab",
+        "texto": "Exchanges",
+        "ancho": 103,
+        "alto": 36,
+        "radio": "6px",
+        "fondo": "rgba(0, 0, 0, 0)",
+        "color": "rgb(113, 113, 122)",
+        "fuente": "8.97812px/500",
+        "transicion": "all"
+      },
+      {
+        "clase": "filter-btn-footer active",
+        "texto": "",
+        "ancho": 36,
+        "alto": 32,
+        "radio": "4px",
+        "fondo": "rgb(59, 130, 246)",
+        "color": "rgb(9, 9, 11)",
+        "fuente": "13.3333px/400",
+        "transicion": "all"
+      },
+      {
+        "clase": "filter-btn-footer",
+        "texto": "",
+        "ancho": 36,
+        "alto": 32,
+        "radio": "4px",
+        "fondo": "rgba(0, 0, 0, 0)",
+        "color": "rgb(113, 113, 122)",
+        "fuente": "13.3333px/400",
+        "transicion": "all"
+      },
+      {
+        "clase": "filter-btn-footer",
+        "texto": "",
+        "ancho": 36,
+        "alto": 32,
+        "radio": "4px",
+        "fondo": "rgba(0, 0, 0, 0)",
+        "color": "rgb(113, 113, 122)",
+        "fuente": "13.3333px/400",
+        "transicion": "all"
+      }
+    ],
+    "selects": [
+      {
+        "id": "crypto-filter",
+        "opciones": [
+          "Todas las criptos",
+          "Bitcoin (BTC)",
+          "Ethereum (ETH)",
+          "USD Coin (USDC)",
+          "DAI",
+          "Binance Coin (BNB)",
+          "Solana (SOL)",
+          "Cardano (ADA)"
+        ]
+      }
+    ],
+    "filtros": [
+      {
+        "clase": "sim-matrix-filters",
+        "texto": "Filtrar: % a %"
+      },
+      {
+        "clase": "sim-btn-filter",
+        "texto": ""
+      },
+      {
+        "clase": "sim-btn-filter-reset",
+        "texto": ""
+      },
+      {
+        "clase": "sim-filter-count",
+        "texto": "0 combinaciones"
+      },
+      {
+        "clase": "footer-filters",
+        "texto": ""
+      },
+      {
+        "clase": "filter-btn-footer active",
+        "texto": ""
+      },
+      {
+        "clase": "filter-btn-footer",
+        "texto": ""
+      },
+      {
+        "clase": "filter-btn-footer",
+        "texto": ""
+      }
+    ],
+    "secciones": [
+      {
+        "clase": "tab-content",
+        "visible": false,
+        "alto": 0
+      },
+      {
+        "clase": "tab-content active",
+        "visible": true,
+        "alto": 1082
+      },
+      {
+        "clase": "tab-content",
+        "visible": false,
+        "alto": 0
+      },
+      {
+        "clase": "tab-content",
+        "visible": false,
+        "alto": 0
+      },
+      {
+        "clase": "tab-content",
+        "visible": false,
+        "alto": 0
+      }
+    ]
+  },
+  "estilos": {
+    "bodyFondo": "rgb(9, 9, 11)",
+    "bodyFuente": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+    "bodyTamano": "10.5625px",
+    "tabFondo": "rgba(0, 0, 0, 0)",
+    "tabRadio": "6px",
+    "tabActivaFondo": "rgb(59, 130, 246)",
+    "tabActivaTexto": "rgb(9, 9, 11)",
+    "tabTransicion": "0.15s cubic-bezier(0, 0, 0.2, 1)",
+    "botonFondo": "rgb(39, 39, 42)",
+    "botonRadio": "4px",
+    "keyframesEnUso": 57,
+    "hojas": [
+      "ui-components/design-system.css",
+      "inline",
+      "ui-components/animations-minimal.css",
+      "ui-components/header.css",
+      "ui-components/exchange-card.css",
+      "ui-components/arbitrage-panel.css",
+      "ui-components/tabs.css",
+      "ui-components/loading-states.css",
+      "ui-components/states-feedback.css",
+      "src/popup.css"
+    ]
+  },
+  "errores": []
+}

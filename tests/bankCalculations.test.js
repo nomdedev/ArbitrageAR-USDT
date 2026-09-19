@@ -3,7 +3,7 @@
  *
  * Estas funciones determinan el precio del dolar que se usa en TODOS
  * los calculos de arbitraje. Un error aqui afecta a toda la app.
- * Es el modulo mas critico junto a arbitrageCalculator.
+ * Es el modulo mas critico junto al motor de calculo de main-simple.js.
  *
  * Tests consolidados: 12 tests para cobertura completa de:
  * - calculateBankConsensus

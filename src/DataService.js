@@ -135,7 +135,7 @@ class DataService {
 
     if (data && typeof data === 'object' && Object.keys(data).length > 0) {
       debugLog(
-        `💎 Datos ${symbol}/${fiatCurrency} obtenidos:`,
+        ` Datos ${symbol}/${fiatCurrency} obtenidos:`,
         Object.keys(data).length,
         'exchanges'
       );
@@ -164,7 +164,7 @@ class DataService {
 
     if (data && typeof data === 'object') {
       debugLog(
-        `🔄 Datos ${symbolFrom}/${symbolTo} obtenidos:`,
+        ` Datos ${symbolFrom}/${symbolTo} obtenidos:`,
         Object.keys(data).length,
         'exchanges'
       );
@@ -245,7 +245,7 @@ class DataService {
     ];
     const cryptos = cryptoList || defaultCryptos;
 
-    debugLog(`🔄 Obteniendo datos para ${cryptos.length} criptomonedas...`);
+    debugLog(` Obteniendo datos para ${cryptos.length} criptomonedas...`);
 
     const promises = cryptos.map(symbol =>
       this.fetchCryptoData(symbol, fiatCurrency)
@@ -266,7 +266,7 @@ class DataService {
     });
 
     debugLog(
-      `✅ Datos obtenidos para ${Object.keys(cryptoData).length}/${cryptos.length} criptomonedas`
+      ` Datos obtenidos para ${Object.keys(cryptoData).length}/${cryptos.length} criptomonedas`
     );
     return cryptoData;
   }
@@ -441,7 +441,7 @@ class DataService {
     try {
       if (typeof chrome !== 'undefined' && chrome.storage) {
         await chrome.storage.local.set({ activeCryptos: cryptoList });
-        debugLog('✅ Criptos activas guardadas:', cryptoList);
+        debugLog(' Criptos activas guardadas:', cryptoList);
         return true;
       }
     } catch (error) {
@@ -493,7 +493,7 @@ class DataService {
       }
 
       debugLog(
-        `💰 Precios bancarios obtenidos (dolarito): ${Object.keys(bankRates).length} bancos`
+        ` Precios bancarios obtenidos (dolarito): ${Object.keys(bankRates).length} bancos`
       );
       return bankRates;
     } catch (error) {
@@ -532,7 +532,7 @@ class DataService {
       }
 
       debugLog(
-        `💰 Precios bancarios obtenidos (criptoya): ${Object.keys(bankRates).length} bancos`
+        ` Precios bancarios obtenidos (criptoya): ${Object.keys(bankRates).length} bancos`
       );
       return bankRates;
     } catch (error) {
@@ -630,7 +630,7 @@ class DataService {
         });
       }
 
-      debugLog(`💰 Precios bancarios combinados: ${Object.keys(combined).length} bancos`);
+      debugLog(` Precios bancarios combinados: ${Object.keys(combined).length} bancos`);
       return combined;
     } catch (error) {
       console.error('Error combinando precios bancarios:', error);

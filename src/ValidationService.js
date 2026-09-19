@@ -33,7 +33,7 @@ class ValidationService {
    */
   getDataFreshnessLevel(timestamp) {
     if (!timestamp) {
-      return { level: 'unknown', ageMinutes: null, color: '#94a3b8', icon: '❓' };
+      return { level: 'unknown', ageMinutes: null, color: '#94a3b8', icon: '' };
     }
 
     const dataDate = new Date(timestamp);
@@ -42,11 +42,11 @@ class ValidationService {
     const ageMinutes = Math.floor(ageMs / 60000);
 
     if (ageMinutes < 5) {
-      return { level: 'fresh', ageMinutes, color: '#4ade80', icon: '🟢' };
+      return { level: 'fresh', ageMinutes, color: '#4ade80', icon: '●' };
     } else if (ageMinutes < 15) {
-      return { level: 'warning', ageMinutes, color: '#fbbf24', icon: '🟡' };
+      return { level: 'warning', ageMinutes, color: '#fbbf24', icon: '●' };
     } else {
-      return { level: 'stale', ageMinutes, color: '#f87171', icon: '🔴' };
+      return { level: 'stale', ageMinutes, color: '#f87171', icon: '●' };
     }
   }
 
@@ -101,15 +101,15 @@ class ValidationService {
     if (riskScore >= 50) {
       level = 'high';
       color = '#ef4444';
-      icon = '🔴';
+      icon = '●';
     } else if (riskScore >= 25) {
       level = 'medium';
       color = '#f59e0b';
-      icon = '🟡';
+      icon = '●';
     } else {
       level = 'low';
-      color = '#10b981';
-      icon = '🟢';
+      color = '#30d158'; // systemGreen
+      icon = '●';
     }
 
     return {
@@ -239,19 +239,19 @@ class ValidationService {
   async showConfirmation(amount, profitPercentage, route) {
     const profitSign = profitPercentage >= 0 ? '+' : '';
 
-    let message = '⚠️ CONFIRMACIÓN REQUERIDA\n\n';
+    let message = ' CONFIRMACIÓN REQUERIDA\n\n';
     message += `Monto: $${this.formatNumber(amount)} ARS\n`;
     message += `Ganancia estimada: ${profitSign}${profitPercentage.toFixed(2)}%\n`;
     message += `Ruta: ${route.buyExchange} → ${route.sellExchange}\n\n`;
 
     if (amount > this.HIGH_AMOUNT_THRESHOLD) {
-      message += '⚠️ Este es un monto considerable.\n';
+      message += ' Este es un monto considerable.\n';
     }
 
     if (profitPercentage < 0) {
-      message += '⚠️ Esta operación resultaría en PÉRDIDA.\n';
+      message += ' Esta operación resultaría en PÉRDIDA.\n';
     } else if (profitPercentage < this.MIN_PROFIT_THRESHOLD) {
-      message += '⚠️ La rentabilidad es muy baja.\n';
+      message += ' La rentabilidad es muy baja.\n';
     }
 
     message += '\n¿Deseas continuar con la simulación?';

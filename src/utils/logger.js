@@ -111,7 +111,7 @@ const Logger = (() => {
 
     group: label => {
       if (currentLevel >= LogLevel.DEBUG) {
-        console.group(formatMessage('📁', label));
+        console.group(formatMessage('', label));
       }
     },
 

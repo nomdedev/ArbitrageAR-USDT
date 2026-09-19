@@ -197,7 +197,7 @@
   function init(settings, routes) {
     userSettings = settings;
     allRoutes = routes || [];
-    window.Logger?.debug('✅ [FilterManager] Módulo inicializado con', allRoutes.length, 'rutas');
+    window.Logger?.debug(' [FilterManager] Módulo inicializado con', allRoutes.length, 'rutas');
   }
 
   /**
@@ -207,7 +207,7 @@
    */
   function updateRoutes(routes) {
     allRoutes = routes || [];
-    window.Logger?.debug('✅ [FilterManager] Rutas actualizadas:', allRoutes.length);
+    window.Logger?.debug(' [FilterManager] Rutas actualizadas:', allRoutes.length);
 
     // Auto-ajustar filtro por defecto si no hay rutas del tipo actual
     autoAdjustDefaultFilter();
@@ -223,12 +223,12 @@
     const p2pCount = allRoutes.filter(route => isP2PRoute(route)).length;
     const noP2pCount = allRoutes.filter(route => !isP2PRoute(route)).length;
 
-    window.Logger?.debug(`🔍 [FilterManager] Auto-ajuste: ${p2pCount} P2P, ${noP2pCount} No-P2P`);
+    window.Logger?.debug(` [FilterManager] Auto-ajuste: ${p2pCount} P2P, ${noP2pCount} No-P2P`);
 
     // Si el filtro actual no tiene rutas, cambiar a uno que sí tenga
     if (currentFilter === 'no-p2p' && noP2pCount === 0 && p2pCount > 0) {
       window.Logger?.debug(
-        '🔄 [FilterManager] Cambiando filtro de "no-p2p" a "all" (no hay rutas no-P2P)'
+        ' [FilterManager] Cambiando filtro de "no-p2p" a "all" (no hay rutas no-P2P)'
       );
       currentFilter = 'all';
 
@@ -241,7 +241,7 @@
       });
     } else if (currentFilter === 'p2p' && p2pCount === 0 && noP2pCount > 0) {
       window.Logger?.debug(
-        '🔄 [FilterManager] Cambiando filtro de "p2p" a "all" (no hay rutas P2P)'
+        ' [FilterManager] Cambiando filtro de "p2p" a "all" (no hay rutas P2P)'
       );
       currentFilter = 'all';
 
@@ -344,7 +344,7 @@
       const antesFiltro = filteredRoutes.length;
       filteredRoutes = filteredRoutes.filter(route => route.profitPercentage >= 0);
       window.Logger?.debug(
-        `🔍 [FilterManager] Después de filtro solo rentables: ${antesFiltro} → ${filteredRoutes.length}`
+        ` [FilterManager] Después de filtro solo rentables: ${antesFiltro} → ${filteredRoutes.length}`
       );
     }
 
@@ -364,7 +364,7 @@
     }
 
     window.Logger?.debug(
-      `✅ [FilterManager] Filtros aplicados: ${filteredRoutes.length} rutas finales`
+      ` [FilterManager] Filtros aplicados: ${filteredRoutes.length} rutas finales`
     );
 
     return filteredRoutes;
@@ -465,7 +465,7 @@
     if (countNoP2P) countNoP2P.textContent = noP2pCount;
 
     window.Logger?.debug(
-      `📊 [FilterManager] Contadores actualizados - Total: ${allCount}, P2P: ${p2pCount}, No P2P: ${noP2pCount}`
+      ` [FilterManager] Contadores actualizados - Total: ${allCount}, P2P: ${p2pCount}, No P2P: ${noP2pCount}`
     );
   }
 
@@ -491,7 +491,7 @@
     });
 
     window.Logger?.debug(
-      `📊 [FilterManager] Filtro de exchanges poblado con ${exchanges.length} opciones`
+      ` [FilterManager] Filtro de exchanges poblado con ${exchanges.length} opciones`
     );
   }
 
@@ -520,7 +520,7 @@
     if (hideNegative) hideNegative.checked = false;
     if (sortSelect) sortSelect.value = SORT_OPTIONS.PROFIT_DESC;
 
-    window.Logger?.debug('🔄 [FilterManager] Filtros avanzados reseteados');
+    window.Logger?.debug(' [FilterManager] Filtros avanzados reseteados');
 
     // CORREGIDO: Reaplicar filtros y actualizar la UI con los resultados
     const filteredRoutes = applyAllFilters();
@@ -536,12 +536,12 @@
    * @public
    */
   function setupFilterButtons() {
-    window.Logger?.debug('🔧 [FilterManager] Configurando botones de filtro P2P...');
+    window.Logger?.debug(' [FilterManager] Configurando botones de filtro P2P...');
 
     // Buscar botones tanto en el panel como en el footer
     const filterButtons = document.querySelectorAll('.filter-btn, .filter-btn-footer');
     window.Logger?.debug(
-      `🔍 [FilterManager] Encontrados ${filterButtons.length} botones de filtro`
+      ` [FilterManager] Encontrados ${filterButtons.length} botones de filtro`
     );
 
     if (filterButtons.length === 0) {
@@ -551,7 +551,7 @@
 
     filterButtons.forEach((btn, index) => {
       const filter = btn.dataset.filter;
-      window.Logger?.debug(`🔍 [FilterManager] Botón ${index + 1}: data-filter="${filter}"`);
+      window.Logger?.debug(` [FilterManager] Botón ${index + 1}: data-filter="${filter}"`);
 
       if (!filter) {
         console.warn(`⚠️ [FilterManager] Botón ${index + 1} no tiene atributo data-filter`);
@@ -559,7 +559,7 @@
       }
 
       btn.addEventListener('click', () => {
-        window.Logger?.debug(`🖱️ [FilterManager] Click en botón con filtro: ${filter}`);
+        window.Logger?.debug(` [FilterManager] Click en botón con filtro: ${filter}`);
 
         // Actualizar estado activo en todos los botones de filtro (incluyendo footer)
         document
@@ -578,7 +578,7 @@
         if (window.RouteManager && window.RouteManager.displayRoutes) {
           window.RouteManager.displayRoutes(filteredRoutes, 'optimized-routes');
           window.Logger?.debug(
-            `✅ [FilterManager] UI actualizada con ${filteredRoutes.length} rutas`
+            ` [FilterManager] UI actualizada con ${filteredRoutes.length} rutas`
           );
         }
 
@@ -586,7 +586,7 @@
         updateFilterCounts();
       });
 
-      window.Logger?.debug(`✅ [FilterManager] Event listener adjuntado al botón ${index + 1}`);
+      window.Logger?.debug(` [FilterManager] Event listener adjuntado al botón ${index + 1}`);
     });
 
     // Limpiar cualquier clase active previa del HTML
@@ -601,10 +601,10 @@
     const defaultButtons = document.querySelectorAll(`[data-filter="${currentFilter}"]`);
     defaultButtons.forEach(btn => btn.classList.add('active'));
     if (defaultButtons.length > 0) {
-      window.Logger?.debug(`✅ [FilterManager] Filtro activo: ${currentFilter}`);
+      window.Logger?.debug(` [FilterManager] Filtro activo: ${currentFilter}`);
     }
 
-    window.Logger?.debug('✅ [FilterManager] Botones de filtro configurados correctamente');
+    window.Logger?.debug(' [FilterManager] Botones de filtro configurados correctamente');
   }
 
   /**
@@ -713,5 +713,5 @@
   // Exportar para uso global
   window.FilterManager = FilterManager;
 
-  window.Logger?.debug('✅ [FilterManager] Módulo cargado correctamente');
+  window.Logger?.debug(' [FilterManager] Módulo cargado correctamente');
 })(window);

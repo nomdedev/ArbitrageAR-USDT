@@ -84,7 +84,7 @@ const ApiClient = (() => {
   const getUsdtArs = async () => {
     try {
       const data = await fetchWithTimeout(ENDPOINTS.CRIPTOYA_USDT_ARS);
-      debugLog('✅ [ApiClient] USDT/ARS obtenido:', Object.keys(data).length, 'exchanges');
+      debugLog(' [ApiClient] USDT/ARS obtenido:', Object.keys(data).length, 'exchanges');
       return { success: true, data, source: 'criptoya' };
     } catch (error) {
       console.error('❌ [ApiClient] Error USDT/ARS:', error.message);
@@ -98,7 +98,7 @@ const ApiClient = (() => {
   const getUsdtUsd = async () => {
     try {
       const data = await fetchWithTimeout(ENDPOINTS.CRIPTOYA_USDT_USD);
-      debugLog('✅ [ApiClient] USDT/USD obtenido:', Object.keys(data).length, 'exchanges');
+      debugLog(' [ApiClient] USDT/USD obtenido:', Object.keys(data).length, 'exchanges');
       return { success: true, data, source: 'criptoya' };
     } catch (error) {
       console.error('❌ [ApiClient] Error USDT/USD:', error.message);
@@ -112,7 +112,7 @@ const ApiClient = (() => {
   const getBankRates = async () => {
     try {
       const data = await fetchWithTimeout(ENDPOINTS.CRIPTOYA_BANKS);
-      debugLog('✅ [ApiClient] Bancos obtenido:', Object.keys(data).length, 'bancos');
+      debugLog(' [ApiClient] Bancos obtenido:', Object.keys(data).length, 'bancos');
       return { success: true, data, source: 'criptoya_banks' };
     } catch (error) {
       console.error('❌ [ApiClient] Error Bancos:', error.message);
@@ -126,7 +126,7 @@ const ApiClient = (() => {
   const getDollarTypes = async () => {
     try {
       const data = await fetchWithTimeout(ENDPOINTS.CRIPTOYA_DOLLAR);
-      debugLog('✅ [ApiClient] Tipos de dólar obtenido');
+      debugLog(' [ApiClient] Tipos de dólar obtenido');
       return { success: true, data, source: 'criptoya_dollar' };
     } catch (error) {
       console.error('❌ [ApiClient] Error Tipos de dólar:', error.message);
@@ -140,7 +140,7 @@ const ApiClient = (() => {
   const getDolarApiOficial = async () => {
     try {
       const data = await fetchWithTimeout(ENDPOINTS.DOLARAPI_OFICIAL);
-      debugLog('✅ [ApiClient] DolarAPI oficial obtenido');
+      debugLog(' [ApiClient] DolarAPI oficial obtenido');
       return { success: true, data, source: 'dolarapi' };
     } catch (error) {
       console.error('❌ [ApiClient] Error DolarAPI:', error.message);
@@ -152,7 +152,7 @@ const ApiClient = (() => {
    * Obtener todos los datos necesarios en paralelo
    */
   const fetchAllData = async () => {
-    debugLog('📡 [ApiClient] Obteniendo todos los datos...');
+    debugLog(' [ApiClient] Obteniendo todos los datos...');
 
     const [usdtArs, usdtUsd, banks, dollarTypes] = await Promise.all([
       getUsdtArs(),

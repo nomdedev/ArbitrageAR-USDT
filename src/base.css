@@ -9,16 +9,16 @@
 
 :root {
   /* 🎨 COLORES PRINCIPALES */
-  --color-primary: #3b82f6;
+  --color-primary: #0071e3;
   --color-primary-dark: #1e3a8a;
-  --color-primary-light: #60a5fa;
+  --color-primary-light: #2997ff;
 
   /* Estados */
-  --color-success: #10b981;
-  --color-success-dark: #059669;
+  --color-success: #30d158;
+  --color-success-dark: #30d158;
   --color-warning: #f59e0b;
   --color-warning-dark: #d97706;
-  --color-error: #ef4444;
+  --color-error: #ff453a;
   --color-error-dark: #dc2626;
   --color-info: #06b6d4;
 
@@ -29,7 +29,7 @@
   --bg-hover: #2d3548;
 
   /* Texto */
-  --text-primary: #e1e8ed;
+  --text-primary: #ffffff;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
   --text-dim: #475569;
@@ -65,16 +65,16 @@
   --radius-xl: 16px;
   --radius-full: 9999px;
 
-  --border-color: rgba(59, 130, 246, 0.2);
-  --border-color-hover: rgba(59, 130, 246, 0.4);
+  --border-color: rgba(0, 113, 227, 0.2);
+  --border-color-hover: rgba(0, 113, 227, 0.4);
 
   /* 🌫️ SOMBRAS */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.5);
-  --shadow-glow-primary: 0 0 20px rgba(59, 130, 246, 0.3);
-  --shadow-glow-success: 0 0 20px rgba(16, 185, 129, 0.4);
-  --shadow-glow-error: 0 0 20px rgba(239, 68, 68, 0.4);
+  --shadow-glow-primary: 0 0 20px rgba(0, 113, 227, 0.3);
+  --shadow-glow-success: 0 0 20px rgba(48, 209, 88, 0.4);
+  --shadow-glow-error: 0 0 20px rgba(255, 69, 58, 0.4);
 
   /* ⏱️ ANIMACIONES */
   --transition-fast: 150ms ease;
@@ -85,9 +85,9 @@
 
   /* 📝 INPUTS */
   --input-bg: rgba(10, 14, 26, 0.7);
-  --input-border: rgba(59, 130, 246, 0.3);
+  --input-border: rgba(0, 113, 227, 0.3);
   --input-border-focus: var(--color-primary);
-  --input-shadow-focus: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  --input-shadow-focus: 0 0 0 3px rgba(0, 113, 227, 0.2);
 
   /* ==========================================
      FASE 1: FUNDAMENTOS UI/UX
@@ -255,9 +255,9 @@
 }
 
 .badge-success {
-  background: rgba(16, 185, 129, 0.2);
+  background: rgba(48, 209, 88, 0.2);
   color: var(--color-success);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  border: 1px solid rgba(48, 209, 88, 0.3);
 }
 
 .badge-warning {
@@ -267,9 +267,9 @@
 }
 
 .badge-error {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(255, 69, 58, 0.2);
   color: var(--color-error);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  border: 1px solid rgba(255, 69, 58, 0.3);
 }
 
 .badge-info {

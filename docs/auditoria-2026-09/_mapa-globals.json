@@ -1,0 +1,117 @@
+{
+ "exports": {
+  "src/DataService.js": [
+   "__ARBITRAGE_DEBUG__"
+  ],
+  "src/ValidationService.js": [
+   "ValidationService",
+   "validationService"
+  ],
+  "src/background/apiClient.js": [],
+  "src/background/arbitrageCalculator.js": [],
+  "src/background/cacheManager.js": [],
+  "src/background/main-simple.js": [
+   "BANK_CALCULATIONS",
+   "MESSAGE_HANDLERS",
+   "__ARBITRAGE_DEBUG__",
+   "globalThis.__ARBITRAGE_DEBUG__"
+  ],
+  "src/modules/filterManager.js": [
+   "FilterManager"
+  ],
+  "src/modules/modalManager.js": [
+   "ModalManager"
+  ],
+  "src/modules/notificationManager.js": [
+   "NotificationManager"
+  ],
+  "src/modules/routeManager.js": [
+   "RouteManager",
+   "initMagneticButtons"
+  ],
+  "src/modules/simulator.js": [
+   "Simulator"
+  ],
+  "src/options.js": [
+   "DEFAULT_SETTINGS",
+   "__ARBITRAGE_DEBUG__"
+  ],
+  "src/popup.js": [
+   "CommonUtils",
+   "FilterManager",
+   "Formatters",
+   "Logger",
+   "ModalManager",
+   "NotificationManager",
+   "PopupLegacyApi",
+   "RouteManager",
+   "SIMULATOR_PRESETS",
+   "Simulator",
+   "StateManager",
+   "__ARBITRAGE_DEBUG__",
+   "currentBanksData",
+   "initTooltips"
+  ],
+  "src/renderHelpers.js": [],
+  "src/ui-components/animations.js": [
+   "AnimationController",
+   "AnimationUtils",
+   "animationController",
+   "initAnimations"
+  ],
+  "src/ui-components/arbitrage-panel.js": [
+   "ArbitragePanel",
+   "createArbitragePanel",
+   "initArbitragePanels",
+   "sanitizeHTML"
+  ],
+  "src/ui-components/tabs.js": [
+   "TabSystem",
+   "createTabSystem",
+   "initTabSystems"
+  ],
+  "src/ui/filterController.js": [
+   "FilterController"
+  ],
+  "src/ui/routeRenderer.js": [
+   "RouteRenderer",
+   "fetchAndDisplay"
+  ],
+  "src/ui/tooltipSystem.js": [
+   "TooltipSystem",
+   "getTooltipSystem",
+   "hideTooltip",
+   "initTooltips",
+   "showTooltip"
+  ],
+  "src/utils.js": [],
+  "src/utils/bankCalculations.js": [],
+  "src/utils/commonUtils.js": [
+   "CommonUtils",
+   "__ARBITRAGE_DEBUG__"
+  ],
+  "src/utils/formatters.js": [
+   "Formatters"
+  ],
+  "src/utils/logger.js": [
+   "LogLevel",
+   "Logger",
+   "__ARBITRAGE_DEBUG__"
+  ],
+  "src/utils/stateManager.js": [
+   "StateManager"
+  ]
+ },
+ "background_actions": [],
+ "sent": {
+  "src/popup.js": [
+   "getArbitrages",
+   "getBanksData"
+  ],
+  "src/options.js": [
+   "settingsUpdated"
+  ],
+  "src/DataService.js": [],
+  "src/modules/simulator.js": []
+ }
+}

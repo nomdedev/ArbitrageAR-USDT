@@ -5,19 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Configuración - ArbitrARS</title>
     <link rel="stylesheet" href="options.css" />
+  <!-- Chips de seleccion (propuesta 1 del agente de diseno): capsulas Apple para elegir -->
+  <link rel="stylesheet" href="options.chips.css" />
   </head>
   <body>
     <div class="container">
       <header class="options-header">
-        <h1>⚙️ Configuración</h1>
+        <h1>Configuración</h1>
         <p class="subtitle">Personaliza ArbitrARS según tus necesidades</p>
       </header>
 
       <div class="grid">
-        <!-- 💵 PRECIO DEL DÓLAR -->
+ <!--  PRECIO DEL DÓLAR -->
         <section class="card">
           <div class="card-header" data-action="toggle-section">
-            <h2>💵 Precio del Dólar</h2>
+            <h2>Precio del Dólar</h2>
             <span class="toggle-icon">▼</span>
           </div>
           <div class="card-content">
@@ -30,11 +32,11 @@
               <div class="radio-group">
                 <label>
                   <input type="radio" name="dollar-price-source" value="auto" checked />
-                  🌐 Automático
+                   Automático
                 </label>
                 <label>
                   <input type="radio" name="dollar-price-source" value="manual" />
-                  ✏️ Manual
+                   Manual
                 </label>
               </div>
             </div>
@@ -58,15 +60,15 @@
             <div class="field" id="bank-method">
               <label for="dollar-method">Método de cálculo</label>
               <select id="dollar-method">
-                <option value="consenso" selected>🔥 Consenso (recomendado)</option>
-                <option value="promedio">📊 Promedio simple</option>
-                <option value="mejor-compra">📉 Mejor compra</option>
-                <option value="mejor-venta">📈 Mejor venta</option>
-                <option value="bna">🏛️ Banco Nación</option>
-                <option value="galicia">🏦 Galicia</option>
-                <option value="santander">🏦 Santander</option>
-                <option value="bbva">🏦 BBVA</option>
-                <option value="icbc">🏦 ICBC</option>
+ <option value="consenso" selected> Consenso (recomendado)</option>
+ <option value="promedio"> Promedio simple</option>
+ <option value="mejor-compra"> Mejor compra</option>
+ <option value="mejor-venta"> Mejor venta</option>
+ <option value="bna"> Banco Nación</option>
+ <option value="galicia"> Galicia</option>
+ <option value="santander"> Santander</option>
+ <option value="bbva"> BBVA</option>
+ <option value="icbc"> ICBC</option>
               </select>
             </div>
 
@@ -159,10 +161,10 @@
           </div>
         </section>
 
-        <!-- 🔄 EXCHANGES P2P -->
+ <!--  EXCHANGES P2P -->
         <section class="card">
           <div class="card-header" data-action="toggle-section">
-            <h2>🔄 Exchanges P2P</h2>
+            <h2>Exchanges P2P</h2>
             <span class="toggle-icon">▼</span>
           </div>
           <div class="card-content">
@@ -173,7 +175,7 @@
 
             <!-- PASO 2: USD → USDT -->
             <div class="field full">
-              <h3>💵 Paso 2: USD → USDT (Compra USDT)</h3>
+              <h3>Paso 2: USD → USDT (Compra USDT)</h3>
               <p class="subsection-description">Exchanges P2P para comprar USDT con USD</p>
               <div class="exchanges-grid">
                 <div class="exchange-group">
@@ -242,7 +244,7 @@
 
             <!-- PASO 3: USDT → ARS (Venta USDT) -->
             <div class="field full">
-              <h3>💰 Paso 3: USDT → ARS (Venta USDT)</h3>
+              <h3>Paso 3: USDT → ARS (Venta USDT)</h3>
               <p class="subsection-description">Exchanges P2P para vender USDT por ARS</p>
               <div class="exchanges-grid">
                 <div class="exchange-group">
@@ -311,7 +313,7 @@
 
             <!-- SINCRONIZACIÓN -->
             <div class="field full">
-              <h3>🔄 Sincronización (Paso 2 y 3)</h3>
+              <h3>Sincronización (Paso 2 y 3)</h3>
               <p class="subsection-description">
                 Exchanges P2P que se usarán en ambos pasos (compra y venta)
               </p>
@@ -391,10 +393,10 @@
           </div>
         </section>
 
-        <!-- 🏛️ EXCHANGES TRADICIONALES -->
+ <!--  EXCHANGES TRADICIONALES -->
         <section class="card">
           <div class="card-header" data-action="toggle-section">
-            <h2>🏛️ Exchanges Tradicionales</h2>
+            <h2>Exchanges Tradicionales</h2>
             <span class="toggle-icon">▼</span>
           </div>
           <div class="card-content">
@@ -566,10 +568,10 @@
           </div>
         </section>
 
-        <!-- 💎 EXCHANGES USDT PARA RUTAS -->
+ <!--  EXCHANGES USDT PARA RUTAS -->
         <section class="card">
           <div class="card-header" data-action="toggle-section">
-            <h2>💎 Exchanges USDT para Rutas</h2>
+            <h2>Exchanges USDT para Rutas</h2>
             <span class="toggle-icon">▼</span>
           </div>
           <div class="card-content">
@@ -578,7 +580,7 @@
               están seleccionados.
             </p>
             <p class="field-hint">
-              ℹ️ Solo se usarán los exchanges seleccionados para calcular rutas. Si no seleccionas
+              ℹ Solo se usarán los exchanges seleccionados para calcular rutas. Si no seleccionas
               ninguno, se usarán todos.
             </p>
 
@@ -744,20 +746,16 @@
             </div>
 
             <div class="field">
-              <button id="select-all-usdt-brokers" class="btn secondary">
-                ✅ Seleccionar todos
-              </button>
-              <button id="deselect-all-usdt-brokers" class="btn secondary">
-                ❌ Deseleccionar todos
-              </button>
+              <button id="select-all-usdt-brokers" class="btn secondary">Seleccionar todos</button>
+              <button id="deselect-all-usdt-brokers" class="btn secondary">Deseleccionar todos</button>
             </div>
           </div>
         </section>
 
-        <!-- 🎨 INTERFAZ -->
+ <!--  INTERFAZ -->
         <section class="card">
           <div class="card-header" data-action="toggle-section">
-            <h2>🎨 Interfaz</h2>
+            <h2>Interfaz</h2>
             <span class="toggle-icon">▼</span>
           </div>
           <div class="card-content">
@@ -872,14 +870,28 @@
           </div>
         </section>
 
-        <!-- 💸 FEES -->
+ <!--  FEES -->
         <section class="card">
           <div class="card-header" data-action="toggle-section">
-            <h2>💸 Fees y Comisiones</h2>
+            <h2>Fees y Comisiones</h2>
             <span class="toggle-icon">▼</span>
           </div>
           <div class="card-content">
             <p class="section-description">Configura fees adicionales para cálculos precisos</p>
+
+            <div class="field">
+              <label class="switch">
+                <input type="checkbox" id="apply-fees" />
+                <span class="slider"></span>
+                Descontar comisiones del cálculo (recomendado)
+              </label>
+              <p class="info">
+                 Con esto apagado, la ganancia que muestra la extensión es el spread
+                <b>bruto</b>: no descuenta fee de compra, de venta, retiro, transferencia ni
+                comisión bancaria, así que los números se ven mejores de lo que son. El popup
+                rotula ese caso como «Ganancia bruta — sin comisiones».
+              </p>
+            </div>
 
             <div class="field">
               <label for="trading-fee">Fee trading (%)</label>
@@ -890,30 +902,34 @@
             </div>
 
             <div class="field">
-              <label for="withdrawal-fee">Fee retiro (%)</label>
+              <label for="withdrawal-fee">Fee de retiro ($ ARS)</label>
               <div class="input-group">
-                <input type="number" id="withdrawal-fee" min="0" max="10" step="0.1" value="0" />
-                <span>%</span>
+                <input type="number" id="withdrawal-fee" min="0" max="100000" step="1" value="0" />
+                <span>ARS</span>
               </div>
             </div>
 
             <div class="field">
-              <label for="transfer-fee">Fee transferencia (USD)</label>
+              <label for="transfer-fee">Fee de transferencia ($ ARS)</label>
               <div class="input-group">
-                <input type="number" id="transfer-fee" min="0" max="50" step="0.1" value="0" />
-                <span>USD</span>
+                <input type="number" id="transfer-fee" min="0" max="100000" step="1" value="0" />
+                <span>ARS</span>
               </div>
             </div>
 
             <div class="field">
-              <label for="bank-fee">Comisión bancaria (%)</label>
+              <label for="bank-fee">Comisión bancaria ($ ARS)</label>
               <div class="input-group">
-                <input type="number" id="bank-fee" min="0" max="10" step="0.1" value="0" />
-                <span>%</span>
+                <input type="number" id="bank-fee" min="0" max="100000" step="1" value="0" />
+                <span>ARS</span>
               </div>
             </div>
 
-            <div class="info">ℹ️ Estos fees se suman a los predeterminados</div>
+            <div class="info">
+              ℹ El fee de trading es un porcentaje por operación. Retiro, transferencia y
+              comisión bancaria son <b>montos fijos en pesos</b> y se restan del resultado
+              después de vender (el motor los usa tal cual, sin convertirlos).
+            </div>
 
             <div class="broker-fees-improved">
               <h4>Fees por broker</h4>
@@ -922,11 +938,11 @@
                   <label for="broker-select">Broker</label>
                   <select id="broker-select">
                     <option value="">Elegir...</option>
-                    <option value="lemon-cash">🍋 Lemon</option>
-                    <option value="fiwind">💰 Fiwind</option>
-                    <option value="buenbit">🪙 Buenbit</option>
-                    <option value="letsbit">⚡ Letsbit</option>
-                    <option value="other">🔧 Otro</option>
+ <option value="lemoncash"> Lemon</option>
+ <option value="fiwind"> Fiwind</option>
+ <option value="buenbit"> Buenbit</option>
+ <option value="letsbit"> Letsbit</option>
+ <option value="other"> Otro</option>
                   </select>
                 </div>
                 <div class="field full" id="custom-broker-field" style="display: none">
@@ -962,9 +978,7 @@
                   </div>
                 </div>
                 <div class="field">
-                  <button id="add-broker-improved" class="btn btn-primary" disabled>
-                    ➕ Agregar
-                  </button>
+                  <button id="add-broker-improved" class="btn btn-primary" disabled>Agregar</button>
                 </div>
               </div>
             </div>
@@ -990,14 +1004,14 @@
               </thead>
               <tbody id="broker-fees-body"></tbody>
             </table>
-            <button id="add-broker" class="btn">➕ Agregar</button>
+            <button id="add-broker" class="btn">Agregar</button>
           </div>
         </section>
 
-        <!-- 🔔 NOTIFICACIONES -->
+ <!--  NOTIFICACIONES -->
         <section class="card">
           <div class="card-header" data-action="toggle-section">
-            <h2>🔔 Notificaciones</h2>
+            <h2>Notificaciones</h2>
             <span class="toggle-icon">▼</span>
           </div>
           <div class="card-content">
@@ -1133,18 +1147,18 @@
               </div>
             </div>
 
-            <button id="test-notification" class="btn">🔔 Probar</button>
+            <button id="test-notification" class="btn">Probar</button>
           </div>
         </section>
 
-        <!-- 🔧 AVANZADO -->
+ <!--  AVANZADO -->
         <section class="card">
           <div class="card-header" data-action="toggle-section">
-            <h2>🔧 Avanzado</h2>
+            <h2>Avanzado</h2>
             <span class="toggle-icon">▼</span>
           </div>
           <div class="card-content">
-            <h4>🌐 APIs</h4>
+ <h4> APIs</h4>
             <div class="field">
               <label for="dolarapi-url">API Dólar</label>
               <input type="url" id="dolarapi-url" value="https://dolarapi.com/v1/dolares/oficial" />
@@ -1169,7 +1183,7 @@
               />
             </div>
 
-            <h4>⏱️ Tiempos</h4>
+ <h4>⏱ Tiempos</h4>
             <div class="field">
               <label for="update-interval">Intervalo actualización (min)</label>
               <div class="input-group">
@@ -1186,7 +1200,7 @@
               </div>
             </div>
 
-            <h4>🛡️ Seguridad</h4>
+ <h4> Seguridad</h4>
             <div class="field">
               <label class="switch">
                 <input type="checkbox" id="freshness-warning" checked />
@@ -1230,8 +1244,8 @@
       </div>
 
       <footer class="footer">
-        <button id="save-settings" class="btn primary">💾 Guardar</button>
-        <button id="reset-settings" class="btn secondary">🔄 Reset</button>
+        <button id="save-settings" class="btn primary">Guardar</button>
+        <button id="reset-settings" class="btn secondary">Reset</button>
         <div id="save-status"></div>
       </footer>
     </div>
@@ -1239,5 +1253,7 @@
     <!-- CORREGIDO v6.0.2: Agregado commonUtils.js para unificar sanitizeHTML (R-02) -->
     <script src="utils/commonUtils.js"></script>
     <script src="options.js"></script>
+    <!-- Resumen "x de y activos" + cabeceras operables con teclado (hallazgos del agente de diseno) -->
+    <script src="options.selection-summary.js"></script>
   </body>
 </html>

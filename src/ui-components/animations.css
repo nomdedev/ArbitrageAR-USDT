@@ -179,7 +179,7 @@
     background-color: transparent;
   }
   50% {
-    background-color: rgba(16, 185, 129, 0.2);
+    background-color: rgba(48, 209, 88, 0.2);
   }
   100% {
     background-color: transparent;
@@ -191,7 +191,7 @@
     background-color: transparent;
   }
   50% {
-    background-color: rgba(239, 68, 68, 0.2);
+    background-color: rgba(255, 69, 58, 0.2);
   }
   100% {
     background-color: transparent;
@@ -903,26 +903,26 @@
 .profit-high {
   color: var(--color-success);
   font-weight: var(--font-weight-bold);
-  text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+  text-shadow: 0 0 10px rgba(48, 209, 88, 0.5);
   animation: profitGlow 2s ease-in-out infinite;
 }
 
 @keyframes profitGlow {
   0%,
   100% {
-    text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    text-shadow: 0 0 10px rgba(48, 209, 88, 0.5);
   }
   50% {
     text-shadow:
-      0 0 20px rgba(16, 185, 129, 0.7),
-      0 0 30px rgba(16, 185, 129, 0.4);
+      0 0 20px rgba(48, 209, 88, 0.7),
+      0 0 30px rgba(48, 209, 88, 0.4);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .profit-high {
     animation: none;
-    text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    text-shadow: 0 0 10px rgba(48, 209, 88, 0.5);
   }
 }
 
@@ -960,17 +960,17 @@
 }
 
 .hover-glow:hover {
-  box-shadow: 0 0 16px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 16px rgba(0, 113, 227, 0.3);
 }
 
 /* Hover Glow Success - Para elementos de ganancia */
 .hover-glow-success:hover {
-  box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 16px rgba(48, 209, 88, 0.4);
 }
 
 /* Hover Glow Danger - Para elementos de pérdida */
 .hover-glow-danger:hover {
-  box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 16px rgba(255, 69, 58, 0.4);
 }
 
 /* === ACTIVE/CLICK EFFECTS === */
@@ -997,7 +997,7 @@
   outline: none;
   box-shadow:
     0 0 0 2px var(--color-bg-primary, #0a0e1a),
-    0 0 0 4px var(--color-brand-primary, #3b82f6);
+    0 0 0 4px var(--color-brand-primary, #0071e3);
   animation: focusPulse 2s ease-in-out infinite;
 }
 
@@ -1006,12 +1006,12 @@
   100% {
     box-shadow:
       0 0 0 2px var(--color-bg-primary, #0a0e1a),
-      0 0 0 4px var(--color-brand-primary, #3b82f6);
+      0 0 0 4px var(--color-brand-primary, #0071e3);
   }
   50% {
     box-shadow:
       0 0 0 2px var(--color-bg-primary, #0a0e1a),
-      0 0 0 6px rgba(59, 130, 246, 0.4);
+      0 0 0 6px rgba(0, 113, 227, 0.4);
   }
 }
 
@@ -1041,7 +1041,7 @@
 
 @keyframes flashSuccess {
   0% {
-    background-color: rgba(16, 185, 129, 0.3);
+    background-color: rgba(48, 209, 88, 0.3);
   }
   100% {
     background-color: transparent;
@@ -1055,7 +1055,7 @@
 
 @keyframes flashDanger {
   0% {
-    background-color: rgba(239, 68, 68, 0.3);
+    background-color: rgba(255, 69, 58, 0.3);
   }
   100% {
     background-color: transparent;
@@ -1069,7 +1069,7 @@
 
 @keyframes flashInfo {
   0% {
-    background-color: rgba(59, 130, 246, 0.3);
+    background-color: rgba(0, 113, 227, 0.3);
   }
   100% {
     background-color: transparent;
@@ -1144,7 +1144,7 @@
 
 .btn-interactive:hover {
   transform: translateY(-1px);
-  box-shadow: var(--shadow-glow-brand, 0 0 16px rgba(59, 130, 246, 0.4));
+  box-shadow: var(--shadow-glow-brand, 0 0 16px rgba(0, 113, 227, 0.4));
 }
 
 .btn-interactive:active {

@@ -1,0 +1,1353 @@
+Codigo muerto borrado: guia inalcanzable (#tab-guide y compañia)
+
+Fecha: 2026-09-19T20:11:56.884Z
+
+Motivo: la guia tenia TRES implementaciones y esta no se podia abrir.
+  - popup.html tiene 4 botones de pestana (routes / crypto-arbitrage / simulator / banks) y ninguno
+    tiene data-tab="guide": ese selector solo aparecia en JS, nunca en el HTML.
+  - showRouteGuideFromData estaba exportada y no la llamaba nadie dentro de src/.
+  - popup.js hacia querySelector('[data-tab="guide"]').click() sin guarda -> TypeError.
+La guia que el usuario SI ve es la del modal de detalle (showRouteDetailsByType /
+showCryptoRouteDetails) y la copia alcanzable de modalManager.js.
+
+Se conservan (tienen llamadas vivas): fetchExchangeRatesFromAPIs, displayExchangeRates,
+sanitizeHTML, setSafeHTML, createSafeElement, y las clases .steps-simple / .step-simple del CSS
+(las usa modalManager.js).
+
+Abajo, exactamente lo que se quito.
+
+===== popup.js — function showRouteGuideFromData() =====
+
+// NUEVA FUNCIÓN v5.0.72: Mostrar guía desde datos de ruta directos (sin índice)
+function showRouteGuideFromData(route) {
+  if (!route) {
+    console.warn('❌ [POPUP] No hay datos de ruta disponibles');
+    return;
+  }
+
+  // Convertir ruta a formato de arbitraje para la guía
+  const arbitrage = {
+    broker: route.isSingleExchange
+      ? route.buyExchange
+      : `${route.buyExchange} → ${route.sellExchange}`,
+    buyExchange: route.buyExchange || 'N/A',
+    sellExchange: route.sellExchange || route.buyExchange || 'N/A',
+    isSingleExchange: route.isSingleExchange || false,
+    profitPercentage: route.profitPercentage || 0,
+    officialPrice: route.officialPrice || 0,
+    usdToUsdtRate:
+      typeof route.usdToUsdtRate === 'number' && isFinite(route.usdToUsdtRate)
+        ? route.usdToUsdtRate
+        : null,
+    usdtArsBid: route.usdtArsBid || 0,
+    sellPrice: route.usdtArsBid || 0,
+    transferFeeUSD: route.transferFeeUSD || 0,
+    calculation: route.calculation || {},
+    fees: route.fees || { trading: 0, withdrawal: 0 }
+  };
+  selectedArbitrage = arbitrage;
+  displayStepByStepGuide(arbitrage);
+
+  // Cambiar a la pestaña de guía
+  const guideTab = document.querySelector('[data-tab="guide"]');
+  if (guideTab) {
+    guideTab.click();
+  } else {
+    console.error('❌ [POPUP] No se encontró el botón de la pestaña guía');
+  }
+}
+
+// FUNCIÓN LEGACY v5.0.5: Mostrar guía de una ruta optimizada (POR ÍNDICE - DEPRECADO en v5.0.72)
+// Mantener para compatibilidad pero ya no se usa
+
+===== popup.js — function showRouteGuide() =====
+
+function showRouteGuide(index) {
+  log('🔍 [POPUP] currentData.optimizedRoutes.length:', currentData?.optimizedRoutes?.length);
+
+  if (!currentData?.optimizedRoutes?.[index]) {
+    console.warn(`❌ [POPUP] No hay ruta disponible para el índice: ${index}`);
+    console.warn('   currentData:', currentData);
+    return;
+  }
+
+  const route = currentData.optimizedRoutes[index];
+  // Convertir ruta a formato de arbitraje para la guía
+  const arbitrage = {
+    broker: route.isSingleExchange
+      ? route.buyExchange
+      : `${route.buyExchange} → ${route.sellExchange}`,
+    buyExchange: route.buyExchange || 'N/A',
+    sellExchange: route.sellExchange || route.buyExchange || 'N/A',
+    isSingleExchange: route.isSingleExchange || false,
+    profitPercentage: route.profitPercentage || route.profitPercent || 0,
+    officialPrice: route.officialPrice || 0,
+    usdToUsdtRate:
+      typeof route.usdToUsdtRate === 'number' && isFinite(route.usdToUsdtRate)
+        ? route.usdToUsdtRate
+        : null,
+    usdtArsBid: route.usdtArsBid || 0,
+    sellPrice: route.usdtArsBid || 0,
+    transferFeeUSD: route.transferFeeUSD || 0,
+    calculation: route.calculation || {},
+    fees: route.fees || { trading: 0, withdrawal: 0 }
+  };
+  selectedArbitrage = arbitrage;
+  displayStepByStepGuide(arbitrage);
+
+  // Cambiar a la pestaña de guía
+  const guideTab = document.querySelector('[data-tab="guide"]');
+  if (guideTab) {
+    guideTab.click();
+  } else {
+    console.error('❌ [POPUP] No se encontró el botón de la pestaña guía');
+  }
+}
+
+// Seleccionar un arbitraje y mostrar guía
+
+===== popup.js — function selectArbitrage() =====
+
+function selectArbitrage(index) {
+  if (!currentData?.arbitrages?.[index]) {
+    return;
+  }
+
+  selectedArbitrage = currentData.arbitrages[index];
+  displayStepByStepGuide(selectedArbitrage);
+}
+
+// REEMPLAZO v6.0.0: Función para crear elementos HTML de manera segura delegada a CommonUtils
+
+===== popup.js — function calculateGuideValues() =====
+
+// Calcular valores para la guía paso a paso
+function calculateGuideValues(arb) {
+  const calc = arb.calculation || {};
+
+  // CORREGIDO v5.0.71: Usar profitPercentage de calculation para consistencia
+  // Si existe calculation.profitPercentage, usarlo; sino usar el top-level
+  const correctProfitPercentage =
+    calc.profitPercentage !== undefined ? calc.profitPercentage : arb.profitPercentage || 0;
+
+  return {
+    estimatedInvestment: calc.initial || 100000,
+    officialPrice: arb.officialPrice || 1000,
+    usdAmount: calc.usdPurchased || (calc.initial || 100000) / (arb.officialPrice || 1000),
+    usdtAfterFees:
+      calc.usdtAfterFees ||
+      calc.usdPurchased ||
+      (calc.initial || 100000) / (arb.officialPrice || 1000),
+    sellPrice: arb.sellPrice || arb.usdtArsBid || 1000,
+    arsFromSale:
+      calc.arsFromSale ||
+      (calc.usdtAfterFees ||
+        calc.usdPurchased ||
+        (calc.initial || 100000) / (arb.officialPrice || 1000)) *
+        (arb.sellPrice || arb.usdtArsBid || 1000),
+    finalAmount:
+      calc.finalAmount ||
+      calc.arsFromSale ||
+      (calc.usdtAfterFees ||
+        calc.usdPurchased ||
+        (calc.initial || 100000) / (arb.officialPrice || 1000)) *
+        (arb.sellPrice || arb.usdtArsBid || 1000),
+    profit:
+      calc.netProfit ||
+      (calc.finalAmount ||
+        calc.arsFromSale ||
+        (calc.usdtAfterFees ||
+          calc.usdPurchased ||
+          (calc.initial || 100000) / (arb.officialPrice || 1000)) *
+          (arb.sellPrice || arb.usdtArsBid || 1000)) - (calc.initial || 100000),
+    profitPercentage: correctProfitPercentage, // USAR EL VALOR CORRECTO
+    usdToUsdtRate:
+      typeof arb.usdToUsdtRate === 'number' && isFinite(arb.usdToUsdtRate)
+        ? arb.usdToUsdtRate
+        : null,
+    usdtArsBid: arb.usdtArsBid || arb.sellPrice || 1000,
+    fees: arb.fees || { trading: 0, withdrawal: 0, total: 0 },
+    broker: arb.broker || 'Exchange'
+  };
+}
+
+// Generar HTML del header de la guía
+
+===== popup.js — function generateGuideHeader() =====
+
+function generateGuideHeader(broker, profitPercentage) {
+  const isProfitable = profitPercentage >= 0;
+  return `
+    <div class="guide-header-simple">
+      <div class="guide-title">
+        <h3>📋 Cómo hacer el arbitraje en <span class="broker-name">${sanitizeHTML(broker)}</span></h3>
+      </div>
+      <div class="profit-badge ${isProfitable ? 'profit-positive' : 'profit-negative'}">
+        <span class="profit-icon">${isProfitable ? '📈' : '📉'}</span>
+        <span class="profit-text">
+          ${isProfitable ? 'Ganancia' : 'Pérdida'}: 
+          <strong>${isProfitable ? '+' : ''}${Fmt.formatNumber(profitPercentage)}%</strong>
+        </span>
+      </div>
+    </div>
+  `;
+}
+
+// Generar HTML de los pasos de la guía (SIMPLIFICADO)
+
+===== popup.js — function generateGuideSteps() =====
+
+function generateGuideSteps(values) {
+  const {
+    estimatedInvestment,
+    officialPrice,
+    usdAmount,
+    usdToUsdtRate,
+    usdtAfterFees,
+    usdtArsBid,
+    arsFromSale,
+    finalAmount,
+    profit,
+    profitPercentage,
+    broker
+  } = values;
+
+  return `
+    <div class="steps-simple">
+      <!-- Paso 1: Comprar USD -->
+      <div class="step-simple" data-step="1">
+        <div class="step-number">1</div>
+        <div class="step-simple-content">
+          <h4>Comprá dólares en tu banco</h4>
+          <p class="step-simple-text">Pagás el precio oficial del dólar, no el blue.</p>
+          <div class="step-simple-calc">
+            <span class="calc-label">Precio:</span>
+            <span class="calc-value">$${Fmt.formatNumber(officialPrice)}/USD</span>
+            <span class="calc-arrow">→</span>
+            <span class="calc-result">Obtienes ${Fmt.formatNumber(usdAmount)} USD</span>
+          </div>
+          <div class="step-simple-note">
+            Verificá con tu banco cuánto podés comprar por mes
+          </div>
+        </div>
+      </div>
+
+      <!-- Paso 2: USD → USDT -->
+      <div class="step-simple" data-step="2">
+        <div class="step-number">2</div>
+        <div class="step-simple-content">
+          <h4>Convertí tus dólares a USDT</h4>
+          <p class="step-simple-text">Depositá los dólares en <strong>${sanitizeHTML(broker)}</strong> y cambialos por USDT.</p>
+          <div class="step-simple-calc">
+            <span class="calc-label">Tasa:</span>
+            <span class="calc-value">${Fmt.formatUsdUsdtRatio(usdToUsdtRate)} USD = 1 USDT</span>
+            <span class="calc-arrow">→</span>
+            <span class="calc-result">${Fmt.formatNumber(usdtAfterFees)} USDT</span>
+          </div>
+          ${
+            typeof usdToUsdtRate === 'number' && isFinite(usdToUsdtRate) && usdToUsdtRate > 1.005
+              ? `
+          <div class="step-simple-warning">
+            La conversión te cuesta ${Fmt.formatCommissionPercent((usdToUsdtRate - 1) * 100)}%
+          </div>
+          `
+              : ''
+          }
+        </div>
+      </div>
+
+      <!-- Paso 3: USDT → ARS -->
+      <div class="step-simple" data-step="3">
+        <div class="step-number">3</div>
+        <div class="step-simple-content">
+          <h4>Vendé los USDT por pesos</h4>
+          <p class="step-simple-text">Vendelos en <strong>${sanitizeHTML(broker)}</strong> y recibís pesos.</p>
+          <div class="step-simple-calc highlight-profit">
+            <span class="calc-label">Precio:</span>
+            <span class="calc-value big">$${Fmt.formatNumber(usdtArsBid)}/USDT</span>
+            <span class="calc-arrow">→</span>
+            <span class="calc-result big">$${Fmt.formatNumber(arsFromSale)}</span>
+          </div>
+          <div class="step-simple-success">
+            Acá aparece la ganancia: es la diferencia entre el dólar que compraste y el USDT que vendés.
+          </div>
+        </div>
+      </div>
+
+      <!-- Paso 4: Retirar -->
+      <div class="step-simple" data-step="4">
+        <div class="step-number">4</div>
+        <div class="step-simple-content">
+          <h4>Pasá los pesos a tu banco</h4>
+          <p class="step-simple-text">Transferí los pesos a tu cuenta bancaria.</p>
+          <div class="step-simple-calc final">
+            <span class="calc-label">Después de comisiones:</span>
+            <span class="calc-result">$${Fmt.formatNumber(finalAmount)}</span>
+          </div>
+          <div class="profit-summary ${profit >= 0 ? 'positive' : 'negative'}">
+            <div class="profit-main">
+              <span class="profit-icon" aria-hidden="true">${profit >= 0 ? '↑' : '↓'}</span>
+              <span class="profit-amount">${profit >= 0 ? '+' : ''}$${Fmt.formatNumber(profit)}</span>
+              <span class="profit-percent">(${profit >= 0 ? '+' : ''}${Fmt.formatNumber(profitPercentage)}%)</span>
+            </div>
+            <div class="profit-subtitle">
+              ${profit >= 0 ? 'Ganancia neta' : 'Pérdida neta'}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resumen Rápido -->
+    <div class="quick-summary">
+      <h4>Resumen</h4>
+      <div class="summary-flow">
+        <div class="summary-item">
+          <span class="summary-label">Inversión</span>
+          <span class="summary-value">$${Fmt.formatNumber(estimatedInvestment)}</span>
+        </div>
+        <span class="summary-arrow">→</span>
+        <div class="summary-item">
+          <span class="summary-label">USD Oficial</span>
+          <span class="summary-value">${Fmt.formatNumber(usdAmount)} USD</span>
+        </div>
+        <span class="summary-arrow">→</span>
+        <div class="summary-item">
+          <span class="summary-label">USDT</span>
+          <span class="summary-value">${Fmt.formatNumber(usdtAfterFees)} USDT</span>
+        </div>
+        <span class="summary-arrow">→</span>
+        <div class="summary-item highlight">
+          <span class="summary-label">Resultado</span>
+          <span class="summary-value big">$${Fmt.formatNumber(finalAmount)}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Nota: Las funciones generateCalculatorHTML y generateConsiderationsHTML fueron eliminadas
+// en v5.0.0 al simplificar la guía paso a paso. Su funcionalidad fue reemplazada por
+// generateGuideSteps() que ahora incluye toda la información necesaria de forma más compacta.
+
+// Configurar animaciones y event listeners para la guía
+
+===== popup.js — function setupGuideAnimations() =====
+
+function setupGuideAnimations(container) {
+  // Función helper para animar elementos
+  function animateStep(entry, index) {
+    if (entry.isIntersecting) {
+      setTimeout(() => {
+        entry.target.classList.add('active');
+      }, index * 100);
+    }
+  }
+
+  // Activar animaciones de progreso al hacer scroll
+  setTimeout(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(animateStep);
+      },
+      { threshold: 0.5 }
+    );
+
+    const stepItems = container.querySelectorAll('.step-item');
+    stepItems.forEach(step => observer.observe(step));
+  }, 100);
+
+  // Agregar event listener al link de bancos (sin onclick inline)
+  const bankLink = container.querySelector('[data-action="show-banks"]');
+  if (bankLink) {
+    bankLink.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelector('[data-tab="banks"]')?.click();
+    });
+  }
+}
+
+// Función principal refactorizada para mostrar guía paso a paso
+
+===== popup.js — function displayStepByStepGuide() =====
+
+function displayStepByStepGuide(arb) {
+  const container = document.getElementById('selected-arbitrage-guide');
+  if (!container) {
+    console.error('❌ [POPUP] No se encontró el contenedor selected-arbitrage-guide');
+    return;
+  }
+  // Validar datos mínimos necesarios
+  if (!arb.broker) {
+    console.error('❌ [POPUP] Datos incompletos del arbitraje:', arb);
+    container.innerHTML = `
+      <div class="error-state animate-scale-in">
+        <div class="error-state-icon animate-pulse">⚠️</div>
+        <h3 class="error-state-title">Datos incompletos</h3>
+        <p class="error-state-message">No se pudieron cargar todos los datos del arbitraje</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Calcular valores usando función auxiliar
+  const values = calculateGuideValues(arb);
+  // Generar HTML completo usando funciones auxiliares (SIMPLIFICADO)
+  const html = `
+    <div class="guide-container-simple">
+      ${generateGuideHeader(values.broker, values.profitPercentage)}
+      ${generateGuideSteps(values)}
+    </div>
+  `;
+  container.innerHTML = html;
+  // Configurar animaciones y event listeners
+  setupGuideAnimations(container);
+}
+
+// Nota: La función loadBanksDataOld() fue eliminada en v5.0.69
+// El botón refresh-banks fue removido y la funcionalidad se integró en loadBanksData()
+
+// Obtener datos de exchanges desde las APIs configuradas
+
+===== popup.js — exports =====
+showRouteGuideFromData,
+  showRouteGuide,
+
+
+Codigo muerto borrado (2da tanda): duplicado de la guia en modalManager.js
+
+Fecha: 2026-09-19T20:18:46.492Z
+
+Motivo: la guia del modal de detalle estaba implementada DOS veces. La que corre es la de popup.js
+(showRouteDetailsByType / showCryptoRouteDetails, verificada en vivo). La de modalManager.js la
+exponia popup.js -> ModMgr.openRouteDetailsModal y NADIE la llamaba (ni en src/, ni en tests/, ni
+desde el HTML): ModMgr.init() corre, pero solo necesita setupRouteDetailsModal + closeModal, que se
+conservan.
+
+Abajo, exactamente lo que se quito.
+
+===== modalManager.js — function calculateGuideValues() =====
+
+  function calculateGuideValues(arb) {
+    const calc = arb.calculation || {};
+    const correctProfitPercentage =
+      calc.profitPercentage !== undefined ? calc.profitPercentage : arb.profitPercentage || 0;
+
+    const initial = calc.initial || 100000;
+    const officialPrice = arb.officialPrice || 1000;
+    const usdAmount = calc.usdPurchased || initial / officialPrice;
+    const usdtAfterFees = calc.usdtAfterFees || usdAmount;
+    const sellPrice = arb.sellPrice || arb.usdtArsBid || 1000;
+    const arsFromSale = calc.arsFromSale || usdtAfterFees * sellPrice;
+    const finalAmount = calc.finalAmount || arsFromSale;
+    const profit = calc.netProfit || finalAmount - initial;
+
+    return {
+      estimatedInvestment: initial,
+      officialPrice,
+      usdAmount,
+      usdtAfterFees,
+      sellPrice,
+      arsFromSale,
+      finalAmount,
+      profit,
+      profitPercentage: correctProfitPercentage,
+      usdToUsdtRate:
+        typeof arb.usdToUsdtRate === 'number' && isFinite(arb.usdToUsdtRate)
+          ? arb.usdToUsdtRate
+          : null,
+      usdtArsBid: arb.usdtArsBid || arb.sellPrice || 1000,
+      fees: arb.fees || { trading: 0, withdrawal: 0, total: 0 },
+      broker: arb.broker || 'Exchange'
+    };
+  }
+
+===== modalManager.js — function generateGuideHeader() =====
+
+  function generateGuideHeader(broker, profitPercentage) {
+    const Fmt = window.Formatters || { formatNumber: n => n?.toLocaleString('es-AR') || '0' };
+    const isProfitable = profitPercentage >= 0;
+
+    return `
+      <div class="guide-header-simple">
+        <div class="guide-title">
+          <h3>📋 Cómo hacer el arbitraje en <span class="broker-name">${sanitizeHTML(broker)}</span></h3>
+        </div>
+        <div class="profit-badge ${isProfitable ? 'profit-positive' : 'profit-negative'}">
+          <span class="profit-icon">${isProfitable ? '📈' : '📉'}</span>
+          <span class="profit-text">
+            ${isProfitable ? 'Ganancia' : 'Pérdida'}: 
+            <strong>${isProfitable ? '+' : ''}${Fmt.formatNumber(profitPercentage)}%</strong>
+          </span>
+        </div>
+      </div>
+    `;
+  }
+
+===== modalManager.js — function generateGuideSteps() =====
+
+  function generateGuideSteps(values) {
+    const Fmt = window.Formatters || { formatNumber: n => n?.toLocaleString('es-AR') || '0' };
+
+    const {
+      estimatedInvestment,
+      officialPrice,
+      usdAmount,
+      usdToUsdtRate,
+      usdtAfterFees,
+      usdtArsBid,
+      arsFromSale,
+      finalAmount,
+      profit,
+      profitPercentage,
+      broker
+    } = values;
+
+    return `
+      <div class="steps-simple">
+        <!-- Paso 1: Comprar USD -->
+        <div class="step-simple" data-step="1">
+          <div class="step-number">1</div>
+          <div class="step-simple-content">
+            <h4>Comprá dólares en tu banco</h4>
+            <p class="step-simple-text">Pagás el precio oficial del dólar, no el blue.</p>
+            <div class="step-simple-calc">
+              <span class="calc-label">Precio:</span>
+              <span class="calc-value">$${Fmt.formatNumber(officialPrice)}/USD</span>
+              <span class="calc-arrow">→</span>
+              <span class="calc-result">Obtienes ${Fmt.formatNumber(usdAmount)} USD</span>
+            </div>
+            <div class="step-simple-note">
+              Verificá con tu banco cuánto podés comprar por mes
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 2: USD → USDT -->
+        <div class="step-simple" data-step="2">
+          <div class="step-number">2</div>
+          <div class="step-simple-content">
+            <h4>Convertí tus dólares a USDT</h4>
+            <p class="step-simple-text">Depositá los dólares en <strong>${sanitizeHTML(broker)}</strong> y cambialos por USDT.</p>
+            <div class="step-simple-calc">
+              <span class="calc-label">Tasa:</span>
+              <span class="calc-value">${Fmt.formatUsdUsdtRatio ? Fmt.formatUsdUsdtRatio(usdToUsdtRate) : usdToUsdtRate?.toFixed(4)} USD = 1 USDT</span>
+              <span class="calc-arrow">→</span>
+              <span class="calc-result">${Fmt.formatNumber(usdtAfterFees)} USDT</span>
+            </div>
+            ${
+              typeof usdToUsdtRate === 'number' && isFinite(usdToUsdtRate) && usdToUsdtRate > 1.005
+                ? `
+            <div class="step-simple-warning">
+              La conversión te cuesta ${Fmt.formatCommissionPercent ? Fmt.formatCommissionPercent((usdToUsdtRate - 1) * 100) : ((usdToUsdtRate - 1) * 100).toFixed(2)}%
+            </div>
+            `
+                : ''
+            }
+          </div>
+        </div>
+
+        <!-- Paso 3: USDT → ARS -->
+        <div class="step-simple" data-step="3">
+          <div class="step-number">3</div>
+          <div class="step-simple-content">
+            <h4>Vendé los USDT por pesos</h4>
+            <p class="step-simple-text">Vendelos en <strong>${sanitizeHTML(broker)}</strong> y recibís pesos.</p>
+            <div class="step-simple-calc highlight-profit">
+              <span class="calc-label">Precio:</span>
+              <span class="calc-value big">$${Fmt.formatNumber(usdtArsBid)}/USDT</span>
+              <span class="calc-arrow">→</span>
+              <span class="calc-result big">$${Fmt.formatNumber(arsFromSale)}</span>
+            </div>
+            <div class="step-simple-success">
+              Acá aparece la ganancia: es la diferencia entre el dólar que compraste y el USDT que vendés.
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 4: Retirar -->
+        <div class="step-simple" data-step="4">
+          <div class="step-number">4</div>
+          <div class="step-simple-content">
+            <h4>Pasá los pesos a tu banco</h4>
+            <p class="step-simple-text">Transferí los pesos a tu cuenta bancaria.</p>
+            <div class="step-simple-calc final">
+              <span class="calc-label">Después de comisiones:</span>
+              <span class="calc-result">$${Fmt.formatNumber(finalAmount)}</span>
+            </div>
+            <div class="profit-summary ${profit >= 0 ? 'positive' : 'negative'}">
+              <div class="profit-main">
+                <span class="profit-icon">${profit >= 0 ? '↑' : '↓'}</span>
+                <span class="profit-amount">${profit >= 0 ? '+' : ''}$${Fmt.formatNumber(profit)}</span>
+                <span class="profit-percent">(${profit >= 0 ? '+' : ''}${Fmt.formatNumber(profitPercentage)}%)</span>
+              </div>
+              <div class="profit-subtitle">
+                ${profit >= 0 ? 'Ganancia neta' : 'Pérdida neta'}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen Rápido -->
+      <div class="quick-summary">
+        <h4>📊 Resumen Rápido</h4>
+        <div class="summary-flow">
+          <div class="summary-item">
+            <span class="summary-label">Inversión</span>
+            <span class="summary-value">$${Fmt.formatNumber(estimatedInvestment)}</span>
+          </div>
+          <span class="summary-arrow">→</span>
+          <div class="summary-item">
+            <span class="summary-label">USD Oficial</span>
+            <span class="summary-value">${Fmt.formatNumber(usdAmount)} USD</span>
+          </div>
+          <span class="summary-arrow">→</span>
+          <div class="summary-item">
+            <span class="summary-label">USDT</span>
+            <span class="summary-value">${Fmt.formatNumber(usdtAfterFees)} USDT</span>
+          </div>
+          <span class="summary-arrow">→</span>
+          <div class="summary-item highlight">
+            <span class="summary-label">Resultado</span>
+            <span class="summary-value big">$${Fmt.formatNumber(finalAmount)}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+===== modalManager.js — function openRouteDetailsModal() =====
+
+  function openRouteDetailsModal(arbitrage) {
+    window.Logger?.debug('📱 [ModalManager] Abriendo modal de detalles para:', arbitrage);
+
+    const modal = document.getElementById('route-details-modal');
+    if (!modal) {
+      console.error('❌ [ModalManager] Modal #route-details-modal no encontrado');
+      return;
+    }
+
+    // Calcular valores
+    const values = calculateGuideValues(arbitrage);
+
+    // Generar HTML
+    const modalHtml = `
+      <div class="guide-container-simple">
+        ${generateGuideHeader(values.broker, values.profitPercentage)}
+        ${generateGuideSteps(values)}
+      </div>
+    `;
+
+    // Insertar contenido
+    const modalBody = document.getElementById('modal-body');
+    if (modalBody) {
+      modalBody.innerHTML = modalHtml;
+      setupModalAnimations(modalBody);
+    } else {
+      console.error('❌ [ModalManager] #modal-body no encontrado');
+    }
+
+    // Mostrar modal
+    modal.style.display = 'flex';
+    activeModal = 'route-details';
+
+    // Agregar al historial
+    modalHistory.push('route-details');
+
+    window.Logger?.debug('✅ [ModalManager] Modal abierto');
+  }
+
+===== popup.js — wrapper openRouteDetailsModal() =====
+// REEMPLAZO v6.0.0: Abrir modal con detalles de la ruta delegada a ModalManager
+function openRouteDetailsModal(arbitrage) {
+  return ModMgr.openRouteDetailsModal(arbitrage);
+}
+
+
+
+
+===== modalManager.js — function setupModalAnimations() =====
+
+  function setupModalAnimations(container) {
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach((entry, index) => {
+          if (entry.isIntersecting) {
+            setTimeout(() => {
+              entry.target.classList.add('active');
+            }, index * 100);
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    const stepItems = container.querySelectorAll('.step-item');
+    stepItems.forEach(step => observer.observe(step));
+  }
+
+===== popup.css — reglas .steps-simple =====
+
+
+.steps-simple {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+}
+
+===== popup.css — reglas .step-simple =====
+
+
+.step-simple {
+  animation: hf-fade-in-up 0.3s ease-out;
+}
+
+===== popup.css — reglas .step-number =====
+
+}
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, var(--primary-blue-dark) 0%, var(--primary-blue) 100%);
+  color: var(--color-text-inverse);
+  border-radius: 50%;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 113, 227, 0.3);
+  position: relative;
+  z-index: 1;
+}
+
+
+
+
+===== tests/modalManager.test.js — describe openRouteDetailsModal() =====
+  describe('openRouteDetailsModal()', () => {
+    it('abre el modal y lo hace visible (display flex)', () => {
+      const arb = createMockArbitrage();
+      MM.openRouteDetailsModal(arb);
+
+      const modal = document.getElementById('route-details-modal');
+      expect(modal.style.display).toBe('flex');
+    });
+
+    it('establece activeModal a "route-details"', () => {
+      const arb = createMockArbitrage();
+      MM.openRouteDetailsModal(arb);
+
+      expect(MM.getActiveModal()).toBe('route-details');
+      expect(MM.hasActiveModal()).toBe(true);
+    });
+
+    it('inyecta HTML en #modal-body con la guía de arbitraje', () => {
+      const arb = createMockArbitrage();
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).toContain('guide-container-simple');
+      expect(modalBody.innerHTML).toContain('guide-header-simple');
+      expect(modalBody.innerHTML).toContain('steps-simple');
+    });
+
+    it('incluye el nombre del broker en el contenido', () => {
+      const arb = createMockArbitrage({ broker: 'Binance' });
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).toContain('Binance');
+    });
+
+    it('muestra badge de ganancia positiva cuando profitPercentage >= 0', () => {
+      const arb = createMockArbitrage({ profitPercentage: 5.0 });
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).toContain('profit-positive');
+      expect(modalBody.innerHTML).toContain('Ganancia');
+    });
+
+    it('muestra badge de pérdida cuando profitPercentage < 0', () => {
+      const arb = createMockArbitrage({
+        profitPercentage: -3.5,
+        calculation: {
+          initial: 100000,
+          usdPurchased: 95.238,
+          usdtAfterFees: 95.0,
+          arsFromSale: 95000,
+          finalAmount: 96500,
+          netProfit: -3500,
+          profitPercentage: -3.5
+        }
+      });
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).toContain('profit-negative');
+      expect(modalBody.innerHTML).toContain('Pérdida');
+    });
+
+    it('genera los 4 pasos de la guía', () => {
+      const arb = createMockArbitrage();
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).toContain('data-step="1"');
+      expect(modalBody.innerHTML).toContain('data-step="2"');
+      expect(modalBody.innerHTML).toContain('data-step="3"');
+      expect(modalBody.innerHTML).toContain('data-step="4"');
+    });
+
+    it('incluye el resumen rápido', () => {
+      const arb = createMockArbitrage();
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).toContain('quick-summary');
+      expect(modalBody.innerHTML).toContain('Resumen Rápido');
+    });
+
+    it('no lanza error cuando #route-details-modal no existe', () => {
+      document.body.innerHTML = '';
+      const arb = createMockArbitrage();
+      expect(() => MM.openRouteDetailsModal(arb)).not.toThrow();
+    });
+
+    it('loguea error por consola cuando el modal no se encuentra', () => {
+      document.body.innerHTML = '';
+      const arb = createMockArbitrage();
+      MM.openRouteDetailsModal(arb);
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('route-details-modal')
+      );
+    });
+
+    it('maneja datos de arbitraje mínimos (sin calculation)', () => {
+      const arb = {
+        broker: 'TestExchange',
+        officialPrice: 1000,
+        sellPrice: 1100
+      };
+      MM.openRouteDetailsModal(arb);
+
+      const modal = document.getElementById('route-details-modal');
+      expect(modal.style.display).toBe('flex');
+      expect(MM.hasActiveModal()).toBe(true);
+    });
+
+    it('maneja datos de arbitraje vacíos', () => {
+      MM.openRouteDetailsModal({});
+      const modal = document.getElementById('route-details-modal');
+      expect(modal.style.display).toBe('flex');
+    });
+
+    it('maneja datos de arbitraje null sin lanzar error', () => {
+      // El módulo no valida el parámetro, puede lanzar al acceder propiedades
+      // Verificamos que no crashea el proceso de tests
+      try {
+        MM.openRouteDetailsModal(null);
+      } catch (e) {
+        // Esperado: puede lanzar error al acceder propiedades de null
+        expect(e).toBeDefined();
+      }
+    });
+
+    it('muestra advertencia de comisión cuando usdToUsdtRate > 1.005', () => {
+      const arb = createMockArbitrage({ usdToUsdtRate: 1.1 });
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).toContain('step-simple-warning');
+    });
+
+    it('no muestra advertencia de comisión cuando usdToUsdtRate <= 1.005', () => {
+      const arb = createMockArbitrage({ usdToUsdtRate: 1.001 });
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).not.toContain('step-simple-warning');
+    });
+
+    it('no muestra advertencia cuando usdToUsdtRate es null', () => {
+      const arb = createMockArbitrage({ usdToUsdtRate: null });
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).not.toContain('step-simple-warning');
+    });
+  });
+
+===== tests/modalManager.test.js — describe Casos edge en cálculos de guía =====
+  describe('Casos edge en cálculos de guía', () => {
+    it('maneja datos sin calculation con valores por defecto', () => {
+      const arb = {
+        broker: 'TestBroker',
+        officialPrice: 1000,
+        sellPrice: 1100
+      };
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).toContain('TestBroker');
+      expect(modalBody.innerHTML).toContain('guide-container-simple');
+    });
+
+    it('maneja fees ausentes usando valores por defecto', () => {
+      const arb = {
+        broker: 'NoFees',
+        officialPrice: 1000,
+        calculation: { initial: 50000 }
+      };
+      MM.openRouteDetailsModal(arb);
+
+      const modal = document.getElementById('route-details-modal');
+      expect(modal.style.display).toBe('flex');
+    });
+
+    it('maneja usdToUsdtRate como número finito válido', () => {
+      const arb = createMockArbitrage({ usdToUsdtRate: 1.003 });
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      // Debe mostrar la tasa en el paso 2
+      expect(modalBody.innerHTML).toContain('1.0030');
+    });
+
+    it('maneja usdToUsdtRate undefined correctamente', () => {
+      const arb = createMockArbitrage({ usdToUsdtRate: undefined });
+      MM.openRouteDetailsModal(arb);
+
+      const modal = document.getElementById('route-details-modal');
+      expect(modal.style.display).toBe('flex');
+    });
+
+    it('maneja profitPercentage negativo mostrando pérdida', () => {
+      const arb = createMockArbitrage({
+        profitPercentage: -5.2,
+        calculation: {
+          ...createMockArbitrage().calculation,
+          netProfit: -5200,
+          profitPercentage: -5.2,
+          finalAmount: 94800,
+          arsFromSale: 94800
+        }
+      });
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).toContain('Pérdida');
+      expect(modalBody.innerHTML).toContain('profit-negative');
+    });
+
+    it('maneja objeto arbitraje completamente vacío', () => {
+      MM.openRouteDetailsModal({});
+
+      const modal = document.getElementById('route-details-modal');
+      expect(modal.style.display).toBe('flex');
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).toContain('guide-container-simple');
+    });
+  });
+
+===== tests/modalManager.test.js — describe Flujo completo abrir/cerrar =====
+  describe('Flujo completo abrir/cerrar', () => {
+    it('abre modal, verifica estado, cierra y verifica estado limpio', () => {
+      // beforeEach ya garantiza estado limpio
+
+      // Abrir
+      const arb = createMockArbitrage();
+      MM.openRouteDetailsModal(arb);
+      expect(MM.hasActiveModal()).toBe(true);
+      expect(MM.getActiveModal()).toBe('route-details');
+
+      // Verificar visible
+      const modal = document.getElementById('route-details-modal');
+      expect(modal.style.display).toBe('flex');
+
+      // Cerrar
+      MM.closeModal();
+      expect(MM.hasActiveModal()).toBe(false);
+      expect(MM.getActiveModal()).toBeNull();
+      expect(modal.style.display).toBe('none');
+    });
+
+    it('permite abrir múltiples veces y el historial crece', () => {
+      const arb = createMockArbitrage();
+      MM.openRouteDetailsModal(arb);
+      MM.openRouteDetailsModal(arb);
+      MM.openRouteDetailsModal(arb);
+
+      expect(MM.hasActiveModal()).toBe(true);
+
+      // Cerrar todas
+      MM.closeModal();
+      expect(MM.hasActiveModal()).toBe(true);
+      MM.closeModal();
+      expect(MM.hasActiveModal()).toBe(true);
+      MM.closeModal();
+      expect(MM.hasActiveModal()).toBe(false);
+    });
+  });
+
+===== popup.css — familia .step-simple* =====
+
+}
+.step-simple-calc {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: var(--space-1) 0;
+  padding: var(--space-1);
+  background: rgba(15, 23, 42, 0.4);
+  border-radius: var(--border-radius-sm);
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: var(--font-size-sm);
+}
+
+}
+.step-simple-warning {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.2) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  color: #fbbf24;
+  margin-top: var(--space-1);
+}
+
+===== popup.css — @keyframes stepSlideIn =====
+@keyframes stepSlideIn - DEFINIDO EN SECCIÓN DE ANIMACIONES CONSOLIDADAS */
+
+.step-simple:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+
+
+
+===== popup.css — familia .step-simple* (resto) =====
+
+
+.step-simple::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
+  border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+}
+
+.step-simple[data-step='1']::before {
+  background: linear-gradient(180deg, #30d158 0%, #30d158 100%);
+}
+
+.step-simple[data-step='3']::before {
+  background: linear-gradient(180deg, #0071e3 0%, #1e3a8a 100%);
+
+.step-simple[data-step='2'] .step-number {
+  background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+}
+
+.step-simple[data-step='4'] .step-number {
+  background: linear-gradient(135deg, #6d28d9 0%, #2997ff 100%);
+}
+
+.step-simple-content h4 {
+  margin: 0 0 var(--space-1) 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+
+.step-simple-calc.final {
+  background: linear-gradient(135deg, rgba(0, 113, 227, 0.1) 0%, rgba(109, 40, 217, 0.15) 100%);
+  border: 1px solid rgba(0, 113, 227, 0.2);
+}
+
+/* 
+.step-simple:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+
+
+
+===== tests/modalManager.test.js — describe openRouteDetailsModal() =====
+  describe('openRouteDetailsModal()', () => {
+    it('abre el modal y lo hace visible (display flex)', () => {
+      const arb = createMockArbitrage();
+      MM.openRouteDetailsModal(arb);
+
+      const modal = document.getElementById('route-details-modal');
+      expect(modal.style.display).toBe('flex');
+    });
+
+    it('establece activeModal a "route-details"', () => {
+      const arb = createMockArbitrage();
+      MM.openRouteDetailsModal(arb);
+
+      expect(MM.getActiveModal()).toBe('route-details');
+      expect(MM.hasActiveModal()).toBe(true);
+    });
+
+    it('inyecta HTML en #modal-body con la guía de arbitraje', () => {
+      const arb = createMockArbitrage();
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).toContain('guide-container-simple');
+      expect(modalBody.innerHTML).toContain('guide-header-simple');
+      expect(modalBody.innerHTML).toContain('steps-simple');
+    });
+
+    it('incluye el nombre del broker en el contenido', () => {
+      const arb = createMockArbitrage({ broker: 'Binance' });
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).toContain('Binance');
+    });
+
+    it('muestra badge de ganancia positiva cuando profitPercentage >= 0', () => {
+      const arb = createMockArbitrage({ profitPercentage: 5.0 });
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).toContain('profit-positive');
+      expect(modalBody.innerHTML).toContain('Ganancia');
+    });
+
+    it('muestra badge de pérdida cuando profitPercentage < 0', () => {
+      const arb = createMockArbitrage({
+        profitPercentage: -3.5,
+        calculation: {
+          initial: 100000,
+          usdPurchased: 95.238,
+          usdtAfterFees: 95.0,
+          arsFromSale: 95000,
+          finalAmount: 96500,
+          netProfit: -3500,
+          profitPercentage: -3.5
+        }
+      });
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).toContain('profit-negative');
+      expect(modalBody.innerHTML).toContain('Pérdida');
+    });
+
+    it('genera los 4 pasos de la guía', () => {
+      const arb = createMockArbitrage();
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).toContain('data-step="1"');
+      expect(modalBody.innerHTML).toContain('data-step="2"');
+      expect(modalBody.innerHTML).toContain('data-step="3"');
+      expect(modalBody.innerHTML).toContain('data-step="4"');
+    });
+
+    it('incluye el resumen rápido', () => {
+      const arb = createMockArbitrage();
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).toContain('quick-summary');
+      expect(modalBody.innerHTML).toContain('Resumen Rápido');
+    });
+
+    it('no lanza error cuando #route-details-modal no existe', () => {
+      document.body.innerHTML = '';
+      const arb = createMockArbitrage();
+      expect(() => MM.openRouteDetailsModal(arb)).not.toThrow();
+    });
+
+    it('loguea error por consola cuando el modal no se encuentra', () => {
+      document.body.innerHTML = '';
+      const arb = createMockArbitrage();
+      MM.openRouteDetailsModal(arb);
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('route-details-modal')
+      );
+    });
+
+    it('maneja datos de arbitraje mínimos (sin calculation)', () => {
+      const arb = {
+        broker: 'TestExchange',
+        officialPrice: 1000,
+        sellPrice: 1100
+      };
+      MM.openRouteDetailsModal(arb);
+
+      const modal = document.getElementById('route-details-modal');
+      expect(modal.style.display).toBe('flex');
+      expect(MM.hasActiveModal()).toBe(true);
+    });
+
+    it('maneja datos de arbitraje vacíos', () => {
+      MM.openRouteDetailsModal({});
+      const modal = document.getElementById('route-details-modal');
+      expect(modal.style.display).toBe('flex');
+    });
+
+    it('maneja datos de arbitraje null sin lanzar error', () => {
+      // El módulo no valida el parámetro, puede lanzar al acceder propiedades
+      // Verificamos que no crashea el proceso de tests
+      try {
+        MM.openRouteDetailsModal(null);
+      } catch (e) {
+        // Esperado: puede lanzar error al acceder propiedades de null
+        expect(e).toBeDefined();
+      }
+    });
+
+    it('muestra advertencia de comisión cuando usdToUsdtRate > 1.005', () => {
+      const arb = createMockArbitrage({ usdToUsdtRate: 1.1 });
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).toContain('step-simple-warning');
+    });
+
+    it('no muestra advertencia de comisión cuando usdToUsdtRate <= 1.005', () => {
+      const arb = createMockArbitrage({ usdToUsdtRate: 1.001 });
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).not.toContain('step-simple-warning');
+    });
+
+    it('no muestra advertencia cuando usdToUsdtRate es null', () => {
+      const arb = createMockArbitrage({ usdToUsdtRate: null });
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).not.toContain('step-simple-warning');
+    });
+  });
+
+===== tests/modalManager.test.js — describe Casos edge en cálculos de guía =====
+  describe('Casos edge en cálculos de guía', () => {
+    it('maneja datos sin calculation con valores por defecto', () => {
+      const arb = {
+        broker: 'TestBroker',
+        officialPrice: 1000,
+        sellPrice: 1100
+      };
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).toContain('TestBroker');
+      expect(modalBody.innerHTML).toContain('guide-container-simple');
+    });
+
+    it('maneja fees ausentes usando valores por defecto', () => {
+      const arb = {
+        broker: 'NoFees',
+        officialPrice: 1000,
+        calculation: { initial: 50000 }
+      };
+      MM.openRouteDetailsModal(arb);
+
+      const modal = document.getElementById('route-details-modal');
+      expect(modal.style.display).toBe('flex');
+    });
+
+    it('maneja usdToUsdtRate como número finito válido', () => {
+      const arb = createMockArbitrage({ usdToUsdtRate: 1.003 });
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      // Debe mostrar la tasa en el paso 2
+      expect(modalBody.innerHTML).toContain('1.0030');
+    });
+
+    it('maneja usdToUsdtRate undefined correctamente', () => {
+      const arb = createMockArbitrage({ usdToUsdtRate: undefined });
+      MM.openRouteDetailsModal(arb);
+
+      const modal = document.getElementById('route-details-modal');
+      expect(modal.style.display).toBe('flex');
+    });
+
+    it('maneja profitPercentage negativo mostrando pérdida', () => {
+      const arb = createMockArbitrage({
+        profitPercentage: -5.2,
+        calculation: {
+          ...createMockArbitrage().calculation,
+          netProfit: -5200,
+          profitPercentage: -5.2,
+          finalAmount: 94800,
+          arsFromSale: 94800
+        }
+      });
+      MM.openRouteDetailsModal(arb);
+
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).toContain('Pérdida');
+      expect(modalBody.innerHTML).toContain('profit-negative');
+    });
+
+    it('maneja objeto arbitraje completamente vacío', () => {
+      MM.openRouteDetailsModal({});
+
+      const modal = document.getElementById('route-details-modal');
+      expect(modal.style.display).toBe('flex');
+      const modalBody = document.getElementById('modal-body');
+      expect(modalBody.innerHTML).toContain('guide-container-simple');
+    });
+  });
+
+===== tests/modalManager.test.js — describe Flujo completo abrir/cerrar =====
+  describe('Flujo completo abrir/cerrar', () => {
+    it('abre modal, verifica estado, cierra y verifica estado limpio', () => {
+      // beforeEach ya garantiza estado limpio
+
+      // Abrir
+      const arb = createMockArbitrage();
+      MM.showAlert('Setup', 'modal abierto para el test');
+      expect(MM.hasActiveModal()).toBe(true);
+      expect(MM.getActiveModal()).toBe('route-details');
+
+      // Verificar visible
+      const modal = document.getElementById('route-details-modal');
+      expect(modal.style.display).toBe('flex');
+
+      // Cerrar
+      MM.closeModal();
+      expect(MM.hasActiveModal()).toBe(false);
+      expect(MM.getActiveModal()).toBeNull();
+      expect(modal.style.display).toBe('none');
+    });
+
+    it('permite abrir múltiples veces y el historial crece', () => {
+      const arb = createMockArbitrage();
+      MM.showAlert('Setup', 'modal abierto para el test');
+      MM.showAlert('Setup', 'modal abierto para el test');
+      MM.showAlert('Setup', 'modal abierto para el test');
+
+      expect(MM.hasActiveModal()).toBe(true);
+
+      // Cerrar todas
+      MM.closeModal();
+      expect(MM.hasActiveModal()).toBe(true);
+      MM.closeModal();
+      expect(MM.hasActiveModal()).toBe(true);
+      MM.closeModal();
+      expect(MM.hasActiveModal()).toBe(false);
+    });
+  });

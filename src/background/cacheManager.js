@@ -73,7 +73,7 @@
     const maxAge = CACHE_CONFIG[cacheType];
 
     console.log(
-      `✅ [CACHE] Usando datos de caché ${cacheType} (${Math.round(age / 1000)}s/${Math.round(maxAge / 1000)}s)`
+      ` [CACHE] Usando datos de caché ${cacheType} (${Math.round(age / 1000)}s/${Math.round(maxAge / 1000)}s)`
     );
     return cached.data;
   }

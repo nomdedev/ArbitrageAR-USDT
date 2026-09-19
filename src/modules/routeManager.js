@@ -160,8 +160,8 @@
   function getP2PBadge(route) {
     const isP2P = route.requiresP2P || (route.broker && route.broker.toLowerCase().includes('p2p'));
     return isP2P
-      ? '<span class="p2p-badge">🤝 P2P</span>'
-      : '<span class="no-p2p-badge">⚡ Directo</span>';
+      ? '<span class="p2p-badge"> P2P</span>'
+      : '<span class="no-p2p-badge"> Directo</span>';
   }
 
   /**
@@ -197,11 +197,11 @@
   function getRouteIcon(routeType, route) {
     switch (routeType) {
       case ROUTE_TYPES.DIRECT_USDT_ARS:
-        return '💰';
+        return '';
       case ROUTE_TYPES.USD_TO_USDT:
-        return '💎';
+        return '';
       default:
-        return route?.isSingleExchange ? '🎯' : '🔀';
+        return route?.isSingleExchange ? '' : '';
     }
   }
 
@@ -218,7 +218,7 @@
   function init(data, settings) {
     userSettings = settings;
     allRoutes = data?.optimizedRoutes || [];
-    window.Logger?.debug('✅ [RouteManager] Módulo inicializado con', allRoutes.length, 'rutas');
+    window.Logger?.debug(' [RouteManager] Módulo inicializado con', allRoutes.length, 'rutas');
   }
 
   /**
@@ -228,7 +228,7 @@
    */
   function updateData(data) {
     allRoutes = data?.optimizedRoutes || [];
-    window.Logger?.debug('✅ [RouteManager] Datos actualizados:', allRoutes.length, 'rutas');
+    window.Logger?.debug(' [RouteManager] Datos actualizados:', allRoutes.length, 'rutas');
   }
 
   /**
@@ -396,7 +396,7 @@
         
         <div class="operation-meta">
           ${p2pBadge}
-          ${timestampInfo ? `<span class="time-indicator">🕐 ${new Date(route.timestamp).toLocaleTimeString()}</span>` : ''}
+          ${timestampInfo ? `<span class="time-indicator"> ${new Date(route.timestamp).toLocaleTimeString()}</span>` : ''}
         </div>
       </div>
       
@@ -435,7 +435,7 @@
         <div class="empty-state-card">
           <div class="empty-state-header">
             <div class="empty-state-icon-wrapper">
-              <span class="empty-state-emoji">📊</span>
+ <span class="empty-state-emoji"></span>
             </div>
             <h3 class="empty-state-title">Estado del Mercado</h3>
             <p class="empty-state-subtitle">No se encontraron oportunidades</p>
@@ -445,28 +445,28 @@
             <p class="reasons-title">Posibles causas:</p>
             <div class="reasons-list">
               <div class="reason-item">
-                <span class="reason-icon">🎯</span>
+ <span class="reason-icon">●</span>
                 <div class="reason-content">
                   <span class="reason-label">Umbral muy alto</span>
                   <span class="reason-hint">Prueba bajar el umbral mínimo</span>
                 </div>
               </div>
               <div class="reason-item">
-                <span class="reason-icon">🏦</span>
+ <span class="reason-icon">●</span>
                 <div class="reason-content">
                   <span class="reason-label">Exchanges restrictivos</span>
                   <span class="reason-hint">Agrega más exchanges</span>
                 </div>
               </div>
               <div class="reason-item">
-                <span class="reason-icon">🔄</span>
+ <span class="reason-icon">●</span>
                 <div class="reason-content">
                   <span class="reason-label">Mercado en equilibrio</span>
                   <span class="reason-hint">Tasas cercanas al oficial</span>
                 </div>
               </div>
               <div class="reason-item">
-                <span class="reason-icon">🤝</span>
+ <span class="reason-icon">●</span>
                 <div class="reason-content">
                   <span class="reason-label">Filtro P2P activo</span>
                   <span class="reason-hint">Cambia a "Todas" o "No P2P"</span>
@@ -477,18 +477,18 @@
           
           <div class="empty-state-config">
             <span class="config-badge">
-              <span class="config-icon">⚙️</span>
+ <span class="config-icon">●</span>
               Umbral: ${threshold}% · Tipo: ${routeType}
             </span>
           </div>
           
           <div class="empty-state-actions">
             <button class="btn-action btn-primary-action" data-action="reload">
-              <span class="btn-icon">🔄</span>
+ <span class="btn-icon">●</span>
               Actualizar
             </button>
             <button class="btn-action btn-secondary-action" data-action="open-options">
-              <span class="btn-icon">⚙️</span>
+ <span class="btn-icon">●</span>
               Configuración
             </button>
           </div>
@@ -566,7 +566,7 @@
     // Agregar event listeners a las tarjetas
     attachRouteListeners(container);
 
-    window.Logger?.debug(`✅ [RouteManager] Renderizadas ${routes.length} rutas`);
+    window.Logger?.debug(` [RouteManager] Renderizadas ${routes.length} rutas`);
   }
 
   /**
@@ -592,7 +592,7 @@
         try {
           const route = JSON.parse(decodeURIComponent(routeData));
           window.Logger?.debug(
-            '🖱️ [RouteManager] Click en ruta:',
+            ' [RouteManager] Click en ruta:',
             route.broker || route.buyExchange
           );
 
@@ -623,7 +623,7 @@
     // CORREGIDO v6.0.2: Sanitizar message (XSS fix)
     container.innerHTML = `
       <div class="empty-state">
-        <div class="empty-state-icon">🔍</div>
+ <div class="empty-state-icon">●</div>
         <div class="empty-state-text">${escapeHtml(message || 'No hay oportunidades de arbitraje disponibles')}</div>
       </div>
     `;
@@ -642,7 +642,7 @@
     // CORREGIDO v6.0.2: Sanitizar message (XSS fix)
     container.innerHTML = `
       <div class="error-message">
-        <p>❌ ${escapeHtml(message || 'Error al cargar los datos')}</p>
+ <p> ${escapeHtml(message || 'Error al cargar los datos')}</p>
       </div>
     `;
   }
@@ -680,5 +680,5 @@
   // Exportar para uso global
   window.RouteManager = RouteManager;
 
-  window.Logger?.debug('✅ [RouteManager] Módulo cargado correctamente');
+  window.Logger?.debug(' [RouteManager] Módulo cargado correctamente');
 })(window);

@@ -20,7 +20,7 @@ log('🔧 [BACKGROUND] Iniciando service worker...');
 // IMPORTAR MÓDULOS (compatibilidad con service worker)
 // ============================================
 try {
-  importScripts('apiClient.js', 'arbitrageCalculator.js', '../DataService.js', 'cacheManager.js');
+  importScripts('apiClient.js', '../DataService.js', 'cacheManager.js');
   log('✅ [BACKGROUND] Módulos importados correctamente');
 } catch (e) {
   console.warn('⚠️ [BACKGROUND] No se pudieron importar módulos:', e.message);
@@ -303,7 +303,7 @@ async function updateGlobalConfig() {
     REQUEST_TIMEOUT = (userSettings.requestTimeoutSeconds || 10) * 1000; // Convertir segundos a ms
 
     log(
-      `⚙️ Configuración global actualizada: intervalo=${REQUEST_INTERVAL}ms, timeout=${REQUEST_TIMEOUT}ms`
+      ` Configuración global actualizada: intervalo=${REQUEST_INTERVAL}ms, timeout=${REQUEST_TIMEOUT}ms`
     );
   } catch (error) {
     log('⚠️ Error actualizando configuración global:', error);
@@ -340,7 +340,7 @@ async function fetchWithRateLimit(url) {
     clearTimeout(timeoutId);
 
     log(
-      '🔍 [DIAGNÓSTICO] fetchWithRateLimit() - Respuesta recibida, status:',
+      ' [DIAGNÓSTICO] fetchWithRateLimit() - Respuesta recibida, status:',
       res.status,
       'ok:',
       res.ok
@@ -371,13 +371,13 @@ async function fetchDolarOficial(userSettings) {
 
   if (data?.oficial) {
     log(
-      '🔍 [DIAGNÓSTICO] fetchDolarOficial() - data.oficial.ask:',
+      ' [DIAGNÓSTICO] fetchDolarOficial() - data.oficial.ask:',
       data.oficial.ask,
       'tipo:',
       typeof data.oficial.ask
     );
     log(
-      '🔍 [DIAGNÓSTICO] fetchDolarOficial() - data.oficial.bid:',
+      ' [DIAGNÓSTICO] fetchDolarOficial() - data.oficial.bid:',
       data.oficial.bid,
       'tipo:',
       typeof data.oficial.bid
@@ -418,7 +418,7 @@ async function fetchAllDollarTypes(userSettings) {
   log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - Tipo de datos:', typeof data);
 
   log(
-    '[BACKGROUND] 📊 Bancos data received:',
+    '[BACKGROUND]  Bancos data received:',
     data ? Object.keys(data).length + ' bancos' : 'null'
   );
   log('[FETCH] 📊 Datos crudos recibidos:', data);
@@ -461,7 +461,7 @@ async function fetchAllDollarTypes(userSettings) {
 
         if (spreadPercent < 0.1) {
           console.warn(
-            `⚠️ [VALIDACIÓN] ${key}: Spread ${spreadPercent.toFixed(2)}% muy bajo (sospechoso)`
+            ` [VALIDACIÓN] ${key}: Spread ${spreadPercent.toFixed(2)}% muy bajo (sospechoso)`
           );
           suspiciousBanks.push({
             bankCode: key,
@@ -470,7 +470,7 @@ async function fetchAllDollarTypes(userSettings) {
           });
         } else if (spreadPercent > 5) {
           console.warn(
-            `⚠️ [VALIDACIÓN] ${key}: Spread ${spreadPercent.toFixed(2)}% muy alto (sospechoso)`
+            ` [VALIDACIÓN] ${key}: Spread ${spreadPercent.toFixed(2)}% muy alto (sospechoso)`
           );
           suspiciousBanks.push({
             bankCode: key,
@@ -492,7 +492,7 @@ async function fetchAllDollarTypes(userSettings) {
     // Loggear resumen de validación
     if (invalidBanks.length > 0) {
       console.error(
-        `❌ [VALIDACIÓN] ${invalidBanks.length} bancos con datos inválidos:`,
+        ` [VALIDACIÓN] ${invalidBanks.length} bancos con datos inválidos:`,
         invalidBanks
       );
       console.error('   Estos bancos serán excluidos de los cálculos');
@@ -500,7 +500,7 @@ async function fetchAllDollarTypes(userSettings) {
 
     if (suspiciousBanks.length > 0) {
       console.warn(
-        `⚠️ [VALIDACIÓN] ${suspiciousBanks.length} bancos con spreads anómalos:`,
+        ` [VALIDACIÓN] ${suspiciousBanks.length} bancos con spreads anómalos:`,
         suspiciousBanks
       );
     }
@@ -509,7 +509,7 @@ async function fetchAllDollarTypes(userSettings) {
     log(`📊 [VALIDACIÓN] Spread promedio: ${avgSpread.toFixed(2)}%`);
 
     log(
-      '[BACKGROUND] 📤 Processed bancos data:',
+      '[BACKGROUND]  Processed bancos data:',
       Object.keys(dollarTypes).length + ' bancos procesados'
     );
     log('[FETCH] 📤 Datos procesados:', Object.keys(dollarTypes).length + ' bancos');
@@ -570,7 +570,7 @@ async function fetchBankDollarRates(userSettings) {
 
   if (hasLegacyDolarApiBankUrl) {
     console.warn(
-      '⚠️ [BANKS] URL legacy detectada en configuración (DolarAPI /v1/bancos/*). Se usa fallback a CriptoYa bancostodos.'
+      ' [BANKS] URL legacy detectada en configuración (DolarAPI /v1/bancos/*). Se usa fallback a CriptoYa bancostodos.'
     );
   }
 
@@ -587,7 +587,7 @@ async function fetchBankDollarRates(userSettings) {
       timestamp: Date.now()
     };
     log(
-      '🔍 [DIAGNÓSTICO] fetchBankDollarRates() - ✅ Devolviendo datos válidos, keys:',
+      ' [DIAGNÓSTICO] fetchBankDollarRates() -  Devolviendo datos válidos, keys:',
       Object.keys(data)
     );
     return result;
@@ -627,17 +627,36 @@ function resolveUsdToUsdtRate(usdtUsd, exchange, data, officialVenta) {
 }
 
 /**
+ * Normaliza un código de broker para poder comparar fees.
+ *
+ * La página de opciones guardó durante un tiempo el fee de Lemon con el código
+ * `lemon-cash`, mientras el resto del sistema usa `lemoncash` (hallazgo O-05). Como la
+ * comparación era literal, ese fee NUNCA se aplicaba: el usuario creía estar descontando
+ * una comisión que el motor ignoraba. Se normaliza en vez de comparar en crudo, así los
+ * valores ya guardados con el código viejo siguen funcionando.
+ */
+function normalizarBroker(valor) {
+  return String(valor ?? '')
+    .toLowerCase()
+    .replace(/[\s_-]+/g, '');
+}
+
+/**
  * Resuelve el porcentaje de fee de un broker para un tipo de operación.
  * Para 'buyFee': usa fee específico del broker o extraTradingFee como fallback.
- * Para 'sellFee': usa fee específico del broker o 0.
+ * Para 'sellFee': usa fee específico del broker o extraTradingFee como fallback.
  * @returns {number} Fee en porcentaje (ej: 1.5 para 1.5%)
  */
 function resolveBrokerFee(userSettings, exchange, feeType) {
+  const objetivo = normalizarBroker(exchange);
   const config = (userSettings.brokerFees || []).find(
-    fee => fee.broker.toLowerCase() === exchange.toLowerCase()
+    fee => normalizarBroker(fee.broker) === objetivo
   );
   if (config && config[feeType] > 0) return config[feeType];
-  if (feeType === 'buyFee') return userSettings.extraTradingFee || 0;
+  // El fee de trading global es una comisión POR OPERACIÓN: aplica a la compra y a la
+  // venta. Antes devolvía 0 en la venta, así que el mismo fee se cobraba en una sola
+  // pata y el resultado quedaba optimista (hallazgo F-03).
+  if (feeType === 'buyFee' || feeType === 'sellFee') return userSettings.extraTradingFee || 0;
   return 0;
 }
 
@@ -849,7 +868,7 @@ async function calculateInterBrokerRoutes(
         }
         routes.push(route);
         log(
-          `✅ [INTER-BROKER] ${buyExchange}→${sellExchange}: ${route.profitPercentage.toFixed(2)}%`
+          ` [INTER-BROKER] ${buyExchange}→${sellExchange}: ${route.profitPercentage.toFixed(2)}%`
         );
       } catch (error) {
         log(`❌ [INTER-BROKER] Error calculando ${buyExchange}→${sellExchange}:`, error.message);
@@ -859,7 +878,7 @@ async function calculateInterBrokerRoutes(
   }
 
   log(
-    `✅ [INTER-BROKER] Completado: ${processedCount} procesadas, ${skippedCount} saltadas, ${routes.length} rutas generadas`
+    ` [INTER-BROKER] Completado: ${processedCount} procesadas, ${skippedCount} saltadas, ${routes.length} rutas generadas`
   );
 
   return routes;
@@ -915,7 +934,7 @@ function calculateSingleExchangeRoute(
     withdrawalFee = userSettings.extraWithdrawalFee || 0;
     transferFee = userSettings.extraTransferFee || 0;
     bankFee = userSettings.bankCommissionFee || 0;
-    finalAmount = arsFromSale - (withdrawalFee + transferFee + bankFee);
+    finalAmount = arsAfterSellFee - (withdrawalFee + transferFee + bankFee);
   }
 
   const grossProfit = arsFromSale - initialAmount;
@@ -961,7 +980,7 @@ function calculateSingleExchangeRoute(
       applyFees,
       tradingFeePercent: userSettings.extraTradingFee || 0,
       brokerSpecificFees: (userSettings.brokerFees || []).some(
-        f => f.broker.toLowerCase() === exchange.toLowerCase()
+        f => normalizarBroker(f.broker) === normalizarBroker(exchange)
       ),
       usdtUsdSource: usdtUsd?.[exchange]?.totalAsk ? 'api' : 'calculated',
       usdtUsdWarning: usingFallback
@@ -1071,7 +1090,7 @@ async function calculateSimpleRoutes(oficial, usdt, usdtUsd, userSettings = {}) 
   });
 
   log(
-    `✅ [CALC] Rutas totales: ${routes.length} (Intra: ${processedCount}, Inter: ${interBrokerRoutes.length})`
+    ` [CALC] Rutas totales: ${routes.length} (Intra: ${processedCount}, Inter: ${interBrokerRoutes.length})`
   );
   log(`✅ Calculadas ${routes.length} rutas con monto base $${initialAmount.toLocaleString()}`);
   return routes.slice(0, 50);
@@ -1108,7 +1127,7 @@ async function calculateDirectUsdtToArsRoutes(usdt, userSettings = {}) {
     const arsFromSale = initialUsdtAmount * sellPrice;
 
     log(
-      `💰 [${exchange}] Venta directa: ${initialUsdtAmount} USDT × ${sellPrice} = $${arsFromSale.toFixed(2)} ARS`
+      ` [${exchange}] Venta directa: ${initialUsdtAmount} USDT × ${sellPrice} = $${arsFromSale.toFixed(2)} ARS`
     );
 
     // PASO 2 y 3: Aplicar fees (venta + fijos)
@@ -1346,7 +1365,20 @@ function tryCalculateCryptoPair(
     }
   }
 
-  const finalAmount = arsAfterSellFee;
+  // Fees fijos de la operacion: misma formula que las otras tres ramas de calculo.
+  // Sin esto, la ruta crypto informaba una ganancia mas alta que la real, porque no descontaba
+  // retiro, transferencia ni comision bancaria (misma clase de bug que la rama de exchange unico).
+  let withdrawalFee = 0;
+  let transferFee = 0;
+  let bankFee = 0;
+  let finalAmount = arsAfterSellFee;
+  if (applyFees) {
+    withdrawalFee = userSettings.extraWithdrawalFee || 0;
+    transferFee = userSettings.extraTransferFee || 0;
+    bankFee = userSettings.bankCommissionFee || 0;
+    finalAmount = arsAfterSellFee - (withdrawalFee + transferFee + bankFee);
+  }
+
   const netProfit = finalAmount - initialAmount;
   const netProfitPercent = (netProfit / initialAmount) * 100;
   const grossProfit = arsFromSale - initialAmount;
@@ -1405,7 +1437,12 @@ function tryCalculateCryptoPair(
       buy: buyFeeARS,
       sell: sellFeeAmount,
       network: networkFeeARS,
-      total: buyFeeARS + sellFeeAmount + networkFeeARS
+      withdrawal: withdrawalFee,
+      transfer: transferFee,
+      bank: bankFee,
+      // El total tiene que reflejar TODO lo descontado, o el numero que ve el usuario miente.
+      total:
+        buyFeeARS + sellFeeAmount + networkFeeARS + withdrawalFee + transferFee + bankFee
     },
     config: {
       applyFees,
@@ -1458,11 +1495,11 @@ function calculateCryptoSymbolRoutes(symbol, data, { initialAmount, applyFees, u
         if (!route) continue;
         routes.push(route);
         log(
-          `✅ [CRYPTO-ARB] ${symbol} ${buyExchange}→${sellExchange}: ${route.profitPercentage.toFixed(2)}% (${route.operationType})`
+          ` [CRYPTO-ARB] ${symbol} ${buyExchange}→${sellExchange}: ${route.profitPercentage.toFixed(2)}% (${route.operationType})`
         );
       } catch (error) {
         log(
-          `❌ [CRYPTO-ARB] Error calculando ${symbol} ${buyExchange}→${sellExchange}:`,
+          ` [CRYPTO-ARB] Error calculando ${symbol} ${buyExchange}→${sellExchange}:`,
           error.message
         );
       }
@@ -1595,6 +1632,19 @@ async function calculateAllRoutes(oficial, usdt, usdtUsd, userSettings = {}) {
 let lastNotificationTime = 0;
 const notifiedArbitrages = new Set(); // Para evitar notificar el mismo arbitraje repetidamente
 
+/**
+ * Clave de deduplicacion de notificaciones.
+ *
+ * B-01: el chequeo armaba la clave con `Math.floor(profitPct)` (ej. "binance_3") y el alta con
+ * `profit.toFixed(2)` (ej. "binance_3.35"). Nunca podian coincidir, asi que el antiduplicado no
+ * bloqueaba nada. Una sola funcion para las dos puntas hace imposible que vuelvan a divergir.
+ */
+function claveArbitrajeNotificado(arbitrage, profitPct) {
+  const broker = arbitrage && arbitrage.broker ? arbitrage.broker : 'desconocido';
+  const porcentaje = Number.isFinite(Number(profitPct)) ? Math.floor(Number(profitPct)) : 0;
+  return `${broker}_${porcentaje}`;
+}
+
 async function shouldSendNotification(settings, arbitrage) {
   // 1. Verificar si las notificaciones están habilitadas
   if (!settings.notificationsEnabled) {
@@ -1636,7 +1686,7 @@ async function shouldSendNotification(settings, arbitrage) {
   const minInterval = frequencies[settings.notificationFrequency] || frequencies['1min'];
   if (now - lastNotificationTime < minInterval) {
     log(
-      `[NOTIF] ❌ Intervalo mínimo no cumplido (${Math.round((minInterval - (now - lastNotificationTime)) / 1000)}s restantes)`
+      `[NOTIF]  Intervalo mínimo no cumplido (${Math.round((minInterval - (now - lastNotificationTime)) / 1000)}s restantes)`
     );
     return false;
   }
@@ -1667,7 +1717,7 @@ async function shouldSendNotification(settings, arbitrage) {
   }
 
   // 6. Verificar si ya notificamos este arbitraje recientemente
-  const arbKey = `${arbitrage.broker}_${Math.floor(profitPct)}`; // Redondear para evitar spam
+  const arbKey = claveArbitrajeNotificado(arbitrage, profitPct); // Misma clave que el alta (B-01)
   if (notifiedArbitrages.has(arbKey)) {
     log(`[NOTIF] ❌ Arbitraje ya notificado recientemente: ${arbKey}`);
     return false;
@@ -1697,10 +1747,10 @@ async function sendNotification(arbitrage, settings) {
 
     // Emojis y textos amigables según nivel
     const levelConfig = {
-      extreme: { icon: '🚀', label: '¡OPORTUNIDAD EXCEPCIONAL!' },
-      high: { icon: '💎', label: '¡Gran oportunidad!' },
-      moderate: { icon: '💰', label: 'Oportunidad interesante' },
-      normal: { icon: '📊', label: 'Oportunidad detectada' }
+      extreme: { icon: '', label: '¡OPORTUNIDAD EXCEPCIONAL!' },
+      high: { icon: '', label: '¡Gran oportunidad!' },
+      moderate: { icon: '', label: 'Oportunidad interesante' },
+      normal: { icon: '', label: 'Oportunidad detectada' }
     };
 
     const config = levelConfig[iconLevel];
@@ -1709,7 +1759,14 @@ async function sendNotification(arbitrage, settings) {
     const brokerName = broker.charAt(0).toUpperCase() + broker.slice(1).toLowerCase();
 
     // Construir mensaje amigable y legible
-    let message = `Ganancia neta estimada: +${profit.toFixed(2)}%`;
+    // F-09: no se puede afirmar "neta" si el motor no descontó comisiones.
+    const conComisiones =
+      arbitrage.applyFees === true ||
+      arbitrage.config?.applyFees === true ||
+      (arbitrage.fees?.total || 0) > 0;
+    let message = conComisiones
+      ? `Ganancia neta estimada: +${profit.toFixed(2)}%`
+      : `Ganancia BRUTA estimada (sin comisiones): +${profit.toFixed(2)}%`;
 
     // Agregar información de precios si está disponible
     if (arbitrage.usdtArsBid) {
@@ -1740,7 +1797,7 @@ async function sendNotification(arbitrage, settings) {
     lastNotificationTime = Date.now();
 
     // Agregar a notificados (limpiar después de 1 hora)
-    const arbKey = `${arbitrage.broker}_${profit.toFixed(2)}`;
+    const arbKey = claveArbitrajeNotificado(arbitrage, profit); // Misma clave que el chequeo (B-01)
     notifiedArbitrages.add(arbKey);
     setTimeout(
       () => {
@@ -1840,7 +1897,7 @@ async function resolveDollarPrice(userSettings) {
       );
       if (calculatedPrice) {
         log(
-          `💵 Precio calculado (${calculatedPrice.method}): $${calculatedPrice.price} (${calculatedPrice.banksCount} bancos)`
+          ` Precio calculado (${calculatedPrice.method}): $${calculatedPrice.price} (${calculatedPrice.banksCount} bancos)`
         );
         return {
           compra: calculatedPrice.price,
@@ -1852,11 +1909,11 @@ async function resolveDollarPrice(userSettings) {
         };
       }
       log(
-        '⚠️ [BACKGROUND] No se pudo calcular precio de bancos, usando API oficial como fallback...'
+        ' [BACKGROUND] No se pudo calcular precio de bancos, usando API oficial como fallback...'
       );
     } else {
       log(
-        '⚠️ [BACKGROUND] No se pudieron obtener datos de bancos, usando API oficial como fallback...'
+        ' [BACKGROUND] No se pudieron obtener datos de bancos, usando API oficial como fallback...'
       );
     }
 
@@ -2000,7 +2057,7 @@ async function updateData() {
     if (!oficial) {
       console.error('🔍 [DIAGNÓSTICO] ❌ CRÍTICO: oficial es NULL al final de updateData()');
       console.error(
-        '🔍 [DIAGNÓSTICO] Esto significa que NO se pudo obtener precio del dólar oficial'
+        ' [DIAGNÓSTICO] Esto significa que NO se pudo obtener precio del dólar oficial'
       );
       console.error('🔍 [DIAGNÓSTICO] Configuración actual:', {
         dollarPriceSource: userSettings.dollarPriceSource,
@@ -2282,7 +2339,7 @@ function handleNotificationSettingsChange(oldSettings, newSettings) {
   if (updateIntervalChanged || requestTimeoutChanged) {
     if (requestTimeoutChanged) {
       log(
-        `⏱️ Timeout cambió: ${oldSettings.requestTimeoutSeconds}s → ${newSettings.requestTimeoutSeconds}s`
+        `⏱ Timeout cambió: ${oldSettings.requestTimeoutSeconds}s → ${newSettings.requestTimeoutSeconds}s`
       );
     }
     updateGlobalConfig();
@@ -2342,7 +2399,7 @@ async function checkForUpdatesInBackground() {
 
       // Actualizar badge
       chrome.action.setBadgeText({ text: '!' });
-      chrome.action.setBadgeBackgroundColor({ color: '#3b82f6' });
+      chrome.action.setBadgeBackgroundColor({ color: '#0071e3' }); // Apple Blue (único acento)
 
       log('✅ [UPDATE] Nueva versión disponible:', latestVersion);
     } else {

@@ -66,11 +66,11 @@
     if (!official || !official.source) return 'N/A';
 
     const sourceMap = {
-      manual: '👤 Manual',
-      dolarapi_fallback: '🔄 DolarAPI (fallback)',
-      dolarapi_oficial: '🌐 DolarAPI (oficial)',
-      manual_fallback: '🔄 Manual (fallback)',
-      hardcoded_fallback: '⚠️ Fallback fijo'
+      manual: ' Manual',
+      dolarapi_fallback: ' DolarAPI (fallback)',
+      dolarapi_oficial: ' DolarAPI (oficial)',
+      manual_fallback: ' Manual (fallback)',
+      hardcoded_fallback: ' Fallback fijo'
     };
 
     if (sourceMap[official.source]) {
@@ -78,23 +78,23 @@
     }
 
     if (official.source === 'dolarito_bank') {
-      return `🏦 ${official.bank}`;
+      return ` ${official.bank}`;
     }
 
     if (official.source === 'dolarito_median') {
-      return `📊 Mediana (${official.banksCount || 0} bancos)`;
+      return ` Mediana (${official.banksCount || 0} bancos)`;
     }
 
     if (official.source === 'dolarito_trimmed_average') {
-      return `📊 Prom. Recortado (${official.usedBanks || 0}/${official.banksCount || 0} bancos)`;
+      return ` Prom. Recortado (${official.usedBanks || 0}/${official.banksCount || 0} bancos)`;
     }
 
     if (official.source === 'dolarito_average') {
-      return `📊 Promedio (${official.banksCount || 0} bancos)`;
+      return ` Promedio (${official.banksCount || 0} bancos)`;
     }
 
     if (official.source === 'dolarito_cheapest') {
-      return `💰 ${official.bank} (menor precio)`;
+      return ` ${official.bank} (menor precio)`;
     }
 
     if (official.source === 'criptoya_banks') {
@@ -105,7 +105,7 @@
         'mejor-venta': 'mejor venta'
       };
       const methodText = methodDisplay[official.method] || official.method || 'método';
-      return `🏦 Bancos CriptoYa (${methodText})`;
+      return ` Bancos CriptoYa (${methodText})`;
     }
 
     return official.source;

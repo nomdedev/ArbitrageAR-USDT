@@ -54,10 +54,10 @@
     toast.className = `toast-notification toast-${type}`;
 
     const colors = {
-      [TOAST_TYPES.INFO]: '#3b82f6',
-      [TOAST_TYPES.SUCCESS]: '#10b981',
-      [TOAST_TYPES.WARNING]: '#f59e0b',
-      [TOAST_TYPES.ERROR]: '#ef4444'
+      [TOAST_TYPES.INFO]: '#0071e3', // Apple Blue
+      [TOAST_TYPES.SUCCESS]: '#30d158', // systemGreen
+      [TOAST_TYPES.WARNING]: '#ffd60a', // systemYellow
+      [TOAST_TYPES.ERROR]: '#ff453a' // systemRed
     };
 
     toast.style.cssText = `
@@ -162,7 +162,7 @@
    */
   function init(_settings) {
     setupUpdateBanner();
-    window.Logger?.debug('✅ [NotificationManager] Módulo inicializado');
+    window.Logger?.debug(' [NotificationManager] Módulo inicializado');
   }
 
   /**
@@ -210,7 +210,7 @@
       }
     }, duration);
 
-    window.Logger?.debug(`🔔 [NotificationManager] Toast mostrado: ${type} - ${message}`);
+    window.Logger?.debug(` [NotificationManager] Toast mostrado: ${type} - ${message}`);
     return toast;
   }
 
@@ -265,7 +265,7 @@
       }
     });
     activeToasts = [];
-    window.Logger?.debug('🔕 [NotificationManager] Todos los toasts cerrados');
+    window.Logger?.debug(' [NotificationManager] Todos los toasts cerrados');
   }
 
   /**
@@ -283,13 +283,13 @@
     const pendingUpdate = updateData?.pendingUpdate;
 
     if (!pendingUpdate) {
-      window.Logger?.debug('✅ [NotificationManager] No hay actualizaciones pendientes');
+      window.Logger?.debug(' [NotificationManager] No hay actualizaciones pendientes');
       return;
     }
 
     // Verificar si fue descartada
     if (await isUpdateDismissed(pendingUpdate)) {
-      window.Logger?.debug('✅ [NotificationManager] Actualización ya descartada');
+      window.Logger?.debug(' [NotificationManager] Actualización ya descartada');
       return;
     }
 
@@ -316,7 +316,7 @@
 
     activeBanner = updateInfo;
     window.Logger?.debug(
-      `📢 [NotificationManager] Actualización ${updateType} detectada: v${updateInfo.latestVersion}`
+      ` [NotificationManager] Actualización ${updateType} detectada: v${updateInfo.latestVersion}`
     );
   }
 
@@ -345,9 +345,9 @@
 
     // Crear tooltip con información de la actualización
     const typeLabels = {
-      [UPDATE_TYPES.MAJOR]: '🚀 ¡Actualización importante!',
-      [UPDATE_TYPES.MINOR]: '✨ Nueva versión disponible',
-      [UPDATE_TYPES.PATCH]: '🔧 Correcciones disponibles'
+      [UPDATE_TYPES.MAJOR]: ' ¡Actualización importante!',
+      [UPDATE_TYPES.MINOR]: ' Nueva versión disponible',
+      [UPDATE_TYPES.PATCH]: ' Correcciones disponibles'
     };
 
     const tooltipText = `${typeLabels[updateType] || 'Nueva versión'}\nv${updateInfo.latestVersion}\nClick para descargar`;
@@ -365,7 +365,7 @@
     };
 
     window.Logger?.debug(
-      `🔔 [NotificationManager] Indicador de actualización mostrado: ${updateType}`
+      ` [NotificationManager] Indicador de actualización mostrado: ${updateType}`
     );
   }
 
@@ -382,7 +382,7 @@
     const downloadUrl = updateInfo?.downloadUrl || updateInfo?.url || repoUrl;
 
     window.Logger?.debug(
-      `⬇️ [NotificationManager] Descargando actualización desde: ${downloadUrl}`
+      ` [NotificationManager] Descargando actualización desde: ${downloadUrl}`
     );
 
     // Abrir en nueva pestaña
@@ -410,7 +410,7 @@
       updateBadge.style.display = 'none';
     }
 
-    window.Logger?.debug('🔕 [NotificationManager] Indicador de actualización oculto');
+    window.Logger?.debug(' [NotificationManager] Indicador de actualización oculto');
   }
 
   /**
@@ -464,7 +464,7 @@
     // Configurar botones
     setupUpdateBannerButtons(updateInfo);
 
-    window.Logger?.debug(`📢 [NotificationManager] Modal de actualización mostrado: ${updateType}`);
+    window.Logger?.debug(` [NotificationManager] Modal de actualización mostrado: ${updateType}`);
   }
 
   /**
@@ -483,7 +483,7 @@
       downloadBtn.parentNode.replaceChild(newDownloadBtn, downloadBtn);
 
       newDownloadBtn.addEventListener('click', () => {
-        window.Logger?.debug('🖱️ [NotificationManager] Click en "Descargar actualización"');
+        window.Logger?.debug(' [NotificationManager] Click en "Descargar actualización"');
         downloadUpdate(updateInfo);
         hideUpdateBanner();
       });
@@ -495,7 +495,7 @@
       viewBtn.parentNode.replaceChild(newViewBtn, viewBtn);
 
       newViewBtn.addEventListener('click', () => {
-        window.Logger?.debug('🖱️ [NotificationManager] Click en "Ver más detalles"');
+        window.Logger?.debug(' [NotificationManager] Click en "Ver más detalles"');
         // Abrir página de releases de GitHub
         const releasesUrl = 'https://github.com/nomdedev/ArbitrageAR-USDT/releases';
         chrome.tabs.create({ url: updateInfo?.url || releasesUrl });
@@ -508,7 +508,7 @@
       dismissBtn.parentNode.replaceChild(newDismissBtn, dismissBtn);
 
       newDismissBtn.addEventListener('click', async () => {
-        window.Logger?.debug('🖱️ [NotificationManager] Click en "Cerrar"');
+        window.Logger?.debug(' [NotificationManager] Click en "Cerrar"');
 
         const expiryDate = new Date();
         expiryDate.setDate(expiryDate.getDate() + 7);
@@ -522,7 +522,7 @@
         };
 
         await chrome.storage.local.set(dismissedData);
-        window.Logger?.debug('💾 [NotificationManager] Actualización descartada');
+        window.Logger?.debug(' [NotificationManager] Actualización descartada');
 
         hideUpdateBanner();
       });
@@ -563,7 +563,7 @@
 
     activeBanner = null;
 
-    window.Logger?.debug('🔽 [NotificationManager] Modal de actualización oculto');
+    window.Logger?.debug(' [NotificationManager] Modal de actualización oculto');
   }
 
   /**
@@ -582,13 +582,13 @@
     const pendingUpdate = updateData?.pendingUpdate;
 
     if (!pendingUpdate) {
-      window.Logger?.debug('✅ [NotificationManager] No hay actualizaciones pendientes');
+      window.Logger?.debug(' [NotificationManager] No hay actualizaciones pendientes');
       return;
     }
 
     // Verificar si fue descartada
     if (await isUpdateDismissed(pendingUpdate)) {
-      window.Logger?.debug('✅ [NotificationManager] Actualización ya descartada');
+      window.Logger?.debug(' [NotificationManager] Actualización ya descartada');
       return;
     }
 
@@ -668,5 +668,5 @@
   // Exportar para uso global
   window.NotificationManager = NotificationManager;
 
-  window.Logger?.debug('✅ [NotificationManager] Módulo cargado correctamente');
+  window.Logger?.debug(' [NotificationManager] Módulo cargado correctamente');
 })(window);

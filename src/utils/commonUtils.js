@@ -167,7 +167,7 @@
     if (!timestamp) {
       return {
         level: 'stale',
-        icon: '🔴',
+        icon: '●',
         color: '#dc3545',
         ageMinutes: null,
         message: 'Sin timestamp'
@@ -182,7 +182,7 @@
     if (ageMinutes < FRESHNESS_LEVELS.FRESH_MINUTES) {
       return {
         level: 'fresh',
-        icon: '🟢',
+        icon: '●',
         color: '#28a745',
         ageMinutes,
         message: 'Datos frescos'
@@ -190,7 +190,7 @@
     } else if (ageMinutes < FRESHNESS_LEVELS.MODERATE_MINUTES) {
       return {
         level: 'moderate',
-        icon: '🟡',
+        icon: '●',
         color: '#ffc107',
         ageMinutes,
         message: 'Datos recientes'
@@ -198,7 +198,7 @@
     } else {
       return {
         level: 'stale',
-        icon: '🔴',
+        icon: '●',
         color: '#dc3545',
         ageMinutes,
         message: 'Datos desactualizados'

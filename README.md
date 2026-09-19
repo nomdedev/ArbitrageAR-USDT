@@ -462,9 +462,13 @@ La extensión sigue los principios SOLID con una arquitectura modular:
 
 - **DataService**: Gestión de llamadas a APIs externas (DolarAPI, CriptoYA)
 - **StorageManager**: Abstracción del almacenamiento Chrome
-- **ArbitrageCalculator**: Lógica pura de cálculos de arbitraje
 - **NotificationManager**: Sistema de notificaciones inteligentes
 - **ScrapingService**: Web scraping de datos bancarios
+
+> El motor de cálculo vive en `src/background/main-simple.js`
+> (`calculateSingleExchangeRoute`, `tryCalculateInterBrokerPair`, `calculateCryptoSymbolRoutes`).
+> El antiguo módulo `ArbitrageCalculator` se eliminó: era código muerto con cero usos en
+> producción y su suite daba falsa confianza sobre una copia que nunca se ejecutaba.
 
 ## 🚀 Instalación
 

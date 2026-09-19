@@ -21,12 +21,12 @@
 
     // Indicadores de estado
     const statusIndicator = isNegative
-      ? '<span class="status-indicator loss" title="Pérdida">⚠️</span>'
+      ? '<span class="status-indicator loss" title="Pérdida"></span>'
       : arb.profitPercentage >= 2
-        ? '<span class="status-indicator high" title="Alta ganancia">🔥</span>'
+        ? '<span class="status-indicator high" title="Alta ganancia"></span>'
         : arb.profitPercentage >= 0.5
-          ? '<span class="status-indicator ok" title="Ganancia moderada">✓</span>'
-          : '<span class="status-indicator low" title="Ganancia baja">👁️</span>';
+          ? '<span class="status-indicator ok" title="Ganancia moderada"></span>'
+          : '<span class="status-indicator low" title="Ganancia baja"></span>';
 
     const hasFees = arb.fees && arb.fees.total > 0;
     const spread = arb.spread
@@ -39,7 +39,7 @@
         <div class="card-content">
           <div class="card-header">
             <div class="card-title">
-              <span class="exchange-icon">🏦</span>
+ <span class="exchange-icon">●</span>
               <h3>${escapeHtml(arb.broker || 'Desconocido')}</h3>
               ${statusIndicator}
             </div>
@@ -50,11 +50,11 @@
           <div class="card-body">
             <div class="price-grid">
               <div class="price-item">
-                <span class="price-label">💵 Compra USD</span>
+ <span class="price-label"> Compra USD</span>
                 <span class="price-value">$${formatNumber(arb.officialPrice)}</span>
               </div>
               <div class="price-item highlight">
-                <span class="price-label">💸 Venta USDT</span>
+ <span class="price-label"> Venta USDT</span>
                 <span class="price-value">$${formatNumber(arb.usdtArsBid)}</span>
               </div>
             </div>
@@ -62,7 +62,7 @@
               hasFees
                 ? `
             <div class="card-fees">
-              <span class="fee-label">📊 Fees totales:</span>
+ <span class="fee-label"> Fees totales:</span>
               <span class="fee-value">${formatNumber(arb.fees.total)}%</span>
             </div>`
                 : ''
@@ -99,7 +99,7 @@
            role="button" tabindex="0" aria-label="Ruta: ${routeDescription}, ganancia ${profitSymbol}${formatNumber(displayMetrics.percentage)} por ciento">
         <div class="fiat-card-header">
           <div class="fiat-info">
-            <span class="fiat-icon">💵</span>
+ <span class="fiat-icon">●</span>
             <span class="fiat-name">USDT/ARS</span>
           </div>
           <div class="profit-badge ${profitBadgeClass}">
@@ -116,7 +116,7 @@
           
           <div class="operation-meta">
             <span class="operation-badge ${operationBadgeClass}">${operationType}</span>
-            ${hasVolume ? `<span class="volume-indicator">📊 ${volumeDisplay}</span>` : ''}
+            ${hasVolume ? `<span class="volume-indicator"> ${volumeDisplay}</span>` : ''}
           </div>
         </div>
         

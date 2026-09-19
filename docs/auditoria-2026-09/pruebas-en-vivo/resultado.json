@@ -1,0 +1,109 @@
+{
+  "P-01": {
+    "displayAntes": "none",
+    "displayDespues": "block",
+    "visible": true
+  },
+  "P-03": {
+    "encabezados": [
+      "USD Compra \\ USDT Venta",
+      "$1000",
+      "$1025",
+      "$1050",
+      "$1075",
+      "$1100"
+    ],
+    "filas": [
+      [
+        "$1400",
+        "-29.99%",
+        "-28.24%",
+        "-26.49%",
+        "-24.74%",
+        "-22.99%"
+      ],
+      [
+        "$1575",
+        "-37.77%",
+        "-36.22%",
+        "-34.66%",
+        "-33.10%",
+        "-31.55%"
+      ],
+      [
+        "$1750",
+        "-43.99%",
+        "-42.59%",
+        "-41.19%",
+        "-39.79%",
+        "-38.39%"
+      ],
+      [
+        "$1925",
+        "-49.09%",
+        "-47.81%",
+        "-46.54%",
+        "-45.27%",
+        "-43.99%"
+      ],
+      [
+        "$2100",
+        "-53.33%",
+        "-52.16%",
+        "-51.00%",
+        "-49.83%",
+        "-48.66%"
+      ]
+    ]
+  },
+  "P-03-consistencia": {
+    "celdas": 25,
+    "peor": {
+      "usd": 1400,
+      "usdt": 1100,
+      "mostrado": -0.2299,
+      "esperadoSinFees": -0.2142857142857143,
+      "delta": -0.015614285714285692
+    },
+    "preciosCol": [
+      1000,
+      1025,
+      1050,
+      1075,
+      1100
+    ]
+  },
+  "fees-seccion-visible": true,
+  "O-02/F-10/O-05": {
+    "hayInterruptor": 1,
+    "etiquetaRetiro": "Fee de retiro ($ ARS)",
+    "etiquetaTransfer": "Fee de transferencia ($ ARS)",
+    "etiquetaBanco": "Comisión bancaria ($ ARS)",
+    "opcionLemon": 1,
+    "opcionLemonVieja": 0
+  },
+  "O-01": {
+    "itemsAntesDeGuardar": 1,
+    "itemsTrasRecargar": 1,
+    "interruptorTrasRecargar": true,
+    "feesGuardados": {
+      "brokerFees": [
+        {
+          "broker": "lemoncash",
+          "buyFee": 0.5,
+          "label": "Lemon",
+          "sellFee": 1.5
+        }
+      ],
+      "applyFeesInCalculation": true
+    }
+  },
+  "errores": {
+    "serviceWorker": [
+      "Error enviando notificación: Error: Unable to download all specified images.\n    at extensions::notifications:122:7\n    at Object.oncomplete (extensions::notifications:95:9)\n    at Object.onerror (extensions::imageUtil:124:17)\n    at extensions::imageUtil:62:17",
+      "Error enviando notificación: Error: Unable to download all specified images.\n    at extensions::notifications:122:7\n    at Object.oncomplete (extensions::notifications:95:9)\n    at Object.onerror (extensions::imageUtil:124:17)\n    at extensions::imageUtil:62:17"
+    ],
+    "popup": [],
+    "options": []
+  }
+}
