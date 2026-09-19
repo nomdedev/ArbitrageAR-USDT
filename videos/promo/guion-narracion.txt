@@ -1,0 +1,56 @@
+GUION DE NARRACIÓN — ArbitrARS (Detector de Arbitraje)
+======================================================
+
+Voz: es-AR-TomasNeural (Microsoft Edge TTS, español rioplatense) · ritmo +12%
+Duración real medida: 27,26 s · 63 palabras
+Los tiempos son los definitivos: salen de los eventos WordBoundary de la síntesis,
+no de una estimación. La narración está congelada en audio/narration.wav.
+
+Para re-generarlo:  python tools/tts_es.py
+Para re-generar la música:  python tools/make_music.py
+
+
+ESCENA 1 — HOOK (0,00 → 3,22 s)
+  El dólar oficial y el USDT no valen lo mismo.
+
+ESCENA 2 — PROBLEMA (3,52 → 7,93 s)
+  Esa diferencia es real. Medirla a tiempo, no.
+
+ESCENA 3 — FEATURE 01 · COBERTURA (8,23 → 13,03 s)
+  ArbitrARS la mide sobre 49 exchanges, cada 30 segundos.
+
+ESCENA 4 — FEATURE 02 · RUTAS (13,33 → 17,12 s)
+  Te ordena las rutas por rentabilidad, con la guía paso a paso.
+
+ESCENA 5 — FEATURE 03 · SIMULADOR (17,42 → 20,62 s)
+  Simulá tu monto y tus comisiones antes de operar.
+
+ESCENA 6 — FEATURE 04 · ALERTAS (20,92 → 24,11 s)
+  Y te avisa solo cuando la brecha supera tu umbral.
+
+ESCENA 7 — CIERRE (24,41 → 27,26 s)
+  Todo en tu navegador, sin servidores.
+
+
+TEXTO EN PANTALLA (además de la narración)
+------------------------------------------
+- Marca fija (arriba a la izquierda): ArbitrARS · Detector de Arbitraje
+- Pie fijo: github.com/nomdedev/ArbitrageAR-USDT · Manifest V3 · v6.0.0 · 203 tests
+- Escena 1: OFICIAL ≠ USDT + "LA BRECHA ENTRE LOS DOS PRECIOS ES LA OPORTUNIDAD"
+- Escena 2: "Medirla a mano no escala" + 49 + muro con los 49 exchanges reales
+          + "49 EXCHANGES · 2 PRECIOS POR EXCHANGE · COMISIONES DISTINTAS POR PLATAFORMA"
+- Escena 3: "49" + "exchanges, cada 30 segundos" + CriptoYA · Bancos · Spot + P2P
+- Escena 4: "Ordenadas por rentabilidad, con la guía adentro" + los 4 pasos
+- Escena 5: "Tu monto y tus comisiones, antes de operar" + los 4 campos del simulador
+- Escena 6: "Te avisa solo, cuando supera tu umbral" + la notificación "Brecha detectada"
+- Escena 7: logo + ArbitrARS + stack + URL
+
+LO QUE EL GUION NO DICE (y por qué)
+-----------------------------------
+No se afirma en ningún momento que la extensión calcule la ganancia neta exacta, ni
+se muestra ninguna cifra de rentabilidad. La auditoría en curso
+(docs/auditoria-2026-09/) demostró que hoy el cálculo descarta la comisión de venta
+(F-01) y que las comisiones no se aplican por defecto (F-02/O-02). Un video de
+producto no puede sostener una promesa que el código todavía no cumple: el guion se
+limita a lo verificado (qué mira, cada cuánto, qué muestra y que avisa).
+Cuando F-01 y F-02 estén corregidos, el guion puede sumar una línea de resultado.

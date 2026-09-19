@@ -1,0 +1,386 @@
+[
+ {
+  "id": "w0",
+  "text": "El",
+  "start": 0.096,
+  "end": 0.258
+ },
+ {
+  "id": "w1",
+  "text": "dólar",
+  "start": 0.293,
+  "end": 0.525
+ },
+ {
+  "id": "w2",
+  "text": "oficial",
+  "start": 0.536,
+  "end": 0.953
+ },
+ {
+  "id": "w3",
+  "text": "y",
+  "start": 0.976,
+  "end": 1.045
+ },
+ {
+  "id": "w4",
+  "text": "el",
+  "start": 1.045,
+  "end": 1.126
+ },
+ {
+  "id": "w5",
+  "text": "USDT",
+  "start": 1.161,
+  "end": 1.67
+ },
+ {
+  "id": "w6",
+  "text": "no",
+  "start": 1.694,
+  "end": 1.763
+ },
+ {
+  "id": "w7",
+  "text": "valen",
+  "start": 1.798,
+  "end": 2.018
+ },
+ {
+  "id": "w8",
+  "text": "lo",
+  "start": 2.018,
+  "end": 2.133
+ },
+ {
+  "id": "w9",
+  "text": "mismo.",
+  "start": 2.168,
+  "end": 2.469
+ },
+ {
+  "id": "w10",
+  "text": "Esa",
+  "start": 3.983,
+  "end": 4.162
+ },
+ {
+  "id": "w11",
+  "text": "diferencia",
+  "start": 4.195,
+  "end": 4.731
+ },
+ {
+  "id": "w12",
+  "text": "es",
+  "start": 4.832,
+  "end": 4.954
+ },
+ {
+  "id": "w13",
+  "text": "real.",
+  "start": 4.999,
+  "end": 5.311
+ },
+ {
+  "id": "w14",
+  "text": "Medirla",
+  "start": 6.131,
+  "end": 6.532
+ },
+ {
+  "id": "w15",
+  "text": "a",
+  "start": 6.532,
+  "end": 6.577
+ },
+ {
+  "id": "w16",
+  "text": "tiempo,",
+  "start": 6.644,
+  "end": 6.99
+ },
+ {
+  "id": "w17",
+  "text": "no.",
+  "start": 7.269,
+  "end": 7.448
+ },
+ {
+  "id": "w18",
+  "text": "ArbitrARS",
+  "start": 8.849,
+  "end": 9.775
+ },
+ {
+  "id": "w19",
+  "text": "la",
+  "start": 9.798,
+  "end": 9.868
+ },
+ {
+  "id": "w20",
+  "text": "mide",
+  "start": 9.891,
+  "end": 10.099
+ },
+ {
+  "id": "w21",
+  "text": "sobre",
+  "start": 10.111,
+  "end": 10.331
+ },
+ {
+  "id": "w22",
+  "text": "49",
+  "start": 10.389,
+  "end": 11.025
+ },
+ {
+  "id": "w23",
+  "text": "exchanges,",
+  "start": 11.037,
+  "end": 11.696
+ },
+ {
+  "id": "w24",
+  "text": "cada",
+  "start": 11.893,
+  "end": 12.09
+ },
+ {
+  "id": "w25",
+  "text": "30",
+  "start": 12.09,
+  "end": 12.256
+ },
+ {
+  "id": "w26",
+  "text": "segundos.",
+  "start": 12.256,
+  "end": 13.004
+ },
+ {
+  "id": "w27",
+  "text": "Te",
+  "start": 14.284,
+  "end": 14.394
+ },
+ {
+  "id": "w28",
+  "text": "ordena",
+  "start": 14.415,
+  "end": 14.711
+ },
+ {
+  "id": "w29",
+  "text": "las",
+  "start": 14.733,
+  "end": 14.843
+ },
+ {
+  "id": "w30",
+  "text": "rutas",
+  "start": 14.854,
+  "end": 15.139
+ },
+ {
+  "id": "w31",
+  "text": "por",
+  "start": 15.194,
+  "end": 15.282
+ },
+ {
+  "id": "w32",
+  "text": "rentabilidad,",
+  "start": 15.293,
+  "end": 15.929
+ },
+ {
+  "id": "w33",
+  "text": "con",
+  "start": 16.093,
+  "end": 16.192
+ },
+ {
+  "id": "w34",
+  "text": "la",
+  "start": 16.203,
+  "end": 16.29
+ },
+ {
+  "id": "w35",
+  "text": "guía",
+  "start": 16.334,
+  "end": 16.499
+ },
+ {
+  "id": "w36",
+  "text": "paso",
+  "start": 16.565,
+  "end": 16.751
+ },
+ {
+  "id": "w37",
+  "text": "a",
+  "start": 16.751,
+  "end": 16.773
+ },
+ {
+  "id": "w38",
+  "text": "paso.",
+  "start": 16.828,
+  "end": 17.08
+ },
+ {
+  "id": "w39",
+  "text": "Simulá",
+  "start": 18.379,
+  "end": 18.758
+ },
+ {
+  "id": "w40",
+  "text": "tu",
+  "start": 18.825,
+  "end": 18.892
+ },
+ {
+  "id": "w41",
+  "text": "monto",
+  "start": 18.914,
+  "end": 19.238
+ },
+ {
+  "id": "w42",
+  "text": "y",
+  "start": 19.249,
+  "end": 19.305
+ },
+ {
+  "id": "w43",
+  "text": "tus",
+  "start": 19.35,
+  "end": 19.428
+ },
+ {
+  "id": "w44",
+  "text": "comisiones",
+  "start": 19.472,
+  "end": 19.975
+ },
+ {
+  "id": "w45",
+  "text": "antes",
+  "start": 20.03,
+  "end": 20.242
+ },
+ {
+  "id": "w46",
+  "text": "de",
+  "start": 20.265,
+  "end": 20.321
+ },
+ {
+  "id": "w47",
+  "text": "operar.",
+  "start": 20.321,
+  "end": 20.611
+ },
+ {
+  "id": "w48",
+  "text": "Y",
+  "start": 21.89,
+  "end": 22.0
+ },
+ {
+  "id": "w49",
+  "text": "te",
+  "start": 22.054,
+  "end": 22.109
+ },
+ {
+  "id": "w50",
+  "text": "avisa",
+  "start": 22.109,
+  "end": 22.438
+ },
+ {
+  "id": "w51",
+  "text": "solo",
+  "start": 22.449,
+  "end": 22.668
+ },
+ {
+  "id": "w52",
+  "text": "cuando",
+  "start": 22.734,
+  "end": 22.921
+ },
+ {
+  "id": "w53",
+  "text": "la",
+  "start": 22.953,
+  "end": 23.019
+ },
+ {
+  "id": "w54",
+  "text": "brecha",
+  "start": 23.052,
+  "end": 23.304
+ },
+ {
+  "id": "w55",
+  "text": "supera",
+  "start": 23.326,
+  "end": 23.633
+ },
+ {
+  "id": "w56",
+  "text": "tu",
+  "start": 23.688,
+  "end": 23.732
+ },
+ {
+  "id": "w57",
+  "text": "umbral.",
+  "start": 23.732,
+  "end": 24.116
+ },
+ {
+  "id": "w58",
+  "text": "Todo",
+  "start": 25.313,
+  "end": 25.573
+ },
+ {
+  "id": "w59",
+  "text": "en",
+  "start": 25.573,
+  "end": 25.667
+ },
+ {
+  "id": "w60",
+  "text": "tu",
+  "start": 25.679,
+  "end": 25.738
+ },
+ {
+  "id": "w61",
+  "text": "navegador,",
+  "start": 25.761,
+  "end": 26.304
+ },
+ {
+  "id": "w62",
+  "text": "sin",
+  "start": 26.422,
+  "end": 26.657
+ },
+ {
+  "id": "w63",
+  "text": "servidores.",
+  "start": 26.658,
+  "end": 27.341
+ }
+]

@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, height=1920">
+    <title>ArbitrARS — Detector de Arbitraje · promo</title>
+    <script src="assets/gsap.min.js"></script>
+    <style>
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-400-normal-7cHpv4kj.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-400-normal-7cHpv4kj.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-400-normal-7cHpv4kj.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-500-normal-7cHqv4kj.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-500-normal-7cHqv4kj.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-500-normal-7cHqv4kj.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-600-normal-7cHqv4kj.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-600-normal-7cHqv4kj.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-600-normal-7cHqv4kj.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-700-normal-7cHqv4kj.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-700-normal-7cHqv4kj.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-700-normal-7cHqv4kj.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-900-normal-7cHqv4kj.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-900-normal-7cHqv4kj.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url(assets/fonts/Barlow-900-normal-7cHqv4kj.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/fonts/IBMPlexMono-400-normal--F63fjpt.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/fonts/IBMPlexMono-400-normal--F63fjpt.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/fonts/IBMPlexMono-400-normal--F63fjpt.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/fonts/IBMPlexMono-400-normal--F63fjpt.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/fonts/IBMPlexMono-400-normal--F63fjpt.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(assets/fonts/IBMPlexMono-500-normal--F6qfjpt.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(assets/fonts/IBMPlexMono-500-normal--F6qfjpt.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(assets/fonts/IBMPlexMono-500-normal--F6qfjpt.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(assets/fonts/IBMPlexMono-500-normal--F6qfjpt.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(assets/fonts/IBMPlexMono-500-normal--F6qfjpt.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(assets/fonts/IBMPlexMono-600-normal--F6qfjpt.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(assets/fonts/IBMPlexMono-600-normal--F6qfjpt.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(assets/fonts/IBMPlexMono-600-normal--F6qfjpt.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(assets/fonts/IBMPlexMono-600-normal--F6qfjpt.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(assets/fonts/IBMPlexMono-600-normal--F6qfjpt.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  --ground: #09090b;
+  --ground-alt: #18191A;
+  --text: #f0f6fc;
+  --muted: #8B9199;
+  --faint: #484B50;
+  --border: #262728;
+  --accent: #3b82f6;
+  --cyan: #56d4dd;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--ground); }
+body { font-family: 'Barlow', system-ui, sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; }
+
+#root { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--ground); }
+
+/* fondo persistente: sin data-start, necesita su propio posicionamiento */
+#bg { position: absolute; inset: 0; background:
+    radial-gradient(1100px 620px at 78% 8%, rgba(59,130,246,.13), transparent 62%),
+    radial-gradient(900px 520px at 12% 96%, rgba(86,212,221,.07), transparent 60%),
+    linear-gradient(180deg, #09090b 0%, #0d0e11 52%, #09090b 100%); }
+#grid { position: absolute; inset: 0; opacity: .5;
+    background-image: linear-gradient(rgba(59,130,246,.055) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(59,130,246,.055) 1px, transparent 1px);
+    background-size: 64px 64px; }
+#hair-top, #hair-bot { position: absolute; left: 0; right: 0; height: 1px; background: var(--border); }
+#hair-top { top: 96px; }
+#hair-bot { bottom: 96px; }
+
+/* cromo persistente (marca + pie) */
+#brand { position: absolute; left: 72px; top: 40px; display: flex; align-items: baseline; gap: 14px; }
+#brand b { font: 700 26px/1 'Barlow'; letter-spacing: .01em; }
+#brand i { font: 500 12.5px/1 'IBM Plex Mono'; letter-spacing: .18em; color: var(--cyan); font-style: normal; }
+#foot { position: absolute; left: 72px; right: 72px; bottom: 40px; display: flex; justify-content: space-between;
+    font: 500 13px/1 'IBM Plex Mono'; letter-spacing: .13em; color: var(--muted); }
+#foot .a { color: var(--muted); }
+#foot .b { color: #7A7D81; }
+
+.mono { font-family: 'IBM Plex Mono'; letter-spacing: .15em; text-transform: uppercase; }
+
+/* ── escenas ── */
+.clip { position: absolute; inset: 0; }
+.pz { position: absolute; inset: 0; }
+.scene { position: absolute; left: 72px; right: 72px; top: 138px; bottom: 300px; }
+
+/* caption cinética — banda propia, con aire respecto de la escena y del pie */
+.caps { position: absolute; left: 0; right: 0; bottom: 118px; display: flex; justify-content: center; }
+.caps-in { max-width: 1500px; text-align: center; font: 600 42px/1.25 'Barlow'; letter-spacing: -.005em; }
+.cw { display: inline-block; margin: 0 9px; color: var(--text); }
+
+/* escena 1 — hook */
+.s1 { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 46px; }
+.s1-row { display: flex; align-items: center; gap: 54px; }
+.s1-word { font: 900 148px/1 'Barlow'; letter-spacing: -.03em; display: block; }
+.s1-word.alt { color: var(--muted); }
+#s1-neq { width: 132px; height: 132px; display: block; }
+.s1-sub { font: 500 15px/1 'IBM Plex Mono'; letter-spacing: .26em; color: var(--cyan); text-transform: uppercase; }
+
+/* escena 2 — muro de exchanges */
+.s2-title { font: 600 62px/1.1 'Barlow'; letter-spacing: -.02em; max-width: 1180px; }
+.s2-title em { font-style: normal; color: var(--accent); }
+.s2-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px 22px; width: 100%; margin-top: 44px; }
+.s2-chip { font: 400 19px/1 'IBM Plex Mono'; color: var(--muted); padding: 13px 0 13px 14px;
+    border-left: 1px solid var(--border); display: block; }
+.s2-note { margin-top: 40px; font: 500 15px/1 'IBM Plex Mono'; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }
+.s2-badge { position: absolute; right: 0; top: 4px; text-align: right; }
+.s2-badge b { font: 900 128px/1 'Barlow'; color: var(--accent); display: block; letter-spacing: -.03em; margin-bottom: 22px; }
+.s2-badge span { font: 500 14px/1 'IBM Plex Mono'; letter-spacing: .18em; color: var(--muted); text-transform: uppercase; display: block; }
+
+/* escenas 3-5 — producto + columna de datos */
+.split { display: grid; grid-template-columns: 700px 1fr; gap: 90px; height: 100%; align-items: center; }
+.phone { width: 424px; height: 594px; margin: 0 auto; border: 1px solid var(--border); border-radius: 26px;
+    overflow: hidden; background: var(--ground-alt); position: relative;
+    box-shadow: 0 40px 90px rgba(0,0,0,.6), 0 0 0 8px rgba(255,255,255,.02); }
+.phone img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
+.scan { position: absolute; left: 0; right: 0; height: 140px; top: -140px;
+    background: linear-gradient(180deg, rgba(59,130,246,0), rgba(59,130,246,.42), rgba(59,130,246,0)); }
+.feat-label { font: 500 14px/1 'IBM Plex Mono'; letter-spacing: .22em; color: var(--cyan); text-transform: uppercase; }
+.feat-head { font: 700 76px/1.02 'Barlow'; letter-spacing: -.025em; margin-top: 22px; max-width: 900px; }
+.feat-head em { font-style: normal; color: var(--accent); }
+.big-num { font: 900 176px/0.86 'Barlow'; color: var(--accent); letter-spacing: -.04em; }
+.chips { display: flex; gap: 12px; margin-top: 30px; flex-wrap: wrap; }
+.chip { font: 500 15px/1 'IBM Plex Mono'; letter-spacing: .12em; color: var(--text);
+    border: 1px solid var(--border); border-radius: 999px; padding: 12px 20px; text-transform: uppercase; }
+.chip.on { border-color: rgba(59,130,246,.6); color: var(--accent); }
+
+/* pasos */
+.steps { margin-top: 40px; display: flex; flex-direction: column; gap: 20px; }
+.step { display: grid; grid-template-columns: 74px 1fr; align-items: baseline;
+    border-top: 1px solid var(--border); padding-top: 18px; }
+.step i { font: 500 15px/1 'IBM Plex Mono'; color: var(--accent); font-style: normal; letter-spacing: .1em; }
+.step b { font: 600 34px/1.15 'Barlow'; display: block; }
+.step span { font: 400 18px/1.4 'Barlow'; color: var(--muted); display: block; margin-top: 5px; }
+
+/* campos del simulador */
+.fields { margin-top: 38px; display: flex; flex-direction: column; gap: 14px; max-width: 620px; }
+.field { display: flex; justify-content: space-between; align-items: center;
+    border: 1px solid var(--border); border-radius: 14px; padding: 20px 24px; background: rgba(255,255,255,.012); }
+.field label { font: 500 13px/1 'IBM Plex Mono'; letter-spacing: .16em; color: var(--muted); text-transform: uppercase; }
+.field b { font: 600 30px/1 'Barlow'; }
+.field.primary { border-color: rgba(59,130,246,.55); }
+.field.primary b { color: var(--accent); }
+.caret { display: inline-block; width: 2px; height: 30px; background: var(--accent); vertical-align: -4px; margin-left: 8px; }
+
+/* notificaciones (escena 6) */
+.notif-stage { position: relative; height: 560px; display: flex; align-items: center; justify-content: center; }
+.notif { position: absolute; width: 720px; border: 1px solid var(--border); border-radius: 20px; padding: 26px 30px;
+    background: linear-gradient(180deg, #1a1c20 0%, #141619 100%); display: grid;
+    grid-template-columns: 62px 1fr; gap: 20px; align-items: center;
+    box-shadow: 0 34px 80px rgba(0,0,0,.62); }
+.notif.ghost2 { opacity: .28; filter: blur(1.1px); }
+.notif.ghost1 { opacity: .55; filter: blur(.5px); }
+.notif.ghost1, .notif.ghost2 { height: 118px; display: block; padding: 0; }
+.notif.ghost1 .dot, .notif.ghost2 .dot { display: block; }
+.notif .ic { width: 62px; height: 62px; border-radius: 15px; overflow: hidden; background: #0b0d10; display: grid; place-items: center; }
+.notif .ic img { width: 100%; height: 100%; object-fit: contain; }
+.notif h4 { font: 600 27px/1.2 'Barlow'; }
+.notif p { font: 400 19px/1.35 'Barlow'; color: var(--muted); margin-top: 5px; }
+.notif .t { position: absolute; right: 30px; top: 26px; font: 500 12.5px/1 'IBM Plex Mono'; letter-spacing: .14em; color: var(--faint); text-transform: uppercase; }
+.notif .dot { position: absolute; left: -1px; top: 50%; width: 3px; height: 44px; margin-top: -22px; background: var(--accent); border-radius: 2px; }
+
+/* escena 7 — cierre */
+.s7 { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; }
+.s7-mark { width: 300px; height: 278px; position: relative; }
+.s7-mark img { width: 100%; height: 100%; display: block; }
+.s7-word { font: 900 116px/1 'Barlow'; letter-spacing: -.035em; }
+.s7-word i { font-style: normal; color: var(--accent); }
+.s7-stack { font: 500 15px/1 'IBM Plex Mono'; letter-spacing: .24em; color: var(--muted); text-transform: uppercase; }
+.s7-cta { margin-top: 8px; font: 500 19px/1 'IBM Plex Mono'; letter-spacing: .1em; color: var(--accent); }
+
+/* ───────── VERTICAL 1080x1920 (reels / shorts) ───────── */
+#brand { left: 60px; top: 112px; gap: 12px; }
+#brand b { font-size: 30px; }
+#brand i { font-size: 14px; letter-spacing: .16em; }
+#hair-top { top: 196px; }
+#hair-bot { bottom: 452px; }
+#foot { left: 60px; right: 60px; bottom: 400px; font-size: 15px; }
+
+/* zona útil: 230 → 1280 (deja libres los 440px que en un feed tapa la interfaz) */
+.scene { left: 60px; right: 60px; top: 230px; bottom: 640px; }
+.caps { bottom: 470px; }
+.caps-in { max-width: 940px; font-size: 52px; }
+.cw { margin: 0 8px; }
+
+/* el producto manda: teléfono arriba, datos abajo y centrados */
+.split { display: flex; flex-direction: column; align-items: center; justify-content: center;
+         gap: 34px; height: 100%; }
+.split > div:not(.phone):not(.notif-stage) { width: 100%; text-align: center; }
+.phone { width: 600px; height: 840px; margin: 0; border-radius: 32px; }
+.feat-label { font-size: 15px; }
+.feat-head { font-size: 50px; line-height: 1.06; margin-top: 12px; max-width: 100%; }
+.big-num { font-size: 150px; line-height: .88; }
+.chips { margin-top: 22px; justify-content: center; gap: 10px; }
+.chip { font-size: 15px; padding: 12px 19px; }
+.steps { margin-top: 24px; gap: 15px; }
+.step { grid-template-columns: 58px 1fr; padding-top: 13px; }
+.step b { font-size: 30px; }
+.step span { font-size: 17px; }
+.fields { margin-top: 22px; max-width: 100%; gap: 11px; }
+.field { padding: 17px 21px; }
+.field b { font-size: 27px; }
+
+/* hook: en 9:16 la comparación se lee mejor apilada que en fila */
+.s1 { gap: 38px; }
+.s1-row { flex-direction: column; gap: 20px; }
+.s1-word { font-size: 128px; }
+#s1-neq { width: 108px; height: 108px; }
+.s1-sub { font-size: 16px; letter-spacing: .2em; max-width: 900px; text-align: center; }
+
+/* muro de exchanges: cuatro columnas en vez de siete, y el 49 primero */
+#s2 .scene { display: flex; flex-direction: column; align-items: center; }
+.s2-title { order: 1; font-size: 48px; max-width: 960px; text-align: center; }
+.s2-badge { order: 2; position: static; text-align: center; margin: 30px 0 0; }
+.s2-badge b { font-size: 138px; margin-bottom: 12px; }
+.s2-grid { order: 3; grid-template-columns: repeat(4, 1fr); gap: 10px 18px; margin-top: 28px; }
+.s2-chip { font-size: 17px; padding: 11px 0 11px 12px; }
+.s2-note { order: 4; margin-top: 28px; font-size: 14px; text-align: center; }
+
+/* alertas: la notificación arriba (es el sujeto) y el texto abajo */
+#s6 .split { flex-direction: column-reverse; }
+.notif-stage { width: 100%; height: 600px; }
+.notif { width: 840px; grid-template-columns: 66px 1fr; }
+.notif .ic { width: 66px; height: 66px; }
+.notif h4 { font-size: 29px; }
+.notif p { font-size: 20px; }
+
+/* cierre */
+.s7 { gap: 26px; }
+.s7-mark { width: 344px; height: 320px; }
+.s7-word { font-size: 134px; }
+.s7-stack { font-size: 15px; letter-spacing: .2em; }
+.s7-cta { font-size: 20px; }
+
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-ca9a" id="root" data-composition-id="arbitrars-promo" data-start="0" data-width="1080" data-height="1920" data-duration="28.3">
+      <div data-hf-id="hf-2xc0" id="bg"></div>
+      <div data-hf-id="hf-gs5t" id="grid"></div>
+      <div data-hf-id="hf-jrkb" id="hair-top"></div>
+      <div data-hf-id="hf-ibad" id="hair-bot"></div>
+      <div data-hf-id="hf-nv54" id="brand"><b data-hf-id="hf-74u3">ArbitrARS</b><i data-hf-id="hf-0fpz">Detector de Arbitraje</i></div>
+      <div data-hf-id="hf-l4at" id="foot">
+        <span data-hf-id="hf-snvr" class="a">github.com/nomdedev/ArbitrageAR-USDT</span>
+        <span data-hf-id="hf-xifl" class="b">Manifest V3 · v6.0.0 · 203 tests</span>
+      </div>
+
+    <section data-hf-id="hf-bpth" class="clip scene-clip" id="s1" data-start="0.0" data-duration="3.64" data-track-index="3">
+      <div data-hf-id="hf-qdhz" class="pz" id="s1-pz">
+        <div data-hf-id="hf-wua0" class="scene">
+
+      <div data-hf-id="hf-ly60" class="s1">
+        <div data-hf-id="hf-6enb" class="s1-row">
+          <span data-hf-id="hf-io2v" class="s1-word" id="s1-a">OFICIAL</span>
+          <svg data-hf-id="hf-2ra5" id="s1-neq" viewBox="0 0 132 132" aria-hidden="true">
+            <rect data-hf-id="hf-c8kf" x="8" y="44" width="116" height="12" rx="3" fill="#f0f6fc" />
+            <rect data-hf-id="hf-0dug" x="8" y="76" width="116" height="12" rx="3" fill="#f0f6fc" />
+            <rect data-hf-id="hf-i66y" x="-6" y="59" width="144" height="13" rx="4" fill="#3b82f6" transform="rotate(-34 66 66)" />
+          </svg>
+          <span data-hf-id="hf-6as4" class="s1-word alt" id="s1-b">USDT</span>
+        </div>
+        <div data-hf-id="hf-vqfd" class="s1-sub" id="s1-sub">La brecha entre los dos precios es la oportunidad</div>
+      </div>
+        </div>
+      </div>
+      <div data-hf-id="hf-br8j" class="caps"><div data-hf-id="hf-voz7" class="caps-in" id="s1-caps"><span data-hf-id="hf-rs18" class="cw" data-s="0.096" data-e="0.258">El</span><span data-hf-id="hf-51tp" class="cw" data-s="0.293" data-e="0.525">dólar</span><span data-hf-id="hf-w0zz" class="cw" data-s="0.536" data-e="0.953">oficial</span><span data-hf-id="hf-c6tw" class="cw" data-s="0.976" data-e="1.045">y</span><span data-hf-id="hf-xec6" class="cw" data-s="1.045" data-e="1.126">el</span><span data-hf-id="hf-t4ey" class="cw" data-s="1.161" data-e="1.67">USDT</span><span data-hf-id="hf-90ad" class="cw" data-s="1.694" data-e="1.763">no</span><span data-hf-id="hf-y34b" class="cw" data-s="1.798" data-e="2.018">valen</span><span data-hf-id="hf-muu8" class="cw" data-s="2.018" data-e="2.133">lo</span><span data-hf-id="hf-r8di" class="cw" data-s="2.168" data-e="2.469">mismo.</span></div></div>
+    </section>
+    <section data-hf-id="hf-vvsu" class="clip scene-clip" id="s2" data-start="3.64" data-duration="4.96" data-track-index="4">
+      <div data-hf-id="hf-xhl2" class="pz" id="s2-pz">
+        <div data-hf-id="hf-md34" class="scene">
+
+      <div data-hf-id="hf-pxjm" class="s2-badge" id="s2-badge"><b data-hf-id="hf-evda">49</b><span data-hf-id="hf-3xf1">exchanges</span></div>
+      <div data-hf-id="hf-yb58" class="s2-title" id="s2-title">Medirla a mano <em data-hf-id="hf-bh8n">no escala</em></div>
+      <div data-hf-id="hf-nen6" class="s2-grid" id="s2-grid"><span data-hf-id="hf-w9g9" class="s2-chip">binance</span><span data-hf-id="hf-6uoz" class="s2-chip">lemoncash</span><span data-hf-id="hf-qd2w" class="s2-chip">ripio</span><span data-hf-id="hf-ef4m" class="s2-chip">buenbit</span><span data-hf-id="hf-m5t2" class="s2-chip">fiwind</span><span data-hf-id="hf-nc0e" class="s2-chip">letsbit</span><span data-hf-id="hf-y9ax" class="s2-chip">belo</span><span data-hf-id="hf-h8tb" class="s2-chip">satoshitango</span><span data-hf-id="hf-aj4q" class="s2-chip">bitso</span><span data-hf-id="hf-hw6v" class="s2-chip">decrypto</span><span data-hf-id="hf-w51f" class="s2-chip">cocoscrypto</span><span data-hf-id="hf-jeoo" class="s2-chip">pluscrypto</span><span data-hf-id="hf-vg03" class="s2-chip">tiendacrypto</span><span data-hf-id="hf-z00o" class="s2-chip">universalcoins</span><span data-hf-id="hf-quhe" class="s2-chip">saldo</span><span data-hf-id="hf-uky0" class="s2-chip">bitfinex</span><span data-hf-id="hf-3omz" class="s2-chip">kraken</span><span data-hf-id="hf-8nbl" class="s2-chip">coinbase</span><span data-hf-id="hf-ov86" class="s2-chip">gemini</span><span data-hf-id="hf-u7dr" class="s2-chip">bitstamp</span><span data-hf-id="hf-y19t" class="s2-chip">poloniex</span><span data-hf-id="hf-qok7" class="s2-chip">cexio</span><span data-hf-id="hf-v8du" class="s2-chip">gateio</span><span data-hf-id="hf-7kd9" class="s2-chip">okx</span><span data-hf-id="hf-caqf" class="s2-chip">bybit</span><span data-hf-id="hf-n3j2" class="s2-chip">eluter</span><span data-hf-id="hf-raiy" class="s2-chip">vitawallet</span><span data-hf-id="hf-k7xk" class="s2-chip">wallbit</span><span data-hf-id="hf-i82b" class="s2-chip">xapo</span><span data-hf-id="hf-u1vz" class="s2-chip">x4t</span><span data-hf-id="hf-uezp" class="s2-chip">trubit</span><span data-hf-id="hf-ux6y" class="s2-chip">astropay</span><span data-hf-id="hf-u5se" class="s2-chip">banexcoin</span><span data-hf-id="hf-8j4x" class="s2-chip">bingx</span><span data-hf-id="hf-4bl0" class="s2-chip">bitget</span><span data-hf-id="hf-uylt" class="s2-chip">coinex</span><span data-hf-id="hf-8u1f" class="s2-chip">cryptomktpro</span><span data-hf-id="hf-4mkl" class="s2-chip">eldorado</span><span data-hf-id="hf-jdhq" class="s2-chip">huobi</span><span data-hf-id="hf-kbm4" class="s2-chip">kucoin</span><span data-hf-id="hf-ageq" class="s2-chip">mexc</span><span data-hf-id="hf-wxnq" class="s2-chip">paydece</span><span data-hf-id="hf-wf1o" class="s2-chip">weex</span><span data-hf-id="hf-yh8i" class="s2-chip">bitsoalpha</span><span data-hf-id="hf-5lol" class="s2-chip">ripioexchange</span><span data-hf-id="hf-u1vv" class="s2-chip">krakenp2p</span><span data-hf-id="hf-mxe9" class="s2-chip">binancep2p</span><span data-hf-id="hf-1k67" class="s2-chip">bybitp2p</span><span data-hf-id="hf-dbtp" class="s2-chip">okxp2p</span></div>
+      <div data-hf-id="hf-ea24" class="s2-note" id="s2-note">49 exchanges · 2 precios por exchange · comisiones distintas por plataforma</div>
+        </div>
+      </div>
+      <div data-hf-id="hf-pyub" class="caps"><div data-hf-id="hf-p1je" class="caps-in" id="s2-caps"><span data-hf-id="hf-g5gw" class="cw" data-s="3.983" data-e="4.162">Esa</span><span data-hf-id="hf-a6i7" class="cw" data-s="4.195" data-e="4.731">diferencia</span><span data-hf-id="hf-2882" class="cw" data-s="4.832" data-e="4.954">es</span><span data-hf-id="hf-8m9q" class="cw" data-s="4.999" data-e="5.311">real.</span><span data-hf-id="hf-ywey" class="cw" data-s="6.131" data-e="6.532">Medirla</span><span data-hf-id="hf-dyj7" class="cw" data-s="6.532" data-e="6.577">a</span><span data-hf-id="hf-zl7x" class="cw" data-s="6.644" data-e="6.99">tiempo,</span><span data-hf-id="hf-f7wj" class="cw" data-s="7.269" data-e="7.448">no.</span></div></div>
+    </section>
+    <section data-hf-id="hf-mzv8" class="clip scene-clip" id="s3" data-start="8.6" data-duration="5.54" data-track-index="5">
+      <div data-hf-id="hf-kl5l" class="pz" id="s3-pz">
+        <div data-hf-id="hf-l661" class="scene">
+
+      <div data-hf-id="hf-hgc8" class="split">
+        <div data-hf-id="hf-tgum" class="phone" id="s3-phone" data-layout-allow-overflow="">
+          <img data-hf-id="hf-8vlp" src="capture/assets/popup-exchanges.png" alt="Precios por exchange en ArbitrARS">
+          <div data-hf-id="hf-w1sb" class="scan" id="s3-scan"></div>
+        </div>
+        <div data-hf-id="hf-yeow">
+          <div data-hf-id="hf-8fip" class="feat-label" id="s3-label">Feature 01 · Cobertura</div>
+          <div data-hf-id="hf-gmu5" class="big-num" id="s3-num">49</div>
+          <div data-hf-id="hf-ltlg" class="feat-head" id="s3-head">exchanges, <em data-hf-id="hf-kbi1">cada 30 segundos</em></div>
+          <div data-hf-id="hf-pwof" class="chips" id="s3-chips">
+            <span data-hf-id="hf-css7" class="chip on">CriptoYA · USDT/ARS</span>
+            <span data-hf-id="hf-vucj" class="chip">Bancos · dólar oficial</span>
+            <span data-hf-id="hf-l9r4" class="chip">Spot + P2P</span>
+          </div>
+        </div>
+      </div>
+        </div>
+      </div>
+      <div data-hf-id="hf-pkja" class="caps"><div data-hf-id="hf-xydx" class="caps-in" id="s3-caps"><span data-hf-id="hf-8gi0" class="cw" data-s="8.849" data-e="9.775">ArbitrARS</span><span data-hf-id="hf-ez3c" class="cw" data-s="9.798" data-e="9.868">la</span><span data-hf-id="hf-9sxe" class="cw" data-s="9.891" data-e="10.099">mide</span><span data-hf-id="hf-ptu6" class="cw" data-s="10.111" data-e="10.331">sobre</span><span data-hf-id="hf-m746" class="cw" data-s="10.389" data-e="11.025">49</span><span data-hf-id="hf-jo3u" class="cw" data-s="11.037" data-e="11.696">exchanges,</span><span data-hf-id="hf-owt2" class="cw" data-s="11.893" data-e="12.09">cada</span><span data-hf-id="hf-335w" class="cw" data-s="12.09" data-e="12.256">30</span><span data-hf-id="hf-4hnn" class="cw" data-s="12.256" data-e="13.004">segundos.</span></div></div>
+    </section>
+    <section data-hf-id="hf-ew1h" class="clip scene-clip" id="s4" data-start="14.14" data-duration="4.09" data-track-index="6">
+      <div data-hf-id="hf-m6eg" class="pz" id="s4-pz">
+        <div data-hf-id="hf-lkh2" class="scene">
+
+      <div data-hf-id="hf-wu6o" class="split">
+        <div data-hf-id="hf-f6ad" class="phone" id="s4-phone" data-layout-allow-overflow="">
+          <img data-hf-id="hf-d383" src="capture/assets/popup-main.png" alt="Rutas de arbitraje en ArbitrARS">
+        </div>
+        <div data-hf-id="hf-y7yw">
+          <div data-hf-id="hf-uba5" class="feat-label" id="s4-label">Feature 02 · Rutas</div>
+          <div data-hf-id="hf-wyzb" class="feat-head" id="s4-head" style="font-size:60px">Ordenadas por rentabilidad, <em data-hf-id="hf-6y5v">con la guía adentro</em></div>
+          <div data-hf-id="hf-q0p4" class="steps" id="s4-steps"><div data-hf-id="hf-uqbq" class="step"><i data-hf-id="hf-b7wv">01</i><div data-hf-id="hf-x11t"><b data-hf-id="hf-xe5e">Comprar dólar oficial</b><span data-hf-id="hf-0jyy">en tu banco, dentro del cupo</span></div></div><div data-hf-id="hf-jlje" class="step"><i data-hf-id="hf-atlu">02</i><div data-hf-id="hf-xfcu"><b data-hf-id="hf-ky3o">Convertir a USDT</b><span data-hf-id="hf-nwxi">transferís los USD al exchange</span></div></div><div data-hf-id="hf-jzuf" class="step"><i data-hf-id="hf-afat">03</i><div data-hf-id="hf-w8fr"><b data-hf-id="hf-to89">Vender los USDT</b><span data-hf-id="hf-ea7y">por pesos, al mejor precio del mercado</span></div></div><div data-hf-id="hf-ke5g" class="step"><i data-hf-id="hf-d7g0">04</i><div data-hf-id="hf-wmqs"><b data-hf-id="hf-mrgd">Retirar la ganancia</b><span data-hf-id="hf-e4he">de vuelta a tu cuenta bancaria</span></div></div></div>
+        </div>
+      </div>
+        </div>
+      </div>
+      <div data-hf-id="hf-p689" class="caps"><div data-hf-id="hf-ck2c" class="caps-in" id="s4-caps"><span data-hf-id="hf-9t8c" class="cw" data-s="14.284" data-e="14.394">Te</span><span data-hf-id="hf-9rh5" class="cw" data-s="14.415" data-e="14.711">ordena</span><span data-hf-id="hf-xzxd" class="cw" data-s="14.733" data-e="14.843">las</span><span data-hf-id="hf-62jt" class="cw" data-s="14.854" data-e="15.139">rutas</span><span data-hf-id="hf-jedg" class="cw" data-s="15.194" data-e="15.282">por</span><span data-hf-id="hf-oq1w" class="cw" data-s="15.293" data-e="15.929">rentabilidad,</span><span data-hf-id="hf-9rvv" class="cw" data-s="16.093" data-e="16.192">con</span><span data-hf-id="hf-17ly" class="cw" data-s="16.203" data-e="16.29">la</span><span data-hf-id="hf-k7xv" class="cw" data-s="16.334" data-e="16.499">guía</span><span data-hf-id="hf-zqlf" class="cw" data-s="16.565" data-e="16.751">paso</span><span data-hf-id="hf-hpv4" class="cw" data-s="16.751" data-e="16.773">a</span><span data-hf-id="hf-ubwv" class="cw" data-s="16.828" data-e="17.08">paso.</span></div></div>
+    </section>
+    <section data-hf-id="hf-auuh" class="clip scene-clip" id="s5" data-start="18.23" data-duration="3.55" data-track-index="7">
+      <div data-hf-id="hf-ap2z" class="pz" id="s5-pz">
+        <div data-hf-id="hf-kdjz" class="scene">
+
+      <div data-hf-id="hf-vn9l" class="split">
+        <div data-hf-id="hf-aka4" class="phone" id="s5-phone" data-layout-allow-overflow="">
+          <img data-hf-id="hf-zcib" src="capture/assets/popup-sim.png" alt="Simulador de ArbitrARS">
+        </div>
+        <div data-hf-id="hf-vftp">
+          <div data-hf-id="hf-zd0q" class="feat-label" id="s5-label">Feature 03 · Simulador</div>
+          <div data-hf-id="hf-r2k0" class="feat-head" id="s5-head" style="font-size:58px">Tu monto y tus comisiones, <em data-hf-id="hf-ljaa">antes de operar</em></div>
+          <div data-hf-id="hf-nvlt" class="fields" id="s5-fields"><div data-hf-id="hf-8c6e" class="field primary"><label data-hf-id="hf-acre">MONTO A INVERTIR</label><b data-hf-id="hf-pifc">$ 1.000.000<span data-hf-id="hf-odce" class="caret" id="s5-caret"></span></b></div><div data-hf-id="hf-0ztw" class="field"><label data-hf-id="hf-1v4u">COMISIÓN DE TRADING</label><b data-hf-id="hf-yxij">0,5 %</b></div><div data-hf-id="hf-bxgc" class="field"><label data-hf-id="hf-4avg">COMISIÓN DE RETIRO</label><b data-hf-id="hf-ketn">0,5 %</b></div><div data-hf-id="hf-aqj9" class="field"><label data-hf-id="hf-8wfj">COMISIÓN BANCARIA</label><b data-hf-id="hf-xe7v">$ 0</b></div></div>
+        </div>
+      </div>
+        </div>
+      </div>
+      <div data-hf-id="hf-orx8" class="caps"><div data-hf-id="hf-8f5r" class="caps-in" id="s5-caps"><span data-hf-id="hf-29rj" class="cw" data-s="18.379" data-e="18.758">Simulá</span><span data-hf-id="hf-5s5c" class="cw" data-s="18.825" data-e="18.892">tu</span><span data-hf-id="hf-mwww" class="cw" data-s="18.914" data-e="19.238">monto</span><span data-hf-id="hf-wzfj" class="cw" data-s="19.249" data-e="19.305">y</span><span data-hf-id="hf-e9un" class="cw" data-s="19.35" data-e="19.428">tus</span><span data-hf-id="hf-qh3y" class="cw" data-s="19.472" data-e="19.975">comisiones</span><span data-hf-id="hf-uou5" class="cw" data-s="20.03" data-e="20.242">antes</span><span data-hf-id="hf-b7jb" class="cw" data-s="20.265" data-e="20.321">de</span><span data-hf-id="hf-47d0" class="cw" data-s="20.321" data-e="20.611">operar.</span></div></div>
+    </section>
+    <section data-hf-id="hf-hy1j" class="clip scene-clip" id="s6" data-start="21.78" data-duration="3.44" data-track-index="8">
+      <div data-hf-id="hf-5cju" class="pz" id="s6-pz">
+        <div data-hf-id="hf-krv0" class="scene">
+
+      <div data-hf-id="hf-u926" class="split" style="grid-template-columns: 1fr 860px">
+        <div data-hf-id="hf-vu4q">
+          <div data-hf-id="hf-otrc" class="feat-label" id="s6-label">Feature 04 · Alertas</div>
+          <div data-hf-id="hf-3nsu" class="feat-head" id="s6-head" style="font-size:64px">Te avisa solo, <em data-hf-id="hf-qe4z">cuando supera tu umbral</em></div>
+          <div data-hf-id="hf-ask6" class="chips" id="s6-chips">
+            <span data-hf-id="hf-lqml" class="chip on">Notificación nativa</span>
+            <span data-hf-id="hf-ioil" class="chip">Umbral configurable</span>
+            <span data-hf-id="hf-6m6f" class="chip">Horario silencioso</span>
+          </div>
+        </div>
+        <div data-hf-id="hf-mf4n" class="notif-stage">
+          <div data-hf-id="hf-xy5g" class="notif ghost2" id="s6-g2"><div data-hf-id="hf-lu65" class="dot"></div></div>
+          <div data-hf-id="hf-b5gm" class="notif ghost1" id="s6-g1"><div data-hf-id="hf-ww7l" class="dot"></div></div>
+          <div data-hf-id="hf-muju" class="notif" id="s6-n">
+            <div data-hf-id="hf-y34o" class="dot"></div>
+            <div data-hf-id="hf-w92w" class="ic"><img data-hf-id="hf-z18i" src="capture/assets/icon128.png" alt="ArbitrARS"></div>
+            <div data-hf-id="hf-1043">
+              <h4 data-hf-id="hf-yj5j">Brecha detectada</h4>
+              <p data-hf-id="hf-9is2">Una ruta supera el umbral que configuraste.</p>
+            </div>
+            <div data-hf-id="hf-e3tj" class="t">ahora</div>
+          </div>
+        </div>
+      </div>
+        </div>
+      </div>
+      <div data-hf-id="hf-odm7" class="caps"><div data-hf-id="hf-9aom" class="caps-in" id="s6-caps"><span data-hf-id="hf-lv2a" class="cw" data-s="21.89" data-e="22.0">Y</span><span data-hf-id="hf-m57x" class="cw" data-s="22.054" data-e="22.109">te</span><span data-hf-id="hf-p53e" class="cw" data-s="22.109" data-e="22.438">avisa</span><span data-hf-id="hf-ir4n" class="cw" data-s="22.449" data-e="22.668">solo</span><span data-hf-id="hf-97gz" class="cw" data-s="22.734" data-e="22.921">cuando</span><span data-hf-id="hf-xcyg" class="cw" data-s="22.953" data-e="23.019">la</span><span data-hf-id="hf-ylm0" class="cw" data-s="23.052" data-e="23.304">brecha</span><span data-hf-id="hf-c3ts" class="cw" data-s="23.326" data-e="23.633">supera</span><span data-hf-id="hf-egjg" class="cw" data-s="23.688" data-e="23.732">tu</span><span data-hf-id="hf-5le1" class="cw" data-s="23.732" data-e="24.116">umbral.</span></div></div>
+    </section>
+    <section data-hf-id="hf-a9m0" class="clip scene-clip" id="s7" data-start="25.22" data-duration="3.08" data-track-index="9">
+      <div data-hf-id="hf-ayq5" class="pz" id="s7-pz">
+        <div data-hf-id="hf-jkxx" class="scene">
+
+      <div data-hf-id="hf-buc6" class="s7">
+        <div data-hf-id="hf-l34a" class="s7-mark" id="s7-mark"><img data-hf-id="hf-dyip" src="capture/assets/logo-mark.png" alt="ArbitrARS"></div>
+        <div data-hf-id="hf-xpss" class="s7-word" id="s7-word">Arbitr<i data-hf-id="hf-sogk">ARS</i></div>
+        <div data-hf-id="hf-wt6q" class="s7-stack" id="s7-stack">Manifest V3 · 49 exchanges · 203 tests · 0 servidores</div>
+        <div data-hf-id="hf-kcg3" class="s7-cta" id="s7-cta">github.com/nomdedev/ArbitrageAR-USDT</div>
+      </div>
+        </div>
+      </div>
+      <div data-hf-id="hf-nzb6" class="caps"><div data-hf-id="hf-jhk1" class="caps-in" id="s7-caps"><span data-hf-id="hf-v6n9" class="cw" data-s="25.313" data-e="25.573">Todo</span><span data-hf-id="hf-tkbe" class="cw" data-s="25.573" data-e="25.667">en</span><span data-hf-id="hf-jzaa" class="cw" data-s="25.679" data-e="25.738">tu</span><span data-hf-id="hf-fpuq" class="cw" data-s="25.761" data-e="26.304">navegador,</span><span data-hf-id="hf-374n" class="cw" data-s="26.422" data-e="26.657">sin</span><span data-hf-id="hf-j3xz" class="cw" data-s="26.658" data-e="27.341">servidores.</span></div></div>
+    </section>
+
+      <audio data-hf-id="hf-mh78" id="mix" src="audio/mix_final.wav" data-start="0" data-duration="28.24" data-volume="1" data-track-index="0"></audio>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+  tl.fromTo("#grid", { backgroundPosition: "0px 0px" }, { backgroundPosition: "128px 64px", duration: 28.3, ease: "none" }, 0);
+
+  /* ── escena 1 (s1) · 0.0s +3.64s ── */
+  tl.fromTo("#s1-pz", { scale: 1 }, { scale: 1.03, duration: 3.64, ease: "none" }, 0.0);
+  tl.fromTo("#s1-a", { x: -70 }, { x: 0, duration: .62, ease: "power3.out" }, 0.0);
+  tl.fromTo("#s1-b", { x: 70 }, { x: 0, duration: .62, ease: "power3.out" }, 0.14);
+  tl.fromTo("#s1-neq", { scale: .55, rotate: -18 }, { scale: 1, rotate: 0, duration: .7, ease: "back.out(1.7)" }, 0.08);
+  tl.fromTo("#s1-sub", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: .5 }, 0.95);
+  tl.fromTo("#s1 .cw[data-s='0.096']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 0.096);
+  tl.set("#s1 .cw[data-s='0.096']", { color: "#3b82f6" }, 0.096);
+  tl.set("#s1 .cw[data-s='0.096']", { color: "#f0f6fc" }, 0.318);
+  tl.fromTo("#s1 .cw[data-s='0.293']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 0.293);
+  tl.set("#s1 .cw[data-s='0.293']", { color: "#3b82f6" }, 0.293);
+  tl.set("#s1 .cw[data-s='0.293']", { color: "#f0f6fc" }, 0.585);
+  tl.fromTo("#s1 .cw[data-s='0.536']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 0.536);
+  tl.set("#s1 .cw[data-s='0.536']", { color: "#3b82f6" }, 0.536);
+  tl.set("#s1 .cw[data-s='0.536']", { color: "#f0f6fc" }, 1.013);
+  tl.fromTo("#s1 .cw[data-s='0.976']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 0.976);
+  tl.set("#s1 .cw[data-s='0.976']", { color: "#3b82f6" }, 0.976);
+  tl.set("#s1 .cw[data-s='0.976']", { color: "#f0f6fc" }, 1.105);
+  tl.fromTo("#s1 .cw[data-s='1.045']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 1.045);
+  tl.set("#s1 .cw[data-s='1.045']", { color: "#3b82f6" }, 1.045);
+  tl.set("#s1 .cw[data-s='1.045']", { color: "#f0f6fc" }, 1.186);
+  tl.fromTo("#s1 .cw[data-s='1.161']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 1.161);
+  tl.set("#s1 .cw[data-s='1.161']", { color: "#3b82f6" }, 1.161);
+  tl.set("#s1 .cw[data-s='1.161']", { color: "#f0f6fc" }, 1.73);
+  tl.fromTo("#s1 .cw[data-s='1.694']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 1.694);
+  tl.set("#s1 .cw[data-s='1.694']", { color: "#3b82f6" }, 1.694);
+  tl.set("#s1 .cw[data-s='1.694']", { color: "#f0f6fc" }, 1.823);
+  tl.fromTo("#s1 .cw[data-s='1.798']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 1.798);
+  tl.set("#s1 .cw[data-s='1.798']", { color: "#3b82f6" }, 1.798);
+  tl.set("#s1 .cw[data-s='1.798']", { color: "#f0f6fc" }, 2.078);
+  tl.fromTo("#s1 .cw[data-s='2.018']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 2.018);
+  tl.set("#s1 .cw[data-s='2.018']", { color: "#3b82f6" }, 2.018);
+  tl.set("#s1 .cw[data-s='2.018']", { color: "#f0f6fc" }, 2.193);
+  tl.fromTo("#s1 .cw[data-s='2.168']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 2.168);
+  tl.set("#s1 .cw[data-s='2.168']", { color: "#3b82f6" }, 2.168);
+  tl.set("#s1 .cw[data-s='2.168']", { color: "#f0f6fc" }, 2.529);
+
+  /* ── escena 2 (s2) · 3.64s +4.96s ── */
+  tl.fromTo("#s2-pz", { scale: 1 }, { scale: 1.03, duration: 4.96, ease: "none" }, 3.64);
+  tl.fromTo("#s2-title", { y: 30 }, { y: 0, duration: .5, ease: "power2.out" }, 3.64);
+  tl.fromTo("#s2-badge", { y: 26 }, { y: 0, duration: .55, ease: "power2.out" }, 3.7);
+  tl.fromTo("#s2-grid .s2-chip", { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: .22, stagger: 0.008, ease: "power1.out" }, 3.76);
+  tl.fromTo("#s2-note", { opacity: 0 }, { opacity: 1, duration: .45 }, 4.54);
+  tl.fromTo("#s2 .cw[data-s='3.983']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 3.983);
+  tl.set("#s2 .cw[data-s='3.983']", { color: "#3b82f6" }, 3.983);
+  tl.set("#s2 .cw[data-s='3.983']", { color: "#f0f6fc" }, 4.222);
+  tl.fromTo("#s2 .cw[data-s='4.195']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 4.195);
+  tl.set("#s2 .cw[data-s='4.195']", { color: "#3b82f6" }, 4.195);
+  tl.set("#s2 .cw[data-s='4.195']", { color: "#f0f6fc" }, 4.791);
+  tl.fromTo("#s2 .cw[data-s='4.832']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 4.832);
+  tl.set("#s2 .cw[data-s='4.832']", { color: "#3b82f6" }, 4.832);
+  tl.set("#s2 .cw[data-s='4.832']", { color: "#f0f6fc" }, 5.014);
+  tl.fromTo("#s2 .cw[data-s='4.999']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 4.999);
+  tl.set("#s2 .cw[data-s='4.999']", { color: "#3b82f6" }, 4.999);
+  tl.set("#s2 .cw[data-s='4.999']", { color: "#f0f6fc" }, 5.371);
+  tl.fromTo("#s2 .cw[data-s='6.131']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 6.131);
+  tl.set("#s2 .cw[data-s='6.131']", { color: "#3b82f6" }, 6.131);
+  tl.set("#s2 .cw[data-s='6.131']", { color: "#f0f6fc" }, 6.592);
+  tl.fromTo("#s2 .cw[data-s='6.532']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 6.532);
+  tl.set("#s2 .cw[data-s='6.532']", { color: "#3b82f6" }, 6.532);
+  tl.set("#s2 .cw[data-s='6.532']", { color: "#f0f6fc" }, 6.637);
+  tl.fromTo("#s2 .cw[data-s='6.644']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 6.644);
+  tl.set("#s2 .cw[data-s='6.644']", { color: "#3b82f6" }, 6.644);
+  tl.set("#s2 .cw[data-s='6.644']", { color: "#f0f6fc" }, 7.05);
+  tl.fromTo("#s2 .cw[data-s='7.269']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 7.269);
+  tl.set("#s2 .cw[data-s='7.269']", { color: "#3b82f6" }, 7.269);
+  tl.set("#s2 .cw[data-s='7.269']", { color: "#f0f6fc" }, 7.508);
+
+  /* ── escena 3 (s3) · 8.6s +5.54s ── */
+  tl.fromTo("#s3-pz", { scale: 1 }, { scale: 1.03, duration: 5.54, ease: "none" }, 8.6);
+  tl.fromTo("#s3-phone", { scale: .97 }, { scale: 1, duration: .6, ease: "power3.out" }, 8.6);
+  tl.fromTo("#s3-phone img", { scale: 1 }, { scale: 1.09, duration: 5.54, ease: "none" }, 8.6);
+  tl.fromTo("#s3-label", { x: 22 }, { x: 0, duration: .45 }, 8.66);
+  tl.fromTo("#s3-head", { x: 22 }, { x: 0, duration: .5 }, 8.78);
+  tl.fromTo("#s3-num", { scale: .86 }, { scale: 1, duration: .55, ease: "back.out(1.5)" }, 8.86);
+  tl.fromTo("#s3-chips .chip", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: .38, stagger: .07 }, 9.2);
+  tl.fromTo("#s3-scan", { y: -140 }, { y: 620, duration: 5.24, ease: "none" }, 8.95);
+  tl.fromTo("#s3 .cw[data-s='8.849']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 8.849);
+  tl.set("#s3 .cw[data-s='8.849']", { color: "#3b82f6" }, 8.849);
+  tl.set("#s3 .cw[data-s='8.849']", { color: "#f0f6fc" }, 9.835);
+  tl.fromTo("#s3 .cw[data-s='9.798']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 9.798);
+  tl.set("#s3 .cw[data-s='9.798']", { color: "#3b82f6" }, 9.798);
+  tl.set("#s3 .cw[data-s='9.798']", { color: "#f0f6fc" }, 9.928);
+  tl.fromTo("#s3 .cw[data-s='9.891']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 9.891);
+  tl.set("#s3 .cw[data-s='9.891']", { color: "#3b82f6" }, 9.891);
+  tl.set("#s3 .cw[data-s='9.891']", { color: "#f0f6fc" }, 10.159);
+  tl.fromTo("#s3 .cw[data-s='10.111']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 10.111);
+  tl.set("#s3 .cw[data-s='10.111']", { color: "#3b82f6" }, 10.111);
+  tl.set("#s3 .cw[data-s='10.111']", { color: "#f0f6fc" }, 10.391);
+  tl.fromTo("#s3 .cw[data-s='10.389']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 10.389);
+  tl.set("#s3 .cw[data-s='10.389']", { color: "#3b82f6" }, 10.389);
+  tl.set("#s3 .cw[data-s='10.389']", { color: "#f0f6fc" }, 11.085);
+  tl.fromTo("#s3 .cw[data-s='11.037']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 11.037);
+  tl.set("#s3 .cw[data-s='11.037']", { color: "#3b82f6" }, 11.037);
+  tl.set("#s3 .cw[data-s='11.037']", { color: "#f0f6fc" }, 11.756);
+  tl.fromTo("#s3 .cw[data-s='11.893']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 11.893);
+  tl.set("#s3 .cw[data-s='11.893']", { color: "#3b82f6" }, 11.893);
+  tl.set("#s3 .cw[data-s='11.893']", { color: "#f0f6fc" }, 12.15);
+  tl.fromTo("#s3 .cw[data-s='12.09']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 12.09);
+  tl.set("#s3 .cw[data-s='12.09']", { color: "#3b82f6" }, 12.09);
+  tl.set("#s3 .cw[data-s='12.09']", { color: "#f0f6fc" }, 12.316);
+  tl.fromTo("#s3 .cw[data-s='12.256']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 12.256);
+  tl.set("#s3 .cw[data-s='12.256']", { color: "#3b82f6" }, 12.256);
+  tl.set("#s3 .cw[data-s='12.256']", { color: "#f0f6fc" }, 13.064);
+
+  /* ── escena 4 (s4) · 14.14s +4.09s ── */
+  tl.fromTo("#s4-pz", { scale: 1 }, { scale: 1.03, duration: 4.09, ease: "none" }, 14.14);
+  tl.fromTo("#s4-phone", { scale: .97 }, { scale: 1, duration: .6, ease: "power3.out" }, 14.14);
+  tl.fromTo("#s4-phone img", { scale: 1 }, { scale: 1.09, duration: 4.09, ease: "none" }, 14.14);
+  tl.fromTo("#s4-label", { x: 22 }, { x: 0, duration: .45 }, 14.2);
+  tl.fromTo("#s4-head", { x: 22 }, { x: 0, duration: .5 }, 14.32);
+  tl.fromTo("#s4-steps .step", { opacity: 0, x: 26 }, { opacity: 1, x: 0, duration: .42, stagger: .22, ease: "power2.out" }, 14.64);
+  tl.fromTo("#s4 .cw[data-s='14.284']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 14.284);
+  tl.set("#s4 .cw[data-s='14.284']", { color: "#3b82f6" }, 14.284);
+  tl.set("#s4 .cw[data-s='14.284']", { color: "#f0f6fc" }, 14.454);
+  tl.fromTo("#s4 .cw[data-s='14.415']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 14.415);
+  tl.set("#s4 .cw[data-s='14.415']", { color: "#3b82f6" }, 14.415);
+  tl.set("#s4 .cw[data-s='14.415']", { color: "#f0f6fc" }, 14.771);
+  tl.fromTo("#s4 .cw[data-s='14.733']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 14.733);
+  tl.set("#s4 .cw[data-s='14.733']", { color: "#3b82f6" }, 14.733);
+  tl.set("#s4 .cw[data-s='14.733']", { color: "#f0f6fc" }, 14.903);
+  tl.fromTo("#s4 .cw[data-s='14.854']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 14.854);
+  tl.set("#s4 .cw[data-s='14.854']", { color: "#3b82f6" }, 14.854);
+  tl.set("#s4 .cw[data-s='14.854']", { color: "#f0f6fc" }, 15.199);
+  tl.fromTo("#s4 .cw[data-s='15.194']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 15.194);
+  tl.set("#s4 .cw[data-s='15.194']", { color: "#3b82f6" }, 15.194);
+  tl.set("#s4 .cw[data-s='15.194']", { color: "#f0f6fc" }, 15.342);
+  tl.fromTo("#s4 .cw[data-s='15.293']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 15.293);
+  tl.set("#s4 .cw[data-s='15.293']", { color: "#3b82f6" }, 15.293);
+  tl.set("#s4 .cw[data-s='15.293']", { color: "#f0f6fc" }, 15.989);
+  tl.fromTo("#s4 .cw[data-s='16.093']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 16.093);
+  tl.set("#s4 .cw[data-s='16.093']", { color: "#3b82f6" }, 16.093);
+  tl.set("#s4 .cw[data-s='16.093']", { color: "#f0f6fc" }, 16.252);
+  tl.fromTo("#s4 .cw[data-s='16.203']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 16.203);
+  tl.set("#s4 .cw[data-s='16.203']", { color: "#3b82f6" }, 16.203);
+  tl.set("#s4 .cw[data-s='16.203']", { color: "#f0f6fc" }, 16.35);
+  tl.fromTo("#s4 .cw[data-s='16.334']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 16.334);
+  tl.set("#s4 .cw[data-s='16.334']", { color: "#3b82f6" }, 16.334);
+  tl.set("#s4 .cw[data-s='16.334']", { color: "#f0f6fc" }, 16.559);
+  tl.fromTo("#s4 .cw[data-s='16.565']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 16.565);
+  tl.set("#s4 .cw[data-s='16.565']", { color: "#3b82f6" }, 16.565);
+  tl.set("#s4 .cw[data-s='16.565']", { color: "#f0f6fc" }, 16.811);
+  tl.fromTo("#s4 .cw[data-s='16.751']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 16.751);
+  tl.set("#s4 .cw[data-s='16.751']", { color: "#3b82f6" }, 16.751);
+  tl.set("#s4 .cw[data-s='16.751']", { color: "#f0f6fc" }, 16.833);
+  tl.fromTo("#s4 .cw[data-s='16.828']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 16.828);
+  tl.set("#s4 .cw[data-s='16.828']", { color: "#3b82f6" }, 16.828);
+  tl.set("#s4 .cw[data-s='16.828']", { color: "#f0f6fc" }, 17.14);
+
+  /* ── escena 5 (s5) · 18.23s +3.55s ── */
+  tl.fromTo("#s5-pz", { scale: 1 }, { scale: 1.03, duration: 3.55, ease: "none" }, 18.23);
+  tl.fromTo("#s5-phone", { scale: .97 }, { scale: 1, duration: .6, ease: "power3.out" }, 18.23);
+  tl.fromTo("#s5-phone img", { scale: 1 }, { scale: 1.09, duration: 3.55, ease: "none" }, 18.23);
+  tl.fromTo("#s5-label", { x: 22 }, { x: 0, duration: .45 }, 18.29);
+  tl.fromTo("#s5-head", { x: 22 }, { x: 0, duration: .5 }, 18.41);
+  tl.fromTo("#s5-fields .field", { opacity: 0, x: 26 }, { opacity: 1, x: 0, duration: .34, stagger: .12 }, 18.73);
+  tl.fromTo("#s5-caret", { opacity: 0 }, { opacity: 1, duration: .34, repeat: 5, yoyo: true, ease: "steps(1)" }, 19.03);
+  tl.fromTo("#s5 .cw[data-s='18.379']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 18.379);
+  tl.set("#s5 .cw[data-s='18.379']", { color: "#3b82f6" }, 18.379);
+  tl.set("#s5 .cw[data-s='18.379']", { color: "#f0f6fc" }, 18.818);
+  tl.fromTo("#s5 .cw[data-s='18.825']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 18.825);
+  tl.set("#s5 .cw[data-s='18.825']", { color: "#3b82f6" }, 18.825);
+  tl.set("#s5 .cw[data-s='18.825']", { color: "#f0f6fc" }, 18.952);
+  tl.fromTo("#s5 .cw[data-s='18.914']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 18.914);
+  tl.set("#s5 .cw[data-s='18.914']", { color: "#3b82f6" }, 18.914);
+  tl.set("#s5 .cw[data-s='18.914']", { color: "#f0f6fc" }, 19.298);
+  tl.fromTo("#s5 .cw[data-s='19.249']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 19.249);
+  tl.set("#s5 .cw[data-s='19.249']", { color: "#3b82f6" }, 19.249);
+  tl.set("#s5 .cw[data-s='19.249']", { color: "#f0f6fc" }, 19.365);
+  tl.fromTo("#s5 .cw[data-s='19.35']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 19.35);
+  tl.set("#s5 .cw[data-s='19.35']", { color: "#3b82f6" }, 19.35);
+  tl.set("#s5 .cw[data-s='19.35']", { color: "#f0f6fc" }, 19.488);
+  tl.fromTo("#s5 .cw[data-s='19.472']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 19.472);
+  tl.set("#s5 .cw[data-s='19.472']", { color: "#3b82f6" }, 19.472);
+  tl.set("#s5 .cw[data-s='19.472']", { color: "#f0f6fc" }, 20.035);
+  tl.fromTo("#s5 .cw[data-s='20.03']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 20.03);
+  tl.set("#s5 .cw[data-s='20.03']", { color: "#3b82f6" }, 20.03);
+  tl.set("#s5 .cw[data-s='20.03']", { color: "#f0f6fc" }, 20.302);
+  tl.fromTo("#s5 .cw[data-s='20.265']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 20.265);
+  tl.set("#s5 .cw[data-s='20.265']", { color: "#3b82f6" }, 20.265);
+  tl.set("#s5 .cw[data-s='20.265']", { color: "#f0f6fc" }, 20.381);
+  tl.fromTo("#s5 .cw[data-s='20.321']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 20.321);
+  tl.set("#s5 .cw[data-s='20.321']", { color: "#3b82f6" }, 20.321);
+  tl.set("#s5 .cw[data-s='20.321']", { color: "#f0f6fc" }, 20.671);
+
+  /* ── escena 6 (s6) · 21.78s +3.44s ── */
+  tl.fromTo("#s6-pz", { scale: 1 }, { scale: 1.03, duration: 3.44, ease: "none" }, 21.78);
+  tl.fromTo("#s6-label", { x: -22 }, { x: 0, duration: .45 }, 21.78);
+  tl.fromTo("#s6-head", { x: -22 }, { x: 0, duration: .5 }, 21.88);
+  tl.fromTo("#s6-chips .chip", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: .3, stagger: .06 }, 22.0);
+  tl.fromTo("#s6-g2", { opacity: 0, x: 90, y: 96, scale: .94 }, { opacity: .28, x: 0, y: 96, scale: .94, duration: .5 }, 21.82);
+  tl.fromTo("#s6-g1", { opacity: 0, x: 90, y: 50, scale: .97 }, { opacity: .55, x: 0, y: 50, scale: .97, duration: .5 }, 21.9);
+  tl.fromTo("#s6-n", { opacity: 0, x: 130 }, { opacity: 1, x: 0, duration: .46, ease: "power3.out" }, 21.94);
+  tl.fromTo("#s6 .cw[data-s='21.89']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 21.89);
+  tl.set("#s6 .cw[data-s='21.89']", { color: "#3b82f6" }, 21.89);
+  tl.set("#s6 .cw[data-s='21.89']", { color: "#f0f6fc" }, 22.06);
+  tl.fromTo("#s6 .cw[data-s='22.054']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 22.054);
+  tl.set("#s6 .cw[data-s='22.054']", { color: "#3b82f6" }, 22.054);
+  tl.set("#s6 .cw[data-s='22.054']", { color: "#f0f6fc" }, 22.169);
+  tl.fromTo("#s6 .cw[data-s='22.109']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 22.109);
+  tl.set("#s6 .cw[data-s='22.109']", { color: "#3b82f6" }, 22.109);
+  tl.set("#s6 .cw[data-s='22.109']", { color: "#f0f6fc" }, 22.498);
+  tl.fromTo("#s6 .cw[data-s='22.449']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 22.449);
+  tl.set("#s6 .cw[data-s='22.449']", { color: "#3b82f6" }, 22.449);
+  tl.set("#s6 .cw[data-s='22.449']", { color: "#f0f6fc" }, 22.728);
+  tl.fromTo("#s6 .cw[data-s='22.734']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 22.734);
+  tl.set("#s6 .cw[data-s='22.734']", { color: "#3b82f6" }, 22.734);
+  tl.set("#s6 .cw[data-s='22.734']", { color: "#f0f6fc" }, 22.981);
+  tl.fromTo("#s6 .cw[data-s='22.953']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 22.953);
+  tl.set("#s6 .cw[data-s='22.953']", { color: "#3b82f6" }, 22.953);
+  tl.set("#s6 .cw[data-s='22.953']", { color: "#f0f6fc" }, 23.079);
+  tl.fromTo("#s6 .cw[data-s='23.052']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 23.052);
+  tl.set("#s6 .cw[data-s='23.052']", { color: "#3b82f6" }, 23.052);
+  tl.set("#s6 .cw[data-s='23.052']", { color: "#f0f6fc" }, 23.364);
+  tl.fromTo("#s6 .cw[data-s='23.326']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 23.326);
+  tl.set("#s6 .cw[data-s='23.326']", { color: "#3b82f6" }, 23.326);
+  tl.set("#s6 .cw[data-s='23.326']", { color: "#f0f6fc" }, 23.693);
+  tl.fromTo("#s6 .cw[data-s='23.688']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 23.688);
+  tl.set("#s6 .cw[data-s='23.688']", { color: "#3b82f6" }, 23.688);
+  tl.set("#s6 .cw[data-s='23.688']", { color: "#f0f6fc" }, 23.792);
+  tl.fromTo("#s6 .cw[data-s='23.732']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 23.732);
+  tl.set("#s6 .cw[data-s='23.732']", { color: "#3b82f6" }, 23.732);
+  tl.set("#s6 .cw[data-s='23.732']", { color: "#f0f6fc" }, 24.176);
+
+  /* ── escena 7 (s7) · 25.22s +3.08s ── */
+  tl.fromTo("#s7-pz", { scale: 1 }, { scale: 1.03, duration: 3.08, ease: "none" }, 25.22);
+  tl.fromTo("#s7-mark", { scale: .8 }, { scale: 1, duration: .7, ease: "power3.out" }, 25.22);
+  tl.fromTo("#s7-word", { y: 26 }, { y: 0, duration: .55 }, 25.36);
+  tl.fromTo("#s7-stack", { opacity: 0 }, { opacity: 1, duration: .5 }, 25.62);
+  tl.fromTo("#s7-cta", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: .5 }, 25.77);
+  tl.to("#s7-cta", { color: "#f0f6fc", duration: .4 }, 27.80);
+  tl.fromTo("#s7 .cw[data-s='25.313']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 25.313);
+  tl.set("#s7 .cw[data-s='25.313']", { color: "#3b82f6" }, 25.313);
+  tl.set("#s7 .cw[data-s='25.313']", { color: "#f0f6fc" }, 25.633);
+  tl.fromTo("#s7 .cw[data-s='25.573']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 25.573);
+  tl.set("#s7 .cw[data-s='25.573']", { color: "#3b82f6" }, 25.573);
+  tl.set("#s7 .cw[data-s='25.573']", { color: "#f0f6fc" }, 25.727);
+  tl.fromTo("#s7 .cw[data-s='25.679']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 25.679);
+  tl.set("#s7 .cw[data-s='25.679']", { color: "#3b82f6" }, 25.679);
+  tl.set("#s7 .cw[data-s='25.679']", { color: "#f0f6fc" }, 25.798);
+  tl.fromTo("#s7 .cw[data-s='25.761']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 25.761);
+  tl.set("#s7 .cw[data-s='25.761']", { color: "#3b82f6" }, 25.761);
+  tl.set("#s7 .cw[data-s='25.761']", { color: "#f0f6fc" }, 26.364);
+  tl.fromTo("#s7 .cw[data-s='26.422']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 26.422);
+  tl.set("#s7 .cw[data-s='26.422']", { color: "#3b82f6" }, 26.422);
+  tl.set("#s7 .cw[data-s='26.422']", { color: "#f0f6fc" }, 26.717);
+  tl.fromTo("#s7 .cw[data-s='26.658']", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .26, ease: "power2.out" }, 26.658);
+  tl.set("#s7 .cw[data-s='26.658']", { color: "#3b82f6" }, 26.658);
+  tl.set("#s7 .cw[data-s='26.658']", { color: "#f0f6fc" }, 27.401);
+      window.__timelines["arbitrars-promo"] = tl;
+    </script>
+  </body>
+</html>

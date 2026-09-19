@@ -1,0 +1,14 @@
+ArbitrARS — Detector de Arbitraje
+Extensión para navegadores Chromium que detecta oportunidades de arbitraje entre el Dólar Oficial argentino y USDT en exchanges locales.
+
+49 exchanges monitoreados · 191 controles de configuración · 203 tests automatizados · 0 servidores.
+
+Rutas de arbitraje ordenadas por rentabilidad. Guía paso a paso. Simulador con comisiones. Alertas automáticas.
+
+El dólar oficial y el USDT no valen lo mismo. Esa diferencia es la oportunidad.
+ArbitrARS la mide por vos, en tiempo real, sobre el mercado completo.
+
+Datos: CriptoYA (USDT/ARS) + DolarAPI (dólar oficial y bancos). Actualización cada 30 segundos.
+Manifest V3. JavaScript. Sin backend: todo corre en tu navegador.
+
+github.com/nomdedev/ArbitrageAR-USDT

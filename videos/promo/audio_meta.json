@@ -1,0 +1,452 @@
+{
+ "bgm": {
+  "path": "audio/mix_final.wav",
+  "volume": 1.0,
+  "query": "synthesized ambient pad + musical events (ffmpeg, sin licencia de terceros)",
+  "duration_s": 28.24
+ },
+ "bgm_pending": false,
+ "voices": [
+  {
+   "frame": 1,
+   "path": "audio/seg_1.mp3",
+   "duration_s": 3.336,
+   "words": [
+    {
+     "id": "w0",
+     "text": "El",
+     "start": 0.096,
+     "end": 0.258
+    },
+    {
+     "id": "w1",
+     "text": "dólar",
+     "start": 0.293,
+     "end": 0.525
+    },
+    {
+     "id": "w2",
+     "text": "oficial",
+     "start": 0.536,
+     "end": 0.953
+    },
+    {
+     "id": "w3",
+     "text": "y",
+     "start": 0.976,
+     "end": 1.045
+    },
+    {
+     "id": "w4",
+     "text": "el",
+     "start": 1.045,
+     "end": 1.126
+    },
+    {
+     "id": "w5",
+     "text": "USDT",
+     "start": 1.161,
+     "end": 1.67
+    },
+    {
+     "id": "w6",
+     "text": "no",
+     "start": 1.694,
+     "end": 1.763
+    },
+    {
+     "id": "w7",
+     "text": "valen",
+     "start": 1.798,
+     "end": 2.018
+    },
+    {
+     "id": "w8",
+     "text": "lo",
+     "start": 2.018,
+     "end": 2.133
+    },
+    {
+     "id": "w9",
+     "text": "mismo.",
+     "start": 2.168,
+     "end": 2.469
+    }
+   ]
+  },
+  {
+   "frame": 2,
+   "path": "audio/seg_2.mp3",
+   "duration_s": 4.416,
+   "words": [
+    {
+     "id": "w0",
+     "text": "Esa",
+     "start": 0.097,
+     "end": 0.276
+    },
+    {
+     "id": "w1",
+     "text": "diferencia",
+     "start": 0.309,
+     "end": 0.845
+    },
+    {
+     "id": "w2",
+     "text": "es",
+     "start": 0.946,
+     "end": 1.068
+    },
+    {
+     "id": "w3",
+     "text": "real.",
+     "start": 1.113,
+     "end": 1.425
+    },
+    {
+     "id": "w4",
+     "text": "Medirla",
+     "start": 2.245,
+     "end": 2.646
+    },
+    {
+     "id": "w5",
+     "text": "a",
+     "start": 2.646,
+     "end": 2.691
+    },
+    {
+     "id": "w6",
+     "text": "tiempo,",
+     "start": 2.758,
+     "end": 3.104
+    },
+    {
+     "id": "w7",
+     "text": "no.",
+     "start": 3.383,
+     "end": 3.562
+    }
+   ]
+  },
+  {
+   "frame": 3,
+   "path": "audio/seg_3.mp3",
+   "duration_s": 5.088,
+   "words": [
+    {
+     "id": "w0",
+     "text": "ArbitrARS",
+     "start": 0.097,
+     "end": 1.023
+    },
+    {
+     "id": "w1",
+     "text": "la",
+     "start": 1.046,
+     "end": 1.116
+    },
+    {
+     "id": "w2",
+     "text": "mide",
+     "start": 1.139,
+     "end": 1.347
+    },
+    {
+     "id": "w3",
+     "text": "sobre",
+     "start": 1.359,
+     "end": 1.579
+    },
+    {
+     "id": "w4",
+     "text": "49",
+     "start": 1.637,
+     "end": 2.273
+    },
+    {
+     "id": "w5",
+     "text": "exchanges,",
+     "start": 2.285,
+     "end": 2.944
+    },
+    {
+     "id": "w6",
+     "text": "cada",
+     "start": 3.141,
+     "end": 3.338
+    },
+    {
+     "id": "w7",
+     "text": "30",
+     "start": 3.338,
+     "end": 3.504
+    },
+    {
+     "id": "w8",
+     "text": "segundos.",
+     "start": 3.504,
+     "end": 4.252
+    }
+   ]
+  },
+  {
+   "frame": 4,
+   "path": "audio/seg_4.mp3",
+   "duration_s": 3.744,
+   "words": [
+    {
+     "id": "w0",
+     "text": "Te",
+     "start": 0.094,
+     "end": 0.204
+    },
+    {
+     "id": "w1",
+     "text": "ordena",
+     "start": 0.225,
+     "end": 0.521
+    },
+    {
+     "id": "w2",
+     "text": "las",
+     "start": 0.543,
+     "end": 0.653
+    },
+    {
+     "id": "w3",
+     "text": "rutas",
+     "start": 0.664,
+     "end": 0.949
+    },
+    {
+     "id": "w4",
+     "text": "por",
+     "start": 1.004,
+     "end": 1.092
+    },
+    {
+     "id": "w5",
+     "text": "rentabilidad,",
+     "start": 1.103,
+     "end": 1.739
+    },
+    {
+     "id": "w6",
+     "text": "con",
+     "start": 1.903,
+     "end": 2.002
+    },
+    {
+     "id": "w7",
+     "text": "la",
+     "start": 2.013,
+     "end": 2.1
+    },
+    {
+     "id": "w8",
+     "text": "guía",
+     "start": 2.144,
+     "end": 2.309
+    },
+    {
+     "id": "w9",
+     "text": "paso",
+     "start": 2.375,
+     "end": 2.561
+    },
+    {
+     "id": "w10",
+     "text": "a",
+     "start": 2.561,
+     "end": 2.583
+    },
+    {
+     "id": "w11",
+     "text": "paso.",
+     "start": 2.638,
+     "end": 2.89
+    }
+   ]
+  },
+  {
+   "frame": 5,
+   "path": "audio/seg_5.mp3",
+   "duration_s": 3.192,
+   "words": [
+    {
+     "id": "w0",
+     "text": "Simulá",
+     "start": 0.095,
+     "end": 0.474
+    },
+    {
+     "id": "w1",
+     "text": "tu",
+     "start": 0.541,
+     "end": 0.608
+    },
+    {
+     "id": "w2",
+     "text": "monto",
+     "start": 0.63,
+     "end": 0.954
+    },
+    {
+     "id": "w3",
+     "text": "y",
+     "start": 0.965,
+     "end": 1.021
+    },
+    {
+     "id": "w4",
+     "text": "tus",
+     "start": 1.066,
+     "end": 1.144
+    },
+    {
+     "id": "w5",
+     "text": "comisiones",
+     "start": 1.188,
+     "end": 1.691
+    },
+    {
+     "id": "w6",
+     "text": "antes",
+     "start": 1.746,
+     "end": 1.958
+    },
+    {
+     "id": "w7",
+     "text": "de",
+     "start": 1.981,
+     "end": 2.037
+    },
+    {
+     "id": "w8",
+     "text": "operar.",
+     "start": 2.037,
+     "end": 2.327
+    }
+   ]
+  },
+  {
+   "frame": 6,
+   "path": "audio/seg_6.mp3",
+   "duration_s": 3.12,
+   "words": [
+    {
+     "id": "w0",
+     "text": "Y",
+     "start": 0.094,
+     "end": 0.204
+    },
+    {
+     "id": "w1",
+     "text": "te",
+     "start": 0.258,
+     "end": 0.313
+    },
+    {
+     "id": "w2",
+     "text": "avisa",
+     "start": 0.313,
+     "end": 0.642
+    },
+    {
+     "id": "w3",
+     "text": "solo",
+     "start": 0.653,
+     "end": 0.872
+    },
+    {
+     "id": "w4",
+     "text": "cuando",
+     "start": 0.938,
+     "end": 1.125
+    },
+    {
+     "id": "w5",
+     "text": "la",
+     "start": 1.157,
+     "end": 1.223
+    },
+    {
+     "id": "w6",
+     "text": "brecha",
+     "start": 1.256,
+     "end": 1.508
+    },
+    {
+     "id": "w7",
+     "text": "supera",
+     "start": 1.53,
+     "end": 1.837
+    },
+    {
+     "id": "w8",
+     "text": "tu",
+     "start": 1.892,
+     "end": 1.936
+    },
+    {
+     "id": "w9",
+     "text": "umbral.",
+     "start": 1.936,
+     "end": 2.32
+    }
+   ]
+  },
+  {
+   "frame": 7,
+   "path": "audio/seg_7.mp3",
+   "duration_s": 3.024,
+   "words": [
+    {
+     "id": "w0",
+     "text": "Todo",
+     "start": 0.097,
+     "end": 0.357
+    },
+    {
+     "id": "w1",
+     "text": "en",
+     "start": 0.357,
+     "end": 0.451
+    },
+    {
+     "id": "w2",
+     "text": "tu",
+     "start": 0.463,
+     "end": 0.522
+    },
+    {
+     "id": "w3",
+     "text": "navegador,",
+     "start": 0.545,
+     "end": 1.088
+    },
+    {
+     "id": "w4",
+     "text": "sin",
+     "start": 1.206,
+     "end": 1.441
+    },
+    {
+     "id": "w5",
+     "text": "servidores.",
+     "start": 1.442,
+     "end": 2.125
+    }
+   ]
+  }
+ ],
+ "sfx": [],
+ "mix": {
+  "lufs": -14.0,
+  "lra": 2.9,
+  "true_peak_dbfs": -1.5,
+  "target_lufs": -14.0,
+  "target_tp": -1.5
+ }
+}

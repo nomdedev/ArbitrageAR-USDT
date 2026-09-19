@@ -1,0 +1,19 @@
+AUDICION DE PRONUNCIACION Y VELOCIDAD — ArbitrARS
+Archivo: review/audicion-pronunciacion.mp3  (47.1 s)
+Escuchar en orden y elegir una opcion por cada punto en discusion.
+==============================================================================
+
+  #    desde    hasta    rate  variante
+  1    0.00s    1.87s    +12%  USDT — leido letra por letra (candidato A)
+  2    2.72s    5.07s    +12%  USDT — crudo, como lo lee el motor (candidato B)
+  3    5.92s    8.06s    +12%  USDT — como palabra 'tether' (candidato C)
+  4    8.91s   11.24s     +8%  ArbitrARS — deletreado (candidato A)
+  5   12.09s   14.34s     +8%  ArbitrARS — crudo, como lo lee el motor (candidato B)
+  6   15.19s   17.11s     +8%  ArbitrARS — como palabra corrida (candidato C)
+  7   17.96s   21.71s    +12%  exchange — crudo (candidato A)
+  8   22.56s   26.09s    +12%  exchange — reescrito 'exchench' (candidato B)
+  9   26.94s   30.27s     +8%  HOOK completo a +8%  (direccion propuesta: mas peso)
+ 10   31.12s   34.36s    +12%  HOOK completo a +12% (como esta hoy)
+ 11   35.21s   38.24s     +6%  CIERRE a +6%  (direccion propuesta: mas lento)
+ 12   39.09s   41.94s    +12%  CIERRE a +12% (como esta hoy)
+ 13   42.79s   46.42s     +8%  VOZ ALTERNATIVA femenina es-AR — hook

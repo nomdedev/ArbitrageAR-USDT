@@ -1,0 +1,34 @@
+# Material generado al renderizar (~120 MB de los 122 MB de la carpeta).
+# Se regenera desde las composiciones (index.html + compositions/), asi que no tiene sentido
+# versionarlo: son binarios grandes que despues no se pueden sacar sin reescribir el historial.
+# Ademas, la regla del proyecto para este video fue no publicarlo online, y un push a GitHub lo es.
+#
+# Lo que SI queda versionado: index.html, compositions/, assets/ (fuentes woff2 + gsap.min.js),
+# hyperframes.json, meta.json, audio_meta.json y los .md/.txt de guion y documentacion.
+#
+# Si algun dia hay que versionar un render puntual:
+#   git add -f videos/promo/output/arbitrars-promo-1920x1080.mp4
+
+# Renders finales
+output/
+
+# Frames, capturas de revision y audio de locucion (regenerables)
+review/_v2/
+review/_sweep/
+review/frames/
+review/frames-vertical/
+verify/
+review/_au/
+
+# Caches del CLI
+.thumbnails/
+.waveform-cache/
+.hyperframes/
+snapshots/
+
+# Formatos de salida: cualquier mp4/mp3/jpg suelto aca es un render, no una fuente
+*.mp4
+*.mp3
+*.wav
+*.jpg
+*.log
