@@ -1,0 +1,28 @@
+{
+  "pestana:routes": [],
+  "pestana:crypto-arbitrage": [],
+  "pestana:simulator": [],
+  "matriz:celdas": {
+    "positive": null,
+    "neutral": null,
+    "negative": {
+      "fondo": "rgba(255, 69, 58, 0.2)",
+      "texto": "-29.99%",
+      "color": "rgb(252, 165, 165)"
+    }
+  },
+  "pestana:banks": [],
+  "modal:detalle": [],
+  "diagnostico:insignia-de-paso": {
+    "olListStyle": "none / outside none none",
+    "olPaddingLeft": "0px",
+    "numTexto": "1",
+    "numFondo": "rgb(0, 113, 227)",
+    "numColor": "rgb(255, 255, 255)",
+    "numAnchoAlto": "24pxx24px",
+    "numRadio": "50%",
+    "numDisplay": "flex",
+    "numFontSize": "13px"
+  },
+  "pagina:configuracion": []
+}

@@ -1,6 +1,90 @@
 // Script para verificar la sintaxis CSS de popup.css
 const fs = require('fs');
 
+/**
+ * Escaner caracter por caracter: ignora comentarios y cadenas, lleva la profundidad de llaves y
+ * devuelve donde quedo desbalanceado.
+ *
+ * Por que existe: el chequeo de mas abajo cuenta llaves linea por linea y se apoya en su propio
+ * rastreo de comillas/comentarios, que puede quedar "pegado" y saltear lineas enteras. Con popup.css
+ * desbalanceado en una llave (613 '{' contra 612 '}') este script imprimia "Sintaxis CSS valida" y no
+ * veia nada. Ese desbalance real hizo que el navegador descartara ~780 lineas del final del archivo
+ * (incluido el bloque que pinta los numeros de paso de la guia, que quedaban negros sobre negro).
+ *
+ * Devuelve null si esta balanceado, o { linea, restantes } si no lo esta.
+ */
+function balanceReal(css) {
+  let linea = 1;
+  let prof = 0;
+  let enComentario = false;
+  let enCadena = false;
+  let cita = '';
+  let ultimoCero = 1;
+
+  for (let i = 0; i < css.length; i++) {
+    const c = css[i];
+    const sig = css[i + 1];
+    if (c === '\n') linea++;
+
+    if (enComentario) {
+      if (c === '*' && sig === '/') {
+        enComentario = false;
+        i++;
+      }
+      continue;
+    }
+    if (enCadena) {
+      if (c === '\\') i++;
+      else if (c === cita) enCadena = false;
+      continue;
+    }
+    if (c === '/' && sig === '*') {
+      enComentario = true;
+      i++;
+      continue;
+    }
+    if (c === '"' || c === "'") {
+      enCadena = true;
+      cita = c;
+      continue;
+    }
+    if (c === '{') prof++;
+    else if (c === '}') prof--;
+    if (prof === 0) ultimoCero = linea;
+  }
+
+  if (prof === 0) return null;
+  return { linea: ultimoCero, restantes: prof };
+}
+
+/** Aplica el escaner a todos los CSS del proyecto. */
+function verificarTodos() {
+  const archivos = ['src/popup.css', 'src/options.css', 'src/options.chips.css', 'src/base.css'].concat(
+    fs.existsSync('src/ui-components')
+      ? fs.readdirSync('src/ui-components').filter((f) => f.endsWith('.css')).map((f) => 'src/ui-components/' + f)
+      : []
+  );
+
+  let malos = 0;
+  for (const archivo of archivos) {
+    if (!fs.existsSync(archivo)) continue;
+    const desbalance = balanceReal(fs.readFileSync(archivo, 'utf8'));
+    if (desbalance) {
+      malos++;
+      console.log(
+        `\u274c ${archivo}: llaves desbalanceadas (${desbalance.restantes > 0 ? 'falta cerrar' : 'sobra cerrar'} ${Math.abs(desbalance.restantes)}). ` +
+          `La ultima regla abierta arranca cerca de la linea ${desbalance.linea}; el navegador descarta todo lo que viene despues.`
+      );
+    }
+  }
+  if (malos) {
+    console.log('');
+    process.exit(1);
+  }
+}
+
+verificarTodos();
+
 console.log('🔍 Verificando sintaxis CSS de popup.css...\n');
 
 try {

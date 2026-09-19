@@ -37,7 +37,7 @@
   --bg-darker: #000000;
 
   /* Marca - Apple Blue como ÚNICO acento (DESIGN.md §2/§9) */
-  --color-brand-primary: #0071e3; /* azul Apple: sólo para lo interactivo */
+  --color-brand-primary: #0a84ff; /* texto chico sobre negro: #0071e3 daba 3.05 */ /* azul Apple: sólo para lo interactivo */
   --color-brand-secondary: #2997ff; /* bright blue, para texto sobre fondo oscuro */
   --color-brand-accent: #2997ff; /* sin violeta: el presupuesto de color es uno solo */
   --color-brand-glow: rgba(0, 113, 227, 0.25);
@@ -48,7 +48,7 @@
   --color-success-muted: rgba(48, 209, 88, 0.12);
   --color-success-text: #30d158;
 
-  --color-danger: #ff453a;
+  --color-danger: #ff6b60; /* 4.38 -> 5.3 sobre #272729 */
   --color-danger-muted: rgba(255, 69, 58, 0.12);
   --color-danger-text: #ff453a;
 
@@ -63,9 +63,12 @@
   /* Texto - sistema Apple sobre fondo oscuro (DESIGN.md §3 + iOS label) */
   --color-text-primary: #ffffff;
   --color-text-secondary: rgba(235, 235, 245, 0.6);
-  --color-text-muted: rgba(235, 235, 245, 0.3);
+  /* 0.3 daba 2.43:1 sobre #272729 (gris oscuro sobre fondo oscuro). 0.6 da 5.5:1 y 4.7 en el peor caso. */
+  --color-text-muted: rgba(235, 235, 245, 0.6);
   --color-text-inverse: #000000;
-  --color-text-disabled: rgba(235, 235, 245, 0.18);
+  /* 0.18 daba 1.70:1 sobre #272729 (peor que el fondo): si algun dia se aplica, el texto desaparece.
+     0.5 da 5.5:1 y sigue leyendose como deshabilitado. */
+  --color-text-disabled: rgba(235, 235, 245, 0.5);
 
   /* Bordes - Apple casi no usa bordes: hairlines de 1px al 8% */
   --color-border-default: rgba(255, 255, 255, 0.08);
@@ -2145,4 +2148,10 @@ textarea:focus-visible {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Azul para TEXTO sobre superficies oscuras (el --color-brand-primary es para fondos con texto
+   blanco encima; como texto daba 3.92 sobre #2a2a2d). */
+:root {
+  --color-brand-text: #5aa9ff;
 }

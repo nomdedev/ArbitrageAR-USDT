@@ -19,7 +19,7 @@
   --gray-100: #ebebeb;
   --gray-200: #e5e5e5;
   --gray-300: #d4d4d4;
-  --gray-400: #808080;
+  --gray-400: #6e6e6e; /* 3.95 -> 5.2 sobre blanco */
   --gray-500: #666666;
   --gray-600: #4d4d4d;
   --gray-700: #383838;
@@ -1095,4 +1095,11 @@ input:checked + .slider::before {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--gray-300);
+}
+
+/* Contraste medido: el boton primario deshabilitado pintaba texto blanco sobre --gray-300 (1.48).
+   Sigue leyendose como deshabilitado, pero ahora se lee. */
+.btn.primary:disabled,
+.btn.btn-primary:disabled {
+  color: var(--gray-600);
 }

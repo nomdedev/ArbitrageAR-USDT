@@ -55,8 +55,8 @@
 
     const colors = {
       [TOAST_TYPES.INFO]: '#0071e3', // Apple Blue
-      [TOAST_TYPES.SUCCESS]: '#30d158', // systemGreen
-      [TOAST_TYPES.WARNING]: '#ffd60a', // systemYellow
+      [TOAST_TYPES.SUCCESS]: '#1f7a35', // CONTRASTE: el verde de sistema con texto blanco daba 2.02:1; este da 5.39
+      [TOAST_TYPES.WARNING]: '#8a6a00', // CONTRASTE: el amarillo de sistema con texto blanco daba 1.41:1 (ilegible); este da 5.0
       [TOAST_TYPES.ERROR]: '#ff453a' // systemRed
     };
 

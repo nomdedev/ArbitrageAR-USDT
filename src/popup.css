@@ -161,7 +161,7 @@
   --text-primary: var(--color-text-primary);
   --text-secondary: var(--color-text-secondary);
   --text-muted: var(--color-text-muted);
-  --text-dim: #484f58;
+  --text-dim: #8b949e; /* #484f58 daba 1.80:1 sobre #272729 (texto oscuro sobre fondo oscuro, sin uso pero definido); #8b949e da 4.85:1 */
 
   /* === BORDES (Compatibilidad con nombres anteriores) === */
   --border-radius-sm: var(--radius-sm);
@@ -489,8 +489,10 @@ a:focus-visible {
 .banks-tab-btn.active {
   background: linear-gradient(135deg, #0071e3 0%, #0071e3 100%);
   border-color: #0071e3;
-  color: var(--color-text-inverse);
   box-shadow: 0 2px 8px rgba(0, 113, 227, 0.35);
+
+  background: #3a3a3d; /* superficie elevada: el estado activo estaba negro sobre negro */
+  color: var(--color-text-primary);
 }
 
 .banks-tab-btn.active:hover {
@@ -2530,21 +2532,6 @@ footer {
   transition: background var(--duration-fast) var(--ease-out);
 }
 
-.sim-matrix-table td.positive {
-  background: rgba(48, 209, 88, 0.2);
-  color: #30d158;
-}
-
-.sim-matrix-table td.neutral {
-  background: rgba(251, 191, 36, 0.2);
-  color: #fbbf24;
-}
-
-.sim-matrix-table td.negative {
-  background: rgba(255, 69, 58, 0.2);
-  color: #fca5a5;
-}
-
 /* Leyenda compacta */
 .sim-matrix-legend {
   display: flex;
@@ -2891,17 +2878,8 @@ footer {
 
 
 /* Nota: clases legacy de guía no usadas fueron removidas. */
-.calc-value {
-  color: var(--primary-blue);
-  font-size: 1.1em;
-  font-weight: var(--font-weight-semibold);
-}
-.calc-fee {
-  color: #fbbf24;
-  font-size: 0.75em;
-  font-weight: 600;
-  margin-top: 2px;
-}
+
+
 
 /* ==========================================
    FILTROS P2P / NO P2P
@@ -3103,27 +3081,6 @@ p.error {
   border: 1px solid rgba(48, 209, 88, 0.2);
 }
 
-.risk-matrix-section h3 {
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-1);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.risk-matrix-section h3 .icon {
-  color: #30d158;
-}
-
-.risk-matrix-section > p {
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-3);
-  font-size: var(--font-size-xs);
-  line-height: var(--line-height-normal);
-}
-
 .matrix-controls {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
@@ -3146,67 +3103,6 @@ p.error {
   background: var(--color-bg-secondary);
   padding: var(--space-2);
   border: 1px solid var(--color-border-default);
-}
-
-.risk-matrix-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  background: var(--color-bg-primary);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-}
-
-.risk-matrix-table th,
-.risk-matrix-table td {
-  padding: var(--space-2) var(--space-3);
-  text-align: center;
-  border-right: 1px solid var(--color-border-default);
-  border-bottom: 1px solid var(--color-border-default);
-  font-size: var(--font-size-xs);
-  line-height: var(--line-height-tight);
-}
-
-.risk-matrix-table th {
-  background: var(--color-bg-secondary);
-  color: var(--color-primary);
-  font-weight: var(--font-weight-bold);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  white-space: nowrap;
-}
-
-.risk-matrix-table th:first-child {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
-  font-weight: var(--font-weight-semibold);
-  left: 0;
-  z-index: 11;
-}
-
-.risk-matrix-table td {
-  background: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  font-weight: var(--font-weight-medium);
-  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
-  cursor: pointer;
-}
-
-.risk-matrix-table td:first-child {
-  background: var(--color-bg-secondary);
-  color: var(--color-primary);
-  font-weight: var(--font-weight-semibold);
-  position: sticky;
-  left: 0;
-  z-index: 5;
-}
-
-.risk-matrix-table td:hover {
-  background: rgba(0, 113, 227, 0.15);
-  transform: scale(1.03);
-  z-index: 6;
-  box-shadow: 0 0 8px rgba(0, 113, 227, 0.25);
 }
 
 .matrix-cell-positive {
@@ -3770,14 +3666,7 @@ p.error {
 
 
 
-.calc-arrow {
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
-}
-.calc-result.big {
-  font-size: var(--font-size-lg);
-  color: var(--success);
-  font-weight: var(--font-weight-bold);
+
 
 /* Responsive para pasos - Consolidado en @media (max-width: 768px) al final del archivo */
 
@@ -4205,6 +4094,7 @@ header .subtitle {
 .profit-highlight .profit-value {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary); /* contraste: heredaba negro sobre el tinte verde (1.41) */
 }
 
 .crypto-detail-header.profitable .profit-value {
@@ -4597,4 +4487,37 @@ header .subtitle {
   margin: 8px 0 0;
   font-size: 12px;
   color: var(--color-text-muted);
+}
+
+/* Contraste medido: el azul de marca como texto sobre la superficie oscura daba 3.92 (minimo 4.5). */
+.sort-btn.active {
+  color: var(--color-brand-text);
+}
+
+/* CONTRASTE: el <dialog> del navegador aplica color: canvastext (negro) y todo el texto del modal sin
+   color propio heredaba negro sobre la tarjeta oscura (medido: el icono del par, 1.41:1). */
+dialog,
+.modal-content {
+  color: var(--color-text-primary);
+}
+
+/* CONTRASTE: blanco sobre #0a84ff daba 3.65 (minimo 4.5 para 13px). Azul Apple #0071e3 con el mismo
+   texto blanco: 4.70. */
+.guide-step-num {
+  background: #0071e3;
+}
+
+/* CONTRASTE: .sim-matrix-table td (0,1,1) le ganaba el background a .matrix-cell-positive (0,1,0), asi
+   que las celdas quedaban todas negras y el estado se leia solo por el color del numero. Con el td en
+   el selector (0,2,1) el tinte vuelve. */
+.sim-matrix-table td.matrix-cell-positive {
+  background: rgba(48, 209, 88, 0.2);
+}
+
+.sim-matrix-table td.matrix-cell-neutral {
+  background: rgba(251, 191, 36, 0.2);
+}
+
+.sim-matrix-table td.matrix-cell-negative {
+  background: rgba(255, 69, 58, 0.2);
 }

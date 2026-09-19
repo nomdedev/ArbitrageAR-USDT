@@ -22,7 +22,7 @@
 .loading-text {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary, #1a1a1a);
+  color: var(--text-primary, #ffffff); /* el fallback era #1a1a1a: texto oscuro sobre fondo oscuro si alguna vez se borra el alias */
   margin: 0;
 }
 
