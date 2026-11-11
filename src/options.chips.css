@@ -115,3 +115,11 @@ label:has(> input[type='checkbox']:checked):not(.switch):not(.exchange-group lab
   color: #1d1d1f;
   font-weight: 500;
 }
+
+/* Las listas P2P usan filas dentro de .exchange-group, no chips. Evitar que
+   una selección pinte toda la fila aunque el navegador no aplique :not() complejo. */
+.exchange-group label:has(> input[type='checkbox']:checked) {
+  background: transparent !important;
+  color: var(--gray-600) !important;
+  box-shadow: none !important;
+}
