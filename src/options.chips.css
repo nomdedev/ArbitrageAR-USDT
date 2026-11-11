@@ -36,11 +36,12 @@ label:has(> input[type='checkbox']):not(.switch):not(.exchange-group label, .che
   background: #f5f5f7;
 }
 
-/* Estado seleccionado: el acento reemplaza al negro (nunca se suma: un solo azul en la pantalla) */
-label:has(> input[type='checkbox']:checked):not(.switch) {
-  background: #0071e3;
-  color: #ffffff;
-  box-shadow: none;
+/* Seleccionadas: las capsulas cortas usan un fondo neutro; las listas largas
+   conservan el estilo de fila y no colorean toda la etiqueta. */
+label:has(> input[type='checkbox']:checked):not(.switch):not(.exchange-group label, .checkbox-grid label) {
+  background: #f0f0f2;
+  color: #1d1d1f;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
 }
 
 label:has(> input[type='checkbox']):not(.switch):not(.exchange-group label, .checkbox-grid label):has(> input:focus-visible) {
@@ -63,13 +64,13 @@ label:has(> input[type='checkbox']):not(.switch):not(.exchange-group label, .che
   cursor: pointer;
 }
 
-label:has(> input[type='checkbox']:checked):not(.switch) > input[type='checkbox'] {
+label:has(> input[type='checkbox']:checked):not(.switch):not(.exchange-group label, .checkbox-grid label) > input[type='checkbox'] {
   background: #ffffff;
   box-shadow: none;
 }
 
 /* el tilde: marca de forma, no solo el color de fondo */
-label:has(> input[type='checkbox']:checked):not(.switch) > input[type='checkbox']::after {
+label:has(> input[type='checkbox']:checked):not(.switch):not(.exchange-group label, .checkbox-grid label) > input[type='checkbox']::after {
   content: '';
   position: absolute;
   left: 6px;
