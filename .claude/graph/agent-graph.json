@@ -1,0 +1,76 @@
+{
+  "name": "arbitragear-usdt-agent-graph",
+  "version": "1.0.0",
+  "description": "Grafo declarativo de agentes — ArbitrageAR-USDT (extensión Chromium Manifest V3 de arbitraje ARS/USDT). Integrado con los hooks reales de .claude/settings.json (prettier en Edit/Write, log de comandos) y con .claude/skills/auditors/*.md como checkers. Dominio: src/, tests/, scripts/.",
+  "nodes": [
+    { "id": "orchestrator", "kind": "coordinator", "phase": "init", "writes": [".claude/state/STATE.md"], "requiresApproval": false },
+    { "id": "planner", "kind": "coordinator", "phase": "plan", "writes": ["docs/"], "requiresApproval": false },
+    { "id": "architect", "kind": "maker", "phase": "plan", "writes": ["docs/"], "requiresApproval": false },
+    { "id": "background-dev", "kind": "maker", "phase": "build", "writes": ["src/background/", "src/modules/"], "requiresApproval": false },
+    { "id": "ui-dev", "kind": "maker", "phase": "build", "writes": ["src/ui/", "src/ui-components/"], "requiresApproval": false },
+    { "id": "utils-dev", "kind": "maker", "phase": "build", "writes": ["src/utils/"], "requiresApproval": false },
+    { "id": "security-auditor", "kind": "checker", "phase": "verify", "writes": [], "requiresApproval": false },
+    { "id": "testing-auditor", "kind": "checker", "phase": "verify", "writes": [], "requiresApproval": false },
+    { "id": "performance-auditor", "kind": "checker", "phase": "verify", "writes": [], "requiresApproval": false },
+    { "id": "qa-lead", "kind": "checker", "phase": "verify", "writes": [], "requiresApproval": false },
+    { "id": "docs", "kind": "maker", "phase": "close", "writes": ["docs/", "*.md"], "requiresApproval": false },
+    { "id": "state-manager", "kind": "coordinator", "phase": "close", "writes": [".claude/state/STATE.md"], "requiresApproval": false }
+  ],
+  "edges": [
+    { "from": "orchestrator", "to": "planner", "gate": "wip-limit-1" },
+    { "from": "planner", "to": "architect", "gate": null },
+    { "from": "planner", "to": "background-dev", "gate": null },
+    { "from": "planner", "to": "ui-dev", "gate": null },
+    { "from": "planner", "to": "utils-dev", "gate": null },
+    { "from": "background-dev", "to": "testing-auditor", "gate": "post-eval-matrix" },
+    { "from": "ui-dev", "to": "testing-auditor", "gate": "post-eval-matrix" },
+    { "from": "utils-dev", "to": "testing-auditor", "gate": "post-eval-matrix" },
+    { "from": "security-auditor", "to": "qa-lead", "gate": "findings-have-evidence" },
+    { "from": "testing-auditor", "to": "performance-auditor", "gate": "verdict-with-evidence" },
+    { "from": "performance-auditor", "to": "qa-lead", "gate": "verdict-with-evidence" },
+    { "from": "qa-lead", "to": "docs", "gate": "verdict-with-evidence" },
+    { "from": "docs", "to": "state-manager", "gate": "verdict-with-evidence" }
+  ],
+  "gates": {
+    "wip-limit-1": { "type": "state-check", "target": ".claude/state/STATE.md", "rule": "exactly-one-in-progress" },
+    "post-eval-matrix": {
+      "type": "eval-matrix",
+      "precedence": ["security", "backend", "frontend", "eval", "docs"],
+      "matrix": {
+        "security": { "pre": [], "post": ["lint"] },
+        "backend": { "pre": ["typecheck"], "post": ["typecheck", "test-unit"] },
+        "frontend": { "pre": ["typecheck"], "post": ["typecheck", "lint"] },
+        "eval": { "pre": [], "post": ["test-unit"] },
+        "docs": { "pre": [], "post": ["verify-only"] }
+      },
+      "classify": {
+        "security": ["manifest.json", "SECURITY*.md"],
+        "backend": ["src/background/", "src/modules/"],
+        "frontend": ["src/ui/", "src/ui-components/", "src/popup*"],
+        "eval": ["tests/", "scripts/loops/"],
+        "docs": ["*.md", "docs/", ".claude/auditorias/"]
+      }
+    },
+    "findings-have-evidence": { "type": "artifact-check", "rule": "every finding cites file:line" },
+    "verdict-with-evidence": { "type": "artifact-check", "rule": "verdict cites test/lint/typecheck output" },
+    "requires-approval": { "type": "approval", "rule": "human approval before writes" }
+  },
+  "hooks": [
+    { "trigger": "pre-session", "script": ".claude/hooks/pre-session-orchestrator.js" },
+    { "trigger": "pre-prompt", "script": "scripts/loops/agent-graph-runner.js --phase pre" },
+    { "trigger": "post-edit", "script": "scripts/loops/agent-graph-runner.js --phase post" },
+    { "trigger": "post-prompt", "script": "scripts/loops/agent-graph-runner.js --phase post" },
+    { "trigger": "post-session", "script": ".claude/hooks/post-session-state-manager.js" }
+  ],
+  "loops": [
+    { "id": "nightly-security", "schedule": "0 2 * * *", "evals": ["lint"] },
+    { "id": "weekly-full-audit", "schedule": "0 3 * * 0", "evals": ["test-unit"] },
+    { "id": "regression-suite", "schedule": "on-demand", "evals": ["test-unit"] }
+  ],
+  "hardStops": {
+    "tokenBudgetCap": 100000,
+    "maxIterations": 5,
+    "timeLimitMinutes": 10,
+    "onEvalFailure": "STOP_AND_REPORT"
+  }
+}
