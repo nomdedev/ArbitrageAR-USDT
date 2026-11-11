@@ -1683,7 +1683,10 @@ async function shouldSendNotification(settings, arbitrage) {
     once: Infinity
   };
 
-  const minInterval = frequencies[settings.notificationFrequency] || frequencies['1min'];
+  // OJO: con `||` el valor 0 de 'always' ("Sin límite") es falsy y caía en 1 minuto, así que
+  // la opción "Sin límite" en realidad esperaba un minuto entre avisos. Con `??` sólo cae en
+  // el default cuando la frecuencia es desconocida.
+  const minInterval = frequencies[settings.notificationFrequency] ?? frequencies['1min'];
   if (now - lastNotificationTime < minInterval) {
     log(
       `[NOTIF]  Intervalo mínimo no cumplido (${Math.round((minInterval - (now - lastNotificationTime)) / 1000)}s restantes)`
@@ -1783,10 +1786,16 @@ async function sendNotification(arbitrage, settings) {
 
     log(`[NOTIF] 🔔 Enviando notificación: ${brokerName} - ${profit.toFixed(2)}%`);
 
+    // iconUrl ABSOLUTA — medido en vivo (Chromium 153, extensión sin empaquetar): con la
+    // ruta relativa 'icons/icon128.png' Chrome la resuelve contra el script del service
+    // worker (/src/background/), no contra la raíz de la extensión; no encuentra la imagen
+    // y create() RECHAZA con "Unable to download all specified images". O sea que la alerta
+    // disparaba pero no se mostraba nunca. Con chrome.runtime.getURL() sí se muestra.
+    // El título no arranca con un espacio cuando el nivel no define ícono.
     await chrome.notifications.create(notificationId, {
       type: 'basic',
-      iconUrl: 'icons/icon128.png',
-      title: `${config.icon} ${config.label} en ${brokerName}`,
+      iconUrl: chrome.runtime.getURL('icons/icon128.png'),
+      title: `${config.icon ? `${config.icon} ` : ''}${config.label} en ${brokerName}`,
       message: message,
       priority: profit >= 10 ? 2 : 1,
       requireInteraction: profit >= 10, // Requiere interacción para ganancias >= 10%
@@ -1820,10 +1829,22 @@ async function sendNotification(arbitrage, settings) {
 // Verificar y enviar notificaciones después de actualizar datos
 async function checkAndNotify(arbitrages) {
   try {
-    // NUEVO: No enviar notificaciones en la primera actualización (inicialización)
+    // No avisar en la PRIMERA actualización de la instalación (evita el aluvión al instalar).
+    //
+    // MEDIDO EN VIVO: en Manifest V3 el service worker se apaga y se vuelve a crear, y la
+    // alarma de actualización es la que lo despierta. `isFirstUpdate` es una variable del
+    // proceso, así que vuelve a true en CADA arranque: saliendo temprano por esa bandera, el
+    // aviso automático no llegaba nunca (solo avisaba si el popup quedaba abierto y el worker
+    // seguía vivo). Ahora la siembra se anota en storage: se salta UNA vez en la vida de la
+    // instalación, no una vez por arranque.
     if (isFirstUpdate) {
-      log('[NOTIF] ⏭️ Saltando notificación en inicialización (isFirstUpdate = true)');
-      return;
+      const { notificacionSembrada } = await chrome.storage.local.get('notificacionSembrada');
+      if (!notificacionSembrada) {
+        await chrome.storage.local.set({ notificacionSembrada: true });
+        log('[NOTIF] ⏭️ Siembra inicial: sin avisos en la primera actualización de la instalación');
+        return;
+      }
+      isFirstUpdate = false;
     }
 
     const result = await chrome.storage.local.get('notificationSettings');

@@ -2,7 +2,7 @@ const { defineConfig } = require('@playwright/test');
 
 module.exports = defineConfig({
   testDir: './tests/e2e/playwright',
-  testMatch: ['**/extension-live.spec.js'],
+  testMatch: ['**/extension-live.spec.js', '**/alertas-notificacion.spec.js'],
   timeout: 90 * 1000,
   fullyParallel: false,
   workers: 1,
