@@ -1,5 +1,18 @@
 # GUION DE LOCUCIÓN — ArbitrARS
 
+> **Corregido: la voz y la música cambiaron.** La dirección que describe este documento
+> eligió `es-AR-TomasNeural` con `rate` +8/+12% y una cama musical. Las dos cosas fueron
+> rechazadas con razón: la voz sonaba a locutor institucional y la música era un acorde
+> menor con novena (oscura por construcción). Ahora la locución usa **un solo arquetipo**
+> de registro — `narrador` (grave, rápido, irónico; registro del científico loco) — que se
+> puede cambiar a `contraste` (agudo, joven, alarmado) con `python tools/tts_es.py --voz
+> contraste`. No se clona ninguna voz real: es voz del catálogo + `rate` + `pitch`, la
+> misma técnica de la tabla de abajo, ahora con `pitch` sí usado. **No hay música de fondo**
+> (`tools/make_music.py` sin `--con-musica`). La elección final del registro sigue abierta:
+> `tools/audicion-voces.py` genera el archivo para elegirla de oído. Las tablas de
+> pronunciación, pausas y alineación de este documento siguen vigentes tal cual; los
+> valores de `rate` por escena, no.
+
 Dirección de voz del video. Define **qué dice la voz, cómo lo pronuncia y dónde calla**.
 Todo lo que está acá es implementable con el motor real (edge-tts): el control se hace por
 tres vías, porque el motor **ignora SSML** — no acepta `<break>`, `<phoneme>` ni `<prosody>`:

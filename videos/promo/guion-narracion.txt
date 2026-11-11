@@ -1,7 +1,9 @@
 GUION DE NARRACIÓN — ArbitrARS (Detector de Arbitraje)
 ======================================================
 
-Voz: es-AR-TomasNeural (Microsoft Edge TTS, español rioplatense) · ritmo +12%
+Voz: NO SE USA — la locución no se embebe en el video (ver review/CAMBIO-DE-AUDIO.md)
+      Este archivo se conserva como reloj del video: de sus tiempos salen la duración,
+      los cortes de escena y la sincronización palabra por palabra de los captions.
 Duración real medida: 27,26 s · 63 palabras
 Los tiempos son los definitivos: salen de los eventos WordBoundary de la síntesis,
 no de una estimación. La narración está congelada en audio/narration.wav.

@@ -1,0 +1,5 @@
+referencia: audio/narration.wav · 26.80s de voz cruda
+arbitrars-promo-1920x1080-v7.mp4       r=0.9980  ganancia=+2.61 dB  26.88s  → voz sola
+arbitrars-promo-1080x1920-v6.mp4       r=0.9980  ganancia=+2.61 dB  26.88s  → voz sola
+
+OK: el audio de los renders es la locución sola.

@@ -1,0 +1,19 @@
+AUDICION DE VOCES — ArbitrARS
+Archivo: review/audicion-voces.mp3  (56.6 s)
+El video lo lee UNA sola voz de punta a punta: elegí un registro por número.
+N1-N5 son registros graves (científico loco); C1-C3, agudos (pibe nervioso).
+El 1 es la voz del video anterior, para comparar contra lo rechazado.
+Los últimos dos leen dos líneas seguidas: la voz única de hoy y la alternativa.
+==============================================================================
+
+ 1     0.00s →   3.49s   es-AR-TomasNeural        rate  +12% pitch   +0Hz   REF voz vieja (rechazada)
+ 2     4.29s →   7.78s   es-MX-JorgeNeural        rate  +22% pitch  -10Hz   N1 narrador · MX Jorge grave
+ 3     8.58s →  11.73s   es-CL-LorenzoNeural      rate  +22% pitch  -12Hz   N2 narrador · CL Lorenzo
+ 4    12.53s →  15.62s   es-UY-MateoNeural        rate  +22% pitch   -6Hz   N3 narrador · UY Mateo con filo
+ 5    16.42s →  19.76s   es-ES-AlvaroNeural       rate  +22% pitch  -14Hz   N4 narrador · ES Álvaro seco
+ 6    20.56s →  23.81s   es-VE-SebastianNeural    rate  +22% pitch  -10Hz   N5 narrador · VE Sebastián
+ 7    24.61s →  29.25s   es-PE-AlexNeural         rate  +22% pitch  +28Hz   C1 contraste · PE Alex agudo
+ 8    30.05s →  34.55s   es-EC-LuisNeural         rate  +22% pitch  +26Hz   C2 contraste · EC Luis agudo
+ 9    35.35s →  39.66s   es-MX-JorgeNeural        rate  +22% pitch  +30Hz   C3 contraste · Jorge subido
+10    40.46s →  48.23s   es-MX-JorgeNeural        rate  +22% pitch  -10Hz   VOZ ÚNICA hoy · N1 en secuencia
+11    49.03s →  57.43s   es-PE-AlexNeural         rate  +22% pitch  +28Hz   VOZ ÚNICA alternativa · C1 en secuencia

@@ -1,7 +1,15 @@
 # Variante vertical 9:16 — 1080×1920
 
-Segunda entrega de formato: la **misma** composición, los mismos tiempos, los mismos textos y
-el mismo audio, con otra disposición. No es un recorte del horizontal: es un layout propio,
+> **Actualizado.** El render vigente de esta variante es
+> `output/arbitrars-promo-1080x1920-v7.mp4`: **sin audio** (la voz y la música se sacaron de
+> los dos formatos, ver `review/CAMBIO-DE-AUDIO.md`), después del pase de legibilidad que
+> subió todo el texto chico al piso de lectura mobile y bajó el teléfono para que el bloque
+> entrara en la zona útil (ver `review/PASE-LEGIBILIDAD.md`). La tabla de ocupación y las
+> comparaciones de abajo siguen siendo válidas; los tamaños tipográficos y los valores de
+> sonoridad que se citan, no.
+
+Segunda entrega de formato: la **misma** composición, los mismos tiempos, los mismos textos y el
+mismo reloj, con otra disposición. No es un recorte del horizontal: es un layout propio,
 porque el hallazgo número uno del consejo fue justamente que el formato estaba mal elegido
 para el material que tenemos.
 
@@ -19,9 +27,9 @@ objeto a escala de sujeto.
 | Ancho del producto dentro del cuadro | 424 / 1920 = **22,1%** | 600 / 1080 = **55,6%** |
 | Ocupación de la banda útil (media) | 4,02% | **5,55%** |
 | Ocupación máxima | 6,85% | **10,64%** |
-| Sonoridad / pico | −14,0 LUFS / −1,5 dBFS | −14,0 LUFS / −1,5 dBFS (el mismo audio) |
+| Audio | ninguno (mudo) | ninguno (mudo) |
 | Fotogramas con cuadro muerto | 8,5% | 12,3% |
-| Duración · cortes · WCAG | 28,300 s · 6/6 · 137/137 | 28,300 s · 6/6 · 137/137 |
+| Duración · cortes · WCAG | 26,867 s · 6/6 · 129/129 | 26,867 s · 6/6 · 129/129 |
 
 Dos aclaraciones sobre esa tabla, para no comparar peras con manzanas:
 
@@ -36,11 +44,12 @@ Dos aclaraciones sobre esa tabla, para no comparar peras con manzanas:
 ## Cómo se construye y se renderiza cada una
 
 ```bash
-python tools/build_index.py                          # index.html          1920x1080
-python tools/build_index.py --vertical               # compositions/vertical.html  1080x1920
+python tools/build_index.py                          # index.html  1920x1080, sin audio
+python tools/build_index.py --vertical               # compositions/vertical.html 1080x1920, sin audio
+# --con-audio vuelve a embeber la locución (ver review/CAMBIO-DE-AUDIO.md)
 
-npx hyperframes render -o output/arbitrars-promo-1920x1080-v4.mp4                    # horizontal
-npx hyperframes render -c compositions/vertical.html -o output/arbitrars-promo-1080x1920.mp4
+npx hyperframes render -o output/arbitrars-promo-1920x1080-v8.mp4                    # horizontal
+npx hyperframes render -c compositions/vertical.html -o output/arbitrars-promo-1080x1920-v7.mp4
 ```
 
 ## Tres restricciones del framework que costaron tiempo (y quedan documentadas)
@@ -84,12 +93,13 @@ El bloque de ajustes vive al final del CSS de la composición y gana por orden d
 
 ## Verificación
 
-- `check` del proyecto: **0 errores** · layout 0 issues en 9 muestras · **137/137 WCAG**.
-- Render sin errores; ficha del MP4 por ffprobe: H.264 1080×1920 @30, AAC 28,300 s.
-- **Inspección visual** de cuatro fotogramas (`review/frames-vertical/`): hook, muro, feature y
-  alertas. Tipografía cargada, captura dentro del marco, nada cortado, pisado ni desbordado.
-- Los assets (fuentes, capturas, audio) resuelven bien desde `compositions/`: el audio del MP4
-  mide exactamente lo mismo que el del horizontal (−14,0 LUFS).
+- `check` del proyecto: **0 errores** · layout 0 issues en 12 muestras · **129/129 WCAG**.
+- Render sin errores; ficha del MP4 por ffprobe: H.264 1080×1920 @30 · **0 pistas de audio** · 26,867 s.
+- **Inspección visual** de fotogramas (`review/frames-sin-audio/` y `review/frames-legibilidad/`):
+  hook, muro, feature, alertas y cierre. Tipografía cargada, captura dentro del marco, nada
+  cortado, pisado ni desbordado.
+- Los assets (fuentes, capturas) resuelven bien desde `compositions/`. El texto **dentro** de la
+  captura del popup sigue pendiente: se eligió recortar y ampliar la captura por escena, sin hacer.
 
 ## Lo que queda pendiente y es honesto decir
 

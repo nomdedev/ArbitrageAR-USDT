@@ -1,69 +1,102 @@
 {
- "total": 28.24,
- "voice": "es-AR-TomasNeural",
+ "total": 26.8,
+ "voice": "es-MX-JorgeNeural",
+ "arquetipos": {
+  "narrador": {
+   "voz": "es-MX-JorgeNeural",
+   "pitch": "-10Hz",
+   "nota": "registro del científico loco: rápido, grave, irónico, sin solemnidad"
+  },
+  "contraste": {
+   "voz": "es-PE-AlexNeural",
+   "pitch": "+28Hz",
+   "nota": "registro del pibe nervioso: agudo, acelerado, alarmado"
+  }
+ },
  "segments": [
   {
    "frame": 1,
    "start": 0.0,
-   "duration": 3.336,
-   "end": 3.336,
-   "rate": "+8%",
+   "duration": 3.24,
+   "end": 3.24,
+   "rate": "+22%",
    "gap": 0.55,
-   "text": "El dólar oficial y el USDT no valen lo mismo."
+   "text": "El dólar oficial y el USDT no valen lo mismo.",
+   "arquetipo": "narrador",
+   "voz": "es-MX-JorgeNeural",
+   "pitch": "-10Hz"
   },
   {
    "frame": 2,
-   "start": 3.886,
-   "duration": 4.416,
-   "end": 8.302,
-   "rate": "+12%",
+   "start": 3.79,
+   "duration": 3.984,
+   "end": 7.774,
+   "rate": "+24%",
    "gap": 0.45,
-   "text": "Esa diferencia es real. Medirla a tiempo, no."
+   "text": "Esa diferencia es real. Medirla a tiempo, no.",
+   "arquetipo": "narrador",
+   "voz": "es-MX-JorgeNeural",
+   "pitch": "-10Hz"
   },
   {
    "frame": 3,
-   "start": 8.752,
-   "duration": 5.088,
-   "end": 13.84,
-   "rate": "+8%",
+   "start": 8.224,
+   "duration": 4.848,
+   "end": 13.072,
+   "rate": "+20%",
    "gap": 0.35,
-   "text": "ArbitrARS la mide sobre 49 exchanges, cada 30 segundos."
+   "text": "ArbitrARS la mide sobre 49 exchanges, cada 30 segundos.",
+   "arquetipo": "narrador",
+   "voz": "es-MX-JorgeNeural",
+   "pitch": "-10Hz"
   },
   {
    "frame": 4,
-   "start": 14.19,
-   "duration": 3.744,
-   "end": 17.934,
-   "rate": "+14%",
+   "start": 13.422,
+   "duration": 3.576,
+   "end": 16.998,
+   "rate": "+26%",
    "gap": 0.35,
-   "text": "Te ordena las rutas por rentabilidad, con la guía paso a paso."
+   "text": "Te ordena las rutas por rentabilidad, con la guía paso a paso.",
+   "arquetipo": "narrador",
+   "voz": "es-MX-JorgeNeural",
+   "pitch": "-10Hz"
   },
   {
    "frame": 5,
-   "start": 18.284,
-   "duration": 3.192,
-   "end": 21.476,
-   "rate": "+12%",
+   "start": 17.348,
+   "duration": 3.12,
+   "end": 20.468,
+   "rate": "+22%",
    "gap": 0.32,
-   "text": "Simulá tu monto y tus comisiones antes de operar."
+   "text": "Simulá tu monto y tus comisiones antes de operar.",
+   "arquetipo": "narrador",
+   "voz": "es-MX-JorgeNeural",
+   "pitch": "-10Hz"
   },
   {
    "frame": 6,
-   "start": 21.796,
-   "duration": 3.12,
-   "end": 24.916,
-   "rate": "+14%",
+   "start": 20.788,
+   "duration": 2.904,
+   "end": 23.692,
+   "rate": "+26%",
    "gap": 0.3,
-   "text": "Y te avisa solo cuando la brecha supera tu umbral."
+   "text": "Y te avisa solo cuando la brecha supera tu umbral.",
+   "arquetipo": "narrador",
+   "voz": "es-MX-JorgeNeural",
+   "pitch": "-10Hz"
   },
   {
    "frame": 7,
-   "start": 25.216,
-   "duration": 3.024,
-   "end": 28.24,
-   "rate": "+6%",
+   "start": 23.992,
+   "duration": 2.808,
+   "end": 26.8,
+   "rate": "+14%",
    "gap": 0.0,
-   "text": "Todo en tu navegador, sin servidores."
+   "text": "Todo en tu navegador, sin servidores.",
+   "arquetipo": "narrador",
+   "voz": "es-MX-JorgeNeural",
+   "pitch": "-10Hz"
   }
  ]
 }

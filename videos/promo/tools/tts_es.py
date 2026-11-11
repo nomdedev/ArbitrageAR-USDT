@@ -24,6 +24,13 @@ eventos WordBoundary exactos. El audio queda congelado en local: en render no ha
 Uso:  python tools/tts_es.py
 Salida: audio/seg_N.mp3, audio/narration.wav, audio/words.json, audio_meta.json,
         audio/timeline.json
+
+QUÉ ES LA VOZ (y qué no): no se clona ninguna voz real. Un arquetipo se arma con una
+voz sintética del catálogo de edge-tts más parámetros de entrega (rate/pitch). La
+referencia de registro es "científico loco sarcástico" (narrador) contra "pibe nervioso"
+(contrapunto), en dos arquetipos: NARRADOR y CONTRASTE. Clonar la voz de un actor para
+imitar a su personaje es un problema de derechos de imagen y de voz de una persona
+concreta, y no es lo que hace esto.
 """
 from __future__ import annotations
 
@@ -37,41 +44,66 @@ import edge_tts
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 AUDIO = os.path.join(BASE, "audio")
-VOICE = "es-AR-TomasNeural"
+
+# ── arquetipos de voz ─────────────────────────────────────────────────────────
+#   Un arquetipo = voz del catálogo + entrega. El motor ignora SSML, así que las
+#   únicas palancas son la voz, `rate` y `pitch`. El catálogo completo de es-* está
+#   en `edge-tts --list-voices`; todas las voces son "Friendly, Positive", así que el
+#   carácter sale de la entrega, no del timbre base.
+ARQUETIPOS = {
+    "narrador": {
+        "voz": "es-MX-JorgeNeural",
+        "pitch": "-10Hz",   # grave sin forzar
+        "nota": "registro del científico loco: rápido, grave, irónico, sin solemnidad",
+    },
+    "contraste": {
+        "voz": "es-PE-AlexNeural",
+        "pitch": "+28Hz",   # agudo y joven contra el narrador
+        "nota": "registro del pibe nervioso: agudo, acelerado, alarmado",
+    },
+}
+VOICE = ARQUETIPOS["narrador"]["voz"]  # compatibilidad con versiones previas
+
+# ── una sola voz ──────────────────────────────────────────────────────────────
+#   El video no es un diálogo: lo lee UN arquetipo de punta a punta. Cuál, se elige
+#   acá o por línea de comandos:  python tools/tts_es.py --voz contraste
+#   `narrador` = registro del científico loco (grave, rápido, irónico).
+#   `contraste` = registro del pibe nervioso (agudo, acelerado, alarmado).
+VOZ_UNICA = "contraste" if "--voz" in os.sys.argv and "contraste" in os.sys.argv else "narrador"
 
 # ── dirección por escena ──────────────────────────────────────────────────────
-#   frame, rate, pausa posterior (s), [(grafía de pantalla, forma fonética), ...]
+#   (escena, arquetipo, rate, pausa posterior (s), [(grafía de pantalla, forma fonética), ...])
 SEGMENTS = [
-    (1, "+8%", 0.55, [
+    (1, "narrador", "+22%", 0.55, [
         ("El", "El"), ("dólar", "dólar"), ("oficial", "oficial"), ("y", "y"),
         ("el", "el"), ("USDT", "u ese de té"), ("no", "no"), ("valen", "valen"),
         ("lo", "lo"), ("mismo.", "mismo."),
     ]),
-    (2, "+12%", 0.45, [
+    (2, "contraste", "+24%", 0.45, [
         ("Esa", "Esa"), ("diferencia", "diferencia"), ("es", "es"), ("real.", "real."),
         ("Medirla", "Medirla"), ("a", "a"), ("tiempo,", "tiempo,"), ("no.", "no."),
     ]),
-    (3, "+8%", 0.35, [
+    (3, "narrador", "+20%", 0.35, [
         ("ArbitrARS", "Arbitr a erre ese"), ("la", "la"), ("mide", "mide"),
         ("sobre", "sobre"), ("49", "49"), ("exchanges,", "exchanges,"),
         ("cada", "cada"), ("30", "30"), ("segundos.", "segundos."),
     ]),
-    (4, "+14%", 0.35, [
+    (4, "narrador", "+26%", 0.35, [
         ("Te", "Te"), ("ordena", "ordena"), ("las", "las"), ("rutas", "rutas"),
         ("por", "por"), ("rentabilidad,", "rentabilidad,"), ("con", "con"),
         ("la", "la"), ("guía", "guía"), ("paso", "paso"), ("a", "a"), ("paso.", "paso."),
     ]),
-    (5, "+12%", 0.32, [
+    (5, "contraste", "+22%", 0.32, [
         ("Simulá", "Simulá"), ("tu", "tu"), ("monto", "monto"), ("y", "y"),
         ("tus", "tus"), ("comisiones", "comisiones"), ("antes", "antes"),
         ("de", "de"), ("operar.", "operar."),
     ]),
-    (6, "+14%", 0.30, [
+    (6, "narrador", "+26%", 0.30, [
         ("Y", "Y"), ("te", "te"), ("avisa", "avisa"), ("solo", "solo"),
         ("cuando", "cuando"), ("la", "la"), ("brecha", "brecha"), ("supera", "supera"),
         ("tu", "tu"), ("umbral.", "umbral."),
     ]),
-    (7, "+6%", 0.00, [
+    (7, "narrador", "+14%", 0.00, [
         ("Todo", "Todo"), ("en", "en"), ("tu", "tu"), ("navegador,", "navegador,"),
         ("sin", "sin"), ("servidores.", "servidores."),
     ]),
@@ -84,8 +116,8 @@ def _norm(s: str) -> str:
     return _PUNCT.sub("", s).lower()
 
 
-async def synth(text: str, rate: str) -> tuple[bytes, list[dict]]:
-    com = edge_tts.Communicate(text, VOICE, rate=rate, boundary="WordBoundary")
+async def synth(text: str, rate: str, pitch: str, voice: str) -> tuple[bytes, list[dict]]:
+    com = edge_tts.Communicate(text, voice, rate=rate, pitch=pitch, boundary="WordBoundary")
     audio = bytearray()
     tokens: list[dict] = []
     async for chunk in com.stream():
@@ -165,10 +197,14 @@ def main() -> int:
     total_interp = 0
     total_pal = 0
 
-    print("Generando locución dirigida\n")
-    for frame, rate, gap, pares in SEGMENTS:
+    print(f"Generando locución dirigida · una sola voz: {VOZ_UNICA}\n")
+    for frame, _arq_original, rate, gap, pares in SEGMENTS:
+        # una sola voz de punta a punta: el arquetipo por escena queda documentado
+        # arriba pero no se usa mientras el video sea monólogo.
+        arq = VOZ_UNICA
+        perfil = ARQUETIPOS[arq]
         speech = " ".join(f for _, f in pares)
-        audio, tokens = asyncio.run(synth(speech, rate))
+        audio, tokens = asyncio.run(synth(speech, rate, perfil["pitch"], perfil["voz"]))
         path = os.path.join(AUDIO, f"seg_{frame}.mp3")
         with open(path, "wb") as fh:
             fh.write(audio)
@@ -182,10 +218,11 @@ def main() -> int:
 
         display = " ".join(p[0] for p in pares)
         segments.append({"frame": frame, "path": path, "duration": dur,
-                         "gap": gap, "rate": rate, "words": palabras, "text": display})
+                         "gap": gap, "rate": rate, "words": palabras, "text": display,
+                         "arquetipo": arq, "voz": perfil["voz"], "pitch": perfil["pitch"]})
         aviso = f"  ({len(interp)} interpoladas: {', '.join(p['text'] for p in interp)})" if interp else ""
-        print(f"  escena {frame}  {rate:>5}  {dur:5.2f}s  {len(tokens):2} tokens → "
-              f"{len(palabras):2} palabras  «{display[:44]}…»{aviso}")
+        print(f"  escena {frame}  {arq:9} {perfil['voz']:20} {rate:>5} {perfil['pitch']:>6}  "
+              f"{dur:5.2f}s  {len(tokens):2} tokens → {len(palabras):2} palabras  «{display[:38]}…»{aviso}")
 
     cursor = 0.0
     for seg in segments:
@@ -245,10 +282,11 @@ def main() -> int:
         json.dump(meta, fh, ensure_ascii=False, indent=1)
 
     with open(os.path.join(AUDIO, "timeline.json"), "w", encoding="utf-8") as fh:
-        json.dump({"total": total, "voice": VOICE, "segments": [
+        json.dump({"total": total, "voice": VOICE, "arquetipos": ARQUETIPOS, "segments": [
             {"frame": s["frame"], "start": s["start"], "duration": round(s["duration"], 3),
              "end": round(s["start"] + s["duration"], 3), "rate": s["rate"],
-             "gap": s["gap"], "text": s["text"]} for s in segments]}, fh,
+             "gap": s["gap"], "text": s["text"], "arquetipo": s["arquetipo"],
+             "voz": s["voz"], "pitch": s["pitch"]} for s in segments]}, fh,
             ensure_ascii=False, indent=1)
 
     print("\nLínea de tiempo real:")

@@ -7,8 +7,13 @@ Por qué un generador y no escribir el HTML a mano:
   esos tiempos a mano es garantizar la desincronización; acá salen de audio/words.json
   (timestamps reales de WordBoundary de edge-tts) y de audio/timeline.json.
 
-Uso:  python tools/build_index.py
-Salida: index.html (composición standalone, 1920x1080, 27.30 s)
+Uso:  python tools/build_index.py [--vertical] [--con-audio]
+Salida: index.html (1920x1080) o compositions/vertical.html (1080x1920), SIN audio
+
+Sin voz: la locución se sacó del video —no quedaba bien en ninguno de los dos formatos—.
+La composición no embebe audio, pero sigue usando los tiempos de la locución como reloj:
+escenas y captions mantienen el ritmo para el que fueron escritos y el video queda mudo.
+Con `--con-audio` vuelve a embeber `audio/mix_final.wav`.
 """
 from __future__ import annotations
 
@@ -47,11 +52,22 @@ def _duracion(nombre: str) -> float:
     return round(float(salida), 3)
 
 
+# ── el reloj del video es la locución, aunque no se escuche ───────────────────
+#   La duración, los cortes de escena y los captions salen de los tiempos reales de
+#   la locución (audio/timeline.json + words.json). Aunque no haya voz en la pista,
+#   ese reloj sigue siendo el correcto: el video mantiene el ritmo para el que fue
+#   escrito y queda mudo.
 VOZ_DUR = _duracion("narration.wav")
 MIX_DUR = _duracion("mix_final.wav")
-# el video dura lo que dura la voz más un respiro mínimo para que la última
-# animación resuelva antes del corte final
 TOTAL = round(VOZ_DUR + 0.06, 3)
+
+# ── audio embebido: por defecto NO ────────────────────────────────────────────
+#   La voz se sacó de los dos formatos. `--con-audio` vuelve a embeber
+#   audio/mix_final.wav (hay que haber corrido tools/make_music.py antes).
+AUDIO_EMBEBIDO = "--con-audio" in sys.argv
+AUDIO_TAG = (f'\n      <audio id="mix" src="audio/mix_final.wav" data-start="0" '
+             f'data-duration="{MIX_DUR}" data-volume="1" data-track-index="0"></audio>'
+             if AUDIO_EMBEBIDO else "\n      <!-- sin audio: la voz se sacó del video -->")
 
 # ── paleta de marca (remapeada desde el preset broadside por build-frame.mjs) ──────
 C = {
@@ -175,66 +191,79 @@ def build() -> str:
     vert_css = "" if not VERTICAL else """
 /* ───────── VERTICAL 1080x1920 (reels / shorts) ───────── */
 #brand { left: 60px; top: 112px; gap: 12px; }
-#brand b { font-size: 30px; }
-#brand i { font-size: 14px; letter-spacing: .16em; }
+#brand b { font-size: 34px; }
+#brand i { display: none; }         /* 14px = 5,1pt en un telefono de 390pt: ilegible */
 #hair-top { top: 196px; }
 #hair-bot { bottom: 452px; }
-#foot { left: 60px; right: 60px; bottom: 400px; font-size: 15px; }
+#foot { display: none; }            /* cromo de datos a 15px (5,4pt): se lee como suciedad */
 
-/* zona útil: 230 → 1280 (deja libres los 440px que en un feed tapa la interfaz) */
-.scene { left: 60px; right: 60px; top: 230px; bottom: 640px; }
+/* zona util: 200 -> 1386 (deja libres los 440px que en un feed tapa la interfaz y
+   no invade la banda de captions). Arranca en 200 y no en 230 porque el piso
+   tipografico nuevo hace que el contenido crezca: con 230 el telefono se salia
+   por arriba del cuadro en las escenas 4 y 5. */
+.scene { left: 60px; right: 60px; top: 200px; bottom: 640px; }
 .caps { bottom: 470px; }
-.caps-in { max-width: 940px; font-size: 52px; }
+.caps-in { max-width: 940px; font-size: 52px; }   /* 18,8pt en un telefono: correcto */
 .cw { margin: 0 8px; }
 
-/* el producto manda: teléfono arriba, datos abajo y centrados */
+/* el producto manda: telefono arriba, datos abajo y centrados.
+   Piso tipografico mobile: ningun texto informativo por debajo de 28px (=10,1pt a
+   390pt de ancho). Todo lo que estaba entre 14 y 20px era ilegible en pantalla chica.
+   El telefono baja de 784 a 700 de alto para que el bloque entero entre en la zona
+   util: sigue siendo el sujeto (46% del ancho) pero sin empujar el texto fuera. */
 .split { display: flex; flex-direction: column; align-items: center; justify-content: center;
-         gap: 34px; height: 100%; }
+         gap: 22px; height: 100%; }
 .split > div:not(.phone):not(.notif-stage) { width: 100%; text-align: center; }
-.phone { width: 600px; height: 840px; margin: 0; border-radius: 32px; }
-.feat-label { font-size: 15px; }
-.feat-head { font-size: 50px; line-height: 1.06; margin-top: 12px; max-width: 100%; }
+.phone { width: 500px; height: 700px; margin: 0; border-radius: 32px; }
+.feat-label { font-size: 32px; }
+.feat-head { font-size: 50px; line-height: 1.06; margin-top: 14px; max-width: 100%; }
 .big-num { font-size: 150px; line-height: .88; }
-.chips { margin-top: 22px; justify-content: center; gap: 10px; }
-.chip { font-size: 15px; padding: 12px 19px; }
-.steps { margin-top: 24px; gap: 15px; }
-.step { grid-template-columns: 58px 1fr; padding-top: 13px; }
-.step b { font-size: 30px; }
-.step span { font-size: 17px; }
-.fields { margin-top: 22px; max-width: 100%; gap: 11px; }
-.field { padding: 17px 21px; }
-.field b { font-size: 27px; }
+.chips { margin-top: 24px; justify-content: center; gap: 12px; }
+.chip { font-size: 30px; padding: 16px 24px; }
+.steps { margin-top: 18px; gap: 14px; }
+.step { grid-template-columns: 70px 1fr; padding-top: 12px; }
+.step b { font-size: 36px; }
+.step span { font-size: 32px; }
+.fields { margin-top: 18px; max-width: 100%; gap: 10px; }
+.field { padding: 16px 24px; }
+.field b { font-size: 36px; }
 
-/* hook: en 9:16 la comparación se lee mejor apilada que en fila */
+/* hook: en 9:16 la comparacion se lee mejor apilada que en fila */
 .s1 { gap: 38px; }
 .s1-row { flex-direction: column; gap: 20px; }
 .s1-word { font-size: 128px; }
 #s1-neq { width: 108px; height: 108px; }
-.s1-sub { font-size: 16px; letter-spacing: .2em; max-width: 900px; text-align: center; }
+.s1-sub { font-size: 30px; letter-spacing: .16em; max-width: 900px; text-align: center; }
 
-/* muro de exchanges: cuatro columnas en vez de siete, y el 49 primero */
+/* muro de exchanges: cuatro columnas en vez de siete, y el 49 primero.
+   El muro es textura, no texto de lectura: 26px es su piso. Subirlo a 28 hacia
+   que las 13 filas empujaran la nota contra la banda de captions (8 errores de
+   content_overlap que devolvio `check`). */
 #s2 .scene { display: flex; flex-direction: column; align-items: center; }
-.s2-title { order: 1; font-size: 48px; max-width: 960px; text-align: center; }
-.s2-badge { order: 2; position: static; text-align: center; margin: 30px 0 0; }
-.s2-badge b { font-size: 138px; margin-bottom: 12px; }
-.s2-grid { order: 3; grid-template-columns: repeat(4, 1fr); gap: 10px 18px; margin-top: 28px; }
-.s2-chip { font-size: 17px; padding: 11px 0 11px 12px; }
-.s2-note { order: 4; margin-top: 28px; font-size: 14px; text-align: center; }
+.s2-title { order: 1; font-size: 44px; max-width: 960px; text-align: center; }
+.s2-badge { order: 2; position: static; text-align: center; margin: 20px 0 0; }
+.s2-badge b { font-size: 120px; margin-bottom: 8px; }
+.s2-grid { order: 3; grid-template-columns: repeat(4, 1fr); gap: 8px 16px; margin-top: 22px; }
+.s2-chip { font-size: 26px; padding: 8px 0 8px 12px; }
+.s2-note { order: 4; margin-top: 22px; font-size: 28px; text-align: center; }
 
-/* alertas: la notificación arriba (es el sujeto) y el texto abajo */
+/* alertas: la notificacion arriba (es el sujeto) y el texto abajo */
 #s6 .split { flex-direction: column-reverse; }
 .notif-stage { width: 100%; height: 600px; }
-.notif { width: 840px; grid-template-columns: 66px 1fr; }
-.notif .ic { width: 66px; height: 66px; }
-.notif h4 { font-size: 29px; }
-.notif p { font-size: 20px; }
+.notif { width: 900px; grid-template-columns: 76px 1fr; }
+.notif .ic { width: 76px; height: 76px; }
+.notif h4 { font-size: 42px; }
+.notif p { font-size: 34px; }
 
 /* cierre */
 .s7 { gap: 26px; }
 .s7-mark { width: 344px; height: 320px; }
 .s7-word { font-size: 134px; }
-.s7-stack { font-size: 15px; letter-spacing: .2em; }
-.s7-cta { font-size: 20px; }
+.s7-stack { font-size: 30px; letter-spacing: .14em; }
+.step i { font-size: 30px; }
+.field label { font-size: 28px; letter-spacing: .1em; }
+.notif .t { font-size: 26px; }
+.s7-cta { font-size: 36px; }
 """
 
     css = f"""
@@ -272,9 +301,9 @@ body {{ font-family: 'Barlow', system-ui, sans-serif; color: var(--text); -webki
 /* cromo persistente (marca + pie) */
 #brand {{ position: absolute; left: 72px; top: 40px; display: flex; align-items: baseline; gap: 14px; }}
 #brand b {{ font: 700 26px/1 'Barlow'; letter-spacing: .01em; }}
-#brand i {{ font: 500 12.5px/1 'IBM Plex Mono'; letter-spacing: .18em; color: var(--cyan); font-style: normal; }}
+#brand i {{ font: 500 18px/1 'IBM Plex Mono'; letter-spacing: .18em; color: var(--cyan); font-style: normal; }}
 #foot {{ position: absolute; left: 72px; right: 72px; bottom: 40px; display: flex; justify-content: space-between;
-    font: 500 13px/1 'IBM Plex Mono'; letter-spacing: .13em; color: var(--muted); }}
+    font: 500 18px/1 'IBM Plex Mono'; letter-spacing: .13em; color: var(--muted); }}
 #foot .a {{ color: var(--muted); }}
 #foot .b {{ color: #7A7D81; }}
 
@@ -296,7 +325,7 @@ body {{ font-family: 'Barlow', system-ui, sans-serif; color: var(--text); -webki
 .s1-word {{ font: 900 148px/1 'Barlow'; letter-spacing: -.03em; display: block; }}
 .s1-word.alt {{ color: var(--muted); }}
 #s1-neq {{ width: 132px; height: 132px; display: block; }}
-.s1-sub {{ font: 500 15px/1 'IBM Plex Mono'; letter-spacing: .26em; color: var(--cyan); text-transform: uppercase; }}
+.s1-sub {{ font: 500 18px/1 'IBM Plex Mono'; letter-spacing: .26em; color: var(--cyan); text-transform: uppercase; }}
 
 /* escena 2 — muro de exchanges */
 .s2-title {{ font: 600 62px/1.1 'Barlow'; letter-spacing: -.02em; max-width: 1180px; }}
@@ -304,10 +333,10 @@ body {{ font-family: 'Barlow', system-ui, sans-serif; color: var(--text); -webki
 .s2-grid {{ display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px 22px; width: 100%; margin-top: 44px; }}
 .s2-chip {{ font: 400 19px/1 'IBM Plex Mono'; color: var(--muted); padding: 13px 0 13px 14px;
     border-left: 1px solid var(--border); display: block; }}
-.s2-note {{ margin-top: 40px; font: 500 15px/1 'IBM Plex Mono'; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }}
+.s2-note {{ margin-top: 40px; font: 500 18px/1 'IBM Plex Mono'; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }}
 .s2-badge {{ position: absolute; right: 0; top: 4px; text-align: right; }}
 .s2-badge b {{ font: 900 128px/1 'Barlow'; color: var(--accent); display: block; letter-spacing: -.03em; margin-bottom: 22px; }}
-.s2-badge span {{ font: 500 14px/1 'IBM Plex Mono'; letter-spacing: .18em; color: var(--muted); text-transform: uppercase; display: block; }}
+.s2-badge span {{ font: 500 18px/1 'IBM Plex Mono'; letter-spacing: .18em; color: var(--muted); text-transform: uppercase; display: block; }}
 
 /* escenas 3-5 — producto + columna de datos */
 .split {{ display: grid; grid-template-columns: 700px 1fr; gap: 90px; height: 100%; align-items: center; }}
@@ -317,12 +346,12 @@ body {{ font-family: 'Barlow', system-ui, sans-serif; color: var(--text); -webki
 .phone img {{ width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }}
 .scan {{ position: absolute; left: 0; right: 0; height: 140px; top: -140px;
     background: linear-gradient(180deg, rgba(59,130,246,0), rgba(59,130,246,.42), rgba(59,130,246,0)); }}
-.feat-label {{ font: 500 14px/1 'IBM Plex Mono'; letter-spacing: .22em; color: var(--cyan); text-transform: uppercase; }}
+.feat-label {{ font: 500 18px/1 'IBM Plex Mono'; letter-spacing: .22em; color: var(--cyan); text-transform: uppercase; }}
 .feat-head {{ font: 700 76px/1.02 'Barlow'; letter-spacing: -.025em; margin-top: 22px; max-width: 900px; }}
 .feat-head em {{ font-style: normal; color: var(--accent); }}
 .big-num {{ font: 900 176px/0.86 'Barlow'; color: var(--accent); letter-spacing: -.04em; }}
 .chips {{ display: flex; gap: 12px; margin-top: 30px; flex-wrap: wrap; }}
-.chip {{ font: 500 15px/1 'IBM Plex Mono'; letter-spacing: .12em; color: var(--text);
+.chip {{ font: 500 18px/1 'IBM Plex Mono'; letter-spacing: .12em; color: var(--text);
     border: 1px solid var(--border); border-radius: 999px; padding: 12px 20px; text-transform: uppercase; }}
 .chip.on {{ border-color: rgba(59,130,246,.6); color: var(--accent); }}
 
@@ -330,7 +359,7 @@ body {{ font-family: 'Barlow', system-ui, sans-serif; color: var(--text); -webki
 .steps {{ margin-top: 40px; display: flex; flex-direction: column; gap: 20px; }}
 .step {{ display: grid; grid-template-columns: 74px 1fr; align-items: baseline;
     border-top: 1px solid var(--border); padding-top: 18px; }}
-.step i {{ font: 500 15px/1 'IBM Plex Mono'; color: var(--accent); font-style: normal; letter-spacing: .1em; }}
+.step i {{ font: 500 18px/1 'IBM Plex Mono'; color: var(--accent); font-style: normal; letter-spacing: .1em; }}
 .step b {{ font: 600 34px/1.15 'Barlow'; display: block; }}
 .step span {{ font: 400 18px/1.4 'Barlow'; color: var(--muted); display: block; margin-top: 5px; }}
 
@@ -338,7 +367,7 @@ body {{ font-family: 'Barlow', system-ui, sans-serif; color: var(--text); -webki
 .fields {{ margin-top: 38px; display: flex; flex-direction: column; gap: 14px; max-width: 620px; }}
 .field {{ display: flex; justify-content: space-between; align-items: center;
     border: 1px solid var(--border); border-radius: 14px; padding: 20px 24px; background: rgba(255,255,255,.012); }}
-.field label {{ font: 500 13px/1 'IBM Plex Mono'; letter-spacing: .16em; color: var(--muted); text-transform: uppercase; }}
+.field label {{ font: 500 18px/1 'IBM Plex Mono'; letter-spacing: .16em; color: var(--muted); text-transform: uppercase; }}
 .field b {{ font: 600 30px/1 'Barlow'; }}
 .field.primary {{ border-color: rgba(59,130,246,.55); }}
 .field.primary b {{ color: var(--accent); }}
@@ -358,7 +387,7 @@ body {{ font-family: 'Barlow', system-ui, sans-serif; color: var(--text); -webki
 .notif .ic img {{ width: 100%; height: 100%; object-fit: contain; }}
 .notif h4 {{ font: 600 27px/1.2 'Barlow'; }}
 .notif p {{ font: 400 19px/1.35 'Barlow'; color: var(--muted); margin-top: 5px; }}
-.notif .t {{ position: absolute; right: 30px; top: 26px; font: 500 12.5px/1 'IBM Plex Mono'; letter-spacing: .14em; color: var(--faint); text-transform: uppercase; }}
+.notif .t {{ position: absolute; right: 30px; top: 26px; font: 500 18px/1 'IBM Plex Mono'; letter-spacing: .14em; color: var(--faint); text-transform: uppercase; }}
 .notif .dot {{ position: absolute; left: -1px; top: 50%; width: 3px; height: 44px; margin-top: -22px; background: var(--accent); border-radius: 2px; }}
 
 /* escena 7 — cierre */
@@ -367,8 +396,8 @@ body {{ font-family: 'Barlow', system-ui, sans-serif; color: var(--text); -webki
 .s7-mark img {{ width: 100%; height: 100%; display: block; }}
 .s7-word {{ font: 900 116px/1 'Barlow'; letter-spacing: -.035em; }}
 .s7-word i {{ font-style: normal; color: var(--accent); }}
-.s7-stack {{ font: 500 15px/1 'IBM Plex Mono'; letter-spacing: .24em; color: var(--muted); text-transform: uppercase; }}
-.s7-cta {{ margin-top: 8px; font: 500 19px/1 'IBM Plex Mono'; letter-spacing: .1em; color: var(--accent); }}
+.s7-stack {{ font: 500 18px/1 'IBM Plex Mono'; letter-spacing: .24em; color: var(--muted); text-transform: uppercase; }}
+.s7-cta {{ margin-top: 8px; font: 500 20px/1 'IBM Plex Mono'; letter-spacing: .1em; color: var(--accent); }}
 {vert_css}"""
 
     # ── markup de escenas ──────────────────────────────────────────────────────
@@ -586,9 +615,7 @@ body {{ font-family: 'Barlow', system-ui, sans-serif; color: var(--text); -webki
         <span class="b">Manifest V3 · v6.0.0 · 203 tests</span>
       </div>
 {''.join(scene_html)}
-
-      <audio id="mix" src="audio/mix_final.wav" data-start="0" data-duration="{MIX_DUR}"
-             data-volume="1" data-track-index="0"></audio>
+{AUDIO_TAG}
     </div>
 
     <script>

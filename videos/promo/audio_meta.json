@@ -1,442 +1,437 @@
 {
- "bgm": {
-  "path": "audio/mix_final.wav",
-  "volume": 1.0,
-  "query": "synthesized ambient pad + musical events (ffmpeg, sin licencia de terceros)",
-  "duration_s": 28.24
- },
+ "bgm": null,
  "bgm_pending": false,
  "voices": [
   {
    "frame": 1,
    "path": "audio/seg_1.mp3",
-   "duration_s": 3.336,
+   "duration_s": 3.24,
    "words": [
     {
      "id": "w0",
      "text": "El",
-     "start": 0.096,
-     "end": 0.258
+     "start": 0.091,
+     "end": 0.255
     },
     {
      "id": "w1",
      "text": "dólar",
-     "start": 0.293,
-     "end": 0.525
+     "start": 0.265,
+     "end": 0.501
     },
     {
      "id": "w2",
      "text": "oficial",
-     "start": 0.536,
-     "end": 0.953
+     "start": 0.511,
+     "end": 0.921
     },
     {
      "id": "w3",
      "text": "y",
-     "start": 0.976,
-     "end": 1.045
+     "start": 0.931,
+     "end": 1.023
     },
     {
      "id": "w4",
      "text": "el",
-     "start": 1.045,
+     "start": 1.034,
      "end": 1.126
     },
     {
      "id": "w5",
      "text": "USDT",
-     "start": 1.161,
-     "end": 1.67
+     "start": 1.136,
+     "end": 1.659
     },
     {
      "id": "w6",
      "text": "no",
-     "start": 1.694,
-     "end": 1.763
+     "start": 1.669,
+     "end": 1.823
     },
     {
      "id": "w7",
      "text": "valen",
-     "start": 1.798,
-     "end": 2.018
+     "start": 1.833,
+     "end": 2.089
     },
     {
      "id": "w8",
      "text": "lo",
-     "start": 2.018,
-     "end": 2.133
+     "start": 2.099,
+     "end": 2.171
     },
     {
      "id": "w9",
      "text": "mismo.",
-     "start": 2.168,
-     "end": 2.469
+     "start": 2.181,
+     "end": 2.519
     }
    ]
   },
   {
    "frame": 2,
    "path": "audio/seg_2.mp3",
-   "duration_s": 4.416,
+   "duration_s": 3.984,
    "words": [
     {
      "id": "w0",
      "text": "Esa",
-     "start": 0.097,
-     "end": 0.276
+     "start": 0.09,
+     "end": 0.312
     },
     {
      "id": "w1",
      "text": "diferencia",
-     "start": 0.309,
-     "end": 0.845
+     "start": 0.322,
+     "end": 0.846
     },
     {
      "id": "w2",
      "text": "es",
-     "start": 0.946,
-     "end": 1.068
+     "start": 0.856,
+     "end": 0.998
     },
     {
      "id": "w3",
      "text": "real.",
-     "start": 1.113,
-     "end": 1.425
+     "start": 1.008,
+     "end": 1.29
     },
     {
      "id": "w4",
      "text": "Medirla",
-     "start": 2.245,
-     "end": 2.646
+     "start": 1.976,
+     "end": 2.369
     },
     {
      "id": "w5",
      "text": "a",
-     "start": 2.646,
-     "end": 2.691
+     "start": 2.379,
+     "end": 2.419
     },
     {
      "id": "w6",
      "text": "tiempo,",
-     "start": 2.758,
-     "end": 3.104
+     "start": 2.429,
+     "end": 2.792
     },
     {
      "id": "w7",
      "text": "no.",
-     "start": 3.383,
-     "end": 3.562
+     "start": 3.024,
+     "end": 3.256
     }
    ]
   },
   {
    "frame": 3,
    "path": "audio/seg_3.mp3",
-   "duration_s": 5.088,
+   "duration_s": 4.848,
    "words": [
     {
      "id": "w0",
      "text": "ArbitrARS",
-     "start": 0.097,
-     "end": 1.023
+     "start": 0.092,
+     "end": 1.04
     },
     {
      "id": "w1",
      "text": "la",
-     "start": 1.046,
-     "end": 1.116
+     "start": 1.05,
+     "end": 1.133
     },
     {
      "id": "w2",
      "text": "mide",
-     "start": 1.139,
-     "end": 1.347
+     "start": 1.144,
+     "end": 1.373
     },
     {
      "id": "w3",
      "text": "sobre",
-     "start": 1.359,
-     "end": 1.579
+     "start": 1.383,
+     "end": 1.612
     },
     {
      "id": "w4",
      "text": "49",
-     "start": 1.637,
-     "end": 2.273
+     "start": 1.623,
+     "end": 2.196
     },
     {
      "id": "w5",
      "text": "exchanges,",
-     "start": 2.285,
-     "end": 2.944
+     "start": 2.206,
+     "end": 2.821
     },
     {
      "id": "w6",
      "text": "cada",
-     "start": 3.141,
-     "end": 3.338
+     "start": 3.019,
+     "end": 3.227
     },
     {
      "id": "w7",
      "text": "30",
-     "start": 3.338,
-     "end": 3.504
+     "start": 3.227,
+     "end": 3.39
     },
     {
      "id": "w8",
      "text": "segundos.",
-     "start": 3.504,
-     "end": 4.252
+     "start": 3.39,
+     "end": 4.123
     }
    ]
   },
   {
    "frame": 4,
    "path": "audio/seg_4.mp3",
-   "duration_s": 3.744,
+   "duration_s": 3.576,
    "words": [
     {
      "id": "w0",
      "text": "Te",
-     "start": 0.094,
-     "end": 0.204
+     "start": 0.09,
+     "end": 0.179
     },
     {
      "id": "w1",
      "text": "ordena",
-     "start": 0.225,
-     "end": 0.521
+     "start": 0.189,
+     "end": 0.457
     },
     {
      "id": "w2",
      "text": "las",
-     "start": 0.543,
-     "end": 0.653
+     "start": 0.467,
+     "end": 0.625
     },
     {
      "id": "w3",
      "text": "rutas",
-     "start": 0.664,
-     "end": 0.949
+     "start": 0.635,
+     "end": 0.893
     },
     {
      "id": "w4",
      "text": "por",
-     "start": 1.004,
-     "end": 1.092
+     "start": 0.903,
+     "end": 1.022
     },
     {
      "id": "w5",
      "text": "rentabilidad,",
-     "start": 1.103,
-     "end": 1.739
+     "start": 1.032,
+     "end": 1.598
     },
     {
      "id": "w6",
      "text": "con",
-     "start": 1.903,
-     "end": 2.002
+     "start": 1.786,
+     "end": 1.915
     },
     {
      "id": "w7",
      "text": "la",
-     "start": 2.013,
-     "end": 2.1
+     "start": 1.925,
+     "end": 1.994
     },
     {
      "id": "w8",
      "text": "guía",
-     "start": 2.144,
-     "end": 2.309
+     "start": 2.004,
+     "end": 2.233
     },
     {
      "id": "w9",
      "text": "paso",
-     "start": 2.375,
-     "end": 2.561
+     "start": 2.242,
+     "end": 2.5
     },
     {
      "id": "w10",
      "text": "a",
-     "start": 2.561,
-     "end": 2.583
+     "start": 2.51,
+     "end": 2.54
     },
     {
      "id": "w11",
      "text": "paso.",
-     "start": 2.638,
-     "end": 2.89
+     "start": 2.55,
+     "end": 2.877
     }
    ]
   },
   {
    "frame": 5,
    "path": "audio/seg_5.mp3",
-   "duration_s": 3.192,
+   "duration_s": 3.12,
    "words": [
     {
      "id": "w0",
      "text": "Simulá",
-     "start": 0.095,
-     "end": 0.474
+     "start": 0.091,
+     "end": 0.48
     },
     {
      "id": "w1",
      "text": "tu",
-     "start": 0.541,
-     "end": 0.608
+     "start": 0.491,
+     "end": 0.593
     },
     {
      "id": "w2",
      "text": "monto",
-     "start": 0.63,
-     "end": 0.954
+     "start": 0.603,
+     "end": 0.88
     },
     {
      "id": "w3",
      "text": "y",
-     "start": 0.965,
-     "end": 1.021
+     "start": 0.89,
+     "end": 0.941
     },
     {
      "id": "w4",
      "text": "tus",
-     "start": 1.066,
-     "end": 1.144
+     "start": 0.952,
+     "end": 1.105
     },
     {
      "id": "w5",
      "text": "comisiones",
-     "start": 1.188,
-     "end": 1.691
+     "start": 1.116,
+     "end": 1.659
     },
     {
      "id": "w6",
      "text": "antes",
-     "start": 1.746,
-     "end": 1.958
+     "start": 1.669,
+     "end": 1.935
     },
     {
      "id": "w7",
      "text": "de",
-     "start": 1.981,
-     "end": 2.037
+     "start": 1.946,
+     "end": 1.997
     },
     {
      "id": "w8",
      "text": "operar.",
-     "start": 2.037,
-     "end": 2.327
+     "start": 2.007,
+     "end": 2.407
     }
    ]
   },
   {
    "frame": 6,
    "path": "audio/seg_6.mp3",
-   "duration_s": 3.12,
+   "duration_s": 2.904,
    "words": [
     {
      "id": "w0",
      "text": "Y",
-     "start": 0.094,
-     "end": 0.204
+     "start": 0.09,
+     "end": 0.199
     },
     {
      "id": "w1",
      "text": "te",
-     "start": 0.258,
-     "end": 0.313
+     "start": 0.209,
+     "end": 0.278
     },
     {
      "id": "w2",
      "text": "avisa",
-     "start": 0.313,
-     "end": 0.642
+     "start": 0.288,
+     "end": 0.556
     },
     {
      "id": "w3",
      "text": "solo",
-     "start": 0.653,
-     "end": 0.872
+     "start": 0.566,
+     "end": 0.824
     },
     {
      "id": "w4",
      "text": "cuando",
-     "start": 0.938,
-     "end": 1.125
+     "start": 0.834,
+     "end": 1.052
     },
     {
      "id": "w5",
      "text": "la",
-     "start": 1.157,
-     "end": 1.223
+     "start": 1.062,
+     "end": 1.131
     },
     {
      "id": "w6",
      "text": "brecha",
-     "start": 1.256,
-     "end": 1.508
+     "start": 1.141,
+     "end": 1.399
     },
     {
      "id": "w7",
      "text": "supera",
-     "start": 1.53,
-     "end": 1.837
+     "start": 1.409,
+     "end": 1.736
     },
     {
      "id": "w8",
      "text": "tu",
-     "start": 1.892,
-     "end": 1.936
+     "start": 1.746,
+     "end": 1.836
     },
     {
      "id": "w9",
      "text": "umbral.",
-     "start": 1.936,
-     "end": 2.32
+     "start": 1.846,
+     "end": 2.203
     }
    ]
   },
   {
    "frame": 7,
    "path": "audio/seg_7.mp3",
-   "duration_s": 3.024,
+   "duration_s": 2.808,
    "words": [
     {
      "id": "w0",
      "text": "Todo",
-     "start": 0.097,
-     "end": 0.357
+     "start": 0.094,
+     "end": 0.28
     },
     {
      "id": "w1",
      "text": "en",
-     "start": 0.357,
-     "end": 0.451
+     "start": 0.291,
+     "end": 0.368
     },
     {
      "id": "w2",
      "text": "tu",
-     "start": 0.463,
-     "end": 0.522
+     "start": 0.379,
+     "end": 0.467
     },
     {
      "id": "w3",
      "text": "navegador,",
-     "start": 0.545,
-     "end": 1.088
+     "start": 0.478,
+     "end": 0.971
     },
     {
      "id": "w4",
      "text": "sin",
-     "start": 1.206,
-     "end": 1.441
+     "start": 1.179,
+     "end": 1.355
     },
     {
      "id": "w5",
      "text": "servidores.",
-     "start": 1.442,
-     "end": 2.125
+     "start": 1.366,
+     "end": 2.046
     }
    ]
   }
@@ -447,6 +442,7 @@
   "lra": 2.9,
   "true_peak_dbfs": -1.5,
   "target_lufs": -14.0,
-  "target_tp": -1.5
+  "target_tp": -1.5,
+  "con_musica": false
  }
 }

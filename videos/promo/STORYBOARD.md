@@ -2,10 +2,11 @@
 workflow: product-launch-video
 flow: autonomous
 format: 1920x1080
-duration: 28.3
+duration: 26.9
 fps: 30
-music: synthesized ambient pad + musical events (ffmpeg) · mezcla a -14 LUFS
-narration: es-AR-TomasNeural (+12%)
+music: ninguna — el video va mudo (sin voz y sin música)
+narration: ninguna — la locución no se embebe; sus tiempos siguen siendo el reloj del video
+audio: 0 pistas en los renders (tools/build_index.py, sin --con-audio)
 captions: kinetic, word-synced
 ---
 
