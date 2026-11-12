@@ -216,12 +216,12 @@ describe('compuerta de alertas · shouldSendNotification (función real de main-
     });
   });
 
-  test('antiduplicado: misma banda de 1% bloqueada, banda nueva permitida', async () => {
+  test('antiduplicado: el mismo broker queda bloqueado aunque cambie el %, otro broker pasa', async () => {
     const notificados = new Set();
     const { gate } = construirGate({ notificados });
-    notificados.add(CLAVE({ broker: 'binance' }, 7.5)); // "binance_7"
+    notificados.add(CLAVE({ broker: 'binance' }, 7.5)); // "binance"
     await expect(gate(AJUSTES, { broker: 'binance', profitPercentage: 7.9 })).resolves.toBe(false);
-    await expect(gate(AJUSTES, { broker: 'binance', profitPercentage: 8.1 })).resolves.toBe(true);
+    await expect(gate(AJUSTES, { broker: 'binance', profitPercentage: 8.1 })).resolves.toBe(false);
     await expect(gate(AJUSTES, { broker: 'fiwind', profitPercentage: 7.9 })).resolves.toBe(true);
   });
 });

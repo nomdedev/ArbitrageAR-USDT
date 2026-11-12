@@ -20,7 +20,7 @@ log('🔧 [BACKGROUND] Iniciando service worker...');
 // IMPORTAR MÓDULOS (compatibilidad con service worker)
 // ============================================
 try {
-  importScripts('apiClient.js', '../DataService.js', 'cacheManager.js');
+  importScripts('../DataService.js');
   log('✅ [BACKGROUND] Módulos importados correctamente');
 } catch (e) {
   console.warn('⚠️ [BACKGROUND] No se pudieron importar módulos:', e.message);
@@ -173,28 +173,51 @@ const BANK_CALCULATIONS = {
 };
 
 // ============================================
+// VIGENCIA DE COTIZACIONES
+// ============================================
+
+// CriptoYa sigue devolviendo bancos con cotizaciones de hace meses (medido: 10 de 22 con 150 a
+// 480 días) y la mediana/promedio las trataba como actuales. `time` viene en segundos epoch.
+const MAX_BANK_QUOTE_AGE_S = 3 * 24 * 60 * 60; // 3 días: los bancos no cotizan los fines de semana
+const MAX_EXCHANGE_QUOTE_AGE_S = 6 * 60 * 60; // 6 horas: los exchanges se actualizan al minuto
+
+function isFreshQuote(quote, maxAgeSeconds) {
+  const time = Number(quote?.time);
+  if (!Number.isFinite(time) || time <= 0) return true; // sin `time` no se puede juzgar: se conserva
+  return Date.now() / 1000 - time <= maxAgeSeconds;
+}
+
+// ============================================
 // FUNCIONES DE FETCH PARA BANCOS
 // ============================================
 
 /**
  * Fetch datos de USDT/USD desde CriptoYa
  */
-async function fetchUSDTtoUSD() {
+async function fetchUSDTtoUSD(userSettings = {}) {
   try {
-    const data = await fetchWithRateLimit('https://criptoya.com/api/USDT/USD/1');
+    const data = await fetchWithRateLimit(
+      userSettings.criptoyaUsdtUsdUrl || 'https://criptoya.com/api/USDT/USD/1'
+    );
     if (!data || typeof data !== 'object') {
       throw new Error('Respuesta inválida de API USDT/USD');
     }
 
     log('💰 Datos USDT/USD obtenidos:', Object.keys(data).length, 'exchanges');
 
-    // Procesar datos
+    // Procesar datos. `totalAsk/totalBid` ya incluyen la comisión del exchange (lo que de verdad
+    // se paga/cobra); `ask/bid` son el precio crudo y quedan como respaldo.
     const processedData = {};
     Object.entries(data).forEach(([exchange, info]) => {
-      if (info && typeof info === 'object' && (info.ask > 0 || info.bid > 0)) {
+      if (
+        info &&
+        typeof info === 'object' &&
+        (info.ask > 0 || info.bid > 0) &&
+        isFreshQuote(info, MAX_EXCHANGE_QUOTE_AGE_S)
+      ) {
         processedData[exchange] = {
-          totalBid: info.bid || info.totalBid || 0,
-          totalAsk: info.ask || info.totalAsk || 0,
+          totalBid: info.totalBid || info.bid || 0,
+          totalAsk: info.totalAsk || info.ask || 0,
           volume: info.volume || 0
         };
       }
@@ -212,68 +235,52 @@ async function fetchUSDTtoUSD() {
 /**
  * Fetch datos de USDT/ARS desde CriptoYa
  */
-async function fetchUSDT() {
+async function fetchUSDT(userSettings = {}) {
   try {
-    const data = await fetchWithRateLimit('https://criptoya.com/api/USDT/ARS/1');
+    const data = await fetchWithRateLimit(
+      userSettings.criptoyaUsdtArsUrl || 'https://criptoya.com/api/USDT/ARS/1'
+    );
     if (!data || typeof data !== 'object') {
       throw new Error('Respuesta inválida de API USDT/ARS');
     }
 
     log('💎 Datos USDT/ARS obtenidos:', Object.keys(data).length, 'exchanges');
 
-    // Procesar datos
+    // Procesar datos (mismo criterio que USDT/USD: precio con comisión y sólo cotizaciones vigentes)
     const processedData = {};
     Object.entries(data).forEach(([exchange, info]) => {
-      if (info && typeof info === 'object' && (info.ask > 0 || info.bid > 0)) {
+      if (
+        info &&
+        typeof info === 'object' &&
+        (info.ask > 0 || info.bid > 0) &&
+        isFreshQuote(info, MAX_EXCHANGE_QUOTE_AGE_S)
+      ) {
         processedData[exchange] = {
-          totalBid: info.bid || info.totalBid || 0,
-          totalAsk: info.ask || info.totalAsk || 0,
+          totalBid: info.totalBid || info.bid || 0,
+          totalAsk: info.totalAsk || info.ask || 0,
           volume: info.volume || 0
         };
       }
     });
+
+    if (Object.keys(processedData).length === 0) {
+      throw new Error('Sin cotizaciones vigentes de USDT/ARS');
+    }
 
     log('💎 USDT/ARS procesados:', Object.keys(processedData).length, 'exchanges válidos');
     cachedUsdtData = processedData;
     return processedData;
   } catch (error) {
     log('❌ Error obteniendo USDT/ARS:', error);
-    return cachedUsdtData || {};
+    // null (no {}) cuando no hay nada cacheado: así updateData lo informa como falta de datos
+    // en vez de mostrar "0 oportunidades" (B-05).
+    return cachedUsdtData;
   }
 }
 
-/**
- * Actualizar todos los datos de bancos
- */
-async function updateBanksData() {
-  try {
-    log('🏦 Actualizando datos de bancos...');
-
-    // Obtener configuración del usuario
-    const userSettings = await getUserSettings();
-
-    // Fetch datos en paralelo
-    const [dollarTypes, usdtUsdData, usdtData] = await Promise.allSettled([
-      fetchAllDollarTypes(userSettings),
-      fetchUSDTtoUSD(),
-      fetchUSDT()
-    ]);
-
-    // Actualizar cache
-    cachedDollarTypes = dollarTypes.status === 'fulfilled' ? dollarTypes.value : cachedDollarTypes;
-    cachedUsdtUsdData = usdtUsdData.status === 'fulfilled' ? usdtUsdData.value : cachedUsdtUsdData;
-    cachedUsdtData = usdtData.status === 'fulfilled' ? usdtData.value : cachedUsdtData;
-
-    log('✅ Datos de bancos actualizados');
-  } catch (error) {
-    log('❌ Error actualizando datos de bancos:', error);
-  }
-}
-
-// Variables globales para cache de datos de bancos
-let cachedDollarTypes = {};
+// Última respuesta buena, usada sólo si la API falla (null = nunca hubo una)
 let cachedUsdtUsdData = {};
-let cachedUsdtData = {};
+let cachedUsdtData = null;
 
 // Variables globales de configuración
 let REQUEST_INTERVAL = 100; // ms - OPTIMIZADO v5.0.61: Reducido de 600ms a 100ms
@@ -281,16 +288,6 @@ let REQUEST_TIMEOUT = 10000; // ms - valor por defecto
 const ENABLE_RATE_LIMIT = false; // NUEVO v5.0.61: Desactivar rate limit por defecto
 
 let lastRequestTime = 0;
-
-async function getUserSettings() {
-  try {
-    const result = await chrome.storage.local.get('notificationSettings');
-    return result.notificationSettings || {};
-  } catch (error) {
-    log('⚠️ Error obteniendo configuración de usuario:', error);
-    return {};
-  }
-}
 
 // NUEVO v5.0.54: Función para actualizar configuraciones globales
 async function updateGlobalConfig() {
@@ -417,10 +414,7 @@ async function fetchAllDollarTypes(userSettings) {
   log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - Datos recibidos:', data);
   log('🔍 [DIAGNÓSTICO] fetchAllDollarTypes() - Tipo de datos:', typeof data);
 
-  log(
-    '[BACKGROUND]  Bancos data received:',
-    data ? Object.keys(data).length + ' bancos' : 'null'
-  );
+  log('[BACKGROUND]  Bancos data received:', data ? Object.keys(data).length + ' bancos' : 'null');
   log('[FETCH] 📊 Datos crudos recibidos:', data);
 
   if (data && typeof data === 'object') {
@@ -437,6 +431,7 @@ async function fetchAllDollarTypes(userSettings) {
         typeof value === 'object' &&
         (typeof value.bid === 'number' || typeof value.ask === 'number')
       ) {
+        if (!isFreshQuote(value, MAX_BANK_QUOTE_AGE_S)) return; // cotización vieja: no cuenta
         const ask = value.ask || value.totalAsk;
         const bid = value.bid || value.totalBid;
 
@@ -581,8 +576,11 @@ async function fetchBankDollarRates(userSettings) {
   log('🔍 [DIAGNÓSTICO] fetchBankDollarRates() - Tipo de datos:', typeof data);
 
   if (data && typeof data === 'object') {
+    const vigentes = Object.fromEntries(
+      Object.entries(data).filter(([, quote]) => isFreshQuote(quote, MAX_BANK_QUOTE_AGE_S))
+    );
     const result = {
-      ...data,
+      ...vigentes,
       source: 'criptoya_banks',
       timestamp: Date.now()
     };
@@ -609,21 +607,18 @@ async function fetchBankDollarRates(userSettings) {
 // ============================================
 
 /**
- * Resuelve la tasa USDT/USD para un exchange.
- * Intenta primero la API directa; si no, calcula indirectamente desde precios ARS.
+ * Resuelve la tasa USDT/USD (lo que cuesta un USDT en dólares) de un exchange.
+ *
+ * Sin cotización USDT/USD vigente devuelve null y la ruta se descarta. Antes se estimaba como
+ * `USDT/ARS ÷ dólar oficial`, pero eso es circular: al multiplicar por el precio de venta en
+ * pesos el dólar oficial se cancelaba y la ruta quedaba en `bid ÷ ask − 1`, siempre negativa
+ * y sin relación con el arbitraje. Además, sin par USD/USDT el exchange no permite comprar
+ * USDT con dólares, así que la ruta no se puede ejecutar.
  * @returns {{ rate: number, usingFallback: boolean } | null}
  */
-function resolveUsdToUsdtRate(usdtUsd, exchange, data, officialVenta) {
-  if (usdtUsd?.[exchange]?.totalAsk) {
-    return { rate: usdtUsd[exchange].totalAsk, usingFallback: false };
-  }
-  if (data?.totalAsk && officialVenta) {
-    const calculatedRate = data.totalAsk / officialVenta;
-    if (calculatedRate >= 0.95 && calculatedRate <= 1.15) {
-      return { rate: calculatedRate, usingFallback: true };
-    }
-  }
-  return null;
+function resolveUsdToUsdtRate(usdtUsd, exchange) {
+  const rate = usdtUsd?.[exchange]?.totalAsk;
+  return rate > 0 ? { rate, usingFallback: false } : null;
 }
 
 /**
@@ -801,8 +796,8 @@ function tryCalculateInterBrokerPair(
       tradingFeePercent: userSettings.extraTradingFee || 0,
       brokerSpecificFees: (userSettings.brokerFees || []).some(
         fee =>
-          fee.broker.toLowerCase() === buyExchange.toLowerCase() ||
-          fee.broker.toLowerCase() === sellExchange.toLowerCase()
+          normalizarBroker(fee.broker) === normalizarBroker(buyExchange) ||
+          normalizarBroker(fee.broker) === normalizarBroker(sellExchange)
       ),
       usdtUsdSource: usdtUsd?.[buyExchange]?.totalAsk ? 'api' : 'calculated',
       usdtUsdWarning: usingFallback ? `Tasa USDT/USD calculada para ${buyExchange}` : null
@@ -1183,7 +1178,7 @@ async function calculateDirectUsdtToArsRoutes(usdt, userSettings = {}) {
       config: {
         applyFees: userSettings.applyFeesInCalculation || false,
         brokerSpecificFees: (userSettings.brokerFees || []).some(
-          f => f.broker.toLowerCase() === exchange.toLowerCase()
+          f => normalizarBroker(f.broker) === normalizarBroker(exchange)
         )
       }
     });
@@ -1277,7 +1272,7 @@ async function calculateUsdToUsdtRoutes(oficial, usdt, usdtUsd, userSettings = {
       config: {
         applyFees: userSettings.applyFeesInCalculation || false,
         brokerSpecificFees: (userSettings.brokerFees || []).some(
-          f => f.broker.toLowerCase() === exchange.toLowerCase()
+          f => normalizarBroker(f.broker) === normalizarBroker(exchange)
         )
       }
     });
@@ -1328,7 +1323,7 @@ function tryCalculateCryptoPair(
       SOL: 0.01,
       ADA: 1,
       XRP: 0.25,
-      MATIC: 0.1,
+      POL: 0.1,
       DOGE: 5
     };
     networkFee = defaultFees[symbol] || 0;
@@ -1441,15 +1436,14 @@ function tryCalculateCryptoPair(
       transfer: transferFee,
       bank: bankFee,
       // El total tiene que reflejar TODO lo descontado, o el numero que ve el usuario miente.
-      total:
-        buyFeeARS + sellFeeAmount + networkFeeARS + withdrawalFee + transferFee + bankFee
+      total: buyFeeARS + sellFeeAmount + networkFeeARS + withdrawalFee + transferFee + bankFee
     },
     config: {
       applyFees,
       brokerSpecificFees: (userSettings.brokerFees || []).some(
         fee =>
-          fee.broker.toLowerCase() === buyExchange.toLowerCase() ||
-          fee.broker.toLowerCase() === sellExchange.toLowerCase()
+          normalizarBroker(fee.broker) === normalizarBroker(buyExchange) ||
+          normalizarBroker(fee.broker) === normalizarBroker(sellExchange)
       )
     },
     metadata: {
@@ -1471,7 +1465,9 @@ function getValidCryptoExchanges(data) {
       data[ex] &&
       typeof data[ex] === 'object' &&
       data[ex].totalAsk &&
-      data[ex].totalBid
+      data[ex].totalBid &&
+      // sin esto una cotización de hace días (ej. POL en Bitso) armaba rutas de +17 % que no existen
+      isFreshQuote(data[ex], MAX_EXCHANGE_QUOTE_AGE_S)
   );
 }
 
@@ -1631,6 +1627,31 @@ async function calculateAllRoutes(oficial, usdt, usdtUsd, userSettings = {}) {
 
 let lastNotificationTime = 0;
 const notifiedArbitrages = new Set(); // Para evitar notificar el mismo arbitraje repetidamente
+const NOTIFIED_TTL_MS = 60 * 60 * 1000;
+
+// B-02: en Manifest V3 el service worker se apaga a los ~30 s y estas variables vuelven a cero,
+// así que la frecuencia y el antiduplicado no se respetaban. Se anotan en storage y se
+// recuperan antes de decidir; el contrato de shouldSendNotification no cambia.
+async function hidratarEstadoNotificaciones() {
+  const { notificationState } = await chrome.storage.local.get('notificationState');
+  const ahora = Date.now();
+  lastNotificationTime = Math.max(lastNotificationTime, notificationState?.last || 0);
+  Object.entries(notificationState?.keys || {}).forEach(([clave, momento]) => {
+    if (ahora - momento < NOTIFIED_TTL_MS) notifiedArbitrages.add(clave);
+  });
+}
+
+async function persistirEstadoNotificaciones(clave) {
+  const { notificationState } = await chrome.storage.local.get('notificationState');
+  const ahora = Date.now();
+  const keys = Object.fromEntries(
+    Object.entries(notificationState?.keys || {}).filter(
+      ([, momento]) => ahora - momento < NOTIFIED_TTL_MS
+    )
+  );
+  keys[clave] = ahora;
+  await chrome.storage.local.set({ notificationState: { last: lastNotificationTime, keys } });
+}
 
 /**
  * Clave de deduplicacion de notificaciones.
@@ -1639,10 +1660,11 @@ const notifiedArbitrages = new Set(); // Para evitar notificar el mismo arbitraj
  * `profit.toFixed(2)` (ej. "binance_3.35"). Nunca podian coincidir, asi que el antiduplicado no
  * bloqueaba nada. Una sola funcion para las dos puntas hace imposible que vuelvan a divergir.
  */
-function claveArbitrajeNotificado(arbitrage, profitPct) {
+function claveArbitrajeNotificado(arbitrage, _profitPct) {
   const broker = arbitrage && arbitrage.broker ? arbitrage.broker : 'desconocido';
-  const porcentaje = Number.isFinite(Number(profitPct)) ? Math.floor(Number(profitPct)) : 0;
-  return `${broker}_${porcentaje}`;
+  // Solo el broker: con la ganancia en la clave, cada vez que el % cruzaba un entero (o saltaba a
+  // otro broker) contaba como "nuevo" y la alarma avisaba cada 5 minutos, indefinidamente.
+  return String(broker).toLowerCase();
 }
 
 async function shouldSendNotification(settings, arbitrage) {
@@ -1808,12 +1830,10 @@ async function sendNotification(arbitrage, settings) {
     // Agregar a notificados (limpiar después de 1 hora)
     const arbKey = claveArbitrajeNotificado(arbitrage, profit); // Misma clave que el chequeo (B-01)
     notifiedArbitrages.add(arbKey);
-    setTimeout(
-      () => {
-        notifiedArbitrages.delete(arbKey);
-      },
-      60 * 60 * 1000
-    ); // 1 hora
+    setTimeout(() => {
+      notifiedArbitrages.delete(arbKey);
+    }, NOTIFIED_TTL_MS);
+    await persistirEstadoNotificaciones(arbKey);
 
     // Reproducir sonido si está habilitado
     if (settings.soundEnabled) {
@@ -1826,8 +1846,16 @@ async function sendNotification(arbitrage, settings) {
   }
 }
 
-// Verificar y enviar notificaciones después de actualizar datos
-async function checkAndNotify(arbitrages) {
+// Verificar y enviar notificaciones después de actualizar datos.
+// Se encadenan: dos actualizaciones simultáneas (mensaje + cambio de storage) leían el estado
+// antes de que la otra lo guardara y avisaban dos veces.
+let colaNotificaciones = Promise.resolve();
+function checkAndNotify(arbitrages) {
+  colaNotificaciones = colaNotificaciones.then(() => verificarYNotificar(arbitrages));
+  return colaNotificaciones;
+}
+
+async function verificarYNotificar(arbitrages) {
   try {
     // No avisar en la PRIMERA actualización de la instalación (evita el aluvión al instalar).
     //
@@ -1851,7 +1879,7 @@ async function checkAndNotify(arbitrages) {
     const settings = result.notificationSettings || {
       notificationsEnabled: true,
       alertThreshold: 1, // CORREGIDO: Usar alertThreshold
-      notificationFrequency: '1min',
+      notificationFrequency: '1hour',
       soundEnabled: true,
       notificationExchanges: [], // CORREGIDO: Usar notificationExchanges
       quietHoursEnabled: false,
@@ -1870,12 +1898,15 @@ async function checkAndNotify(arbitrages) {
       return;
     }
 
-    // Tomar la mejor oportunidad
-    const bestArbitrage = arbitrages[0];
+    await hidratarEstadoNotificaciones();
 
-    // Verificar si debe notificar
-    if (await shouldSendNotification(settings, bestArbitrage)) {
-      await sendNotification(bestArbitrage, settings);
+    // Avisa la mejor oportunidad que pase la compuerta (ya vienen ordenadas por ganancia). Antes
+    // sólo se miraba la primera: si no estaba en la lista de exchanges, no se avisaba nada.
+    for (const arbitrage of arbitrages) {
+      if (await shouldSendNotification(settings, arbitrage)) {
+        await sendNotification(arbitrage, settings);
+        break;
+      }
     }
   } catch (error) {
     console.error('Error en checkAndNotify:', error);
@@ -1888,6 +1919,7 @@ async function checkAndNotify(arbitrages) {
 
 let currentData = null;
 let lastUpdate = null;
+let avisoPendiente = false; // la alarma lo enciende; updateData lo consume al avisar
 let isFirstUpdate = true; // NUEVO: Bandera para evitar notificaciones en inicialización
 
 // ============================================
@@ -1896,7 +1928,13 @@ let isFirstUpdate = true; // NUEVO: Bandera para evitar notificaciones en inicia
 
 async function resolveDollarPrice(userSettings) {
   if (userSettings.dollarPriceSource === 'manual') {
-    const manualPrice = userSettings.manualDollarPrice || 1400;
+    const manualPrice = Number(userSettings.manualDollarPrice);
+    if (!(manualPrice > 0)) {
+      console.warn(
+        '[BG] Modo manual sin un precio válido: no se calcula nada con un valor inventado'
+      );
+      return null;
+    }
     log(`💵 [BACKGROUND] MODO MANUAL: Usando precio manual: $${manualPrice}`);
     return { compra: manualPrice, venta: manualPrice, source: 'manual', timestamp: Date.now() };
   }
@@ -1938,19 +1976,9 @@ async function resolveDollarPrice(userSettings) {
       );
     }
 
-    // Fallback: API oficial
-    const oficialFallback = await fetchDolarOficial(userSettings);
-    if (oficialFallback) return oficialFallback;
-
-    // Último fallback: manual
-    const manualFallback = userSettings.manualDollarPrice || 1400;
-    log('⚠️ [BACKGROUND] API oficial también falló, usando precio manual como último fallback');
-    return {
-      compra: manualFallback,
-      venta: manualFallback,
-      source: 'manual_fallback',
-      timestamp: Date.now()
-    };
+    // Fallback: API oficial. Si también falla se devuelve null (error visible) en vez de calcular
+    // con un "precio manual" que el usuario nunca eligió (el 1400 por defecto ya quedó viejo).
+    return await fetchDolarOficial(userSettings);
   }
 
   // Precio oficial estándar
@@ -1989,7 +2017,10 @@ async function updateData() {
     const oficial = await resolveDollarPrice(userSettings);
 
     // Obtener precios de USDT en paralelo
-    const [usdt, usdtUsd] = await Promise.all([fetchUSDT(), fetchUSDTtoUSD()]);
+    const [usdt, usdtUsd] = await Promise.all([
+      fetchUSDT(userSettings),
+      fetchUSDTtoUSD(userSettings)
+    ]);
 
     log('📊 Datos obtenidos:', { oficial: !!oficial, usdt: !!usdt, usdtUsd: !!usdtUsd });
 
@@ -2049,7 +2080,10 @@ async function updateData() {
     lastUpdate = data.lastUpdate;
 
     // NUEVO: Verificar y enviar notificaciones si hay oportunidades rentables
-    if (routeType === 'arbitrage' || routeType === 'all') {
+    // Solo avisa la actualización que pidió la alarma. Abrir el popup despierta al worker y
+    // también actualiza: ahí quien mira ya tiene las rutas en pantalla, y avisaba en cada clic.
+    if (avisoPendiente && (routeType === 'arbitrage' || routeType === 'all')) {
+      avisoPendiente = false;
       const arbitrageRoutes =
         routeType === 'all'
           ? optimizedRoutes.filter(r => r.routeCategory === 'arbitrage')
@@ -2194,8 +2228,8 @@ function handleGetBanksData(request, sendResponse) {
       return Promise.all([
         fetchBankDollarRates(userSettings),
         fetchAllDollarTypes(userSettings),
-        fetchUSDT(),
-        fetchUSDTtoUSD(),
+        fetchUSDT(userSettings),
+        fetchUSDTtoUSD(userSettings),
         fetchUSDT_USD_Brokers(userSettings),
         fetchBinanceP2P_USDT_ARS(userSettings),
         fetchBinanceP2P_USDT_USD(userSettings)
@@ -2330,8 +2364,16 @@ function handleNotificationSettingsChange(oldSettings, newSettings) {
   const requestTimeoutChanged =
     oldSettings.requestTimeoutSeconds !== newSettings.requestTimeoutSeconds;
 
+  // Los fees por broker se guardan sin avisar al motor: sin esto no recalculaban hasta la alarma.
+  const brokerFeesChanged =
+    JSON.stringify(oldSettings.brokerFees) !== JSON.stringify(newSettings.brokerFees);
+
   const requiresDataRefresh =
-    dollarSourceChanged || manualPriceChanged || bankMethodChanged || defaultSimAmountChanged;
+    dollarSourceChanged ||
+    manualPriceChanged ||
+    bankMethodChanged ||
+    defaultSimAmountChanged ||
+    brokerFeesChanged;
 
   if (requiresDataRefresh) {
     log('🔄 [STORAGE] Cambios relevantes detectados, forzando actualización...');
@@ -2393,8 +2435,9 @@ async function checkForUpdatesInBackground() {
 
     const data = await response.json();
 
-    // Extraer versión del commit message
-    const versionMatch = data.commit.message.match(/v?(\d+\.\d+\.\d+)/);
+    // Extraer versión del commit message. Exige el prefijo "v" y límites de palabra: antes
+    // cualquier x.y.z del texto ("Chromium 153.0.1", una IP) disparaba un aviso falso.
+    const versionMatch = data.commit.message.match(/\bv(\d+\.\d+\.\d+)\b/);
     const latestVersion = versionMatch ? versionMatch[1] : null;
 
     if (!latestVersion) {
@@ -2453,32 +2496,23 @@ function compareVersions(current, latest) {
 // INICIALIZACIÓN
 // ============================================
 
+// Cuando la alarma despierta al service worker se disparan dos actualizaciones a la vez (la del
+// arranque y la de la alarma). Comparten la que ya está en curso: antes eran ~12 pedidos a
+// CriptoYa en vez de 3 y una carrera que podía mandar la alerta dos veces (B-03).
+let actualizacionEnCurso = null;
+function updateDataCompartida() {
+  actualizacionEnCurso ??= updateData().finally(() => {
+    actualizacionEnCurso = null;
+  });
+  return actualizacionEnCurso;
+}
+
 log('[BACKGROUND] Cargando configuración global...');
 updateGlobalConfig()
-  .then(() => {
-    log('[BACKGROUND] Iniciando primera actualización...');
-    updateData()
-      .then(() => {
-        log('[BACKGROUND] Primera actualización completada');
-        // Inicializar datos de bancos
-        updateBanksData()
-          .then(() => {
-            log('[BACKGROUND] Datos de bancos inicializados');
-            log('🏦 Datos de bancos inicializados correctamente');
-
-            // Verificar actualizaciones al iniciar
-            checkForUpdatesInBackground();
-          })
-          .catch(error => {
-            console.error('❌ [BACKGROUND] Error inicializando datos de bancos:', error);
-          });
-      })
-      .catch(error => {
-        console.error('❌ [BACKGROUND] Error en inicialización:', error);
-      });
-  })
+  .then(() => updateDataCompartida())
+  .then(() => log('[BACKGROUND] Primera actualización completada'))
   .catch(error => {
-    console.error('❌ [BACKGROUND] Error cargando configuración:', error);
+    console.error('❌ [BACKGROUND] Error en inicialización:', error);
   });
 
 // Actualización periódica usando chrome.alarms (Manifest V3 compatible)
@@ -2496,6 +2530,11 @@ async function startPeriodicUpdates() {
   // Crear alarma periódica usando chrome.alarms (Manifest V3 compatible)
   // Las alarmas garantizan que el service worker se active incluso cuando está suspendido
   try {
+    // Esto corre en cada arranque del worker: recrear la alarma le reiniciaba el contador, y si
+    // el worker despierta más seguido que el intervalo (popup abierto) no se disparaba nunca.
+    const existente = await chrome.alarms.get(ALARM_NAME);
+    if (existente?.periodInMinutes === intervalMinutes) return;
+
     // Limpiar alarmas existentes
     await chrome.alarms.clear(ALARM_NAME);
 
@@ -2514,9 +2553,12 @@ async function startPeriodicUpdates() {
 chrome.alarms.onAlarm.addListener(async alarm => {
   if (alarm.name === ALARM_NAME) {
     log('⏰ Actualización periódica (desde alarma)...');
-    await updateData();
-    // Actualizar también datos de bancos
-    await updateBanksData();
+    avisoPendiente = true;
+    try {
+      await updateDataCompartida();
+    } finally {
+      avisoPendiente = false; // si la actualización falló, que no avise la próxima del popup
+    }
   }
 });
 
@@ -2527,9 +2569,9 @@ startPeriodicUpdates();
 // SISTEMA DE ALERTAS DE ACTUALIZACIÓN v6.0
 // ============================================
 
-// Crear alarma para verificación de actualizaciones
-chrome.alarms.create('checkUpdates', {
-  periodInMinutes: 60 // Verificar cada hora
+// Crear la alarma de verificación sólo si no existe (no reiniciarla en cada arranque del worker)
+chrome.alarms.get('checkUpdates').then(existente => {
+  if (!existente) chrome.alarms.create('checkUpdates', { delayInMinutes: 1, periodInMinutes: 60 });
 });
 
 chrome.alarms.onAlarm.addListener(alarm => {

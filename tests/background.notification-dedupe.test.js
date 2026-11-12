@@ -42,11 +42,11 @@ describe('B-01 · clave de deduplicacion de notificaciones', () => {
     const arbitraje = { broker: 'binance', profitPercentage: 3.35 };
     // El chequeo pasa profitPct y el alta pasa profit: tienen que dar la misma clave.
     expect(clave(arbitraje, 3.35)).toBe(clave(arbitraje, 3.35));
-    expect(clave(arbitraje, 3.35)).toBe('binance_3');
+    expect(clave(arbitraje, 3.35)).toBe('binance');
     console.log(`[B-01] clave(3.35) = ${clave(arbitraje, 3.35)}`);
   });
 
-  test('el Set bloquea la repeticion y sigue permitiendo una banda nueva', () => {
+  test('el Set bloquea la repeticion aunque cambie la ganancia, y deja pasar a otro broker', () => {
     const notificados = new Set();
     const arbitraje = { broker: 'binance' };
 
@@ -56,8 +56,8 @@ describe('B-01 · clave de deduplicacion de notificaciones', () => {
 
     // La misma banda, con otro decimal (antes generaba "binance_3.90" y no encontraba nada).
     expect(notificados.has(clave(arbitraje, 3.9))).toBe(true);
-    // Otra banda de 1% tiene que poder notificarse.
-    expect(notificados.has(clave(arbitraje, 4.2))).toBe(false);
+    // Aunque la ganancia suba a otra banda, es el mismo broker: no vuelve a avisar.
+    expect(notificados.has(clave(arbitraje, 4.2))).toBe(true);
     // Otro broker no interfiere.
     expect(notificados.has(clave({ broker: 'fiwind' }, 3.35))).toBe(false);
   });

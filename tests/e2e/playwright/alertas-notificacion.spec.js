@@ -34,10 +34,7 @@ test.describe('Alertas y notificaciones · en vivo', () => {
     const context = await chromium.launchPersistentContext(userDataDir, {
       channel: 'chromium',
       headless: false,
-      args: [
-        `--disable-extensions-except=${extensionPath}`,
-        `--load-extension=${extensionPath}`
-      ]
+      args: [`--disable-extensions-except=${extensionPath}`, `--load-extension=${extensionPath}`]
     });
 
     try {
@@ -70,7 +67,8 @@ test.describe('Alertas y notificaciones · en vivo', () => {
           updateData: typeof updateData,
           startPeriodicUpdates: typeof startPeriodicUpdates,
           claveArbitrajeNotificado: typeof claveArbitrajeNotificado,
-          isFirstUpdateAlArrancar: typeof isFirstUpdate === 'boolean' ? isFirstUpdate : 'inalcanzable'
+          isFirstUpdateAlArrancar:
+            typeof isFirstUpdate === 'boolean' ? isFirstUpdate : 'inalcanzable'
         };
         if (out.api.shouldSendNotification !== 'function') return out;
 
@@ -106,7 +104,8 @@ test.describe('Alertas y notificaciones · en vivo', () => {
 
         // ¿Con qué valores corre la creación del reloj al arrancar? (el mismo camino que
         // ejecuta el módulo, replicado paso a paso, para ver el error si lo hay)
-        const guardado = (await chrome.storage.local.get('notificationSettings')).notificationSettings || {};
+        const guardado =
+          (await chrome.storage.local.get('notificationSettings')).notificationSettings || {};
         out.ajustesAlEntrar = {
           existeNotificationSettings: Object.keys(guardado).length > 0,
           updateIntervalMinutes: guardado.updateIntervalMinutes ?? null,
@@ -189,27 +188,67 @@ test.describe('Alertas y notificaciones · en vivo', () => {
           });
         };
 
-        await correr('1 · 7,5% con umbral 5% (debe avisar)', {}, {
-          broker: 'binance', profitPercentage: 7.5, usdtArsBid: 1478.5, applyFees: true
-        });
-        await correr('2 · 12% (nivel alto: prioridad 2 y requiere interacción)', {}, {
-          broker: 'ripio', profitPercentage: 12, usdtArsBid: 1500, applyFees: true
-        });
-        await correr('3 · 7,5% sin comisiones descontadas (debe decir BRUTA)', {}, {
-          broker: 'binance', profitPercentage: 7.5, applyFees: false
-        });
-        await correr('4 · 2% con umbral 5% (NO debe avisar)', {}, {
-          broker: 'binance', profitPercentage: 2
-        });
-        await correr('5 · notificaciones deshabilitadas (NO debe avisar)', { notificationsEnabled: false }, {
-          broker: 'binance', profitPercentage: 9
-        });
-        await correr('6 · horario silencioso 00:00-23:59 (NO debe avisar)', {
-          quietHoursEnabled: true, quietStart: '00:00', quietEnd: '23:59'
-        }, { broker: 'binance', profitPercentage: 9 });
-        await correr('7 · solo ripio habilitado, oportunidad en binance (NO debe avisar)', {
-          notificationExchanges: ['ripio']
-        }, { broker: 'binance', profitPercentage: 9 });
+        await correr(
+          '1 · 7,5% con umbral 5% (debe avisar)',
+          {},
+          {
+            broker: 'binance',
+            profitPercentage: 7.5,
+            usdtArsBid: 1478.5,
+            applyFees: true
+          }
+        );
+        await correr(
+          '2 · 12% (nivel alto: prioridad 2 y requiere interacción)',
+          {},
+          {
+            broker: 'ripio',
+            profitPercentage: 12,
+            usdtArsBid: 1500,
+            applyFees: true
+          }
+        );
+        await correr(
+          '3 · 7,5% sin comisiones descontadas (debe decir BRUTA)',
+          {},
+          {
+            broker: 'binance',
+            profitPercentage: 7.5,
+            applyFees: false
+          }
+        );
+        await correr(
+          '4 · 2% con umbral 5% (NO debe avisar)',
+          {},
+          {
+            broker: 'binance',
+            profitPercentage: 2
+          }
+        );
+        await correr(
+          '5 · notificaciones deshabilitadas (NO debe avisar)',
+          { notificationsEnabled: false },
+          {
+            broker: 'binance',
+            profitPercentage: 9
+          }
+        );
+        await correr(
+          '6 · horario silencioso 00:00-23:59 (NO debe avisar)',
+          {
+            quietHoursEnabled: true,
+            quietStart: '00:00',
+            quietEnd: '23:59'
+          },
+          { broker: 'binance', profitPercentage: 9 }
+        );
+        await correr(
+          '7 · solo ripio habilitado, oportunidad en binance (NO debe avisar)',
+          {
+            notificationExchanges: ['ripio']
+          },
+          { broker: 'binance', profitPercentage: 9 }
+        );
 
         // Deduplicación: mismo broker, misma banda de 1% (7,5% y 7,9% -> binance_7)
         reset();
@@ -236,7 +275,8 @@ test.describe('Alertas y notificaciones · en vivo', () => {
         // cada arranque, así que el aviso automático no llegaba nunca. Ahora la siembra
         // queda anotada en storage: se salta UNA vez en la vida de la instalación, no una
         // vez por arranque.
-        await chrome.storage.local.remove('notificacionSembrada');
+        // el antiduplicado ahora es por broker y persiste: el envío del paso 8 bloquearía este
+        await chrome.storage.local.remove(['notificacionSembrada', 'notificationState']);
         await chrome.storage.local.set({ notificationSettings: { ...base, alertThreshold: 0.5 } });
         const arbitrajeGrande = { broker: 'binance', profitPercentage: 20, applyFees: true };
         const banderaAntes = isFirstUpdate;
@@ -274,7 +314,10 @@ test.describe('Alertas y notificaciones · en vivo', () => {
         if (stubOk) chrome.notifications.create = originalCreate;
         const probarIcono = async (nombre, opts) => {
           try {
-            const idReal = await chrome.notifications.create(`verificacion_${nombre}_${Date.now()}`, opts);
+            const idReal = await chrome.notifications.create(
+              `verificacion_${nombre}_${Date.now()}`,
+              opts
+            );
             out.iconProbes[nombre] = { ok: true, id: idReal };
           } catch (e) {
             out.iconProbes[nombre] = { ok: false, error: String((e && e.message) || e) };
@@ -326,8 +369,12 @@ test.describe('Alertas y notificaciones · en vivo', () => {
       console.log('después de llamarla:          ' + JSON.stringify(informe.alarmasTrasLlamarla));
       console.log('control (create manual):      ' + JSON.stringify(informe.alarmaManual));
       console.log('\najustes guardados al entrar:  ' + JSON.stringify(informe.ajustesAlEntrar));
-      console.log('reintento del reloj (misma lógica): ' + JSON.stringify(informe.reintentoDelReloj));
-      console.log('alarmas tras esperar el arranque:   ' + JSON.stringify(informe.alarmasTrasEsperar));
+      console.log(
+        'reintento del reloj (misma lógica): ' + JSON.stringify(informe.reintentoDelReloj)
+      );
+      console.log(
+        'alarmas tras esperar el arranque:   ' + JSON.stringify(informe.alarmasTrasEsperar)
+      );
       console.log('\n===== Casos =====');
       informe.casos.forEach(c => console.log(' ' + JSON.stringify(c)));
       console.log('\n===== Antiduplicado =====');
@@ -344,7 +391,13 @@ test.describe('Alertas y notificaciones · en vivo', () => {
       expect(informe.api.stubDeNotificaciones).toBe(true);
 
       const c = n => informe.casos.find(x => x.nombre.startsWith(String(n) + ' · '));
-      const uno = c(1), dos = c(2), tres = c(3), cuatro = c(4), cinco = c(5), seis = c(6), siete = c(7);
+      const uno = c(1),
+        dos = c(2),
+        tres = c(3),
+        cuatro = c(4),
+        cinco = c(5),
+        seis = c(6),
+        siete = c(7);
 
       // 1. sobre el umbral
       expect(uno.gate).toBe(true);
@@ -371,7 +424,7 @@ test.describe('Alertas y notificaciones · en vivo', () => {
       expect(informe.dedupe.enviosTrasElPrimero).toBe(1);
       expect(informe.dedupe.segundaVez).toBe(false);
       expect(informe.dedupe.enviosTotales).toBe(1);
-      expect(informe.dedupe.clave).toBe('binance_7');
+      expect(informe.dedupe.clave).toBe('binance'); // solo el broker: la ganancia ya no entra en la clave
 
       // 9. el aviso automático: se salta una sola vez (la primera de la instalación) y
       //    sigue funcionando después de cada reinicio del service worker
