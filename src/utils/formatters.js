@@ -67,6 +67,7 @@
 
     const sourceMap = {
       manual: ' Manual',
+      criptoya_oficial: ' CriptoYa',
       dolarapi_fallback: ' DolarAPI (fallback)',
       dolarapi_oficial: ' DolarAPI (oficial)',
       manual_fallback: ' Manual (fallback)',

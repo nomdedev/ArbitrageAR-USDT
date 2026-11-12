@@ -240,9 +240,7 @@
         btn.classList.add('active');
       });
     } else if (currentFilter === 'p2p' && p2pCount === 0 && noP2pCount > 0) {
-      window.Logger?.debug(
-        ' [FilterManager] Cambiando filtro de "p2p" a "all" (no hay rutas P2P)'
-      );
+      window.Logger?.debug(' [FilterManager] Cambiando filtro de "p2p" a "all" (no hay rutas P2P)');
       currentFilter = 'all';
 
       // Actualizar botones visualmente
@@ -540,9 +538,7 @@
 
     // Buscar botones tanto en el panel como en el footer
     const filterButtons = document.querySelectorAll('.filter-btn, .filter-btn-footer');
-    window.Logger?.debug(
-      ` [FilterManager] Encontrados ${filterButtons.length} botones de filtro`
-    );
+    window.Logger?.debug(` [FilterManager] Encontrados ${filterButtons.length} botones de filtro`);
 
     if (filterButtons.length === 0) {
       console.error('❌ [FilterManager] No se encontraron botones de filtro');

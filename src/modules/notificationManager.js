@@ -381,9 +381,7 @@
     // Usar URL específica si está disponible
     const downloadUrl = updateInfo?.downloadUrl || updateInfo?.url || repoUrl;
 
-    window.Logger?.debug(
-      ` [NotificationManager] Descargando actualización desde: ${downloadUrl}`
-    );
+    window.Logger?.debug(` [NotificationManager] Descargando actualización desde: ${downloadUrl}`);
 
     // Abrir en nueva pestaña
     chrome.tabs.create({ url: downloadUrl });

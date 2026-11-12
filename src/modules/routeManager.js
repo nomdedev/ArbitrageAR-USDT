@@ -187,24 +187,6 @@
     }
   }
 
-  /**
-   * Obtener icono de ruta
-   * @private
-   * @param {string} routeType - Tipo de ruta
-   * @param {Object} route - Datos de la ruta
-   * @returns {string} Icono emoji
-   */
-  function getRouteIcon(routeType, route) {
-    switch (routeType) {
-      case ROUTE_TYPES.DIRECT_USDT_ARS:
-        return '';
-      case ROUTE_TYPES.USD_TO_USDT:
-        return '';
-      default:
-        return route?.isSingleExchange ? '' : '';
-    }
-  }
-
   // ==========================================
   // FUNCIONES PÚBLICAS
   // ==========================================
@@ -379,32 +361,20 @@
 
     // Estructura unificada con crypto cards
     card.innerHTML = `
-      <div class="fiat-card-header">
-        <div class="fiat-info">
-          <span class="fiat-icon">${getRouteIcon(routeType, route)}</span>
-          <span class="fiat-name">${getRouteTypeName(routeType)}</span>
-        </div>
-        <div class="profit-badge ${profitBadgeClass} text-underline-animated glow-pulse">
-          ${profitSymbol}${Fmt.formatNumber(displayMetrics.percentage)}%
-        </div>
-      </div>
-      
-      <div class="fiat-card-body">
+      <div class="rc-main">
         <div class="route-path">
           ${routeDescription}
         </div>
-        
         <div class="operation-meta">
+          ${routeType === 'arbitrage' ? '' : `<span class="route-type-badge">${getRouteTypeName(routeType)}</span>`}
           ${p2pBadge}
-          ${timestampInfo ? `<span class="time-indicator"> ${new Date(route.timestamp).toLocaleTimeString()}</span>` : ''}
+          ${timestampInfo ? `<span class="time-indicator">${new Date(route.timestamp).toLocaleTimeString()}</span>` : ''}
         </div>
       </div>
-      
-      <div class="fiat-card-footer">
-        <div class="profit-details">
-          <span class="label">Resultado:</span>
-          <span class="value ${displayMetrics.percentage >= 0 ? '' : 'negative'}">${displayMetrics.mainValue}</span>
-        </div>
+      <div class="rc-result">
+        <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${Fmt.formatNumber(displayMetrics.percentage)}%</div>
+        <span class="rc-amount ${displayMetrics.percentage >= 0 ? '' : 'negative'}">${displayMetrics.mainValue}</span>
+        <span class="rc-base">${displayMetrics.secondaryInfo || ''}</span>
       </div>
     `;
 
@@ -591,10 +561,7 @@
 
         try {
           const route = JSON.parse(decodeURIComponent(routeData));
-          window.Logger?.debug(
-            ' [RouteManager] Click en ruta:',
-            route.broker || route.buyExchange
-          );
+          window.Logger?.debug(' [RouteManager] Click en ruta:', route.broker || route.buyExchange);
 
           // Remover selección previa
           container.querySelectorAll('.route-card').forEach(c => c.classList.remove('selected'));

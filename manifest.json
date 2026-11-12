@@ -13,7 +13,6 @@
   "host_permissions": [
     "https://dolarapi.com/*",
     "https://criptoya.com/*",
-    "https://dolarito.ar/*",
     "https://api.github.com/*"
   ],
   "background": {
