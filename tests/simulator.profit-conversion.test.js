@@ -74,6 +74,12 @@ describe('P-03 · conversión USD→USDT del simulador', () => {
     expect(calcular(1000000, 1000, 1050, 1, 1, 0, 0)).toBeCloseTo(2.91, 1);
   });
 
+  test('con la tasa USDT/USD de mercado (1,06) la ganancia baja ~6 puntos y el valor por defecto (1) no cambia', () => {
+    const base = calcular(1000000, 1000, 1050, 1, 1, 0, 0);
+    expect(calcular(1000000, 1000, 1050, 1, 1, 0, 0, 1)).toBeCloseTo(base, 10);
+    expect(calcular(1000000, 1000, 1050, 1, 1, 0, 0, 1.06)).toBeCloseTo(-3.0, 0);
+  });
+
   test('toda la columna "real" de la tabla del informe', () => {
     const esperado = { 1000: -1.99, 1025: 0.46, 1050: 2.91, 1075: 5.36, 1100: 7.81 };
     Object.entries(esperado).forEach(([usdtPrice, porcentaje]) => {

@@ -63,7 +63,30 @@
    * @returns {number} Precio del dólar
    */
   function getCurrentDollarPrice() {
-    return currentData?.dollarPrice || currentData?.oficial?.compra || 950;
+    // El motor compra dólares al precio de VENTA del banco; sin dato devuelve null (antes 950,
+    // un número inventado que ya no refleja el mercado).
+    return (
+      currentData?.dollarPrice ||
+      currentData?.oficial?.venta ||
+      currentData?.oficial?.compra ||
+      null
+    );
+  }
+
+  /**
+   * Tasa USDT/USD (dólares por USDT) del mercado: mediana de las cotizaciones vigentes del
+   * motor. El simulador asumía 1, pero comprar USDT con dólares cuesta ~1,06: ~6 puntos de más.
+   * Sin datos devuelve 1 (comportamiento anterior). Es una mediana, no la tasa del exchange.
+   * @private
+   */
+  function getUsdToUsdtRate() {
+    const asks = Object.values(currentData?.usdtUsd || {})
+      .map(q => q?.totalAsk)
+      .filter(v => v > 0)
+      .sort((a, b) => a - b);
+    if (asks.length === 0) return 1;
+    const mid = Math.floor(asks.length / 2);
+    return asks.length % 2 ? asks[mid] : (asks[mid - 1] + asks[mid]) / 2;
   }
 
   /**
@@ -185,6 +208,38 @@
     return currentData?.usdt || null;
   }
 
+  // Lo que llega del service worker trae `totalBid` (con comisión); `venta` es el formato viejo.
+  const precioVentaUsdt = e => Number(e?.totalBid || e?.bid || e?.venta) || 0;
+
+  const IDS_RANGOS = ['matrix-usd-min', 'matrix-usd-max', 'matrix-usdt-min', 'matrix-usdt-max'];
+
+  /**
+   * Los rangos fijos de antes (USDT 1000–1100 con el dólar a $1.570) dejaban la matriz toda en
+   * rojo. Se centran en el mercado actual (±3 %, redondeado a 10) mientras el usuario no los toque.
+   * @private
+   */
+  function sugerirRangosMatriz() {
+    const usdCentro = Number(currentData?.oficial?.venta || currentData?.oficial?.compra);
+    const ventas = Object.values(getUSDTData() || {})
+      .map(precioVentaUsdt)
+      .filter(v => v > 0)
+      .sort((a, b) => a - b);
+    const usdtCentro = ventas[Math.floor(ventas.length / 2)];
+    const redondear = n => Math.round(n / 10) * 10;
+    const poner = (id, valor) => {
+      const el = document.getElementById(id);
+      if (el && el.dataset.editado !== '1' && valor > 0) el.value = redondear(valor);
+    };
+    if (usdCentro > 0) {
+      poner('matrix-usd-min', usdCentro * 0.97);
+      poner('matrix-usd-max', usdCentro * 1.03);
+    }
+    if (usdtCentro > 0) {
+      poner('matrix-usdt-min', usdtCentro * 0.97);
+      poner('matrix-usdt-max', usdtCentro * 1.03);
+    }
+  }
+
   // ==========================================
   // FUNCIONES PÚBLICAS
   // ==========================================
@@ -208,9 +263,12 @@
   function init(data, settings) {
     currentData = data;
     userSettings = settings;
+    sugerirRangosMatriz();
 
     if (listenersReady) {
-      window.Logger?.debug(' [Simulator] Ya inicializado: se actualizan los datos, sin re-registrar listeners');
+      window.Logger?.debug(
+        ' [Simulator] Ya inicializado: se actualizan los datos, sin re-registrar listeners'
+      );
       return;
     }
 
@@ -280,6 +338,11 @@
       });
     }
 
+    // Un rango que el usuario escribió no se pisa al llegar datos nuevos
+    IDS_RANGOS.forEach(id =>
+      document.getElementById(id)?.addEventListener('input', e => (e.target.dataset.editado = '1'))
+    );
+
     window.Logger?.debug(' [Simulator] Event listeners configurados correctamente');
   }
 
@@ -290,6 +353,7 @@
    */
   function updateData(data) {
     currentData = data;
+    sugerirRangosMatriz();
   }
 
   /**
@@ -324,6 +388,7 @@
     }
 
     const officialPrice = getCurrentDollarPrice();
+    if (!officialPrice) return false; // sin cotización no se inventa un precio
 
     // Obtener elementos del DOM
     const elements = {
@@ -396,9 +461,11 @@
       elements.amount.value = userSettings.simulatorDefaultAmount;
     }
 
-    // Precios del dólar
-    elements.usdBuy.value = officialPrice.toFixed(2);
-    elements.usdSell.value = (officialPrice * 1.02).toFixed(2);
+    // Precios del dólar (si no hay cotización se dejan como estén)
+    if (officialPrice) {
+      elements.usdBuy.value = officialPrice.toFixed(2);
+      elements.usdSell.value = (officialPrice * 1.02).toFixed(2);
+    }
 
     // Fees desde configuración
     const buyFee = (userSettings?.extraTradingFee || 0) + 1.0;
@@ -489,8 +556,8 @@
         parseFloat(document.getElementById('matrix-usd-max')?.value) ||
         currentData?.oficial?.compra * 1.5 ||
         1500;
-      const usdtMinInput = parseFloat(document.getElementById('matrix-usdt-min')?.value) || 1000;
-      const usdtMaxInput = parseFloat(document.getElementById('matrix-usdt-max')?.value) || 1100;
+      const usdtMinInput = parseFloat(document.getElementById('matrix-usdt-min')?.value) || 1500;
+      const usdtMaxInput = parseFloat(document.getElementById('matrix-usdt-max')?.value) || 1650;
 
       // CORREGIDO v6.0.2: Migrado de alert() a inline message (R-04)
       // Validaciones
@@ -501,7 +568,11 @@
       }
       if (usdtMinInput >= usdtMaxInput) {
         const usdtMinEl = document.getElementById('matrix-usdt-min');
-        showSimulatorMessage(usdtMinEl, ' El USDT mínimo debe ser menor que el USDT máximo', 'error');
+        showSimulatorMessage(
+          usdtMinEl,
+          ' El USDT mínimo debe ser menor que el USDT máximo',
+          'error'
+        );
         return false;
       }
 
@@ -535,8 +606,8 @@
       const usdtData = getUSDTData();
       if (usdtData && Object.keys(usdtData).length > 0) {
         const usdtSellPrices = Object.values(usdtData)
-          .filter(exchange => exchange.venta && exchange.venta > 0)
-          .map(exchange => exchange.venta)
+          .map(precioVentaUsdt)
+          .filter(precio => precio > 0)
           .sort((a, b) => b - a);
 
         if (usdtSellPrices.length >= 5) {
@@ -548,8 +619,8 @@
 
       // Fallback para USDT
       if (usdtPrices.length === 0) {
-        const usdtMin = 1000;
-        const usdtMax = 1100;
+        const usdtMin = 1500;
+        const usdtMax = 1650;
         usdtPrices.push(...generateEquidistantPrices(usdtMin, usdtMax, 5));
       }
     }
@@ -652,6 +723,7 @@
     tableHTML += '</tr></thead><tbody>';
 
     // Calcular rentabilidad para cada combinación
+    const usdToUsdtRate = getUsdToUsdtRate();
     usdPrices.forEach(usdPrice => {
       tableHTML += `<tr><td><strong>$${usdPrice.toFixed(0)}</strong></td>`;
 
@@ -663,7 +735,8 @@
           buyFeePercent,
           sellFeePercent,
           transferFeeUSD,
-          bankCommissionPercent
+          bankCommissionPercent,
+          usdToUsdtRate
         );
 
         // Determinar clase CSS según rentabilidad
@@ -695,6 +768,7 @@
    * @param {number} sellFeePercent - Fee de venta
    * @param {number} transferFeeUSD - Fee de transferencia
    * @param {number} bankCommissionPercent - Comisión bancaria
+   * @param {number} [usdToUsdtRate=1] - Dólares que cuesta un USDT (ver getUsdToUsdtRate)
    * @returns {number} Porcentaje de ganancia
    */
   function calculateProfitPercent(
@@ -704,7 +778,8 @@
     buyFeePercent,
     sellFeePercent,
     transferFeeUSD,
-    bankCommissionPercent
+    bankCommissionPercent,
+    usdToUsdtRate = 1
   ) {
     // Paso 1: Aplicar comisión bancaria
     const bankCommissionARS = amount * (bankCommissionPercent / 100);
@@ -715,17 +790,12 @@
 
     // Paso 3: Comprar USDT con USD
     //
-    // La conversión NO se deriva de los dos precios en pesos. USDT es un stablecoin del
-    // dólar: se compra ~1:1, y lo que cotiza en pesos (el "precio USDT" de la matriz) es su
-    // VENTA, que se aplica recién en el paso 6.
-    //
-    // Antes esto era `usdPrice / usdtPrice`, o sea el recíproco de la tasa que usa el motor
-    // (`main-simple.js resolveUsdToUsdtRate`). Con esa relación, cuanto más caro estaba el
-    // USDT en pesos MÁS USDT decía el simulador que compraba el usuario: la economía al
-    // revés, que sobreestimaba la ganancia entre 2,5 y 10,8 puntos porcentuales (P-03).
-    // Criterio de aceptación del informe: USD 1000, USDT 1050, fees 1%/1%, 1.000.000 ARS
-    // debe dar ≈ +2,91% (daba +8,06%).
-    const usdToUsdtRate = 1;
+    // La conversión NO se deriva de los dos precios en pesos (P-03: `usdPrice / usdtPrice` era
+    // el recíproco de la tasa del motor y daba la economía al revés). Lo que cotiza en pesos
+    // (el "precio USDT" de la matriz) es la VENTA, que se aplica recién en el paso 6.
+    // `usdToUsdtRate` es la tasa USDT/USD de mercado (dólares por USDT, ~1,06) y se DIVIDE como
+    // en el motor (`main-simple.js resolveUsdToUsdtRate`). Por defecto 1: con USD 1000, USDT
+    // 1050 y fees 1%/1% da ≈ +2,91% (criterio de aceptación de P-03).
     const step2_usdt = step1_usd / usdToUsdtRate;
 
     // Paso 4: Aplicar fee de compra

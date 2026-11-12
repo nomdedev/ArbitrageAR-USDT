@@ -32,7 +32,7 @@ test('verificación en vivo de las correcciones', async () => {
   const context = await chromium.launchPersistentContext(userDataDir, {
     channel: 'chromium',
     headless: false,
-    args: [`--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`],
+    args: [`--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`]
   });
 
   const resultado = {};
@@ -45,15 +45,15 @@ test('verificación en vivo de las correcciones', async () => {
     expect(id).toBeTruthy();
 
     const erroresSW = [];
-    sw.on('console', (m) => {
+    sw.on('console', m => {
       if (m.type() === 'error') erroresSW.push(m.text());
     });
-    sw.on('pageerror', (e) => erroresSW.push(`pageerror: ${e.message}`));
+    sw.on('pageerror', e => erroresSW.push(`pageerror: ${e.message}`));
 
     // ─────────────────────────────── P-01 ───────────────────────────────
     const popup = await context.newPage();
     const erroresPopup = [];
-    popup.on('pageerror', (e) => erroresPopup.push(e.message));
+    popup.on('pageerror', e => erroresPopup.push(e.message));
     await popup.goto(`chrome-extension://${id}/src/popup.html`, { waitUntil: 'domcontentloaded' });
     await popup.waitForTimeout(2000);
 
@@ -61,15 +61,17 @@ test('verificación en vivo de las correcciones', async () => {
     await popup.waitForTimeout(600);
 
     const panel = popup.locator('#advanced-config');
-    const displayAntes = await panel.evaluate((el) => el.style.display);
+    const displayAntes = await panel.evaluate(el => el.style.display);
     await popup.click('#toggle-advanced');
     await popup.waitForTimeout(500);
-    const displayDespues = await panel.evaluate((el) => el.style.display);
+    const displayDespues = await panel.evaluate(el => el.style.display);
     const visible = await panel.isVisible();
     await popup.screenshot({ path: path.join(SALIDA, '01-P01-panel-config-avanzada.png') });
 
     resultado['P-01'] = { displayAntes, displayDespues, visible };
-    console.log(`[P-01] display antes=${displayAntes} · despues=${displayDespues} · visible=${visible}`);
+    console.log(
+      `[P-01] display antes=${displayAntes} · despues=${displayDespues} · visible=${visible}`
+    );
     expect(displayDespues).toBe('block'); // antes del fix quedaba en 'none'
     expect(visible).toBe(true);
 
@@ -79,9 +81,9 @@ test('verificación en vivo de las correcciones', async () => {
     const matriz = await popup.evaluate(() => {
       const t = document.getElementById('risk-matrix-table');
       if (!t) return { error: 'no hay tabla' };
-      const encabezados = [...t.querySelectorAll('thead th')].map((h) => h.textContent.trim());
-      const filas = [...t.querySelectorAll('tbody tr')].map((tr) =>
-        [...tr.querySelectorAll('td')].map((td) => td.textContent.trim())
+      const encabezados = [...t.querySelectorAll('thead th')].map(h => h.textContent.trim());
+      const filas = [...t.querySelectorAll('tbody tr')].map(tr =>
+        [...tr.querySelectorAll('td')].map(td => td.textContent.trim())
       );
       return { encabezados, filas };
     });
@@ -94,12 +96,14 @@ test('verificación en vivo de las correcciones', async () => {
     // Cada celda vale, aproximadamente, (USDT_venta / USD_compra - 1) menos las comisiones.
     // Con la conversion invertida el numero cambia de signo y de magnitud, asi que esta
     // comprobacion distingue una conversion correcta de una dada vuelta sobre la salida REAL.
-    const preciosCol = matriz.encabezados.slice(1).map((h) => parseFloat(h.replace('$', '')));
+    const preciosCol = matriz.encabezados.slice(1).map(h => parseFloat(h.replace('$', '')));
     const desvios = [];
     for (const fila of matriz.filas || []) {
       const usd = parseFloat(fila[0].replace('$', ''));
       for (let i = 0; i < preciosCol.length; i++) {
-        const crudo = String(fila[i + 1]).replace('−', '-').replace('%', '');
+        const crudo = String(fila[i + 1])
+          .replace('−', '-')
+          .replace('%', '');
         const mostrado = parseFloat(crudo) / 100;
         const esperadoSinFees = preciosCol[i] / usd - 1;
         desvios.push({
@@ -107,7 +111,7 @@ test('verificación en vivo de las correcciones', async () => {
           usdt: preciosCol[i],
           mostrado,
           esperadoSinFees,
-          delta: mostrado - esperadoSinFees,
+          delta: mostrado - esperadoSinFees
         });
       }
     }
@@ -124,12 +128,14 @@ test('verificación en vivo de las correcciones', async () => {
 
     // Dato para el informe: la celda de aceptacion (USD 1000 / USDT 1050 = +2,91%) NO existe
     // en la matriz en vivo, que arranca en USD 1400. Es evidencia de P-02 (precios fijos).
-    console.log(`[P-02] filas USD de la matriz en vivo: ${JSON.stringify((matriz.filas || []).map((f) => f[0]))}`);
+    console.log(
+      `[P-02] filas USD de la matriz en vivo: ${JSON.stringify((matriz.filas || []).map(f => f[0]))}`
+    );
 
     // ─────────────────────── options: O-02, F-10, O-05 ───────────────────────
     const opt = await context.newPage();
     const erroresOptions = [];
-    opt.on('pageerror', (e) => erroresOptions.push(e.message));
+    opt.on('pageerror', e => erroresOptions.push(e.message));
     await opt.goto(`chrome-extension://${id}/src/options.html`, { waitUntil: 'domcontentloaded' });
     await opt.waitForTimeout(2000);
 
@@ -137,7 +143,11 @@ test('verificación en vivo de las correcciones', async () => {
     // interruptor esta oculto a proposito (el control visible es el .slider), asi que para
     // saber si la seccion esta abierta se mide un elemento visible, nunca el input.
     const cabeceraFees = opt.locator('.card-header', { hasText: 'Fees y Comisiones' });
-    const seccionVisible = await opt.locator('#broker-select').isVisible().catch(() => false);
+    // Colapsada = la cabecera tiene la clase: `isVisible()` miente, porque el contenido plegado
+    // conserva su caja (max-height: 0 + overflow hidden) y Playwright lo da por visible.
+    const seccionVisible = !(await cabeceraFees
+      .evaluate(h => h.classList.contains('collapsed'))
+      .catch(() => false));
     resultado['fees-seccion-visible'] = seccionVisible;
     if (!seccionVisible && (await cabeceraFees.count())) {
       await cabeceraFees.click();
@@ -151,7 +161,10 @@ test('verificación en vivo de las correcciones', async () => {
     const etiquetaBanco = (await opt.locator('label[for="bank-fee"]').textContent()).trim();
     const opcionLemon = await opt.locator('#broker-select option[value="lemoncash"]').count();
     const opcionLemonVieja = await opt.locator('#broker-select option[value="lemon-cash"]').count();
-    await opt.locator('#apply-fees').scrollIntoViewIfNeeded().catch(() => {});
+    await opt
+      .locator('#apply-fees')
+      .scrollIntoViewIfNeeded({ timeout: 2000 })
+      .catch(() => {});
     await opt
       .screenshot({ path: path.join(SALIDA, '03-options-fees-seccion.png'), fullPage: false })
       .catch(() => {});
@@ -162,10 +175,12 @@ test('verificación en vivo de las correcciones', async () => {
       etiquetaTransfer,
       etiquetaBanco,
       opcionLemon,
-      opcionLemonVieja,
+      opcionLemonVieja
     };
     console.log(`[O-02] #apply-fees existe: ${hayInterruptor}`);
-    console.log(`[F-10] etiquetas: "${etiquetaRetiro}" · "${etiquetaTransfer}" · "${etiquetaBanco}"`);
+    console.log(
+      `[F-10] etiquetas: "${etiquetaRetiro}" · "${etiquetaTransfer}" · "${etiquetaBanco}"`
+    );
     console.log(`[O-05] opcion lemoncash=${opcionLemon} · lemon-cash(vieja)=${opcionLemonVieja}`);
     expect(hayInterruptor).toBe(1);
     expect(etiquetaRetiro).toContain('ARS');
@@ -188,7 +203,9 @@ test('verificación en vivo de las correcciones', async () => {
     // sobre la etiqueta. Se hace asi y se registra el estado para que cualquier falla sea clara.
     await opt.locator('label.switch:has(#apply-fees)').click();
     await opt.waitForTimeout(300);
-    console.log(`[O-01] interruptor antes de guardar=${await opt.locator('#apply-fees').isChecked()}`);
+    console.log(
+      `[O-01] interruptor antes de guardar=${await opt.locator('#apply-fees').isChecked()}`
+    );
     await opt.click('#save-settings');
     await opt.waitForTimeout(2000);
 
@@ -204,8 +221,15 @@ test('verificación en vivo de las correcciones', async () => {
     });
     await opt.screenshot({ path: path.join(SALIDA, '04-O01-tras-guardar-y-recargar.png') });
 
-    resultado['O-01'] = { itemsAntesDeGuardar, itemsTrasRecargar, interruptorTrasRecargar, feesGuardados };
-    console.log(`[O-01] items antes de Guardar=${itemsAntesDeGuardar} · tras recargar=${itemsTrasRecargar}`);
+    resultado['O-01'] = {
+      itemsAntesDeGuardar,
+      itemsTrasRecargar,
+      interruptorTrasRecargar,
+      feesGuardados
+    };
+    console.log(
+      `[O-01] items antes de Guardar=${itemsAntesDeGuardar} · tras recargar=${itemsTrasRecargar}`
+    );
     console.log(`[O-01] interruptor tras recargar=${interruptorTrasRecargar}`);
     console.log(`[O-01] en storage: ${JSON.stringify(feesGuardados)}`);
     expect(itemsAntesDeGuardar).toBeGreaterThan(0);
@@ -216,9 +240,12 @@ test('verificación en vivo de las correcciones', async () => {
 
     // ───────────────── errores de consola (evidencia) ─────────────────
     resultado.errores = { serviceWorker: erroresSW, popup: erroresPopup, options: erroresOptions };
-    console.log(`[consola] errores SW=${erroresSW.length} popup=${erroresPopup.length} options=${erroresOptions.length}`);
+    console.log(
+      `[consola] errores SW=${erroresSW.length} popup=${erroresPopup.length} options=${erroresOptions.length}`
+    );
     if (erroresSW.length) console.log(`[consola] SW: ${JSON.stringify(erroresSW.slice(0, 5))}`);
-    if (erroresPopup.length) console.log(`[consola] popup: ${JSON.stringify(erroresPopup.slice(0, 5))}`);
+    if (erroresPopup.length)
+      console.log(`[consola] popup: ${JSON.stringify(erroresPopup.slice(0, 5))}`);
 
     fs.writeFileSync(path.join(SALIDA, 'resultado.json'), JSON.stringify(resultado, null, 2));
     console.log(`\n[OK] evidencia en ${SALIDA}`);
