@@ -1,0 +1,18 @@
+{
+  "desbordeHorizontal": 0,
+  "anchoContenido": 1080,
+  "bodyFondo": "rgb(10, 13, 18)",
+  "bodyTexto": "rgb(230, 233, 238)",
+  "cardSombra": "rgba(148, 163, 184, 0.16) 0px 0px 0px 1px",
+  "cardBorde": "none",
+  "footerPosicion": "fixed",
+  "h2Tracking": "0.91px",
+  "h4Fuente": "ui-monospace, SFMono-Regular, \"Geist Mono\", \"Roboto Mono\", Menlo, Monaco, monospace",
+  "h4Transform": "uppercase",
+  "inputSombra": "rgba(148, 163, 184, 0.16) 0px 0px 0px 1px",
+  "switchEncendido": "rgb(230, 233, 238)",
+  "legacyDisplay": "none",
+  "tarjetas": 8,
+  "estilosCargados": 2,
+  "reglas": 143
+}

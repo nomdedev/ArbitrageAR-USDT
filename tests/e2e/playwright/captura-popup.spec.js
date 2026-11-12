@@ -21,7 +21,7 @@ test('capturas del popup', async () => {
     channel: 'chromium',
     headless: false,
     args: [`--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`],
-    viewport: { width: 420, height: 760 },
+    viewport: { width: 420, height: 760 }
   });
   try {
     let [sw] = context.serviceWorkers();
@@ -30,19 +30,23 @@ test('capturas del popup', async () => {
     const errores = [];
 
     const popup = await context.newPage();
-    popup.on('pageerror', (e) => errores.push(e.message));
+    popup.on('pageerror', e => errores.push(e.message));
     await popup.goto(`chrome-extension://${id}/src/popup.html`, { waitUntil: 'domcontentloaded' });
     await popup.waitForTimeout(8000); // dar tiempo a que lleguen datos de las APIs
+    if (process.env.THEME) {
+      await popup.evaluate(t => (document.documentElement.dataset.theme = t), process.env.THEME);
+      await popup.waitForTimeout(600); // que terminen las transiciones de color antes de capturar
+    }
 
     // ─── relevamiento de la estructura ───
     const estructura = await popup.evaluate(() => {
-      const txt = (el) => (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 60);
-      const visible = (el) => {
+      const txt = el => (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+      const visible = el => {
         const r = el.getBoundingClientRect();
         const st = getComputedStyle(el);
         return r.width > 0 && r.height > 0 && st.visibility !== 'hidden' && st.display !== 'none';
       };
-      const medir = (el) => {
+      const medir = el => {
         const r = el.getBoundingClientRect();
         const st = getComputedStyle(el);
         return {
@@ -54,32 +58,39 @@ test('capturas del popup', async () => {
           fondo: st.backgroundColor,
           color: st.color,
           fuente: st.fontSize + '/' + st.fontWeight,
-          transicion: st.transitionProperty,
+          transicion: st.transitionProperty
         };
       };
       return {
         tamanoDocumento: {
           ancho: document.documentElement.scrollWidth,
-          alto: document.documentElement.scrollHeight,
+          alto: document.documentElement.scrollHeight
         },
-        pestanias: [...document.querySelectorAll('.tab, [data-tab]')].map((el) => ({
+        pestanias: [...document.querySelectorAll('.tab, [data-tab]')].map(el => ({
           texto: txt(el),
           tab: el.dataset.tab || null,
-          activa: el.classList.contains('active'),
+          activa: el.classList.contains('active')
         })),
-        botonesVisibles: [...document.querySelectorAll('button')].filter(visible).map(medir).slice(0, 24),
-        selects: [...document.querySelectorAll('select')].map((s) => ({
+        botonesVisibles: [...document.querySelectorAll('button')]
+          .filter(visible)
+          .map(medir)
+          .slice(0, 24),
+        selects: [...document.querySelectorAll('select')].map(s => ({
           id: s.id,
-          opciones: [...s.options].map((o) => o.textContent.trim()).slice(0, 8),
+          opciones: [...s.options].map(o => o.textContent.trim()).slice(0, 8)
         })),
-        filtros: [...document.querySelectorAll('.filter-btn, .filter-btn-footer, [class*="filter"]')]
+        filtros: [
+          ...document.querySelectorAll('.filter-btn, .filter-btn-footer, [class*="filter"]')
+        ]
           .slice(0, 12)
-          .map((el) => ({ clase: el.className, texto: txt(el) })),
-        secciones: [...document.querySelectorAll('section, .panel, .card')].slice(0, 14).map((el) => ({
-          clase: typeof el.className === 'string' ? el.className : '',
-          visible: visible(el),
-          alto: Math.round(el.getBoundingClientRect().height),
-        })),
+          .map(el => ({ clase: el.className, texto: txt(el) })),
+        secciones: [...document.querySelectorAll('section, .panel, .card')]
+          .slice(0, 14)
+          .map(el => ({
+            clase: typeof el.className === 'string' ? el.className : '',
+            visible: visible(el),
+            alto: Math.round(el.getBoundingClientRect().height)
+          }))
       };
     });
     console.log('[popup] estructura = ' + JSON.stringify(estructura, null, 1));
@@ -87,18 +98,31 @@ test('capturas del popup', async () => {
     await popup.screenshot({ path: path.join(SALIDA, `${PREFIJO}-01-top.png`) });
     await popup.screenshot({
       path: path.join(SALIDA, `${PREFIJO}-02-full.png`),
-      fullPage: true,
+      fullPage: true
     });
 
     // ─── recorrer las pestanias ───
     const tabs = await popup.locator('.tab[data-tab]').all();
     for (let i = 0; i < tabs.length; i++) {
-      const etiqueta = ((await tabs[i].getAttribute('data-tab')) || `tab${i}`).replace(/[^\w-]/g, '');
+      const etiqueta = ((await tabs[i].getAttribute('data-tab')) || `tab${i}`).replace(
+        /[^\w-]/g,
+        ''
+      );
       await tabs[i].click().catch(() => {});
       await popup.waitForTimeout(2500);
       await popup.screenshot({ path: path.join(SALIDA, `${PREFIJO}-tab-${etiqueta}.png`) });
       console.log(`[popup] capturada pestania ${etiqueta}`);
     }
+
+    // ─── matriz del simulador y detalle de una ruta ───
+    await popup.locator('.tab[data-tab="simulator"]').click();
+    await popup.locator('#generate-risk-matrix').click();
+    await popup.waitForTimeout(1500);
+    await popup.screenshot({ path: path.join(SALIDA, `${PREFIJO}-matriz.png`) });
+    await popup.locator('.tab[data-tab="routes"]').click();
+    await popup.locator('.route-card').first().click();
+    await popup.waitForTimeout(1500);
+    await popup.screenshot({ path: path.join(SALIDA, `${PREFIJO}-detalle.png`) });
 
     // ─── linea base de estilos (para comparar despues del rediseno) ───
     const estilos = await popup.evaluate(() => {
@@ -118,15 +142,17 @@ test('capturas del popup', async () => {
         botonFondo: cs('button', 'backgroundColor'),
         botonRadio: cs('button', 'borderRadius'),
         keyframesEnUso: [...document.styleSheets]
-          .flatMap((s) => {
+          .flatMap(s => {
             try {
               return [...s.cssRules];
             } catch {
               return [];
             }
           })
-          .filter((r) => r.type === 7).length,
-        hojas: [...document.styleSheets].map((s) => (s.href || 'inline').split('/').slice(-2).join('/')),
+          .filter(r => r.type === 7).length,
+        hojas: [...document.styleSheets].map(s =>
+          (s.href || 'inline').split('/').slice(-2).join('/')
+        )
       };
     });
     console.log('[popup] estilos = ' + JSON.stringify(estilos, null, 1));

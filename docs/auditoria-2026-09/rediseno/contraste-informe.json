@@ -1,23 +1,83 @@
 {
   "pestana:routes": [],
   "pestana:crypto-arbitrage": [],
-  "pestana:simulator": [],
+  "pestana:simulator": [
+    {
+      "ruta": "div.sim-matrix-section > div.sim-matrix-controls > button.sim-btn-generate",
+      "texto": "Generar matriz",
+      "color": "rgb(10, 13, 18)",
+      "fondo": "rgb(17, 22, 30)",
+      "ratio": 1.07,
+      "tamano": "13px/600",
+      "minimo": 4.5,
+      "gravedad": "CRITICO"
+    }
+  ],
   "matriz:celdas": {
-    "positive": null,
-    "neutral": null,
+    "positive": {
+      "fondo": "rgba(46, 189, 133, 0.2)",
+      "texto": "1.56%",
+      "color": "rgb(46, 189, 133)"
+    },
+    "neutral": {
+      "fondo": "rgba(251, 191, 36, 0.2)",
+      "texto": "0.66%",
+      "color": "rgb(240, 136, 62)"
+    },
     "negative": {
-      "fondo": "rgba(255, 69, 58, 0.2)",
-      "texto": "-29.99%",
-      "color": "rgb(252, 165, 165)"
+      "fondo": "rgba(246, 70, 93, 0.2)",
+      "texto": "-3.28%",
+      "color": "rgb(246, 70, 93)"
     }
   },
   "pestana:banks": [],
-  "modal:detalle": [],
+  "modal:detalle": [
+    {
+      "ruta": "ol.guide-steps > li.guide-step > span.guide-step-num",
+      "texto": "1",
+      "color": "rgb(255, 255, 255)",
+      "fondo": "rgb(201, 165, 92)",
+      "ratio": 2.33,
+      "tamano": "13px/600",
+      "minimo": 4.5,
+      "gravedad": "CRITICO"
+    },
+    {
+      "ruta": "ol.guide-steps > li.guide-step > span.guide-step-num",
+      "texto": "2",
+      "color": "rgb(255, 255, 255)",
+      "fondo": "rgb(201, 165, 92)",
+      "ratio": 2.33,
+      "tamano": "13px/600",
+      "minimo": 4.5,
+      "gravedad": "CRITICO"
+    },
+    {
+      "ruta": "ol.guide-steps > li.guide-step > span.guide-step-num",
+      "texto": "3",
+      "color": "rgb(255, 255, 255)",
+      "fondo": "rgb(201, 165, 92)",
+      "ratio": 2.33,
+      "tamano": "13px/600",
+      "minimo": 4.5,
+      "gravedad": "CRITICO"
+    },
+    {
+      "ruta": "ol.guide-steps > li.guide-step > span.guide-step-num",
+      "texto": "4",
+      "color": "rgb(255, 255, 255)",
+      "fondo": "rgb(201, 165, 92)",
+      "ratio": 2.33,
+      "tamano": "13px/600",
+      "minimo": 4.5,
+      "gravedad": "CRITICO"
+    }
+  ],
   "diagnostico:insignia-de-paso": {
     "olListStyle": "none / outside none none",
     "olPaddingLeft": "0px",
     "numTexto": "1",
-    "numFondo": "rgb(0, 113, 227)",
+    "numFondo": "rgb(201, 165, 92)",
     "numColor": "rgb(255, 255, 255)",
     "numAnchoAlto": "24pxx24px",
     "numRadio": "50%",

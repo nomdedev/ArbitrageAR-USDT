@@ -22,7 +22,10 @@
 .loading-text {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary, #ffffff); /* el fallback era #1a1a1a: texto oscuro sobre fondo oscuro si alguna vez se borra el alias */
+  color: var(
+    --text-primary,
+    #ffffff
+  ); /* el fallback era #1a1a1a: texto oscuro sobre fondo oscuro si alguna vez se borra el alias */
   margin: 0;
 }
 
@@ -36,7 +39,7 @@
 .loading-dots span {
   width: 8px;
   height: 8px;
-  background: var(--primary-color, #0071e3);
+  background: var(--primary-color, var(--color-brand-primary));
   border-radius: 50%;
   /* Apple: sin bucles decorativos (era: animation: loadingDotBounce 1.4s infinite ease-in-out both;) */
 }
@@ -137,7 +140,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(0, 113, 227, 0.1) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(201, 165, 92, 0.1) 50%, transparent 100%);
   animation: shimmer 1.5s ease-in-out infinite;
 }
 
@@ -321,7 +324,7 @@
   text-align: center;
   gap: var(--space-4);
   background: var(--color-danger-muted);
-  border: 1px solid rgba(255, 69, 58, 0.3);
+  border: 1px solid rgba(246, 70, 93, 0.3);
   border-radius: var(--radius-lg);
 }
 
@@ -361,19 +364,25 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: transform var(--duration-fast) var(--ease-out), opacity var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
-  box-shadow: 0 2px 8px rgba(255, 69, 58, 0.3);
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    opacity var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+  box-shadow: 0 2px 8px rgba(246, 70, 93, 0.3);
 }
 
 .btn-retry:hover {
   background: #dc2626;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 69, 58, 0.4);
+  box-shadow: 0 4px 12px rgba(246, 70, 93, 0.4);
 }
 
 .btn-retry:active {
   transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(255, 69, 58, 0.3);
+  box-shadow: 0 2px 6px rgba(246, 70, 93, 0.3);
 }
 
 /* Botón para empty state */
@@ -382,26 +391,32 @@
   align-items: center;
   gap: 8px;
   padding: var(--space-2) var(--space-4);
-  background: var(--primary-color, #0071e3);
+  background: var(--primary-color, var(--color-brand-primary));
   color: var(--color-text-inverse);
   border: none;
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: transform var(--duration-fast) var(--ease-out), opacity var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
-  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    opacity var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+  box-shadow: 0 2px 8px rgba(201, 165, 92, 0.3);
 }
 
 .empty-state .btn-primary:hover {
-  background: #0071e3;
+  background: var(--color-brand-primary);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 113, 227, 0.4);
+  box-shadow: 0 4px 12px rgba(201, 165, 92, 0.4);
 }
 
 .empty-state .btn-primary:active {
   transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(0, 113, 227, 0.3);
+  box-shadow: 0 2px 6px rgba(201, 165, 92, 0.3);
 }
 
 /* ==========================================

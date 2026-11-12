@@ -18,12 +18,12 @@ label:has(> input[type='checkbox']):not(.switch):not(.exchange-group label, .che
   gap: 8px;
   min-height: 44px;
   padding: 0 16px;
-  border-radius: 980px;
-  background: #fafafc;
-  box-shadow: inset 0 0 0 3px rgba(0, 0, 0, 0.04);
+  border-radius: var(--radius-lg);
+  background: var(--chip-bg);
+  box-shadow: inset 0 0 0 3px var(--chip-ring);
   font-size: 14px;
   letter-spacing: -0.224px;
-  color: rgba(0, 0, 0, 0.8);
+  color: var(--gray-700);
   cursor: pointer;
   user-select: none;
   transition:
@@ -32,25 +32,48 @@ label:has(> input[type='checkbox']):not(.switch):not(.exchange-group label, .che
     box-shadow 160ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-label:has(> input[type='checkbox']):not(.switch):not(.exchange-group label, .checkbox-grid label):hover {
-  background: #f5f5f7;
+label:has(> input[type='checkbox']):not(.switch):not(
+    .exchange-group label,
+    .checkbox-grid label
+  ):hover {
+  background: var(--chip-hover);
 }
 
-/* Seleccionadas: las capsulas cortas usan un fondo neutro; las listas largas
-   conservan el estilo de fila y no colorean toda la etiqueta. */
-label:has(> input[type='checkbox']:checked):not(.switch):not(.exchange-group label, .checkbox-grid label) {
-  background: #f0f0f2;
-  color: #1d1d1f;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+/* Estado seleccionado: el acento reemplaza al negro (nunca se suma: un solo azul en la pantalla) */
+label:has(> input[type='checkbox']:checked):not(.switch):not(
+    .exchange-group label,
+    .checkbox-grid label
+  ) {
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: none;
 }
 
-label:has(> input[type='checkbox']):not(.switch):not(.exchange-group label, .checkbox-grid label):has(> input:focus-visible) {
-  outline: 2px solid #0071e3;
+label:has(> input[type='checkbox']):not(.switch):not(
+    .exchange-group label,
+    .checkbox-grid label
+  ):has(> input:focus-visible) {
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
+/* Filas de las listas largas: marcado discreto (texto fuerte + fondo suave), no un bloque azul */
+.exchange-group label,
+.checkbox-grid label {
+  padding: 0 8px;
+  border-radius: var(--radius);
+}
+
+.exchange-group label:has(> input:checked),
+.checkbox-grid label:has(> input:checked) {
+  background: var(--white);
+  color: var(--black);
+  font-weight: 500;
+}
+
 /* El cuadradito nativo pasa a circulo de estado, con señal de FORMA ademas de color (WCAG 1.4.1) */
-label:has(> input[type='checkbox']):not(.switch):not(.exchange-group label, .checkbox-grid label) > input[type='checkbox'] {
+label:has(> input[type='checkbox']):not(.switch):not(.exchange-group label, .checkbox-grid label)
+  > input[type='checkbox'] {
   appearance: none;
   -webkit-appearance: none;
   width: 18px;
@@ -58,32 +81,43 @@ label:has(> input[type='checkbox']):not(.switch):not(.exchange-group label, .che
   margin: 0;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: #ffffff;
-  box-shadow: inset 0 0 0 1.5px rgba(0, 0, 0, 0.45); /* 0.24 daba 1.78:1: el circulo sin marcar era invisible (min 3:1) */
+  background: var(--white);
+  box-shadow: inset 0 0 0 1.5px var(--chip-border); /* 0.24 daba 1.78:1: el circulo sin marcar era invisible (min 3:1) */
   position: relative;
   cursor: pointer;
 }
 
-label:has(> input[type='checkbox']:checked):not(.switch):not(.exchange-group label, .checkbox-grid label) > input[type='checkbox'] {
-  background: #ffffff;
+label:has(> input[type='checkbox']:checked):not(.switch):not(
+    .exchange-group label,
+    .checkbox-grid label
+  )
+  > input[type='checkbox'] {
+  background: var(--on-accent);
   box-shadow: none;
 }
 
 /* el tilde: marca de forma, no solo el color de fondo */
-label:has(> input[type='checkbox']:checked):not(.switch):not(.exchange-group label, .checkbox-grid label) > input[type='checkbox']::after {
+label:has(> input[type='checkbox']:checked):not(.switch):not(
+    .exchange-group label,
+    .checkbox-grid label
+  )
+  > input[type='checkbox']::after {
   content: '';
   position: absolute;
   left: 6px;
   top: 2.5px;
   width: 5px;
   height: 10px;
-  border: solid #0071e3;
+  border: solid var(--accent);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  label:has(> input[type='checkbox']):not(.switch):not(.exchange-group label, .checkbox-grid label) {
+  label:has(> input[type='checkbox']):not(.switch):not(
+      .exchange-group label,
+      .checkbox-grid label
+    ) {
     transition: none;
   }
 }
@@ -93,18 +127,20 @@ label:has(> input[type='checkbox']:checked):not(.switch):not(.exchange-group lab
    Responde "que esta activo" sin recorrer 5213px y 140 casillas.
    ========================================== */
 .selection-summary {
-  margin: 0 0 18px;
+  grid-column: 1 / -1;
+  align-self: start;
+  margin: 0;
   padding: 10px 14px;
-  border-radius: 11px;
-  background: #f5f5f7;
+  border-radius: var(--radius);
+  background: var(--soft);
   font-size: 13px;
   letter-spacing: -0.08px;
-  color: rgba(0, 0, 0, 0.62);
+  color: var(--gray-600);
   line-height: 1.5;
 }
 
 .selection-summary strong {
-  color: #1d1d1f;
+  color: var(--strong);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
@@ -112,14 +148,12 @@ label:has(> input[type='checkbox']:checked):not(.switch):not(.exchange-group lab
 .selection-warning {
   display: inline-block;
   margin-top: 4px;
-  color: #1d1d1f;
+  color: var(--strong);
   font-weight: 500;
 }
 
-/* Las listas P2P usan filas dentro de .exchange-group, no chips. Evitar que
-   una selección pinte toda la fila aunque el navegador no aplique :not() complejo. */
-.exchange-group label:has(> input[type='checkbox']:checked) {
-  background: transparent !important;
-  color: var(--gray-600) !important;
-  box-shadow: none !important;
+/* El aviso "listas vacías" repetía lo que ya dice el resumen ("se usarán todos"). */
+.selection-summary br,
+.selection-warning {
+  display: none;
 }

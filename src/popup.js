@@ -275,6 +275,7 @@ function setupTabNavigation() {
 
       // Agregar clase active al botón clickeado
       button.classList.add('active');
+      tabButtons.forEach(btn => btn.setAttribute('aria-selected', String(btn === button)));
 
       // Mostrar contenido correspondiente
       const tabId = button.dataset.tab;
@@ -705,6 +706,8 @@ function setupRefreshButton() {
     loadBanksData();
   });
 
+  setupNotificationsToggle();
+
   // Botón de configuración - Mostrar/ocultar filtros avanzados
   document.getElementById('settings').addEventListener('click', () => {
     const panel = document.getElementById('advanced-filters-panel');
@@ -717,6 +720,42 @@ function setupRefreshButton() {
       // Fallback: abrir página de opciones si no hay panel de filtros
       chrome.runtime.openOptionsPage();
     }
+  });
+}
+
+// Campana del encabezado: enciende/apaga las notificaciones sin entrar a Configuración.
+// Escribe la misma clave que la página de opciones (notificationSettings.notificationsEnabled).
+function setupNotificationsToggle() {
+  const boton = document.getElementById('notifications-toggle');
+  if (!boton) return;
+
+  const pintar = activas => {
+    boton.setAttribute('aria-pressed', String(activas));
+    boton.setAttribute(
+      'aria-label',
+      activas ? 'Desactivar notificaciones' : 'Activar notificaciones'
+    );
+    boton.setAttribute(
+      'data-tooltip',
+      activas ? 'Notificaciones activas' : 'Notificaciones apagadas'
+    );
+    boton.classList.toggle('is-off', !activas);
+    boton.querySelector('use')?.setAttribute('href', activas ? '#icon-bell' : '#icon-bell-off');
+  };
+
+  chrome.storage.local.get('notificationSettings', ({ notificationSettings }) => {
+    pintar(notificationSettings?.notificationsEnabled !== false);
+  });
+
+  boton.addEventListener('click', () => {
+    chrome.storage.local.get('notificationSettings', ({ notificationSettings }) => {
+      const ajustes = notificationSettings || {};
+      const activas = ajustes.notificationsEnabled === false; // el nuevo estado
+      chrome.storage.local.set({
+        notificationSettings: { ...ajustes, notificationsEnabled: activas }
+      });
+      pintar(activas);
+    });
   });
 }
 
@@ -908,8 +947,7 @@ function handleSuccessfulData(data, container) {
 
   if (data.optimizedRoutes.length === 0) {
     console.warn('⚠️ optimizedRoutes está vacío');
-    container.innerHTML =
-      '<p class="info"> No se encontraron rutas rentables en este momento.</p>';
+    container.innerHTML = '<p class="info"> No se encontraron rutas rentables en este momento.</p>';
     return;
   }
 
@@ -1443,30 +1481,20 @@ function displayOptimizedRoutes(routes, _official) {
     // v8.0: Estructura unificada con crypto cards
     html += `
       <div class="route-card ${profitClass} ${routeType} ${compactClass}" data-index="${index}" data-route="${escapedRouteData}">
-        <div class="fiat-card-header">
-          <div class="fiat-info">
-            <span class="fiat-icon">${getRouteIcon(routeType, route)}</span>
-            <span class="fiat-name">${getRouteTypeName(routeType)}</span>
-          </div>
-          <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${Fmt.formatNumber(displayMetrics.percentage)}%</div>
-        </div>
-        
-        <div class="fiat-card-body">
+        <div class="rc-main">
           <div class="route-path">
             ${routeDescription}
           </div>
-          
           <div class="operation-meta">
+            ${routeType === 'arbitrage' ? '' : getRouteTypeBadge(routeType)}
             ${p2pBadge}
-            ${timestampInfo ? `<span class="time-indicator"> ${new Date(route.timestamp).toLocaleTimeString()}</span>` : ''}
+            ${timestampInfo ? `<span class="time-indicator">${new Date(route.timestamp).toLocaleTimeString()}</span>` : ''}
           </div>
         </div>
-        
-        <div class="fiat-card-footer">
-          <div class="profit-details">
-            <span class="label">Resultado:</span>
-            <span class="value ${displayMetrics.percentage >= 0 ? '' : 'negative'}">${displayMetrics.mainValue}</span>
-          </div>
+        <div class="rc-result">
+          <div class="profit-badge ${profitBadgeClass}">${profitSymbol}${Fmt.formatNumber(displayMetrics.percentage)}%</div>
+          <span class="rc-amount ${displayMetrics.percentage >= 0 ? '' : 'negative'}">${displayMetrics.mainValue}</span>
+          <span class="rc-base">${displayMetrics.secondaryInfo}</span>
         </div>
       </div>
     `;
@@ -1616,17 +1644,6 @@ function getRouteDescription(route, routeType) {
   }
 }
 
-function getRouteIcon(routeType, route) {
-  switch (routeType) {
-    case 'direct_usdt_ars':
-      return '';
-    case 'usd_to_usdt':
-      return '';
-    default:
-      return route?.isSingleExchange ? '' : '';
-  }
-}
-
 /**
  * Obtener nombre legible del tipo de ruta
  */
@@ -1642,8 +1659,7 @@ function getRouteTypeName(routeType) {
 }
 
 // Función auxiliar para obtener ícono de exchange - Usa RouteRenderer
-const getExchangeIcon = exchangeName =>
-  window.RouteRenderer?.getExchangeIcon?.(exchangeName) || '';
+const getExchangeIcon = exchangeName => window.RouteRenderer?.getExchangeIcon?.(exchangeName) || '';
 
 function showRouteDetailsByType(route) {
   const routeType = getRouteType(route);
@@ -2537,17 +2553,13 @@ function showDataFreshnessWarning(ageMinutes) {
   const warningContainer = document.getElementById('data-warning');
   if (!warningContainer) return;
 
+  // Sin botón propio: el de actualizar del encabezado es el único (había dos).
   warningContainer.innerHTML = `
     <div class="warning-banner stale-data">
- <span class="warning-icon">●</span>
-      <span class="warning-text">Los datos tienen más de ${ageMinutes} minutos. Actualiza para ver precios frescos.</span>
- <button class="warning-refresh-btn" data-action="refresh-data"> Actualizar</button>
+      <span class="warning-icon">●</span>
+      <span class="warning-text">Los datos tienen más de ${ageMinutes} minutos. Tocá ↻ arriba para ver precios frescos.</span>
     </div>
   `;
-  // CORREGIDO v6.0.2: Event listener delegation (CSP fix)
-  warningContainer
-    .querySelector('[data-action="refresh-data"]')
-    ?.addEventListener('click', () => fetchAndDisplay());
   warningContainer.style.display = 'block';
 }
 
@@ -2662,9 +2674,7 @@ function displayDollarInfo(officialData) {
     return;
   }
 
-  log(
-    ` [DISPLAY] Actualizando display del dólar: $${officialData.venta} (${officialData.source})`
-  );
+  log(` [DISPLAY] Actualizando display del dólar: $${officialData.venta} (${officialData.source})`);
 
   // CORREGIDO v6.0.2: Mostrar precio de VENTA (ask) — es lo que el banco nos cobra por comprar USD
   dollarPrice.textContent = `$${Fmt.formatNumber(officialData.venta)}`;
@@ -3451,8 +3461,6 @@ function createCryptoRouteCard(route, index) {
   card.className = 'crypto-route-card';
 
   // v8.0: Animación simplificada para mejor rendimiento
-  card.classList.add('animate-slide-up');
-  card.style.animationDelay = `${index * 30}ms`;
 
   // Agregar clase de profit
   if (route.profitPercent > 2) {
@@ -3468,37 +3476,24 @@ function createCryptoRouteCard(route, index) {
 
   // Construir HTML
   card.innerHTML = `
-    <div class="crypto-card-header">
-      <div class="crypto-info">
-        <span class="crypto-icon">${getCryptoIcon(route.crypto)}</span>
-        <span class="crypto-name">${sanitizeHTML(route.crypto)}</span>
-      </div>
-      <div class="profit-badge ${route.profitPercent >= 0 ? 'profit-positive' : 'profit-negative'} text-underline-animated glow-pulse">
-        ${route.profitPercent >= 0 ? '+' : ''}${route.profitPercent.toFixed(2)}%
-      </div>
-    </div>
-    
-    <div class="crypto-card-body">
+    <div class="rc-main">
       <div class="route-path">
-        <span class="exchange-badge">${sanitizeHTML(capitalizeFirst(route.buyExchange))}</span>
-        <span class="arrow">→</span>
-        <span class="exchange-badge">${sanitizeHTML(capitalizeFirst(route.sellExchange))}</span>
+        <span class="crypto-name">${sanitizeHTML(route.crypto)}</span>
+        <strong>${sanitizeHTML(route.buyExchange)}</strong> → <strong>${sanitizeHTML(route.sellExchange)}</strong>
       </div>
-      
       <div class="operation-meta">
         ${getOperationBadge(route.operationType)}
         ${getSpeedIndicator(route.speed)}
         ${getDifficultyIndicator(route.difficulty)}
       </div>
     </div>
-    
-    <div class="crypto-card-footer">
-      <div class="profit-details">
-        <span class="label">Ganancia estimada:</span>
-        <span class="value ${route.netProfit >= 0 ? '' : 'negative'}">
-          $${Fmt.formatNumber(Math.abs(route.netProfit))} ARS
-        </span>
+    <div class="rc-result">
+      <div class="profit-badge ${route.profitPercent >= 0 ? 'profit-positive' : 'profit-negative'}">
+        ${route.profitPercent >= 0 ? '+' : ''}${route.profitPercent.toFixed(2)}%
       </div>
+      <span class="rc-amount ${route.netProfit >= 0 ? '' : 'negative'}">
+        ${route.netProfit >= 0 ? '+' : '-'}$${Fmt.formatNumber(Math.abs(route.netProfit))} ARS
+      </span>
     </div>
   `;
 
@@ -3537,18 +3532,10 @@ function getCryptoIcon(symbol) {
     SOL: '◎',
     ADA: '₳',
     XRP: '',
-    MATIC: '',
+    POL: '',
     DOGE: ''
   };
   return icons[symbol] || '';
-}
-
-/**
- * Capitalizar primera letra
- */
-function capitalizeFirst(str) {
-  if (!str) return '';
-  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 /**
@@ -3570,9 +3557,9 @@ function getOperationBadge(operationType) {
 function getSpeedIndicator(speed) {
   const speedLower = speed?.toLowerCase() || 'medium';
   const indicators = {
-    fast: '<span class="speed-indicator fast"> Rápido</span>',
-    medium: '<span class="speed-indicator medium">⏱ Medio</span>',
-    slow: '<span class="speed-indicator slow"> Lento</span>'
+    fast: '<span class="speed-indicator fast">Ejecución rápida</span>',
+    medium: '<span class="speed-indicator medium">Ejecución media</span>',
+    slow: '<span class="speed-indicator slow">Ejecución lenta</span>'
   };
   return indicators[speedLower] || indicators['medium'];
 }
@@ -3583,9 +3570,9 @@ function getSpeedIndicator(speed) {
 function getDifficultyIndicator(difficulty) {
   const diffLower = difficulty?.toLowerCase() || 'medium';
   const indicators = {
-    easy: '<span class="difficulty-indicator easy"> Fácil</span>',
-    medium: '<span class="difficulty-indicator medium"> Medio</span>',
-    hard: '<span class="difficulty-indicator hard">● Difícil</span>'
+    easy: '<span class="difficulty-indicator easy">Dificultad baja</span>',
+    medium: '<span class="difficulty-indicator medium">Dificultad media</span>',
+    hard: '<span class="difficulty-indicator hard">Dificultad alta</span>'
   };
   return indicators[diffLower] || indicators['medium'];
 }

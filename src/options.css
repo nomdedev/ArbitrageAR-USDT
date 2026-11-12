@@ -13,40 +13,50 @@
 
 /* ===== TOKENS ===== */
 :root {
-  --white: #ffffff;
-  --black: #171717;
-  --gray-50: #fafafa;
-  --gray-100: #ebebeb;
-  --gray-200: #e5e5e5;
-  --gray-300: #d4d4d4;
-  --gray-400: #6e6e6e; /* 3.95 -> 5.2 sobre blanco */
-  --gray-500: #666666;
-  --gray-600: #4d4d4d;
-  --gray-700: #383838;
+  --white: #fbfaf7;
+  --black: #101826;
+  --gray-50: #f3f1ec;
+  --gray-100: #e6e2d9;
+  --gray-200: #dcd7cc;
+  --gray-300: #c9c3b6;
+  --gray-400: #5f6877; /* 3.95 -> 5.2 sobre blanco */
+  --gray-500: #556072;
+  --gray-600: #3f4a5c;
+  --gray-700: #2a3446;
 
-  --link: #0072f5;
-  --focus: hsla(212, 100%, 48%, 1);
+  --link: #1f3a5f;
+  --focus: #1f3a5f;
 
   /* Estado: los unicos colores con permiso de aparecer */
-  --ok-bg: #ebf5ff;
-  --ok-fg: #0068d6;
-  --err-bg: #fff0f0;
-  --err-fg: #c9252d;
-  --warn-bg: #fff8e5;
-  --warn-fg: #8a5300;
+  --ok-bg: #e6ecf3;
+  --ok-fg: #1f3a5f;
+  --err-bg: #f7e9e7;
+  --err-fg: #b8322a;
+  --warn-bg: #f6ecd9;
+  --warn-fg: #8f5200;
 
   /* Sombra como borde (identidad Vercel) */
-  --ring: rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
-  --ring-light: rgb(235, 235, 235) 0px 0px 0px 1px;
-  --ring-strong: rgba(0, 0, 0, 0.16) 0px 0px 0px 1px;
-  --card-shadow: rgba(0, 0, 0, 0.08) 0px 0px 0px 1px, rgba(0, 0, 0, 0.04) 0px 2px 2px,
-    rgba(0, 0, 0, 0.04) 0px 8px 8px -8px, #fafafa 0px 0px 0px 1px;
+  --ring: rgba(16, 24, 38, 0.13) 0px 0px 0px 1px;
+  --ring-light: rgba(16, 24, 38, 0.08) 0px 0px 0px 1px;
+  --ring-strong: rgba(16, 24, 38, 0.26) 0px 0px 0px 1px;
+  --card-shadow: rgba(16, 24, 38, 0.13) 0px 0px 0px 1px;
   --focus-ring: 0 0 0 2px var(--white), 0 0 0 4px var(--focus);
 
-  --radius-sm: 4px;
-  --radius: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
+  /* Superficies que antes estaban escritas a mano */
+  --footer-bg: rgba(251, 250, 247, 0.92);
+  --chip-bg: #f6f4ef;
+  --chip-hover: #efece5;
+  --chip-ring: rgba(16, 24, 38, 0.1);
+  --chip-border: rgba(16, 24, 38, 0.45);
+  --accent: #1f3a5f;
+  --strong: #101826;
+  --soft: #f3f1ec;
+  --card-hover-shadow: rgba(16, 24, 38, 0.26) 0px 0px 0px 1px;
+
+  --radius-sm: 2px;
+  --radius: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
   --pill: 9999px;
 
   --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Geist', Roboto, sans-serif;
@@ -55,6 +65,44 @@
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --fast: 120ms var(--ease);
   --base: 180ms var(--ease);
+  --on-accent: #ffffff;
+}
+
+/* ===== TEMA OSCURO (se activa con <html data-theme="dark">, ver utils/theme.js) ===== */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --white: #0a0d12;
+  --black: #e6e9ee;
+  --gray-50: #11161e;
+  --gray-100: #1a212c;
+  --gray-200: #232c39;
+  --gray-300: #33404f;
+  --gray-400: #8a94a6;
+  --gray-500: #98a2b3;
+  --gray-600: #b0b8c5;
+  --gray-700: #cdd3dc;
+  --link: #d9b876;
+  --focus: #c9a55c;
+  --ok-bg: #2a2416;
+  --ok-fg: #d9b876;
+  --err-bg: #3a1820;
+  --err-fg: #ff8a98;
+  --warn-bg: #3a2412;
+  --warn-fg: #f5a968;
+  --ring: rgba(148, 163, 184, 0.16) 0px 0px 0px 1px;
+  --ring-light: rgba(148, 163, 184, 0.1) 0px 0px 0px 1px;
+  --ring-strong: rgba(148, 163, 184, 0.32) 0px 0px 0px 1px;
+  --card-shadow: rgba(148, 163, 184, 0.16) 0px 0px 0px 1px;
+  --card-hover-shadow: rgba(148, 163, 184, 0.32) 0px 0px 0px 1px;
+  --footer-bg: rgba(10, 13, 18, 0.92);
+  --chip-bg: #11161e;
+  --chip-hover: #1a212c;
+  --chip-ring: rgba(148, 163, 184, 0.14);
+  --chip-border: rgba(148, 163, 184, 0.55);
+  --accent: #c9a55c;
+  --strong: #e6e9ee;
+  --soft: #11161e;
+  --on-accent: #0a0d12;
 }
 
 /* ===== RESET & BASE ===== */
@@ -76,7 +124,9 @@ body {
   line-height: 1.5;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
-  font-feature-settings: 'liga' 1, 'calt' 1;
+  font-feature-settings:
+    'liga' 1,
+    'calt' 1;
 }
 
 ::selection {
@@ -122,6 +172,10 @@ a:hover {
 
 /* ===== HEADER ===== */
 .options-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
   padding-bottom: 28px;
   box-shadow: inset 0 -1px 0 var(--gray-100);
   margin-bottom: 28px;
@@ -155,8 +209,7 @@ a:hover {
 }
 
 .card:hover {
-  box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 0px 1px, rgba(0, 0, 0, 0.06) 0px 2px 2px,
-    rgba(0, 0, 0, 0.04) 0px 8px 8px -8px, #fafafa 0px 0px 0px 1px;
+  box-shadow: var(--card-hover-shadow);
 }
 
 .card-header {
@@ -205,7 +258,10 @@ a:hover {
   gap: 20px 24px;
   max-height: 8000px;
   overflow: hidden;
-  transition: max-height var(--base), padding var(--base), opacity var(--base);
+  transition:
+    max-height var(--base),
+    padding var(--base),
+    opacity var(--base);
 }
 
 .card-content.collapsed {
@@ -227,10 +283,8 @@ a:hover {
   color: var(--gray-600);
   font-size: 13px;
   line-height: 1.55;
-  padding: 12px 14px;
-  background: var(--gray-50);
-  border-radius: var(--radius);
-  box-shadow: var(--ring-light);
+  padding: 0;
+  order: -2;
 }
 
 .subsection-description {
@@ -435,7 +489,9 @@ input::placeholder {
   padding: 5px 8px;
   border-radius: var(--radius-sm);
   line-height: 1.35;
-  transition: background var(--fast), color var(--fast);
+  transition:
+    background var(--fast),
+    color var(--fast);
 }
 
 .radio-group label:hover,
@@ -458,7 +514,9 @@ input[type='radio'] {
   box-shadow: var(--ring-strong);
   cursor: pointer;
   position: relative;
-  transition: background var(--fast), box-shadow var(--fast);
+  transition:
+    background var(--fast),
+    box-shadow var(--fast);
 }
 
 input[type='radio'] {
@@ -645,7 +703,10 @@ input:checked + .slider::before {
   box-shadow: var(--ring);
   cursor: pointer;
   white-space: nowrap;
-  transition: background var(--fast), color var(--fast), box-shadow var(--fast);
+  transition:
+    background var(--fast),
+    color var(--fast),
+    box-shadow var(--fast);
 }
 
 .btn:hover {
@@ -838,7 +899,9 @@ input:checked + .slider::before {
   border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background var(--fast), color var(--fast);
+  transition:
+    background var(--fast),
+    color var(--fast);
 }
 
 .btn-edit {
@@ -969,7 +1032,9 @@ input:checked + .slider::before {
   box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.35);
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--base), transform var(--base);
+  transition:
+    opacity var(--base),
+    transform var(--base);
 }
 
 .status.success,
@@ -1010,7 +1075,7 @@ input:checked + .slider::before {
   align-items: center;
   gap: 10px;
   padding: 14px 24px;
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--footer-bg);
   backdrop-filter: saturate(180%) blur(12px);
   -webkit-backdrop-filter: saturate(180%) blur(12px);
   box-shadow: 0 -1px 0 var(--gray-100);
@@ -1102,4 +1167,51 @@ input:checked + .slider::before {
 .btn.primary:disabled,
 .btn.btn-primary:disabled {
   color: var(--gray-600);
+}
+
+/* ===== REDISEÑO 2026-11: orden y densidad de la configuración ===== */
+.theme-toggle::before {
+  content: '◐';
+  font-size: 15px;
+}
+
+:root[data-theme='light'] .theme-toggle::before {
+  content: '◑';
+}
+
+/* Cada tarjeta: descripción → resumen de lo marcado → campos */
+.selection-summary {
+  order: -1;
+}
+
+/* Las listas largas ocupaban una sola columna angosta: se reparten en columnas */
+.exchange-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  column-gap: 8px;
+  align-content: start;
+}
+
+.exchange-group h4 {
+  grid-column: 1 / -1;
+}
+
+.card-header h2 {
+  font-size: 17px;
+}
+
+.card-header {
+  padding: 16px 24px;
+}
+
+/* MESA DE OPERACIONES: mismo lenguaje que el popup (cifras monoespaciadas, títulos en mayúscula) */
+input[type='number'],
+input[type='time'] {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.card-header h2 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
 }

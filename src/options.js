@@ -1,3 +1,4 @@
+/* global CommonUtils */
 // ============================================
 // OPTIONS PAGE LOGIC - ArbitrageAR v3.0
 // ============================================
@@ -28,7 +29,7 @@ log('🚀 DEBUG: options.js cargado correctamente');
 const DEFAULT_SETTINGS = {
   notificationsEnabled: true,
   alertThreshold: 1.0, // Umbral único de alerta (%)
-  notificationFrequency: '1min', // Frecuencia de notificaciones por defecto
+  notificationFrequency: '1hour', // Frecuencia de notificaciones por defecto
   soundEnabled: true,
   quietHoursEnabled: false,
   quietStart: '22:00',
@@ -813,8 +814,9 @@ function getCurrentSettings() {
 
   // Notificaciones
   settings.notificationsEnabled = document.getElementById('notify-enabled')?.checked ?? true;
-  settings.alertThreshold = parseFloat(document.getElementById('alert-threshold')?.value) || 1.0;
-  settings.notificationFrequency = document.getElementById('notify-frequency')?.value || '1min';
+  const umbral = parseFloat(document.getElementById('alert-threshold')?.value);
+  settings.alertThreshold = Number.isFinite(umbral) ? umbral : 1.0; // 0 es válido: avisar de todo
+  settings.notificationFrequency = document.getElementById('notify-frequency')?.value || '1hour';
   settings.soundEnabled = document.getElementById('sound-enabled')?.checked ?? true;
 
   // Horario silencioso
@@ -832,7 +834,9 @@ function getCurrentSettings() {
   settings.defaultSimAmount =
     parseInt(document.getElementById('simulator-amount')?.value) || 1000000;
   settings.maxRoutesDisplay = parseInt(document.getElementById('max-routes')?.value) || 20;
-  settings.filterMinProfit = parseFloat(document.getElementById('min-profit')?.value) || -10.0;
+  // `|| -10` convertía un mínimo de 0% (legítimo: "sólo ganancias") en -10%.
+  const minProfit = parseFloat(document.getElementById('min-profit')?.value);
+  settings.filterMinProfit = Number.isFinite(minProfit) ? minProfit : -10.0;
   settings.sortByProfit = document.getElementById('sort-profit')?.checked ?? true;
 
   // Fees
@@ -861,7 +865,9 @@ function getCurrentSettings() {
   const p2pUsdtUsdtCheckboxes = document.querySelectorAll(
     'input[name="p2p-usdt-usdt-exchange"]:checked'
   );
-  settings.p2pUsdtUsdtExchanges = Array.from(p2pUsdtUsdtCheckboxes).map(cb => cb.value);
+  // La clave tiene que ser la que lee el motor y la que carga esta misma página (O-12): antes se
+  // guardaba como p2pUsdtUsdtExchanges, que nadie leía, y los 13 checkboxes no hacían nada.
+  settings.p2pUsdUsdtExchanges = Array.from(p2pUsdtUsdtCheckboxes).map(cb => cb.value);
 
   // Paso 3: USDT → ARS (Venta USDT)
   const p2pUsdtArsCheckboxes = document.querySelectorAll(
@@ -944,6 +950,13 @@ function updateDollarPriceUI() {
 // Configurar secciones colapsables
 function setupCollapsibleSections() {
   const cardHeaders = document.querySelectorAll('.card-header[data-action="toggle-section"]');
+
+  // Arranca con una sola sección abierta: todas abiertas eran 7500px de scroll.
+  cardHeaders.forEach((header, i) => {
+    if (i === 0) return;
+    header.classList.add('collapsed');
+    header.nextElementSibling.classList.add('collapsed');
+  });
 
   cardHeaders.forEach(header => {
     header.addEventListener('click', () => {

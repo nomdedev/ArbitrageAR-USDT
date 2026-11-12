@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>arbitrarARS</title>
+    <script src="utils/theme.js"></script>
     <!-- UI Components CSS - Design System -->
     <link rel="stylesheet" href="ui-components/design-system.css" />
     <!-- Skip Link Styles -->
@@ -76,6 +77,32 @@
         <path d="M21 3v5h-5" />
         <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
         <path d="M8 16H3v5" />
+      </symbol>
+
+      <!-- Notificaciones -->
+      <symbol
+        id="icon-bell"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" />
+      </symbol>
+      <symbol
+        id="icon-bell-off"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path
+          d="M13.73 21a2 2 0 0 1-3.46 0M18.63 13A17.9 17.9 0 0 1 18 8M6.26 6.26A5.9 5.9 0 0 0 6 8c0 7-3 9-3 9h14M18 8a6 6 0 0 0-9.33-5M1 1l22 22"
+        />
       </symbol>
 
       <!-- Settings -->
@@ -893,6 +920,22 @@
             </span>
           </button>
           <button
+            id="theme-toggle"
+            class="btn-header-icon"
+            data-theme-toggle
+            type="button"
+          ></button>
+          <button
+            id="notifications-toggle"
+            class="btn-header-icon"
+            type="button"
+            aria-pressed="true"
+            aria-label="Desactivar notificaciones"
+            data-tooltip="Notificaciones"
+          >
+            <svg><use href="#icon-bell"></use></svg>
+          </button>
+          <button
             id="settings"
             class="btn-header-icon"
             data-tooltip="Configuración"
@@ -987,7 +1030,8 @@
               <svg><use href="#icon-dollar"></use></svg>
             </div>
             <div class="dollar-details">
-              <span class="dollar-value" id="dollar-current-price">$950.00</span>
+              <span class="dollar-label">Dólar oficial</span>
+              <span class="dollar-value" id="dollar-current-price">—</span>
               <span class="dollar-source" id="dollar-source-text">Fuente: Manual</span>
             </div>
           </div>
@@ -995,46 +1039,89 @@
             <button
               id="recalculate-dollar"
               class="dollar-action-btn"
-              aria-label="Recalcular con precio personalizado"
-              title="Recalcular con precio personalizado"
+              aria-label="Cambiar el precio del dólar"
+              title="Cambiar el precio del dólar"
             >
-              <svg aria-hidden="true"><use href="#icon-refresh"></use></svg>
-            </button>
-            <button
-              id="configure-dollar"
-              class="dollar-action-btn secondary"
-              aria-label="Abrir configuración de precio del dólar"
-              title="Abrir configuración de precio del dólar"
-            >
-              <svg aria-hidden="true"><use href="#icon-settings"></use></svg>
+              Cambiar
             </button>
           </div>
         </div>
       </div>
 
-      <div class="tabs">
-        <button class="tab active" data-tab="routes" aria-label="Arbitraje Fiat">
+      <div class="tabs" role="tablist" aria-label="Secciones">
+        <button
+          class="tab active"
+          data-tab="routes"
+          role="tab"
+          aria-selected="true"
+          aria-label="Arbitraje Fiat"
+        >
           <svg><use href="#icon-dollar"></use></svg>
           <span>Fiat</span>
         </button>
-        <button class="tab" data-tab="crypto-arbitrage" aria-label="Arbitraje Cripto">
+        <button
+          class="tab"
+          data-tab="crypto-arbitrage"
+          role="tab"
+          aria-selected="false"
+          aria-label="Arbitraje Cripto"
+        >
           <svg><use href="#icon-crypto"></use></svg>
           <span>Cripto</span>
         </button>
-        <button class="tab" data-tab="simulator" aria-label="Simulador">
+        <button
+          class="tab"
+          data-tab="simulator"
+          role="tab"
+          aria-selected="false"
+          aria-label="Simulador"
+        >
           <svg><use href="#icon-simulator"></use></svg>
           <span>Simular</span>
         </button>
-        <button class="tab" data-tab="banks" aria-label="Exchanges">
+        <button
+          class="tab"
+          data-tab="banks"
+          role="tab"
+          aria-selected="false"
+          aria-label="Exchanges"
+        >
           <svg><use href="#icon-exchange"></use></svg>
           <span>Exchanges</span>
         </button>
       </div>
 
       <main id="main-content">
-        
         <!-- TAB: Todas las Rutas (Single + Multi-Exchange) -->
         <section id="tab-routes" class="tab-content active">
+          <div class="footer-filters" role="group" aria-label="Tipo de ruta">
+            <button
+              class="filter-btn-footer active"
+              data-filter="no-p2p"
+              aria-label="Mostrar rutas directas"
+            >
+              <span class="icon icon-sm">
+                <svg><use href="#icon-bolt"></use></svg>
+              </span>
+              Directas
+            </button>
+            <button class="filter-btn-footer" data-filter="p2p" aria-label="Mostrar rutas P2P">
+              <span class="icon icon-sm">
+                <svg><use href="#icon-p2p"></use></svg>
+              </span>
+              P2P
+            </button>
+            <button
+              class="filter-btn-footer"
+              data-filter="all"
+              aria-label="Mostrar todas las rutas"
+            >
+              <span class="icon icon-sm">
+                <svg><use href="#icon-target"></use></svg>
+              </span>
+              Todas
+            </button>
+          </div>
           <div id="loading" class="loading loading-state">
             <div class="spinner-premium lg">
               <div class="spinner-ring"></div>
@@ -1070,7 +1157,7 @@
                 <option value="SOL">Solana (SOL)</option>
                 <option value="ADA">Cardano (ADA)</option>
                 <option value="XRP">Ripple (XRP)</option>
-                <option value="MATIC">Polygon (MATIC)</option>
+                <option value="POL">Polygon (POL)</option>
                 <option value="DOGE">Dogecoin (DOGE)</option>
                 <option value="USDT">Tether (USDT)</option>
               </select>
@@ -1117,8 +1204,8 @@
                   step="1000"
                 />
               </div>
-              <button id="toggle-advanced" class="sim-settings-btn" title="Configuración avanzada">
-                <svg><use href="#icon-settings"></use></svg>
+              <button id="toggle-advanced" class="sim-settings-btn" title="Rangos de la matriz">
+                Rangos
               </button>
             </div>
 
@@ -1221,7 +1308,7 @@
                     type="number"
                     id="matrix-usd-min"
                     step="10"
-                    value="1400"
+                    value="1520"
                     min="800"
                     max="2000"
                     aria-label="USD mínimo"
@@ -1231,7 +1318,7 @@
                     type="number"
                     id="matrix-usd-max"
                     step="10"
-                    value="2100"
+                    value="1620"
                     min="800"
                     max="2500"
                     aria-label="USD máximo"
@@ -1243,9 +1330,7 @@
                     type="number"
                     id="matrix-usdt-min"
                     step="10"
-                    value="1000"
-                    min="900"
-                    max="1300"
+                    value="1500"
                     aria-label="USDT mínimo"
                   />
                   <span>-</span>
@@ -1253,16 +1338,20 @@
                     type="number"
                     id="matrix-usdt-max"
                     step="10"
-                    value="1100"
-                    min="900"
-                    max="1300"
+                    value="1650"
                     aria-label="USDT máximo"
                   />
                 </div>
-                <button id="generate-risk-matrix" class="sim-btn-generate" title="Generar matriz">
+                <button id="generate-risk-matrix" class="sim-btn-generate">
                   <svg><use href="#icon-chart"></use></svg>
+                  Generar matriz
                 </button>
               </div>
+
+              <p class="sim-empty-hint">
+                Definí los rangos y generá la matriz: cada celda muestra la ganancia con ese par de
+                precios USD y USDT.
+              </p>
 
               <div id="risk-matrix-result" style="display: none">
                 <!-- Filtros -->
@@ -1350,41 +1439,8 @@
             <!-- Indicador de estado de conexión simplificado -->
             <div id="connection-status" class="connection-status online">
               <span class="status-dot"></span>
+              <span class="status-label">Actualizado</span>
               <span id="last-update-time" class="status-time">--:--:--</span>
-            </div>
-          </div>
-          <div class="footer-right">
-            <div class="footer-filters">
-              <button
-                class="filter-btn-footer active"
-                data-filter="no-p2p"
-                data-tooltip="Rutas Directas"
-                aria-label="Mostrar rutas directas"
-              >
-                <span class="icon icon-sm">
-                  <svg><use href="#icon-bolt"></use></svg>
-                </span>
-              </button>
-              <button
-                class="filter-btn-footer"
-                data-filter="p2p"
-                data-tooltip="Rutas P2P"
-                aria-label="Mostrar rutas P2P"
-              >
-                <span class="icon icon-sm">
-                  <svg><use href="#icon-p2p"></use></svg>
-                </span>
-              </button>
-              <button
-                class="filter-btn-footer"
-                data-filter="all"
-                data-tooltip="Todas las Rutas"
-                aria-label="Mostrar todas las rutas"
-              >
-                <span class="icon icon-sm">
-                  <svg><use href="#icon-target"></use></svg>
-                </span>
-              </button>
             </div>
           </div>
         </div>

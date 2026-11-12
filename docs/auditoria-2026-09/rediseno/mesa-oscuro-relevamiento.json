@@ -1,0 +1,272 @@
+{
+  "estructura": {
+    "tamanoDocumento": {
+      "ancho": 430,
+      "alto": 760
+    },
+    "pestanias": [
+      {
+        "texto": "Fiat",
+        "tab": "routes",
+        "activa": true
+      },
+      {
+        "texto": "Cripto",
+        "tab": "crypto-arbitrage",
+        "activa": false
+      },
+      {
+        "texto": "Simular",
+        "tab": "simulator",
+        "activa": false
+      },
+      {
+        "texto": "Exchanges",
+        "tab": "banks",
+        "activa": false
+      }
+    ],
+    "botonesVisibles": [
+      {
+        "clase": "version-indicator",
+        "texto": "v6.0.0",
+        "ancho": 51,
+        "alto": 16,
+        "radio": "2px",
+        "fondo": "rgb(22, 28, 38)",
+        "color": "rgb(138, 148, 166)",
+        "fuente": "10px/500",
+        "transicion": "transform, opacity, background-color, border-color, color, box-shadow"
+      },
+      {
+        "clase": "btn-header-icon",
+        "texto": "",
+        "ancho": 32,
+        "alto": 32,
+        "radio": "3px",
+        "fondo": "rgb(22, 28, 38)",
+        "color": "rgb(138, 148, 166)",
+        "fuente": "13.3333px/400",
+        "transicion": "transform, opacity, background-color, border-color, color, box-shadow"
+      },
+      {
+        "clase": "btn-header-icon",
+        "texto": "",
+        "ancho": 32,
+        "alto": 32,
+        "radio": "3px",
+        "fondo": "rgb(22, 28, 38)",
+        "color": "rgb(138, 148, 166)",
+        "fuente": "13.3333px/400",
+        "transicion": "transform, opacity, background-color, border-color, color, box-shadow"
+      },
+      {
+        "clase": "btn-header-icon",
+        "texto": "",
+        "ancho": 32,
+        "alto": 32,
+        "radio": "3px",
+        "fondo": "rgb(22, 28, 38)",
+        "color": "rgb(138, 148, 166)",
+        "fuente": "13.3333px/400",
+        "transicion": "transform, opacity, background-color, border-color, color, box-shadow"
+      },
+      {
+        "clase": "btn-header-icon btn-refresh",
+        "texto": "",
+        "ancho": 32,
+        "alto": 32,
+        "radio": "3px",
+        "fondo": "rgb(22, 28, 38)",
+        "color": "rgb(138, 148, 166)",
+        "fuente": "13.3333px/400",
+        "transicion": "transform, opacity, background-color, border-color, color, box-shadow"
+      },
+      {
+        "clase": "dollar-action-btn",
+        "texto": "Cambiar",
+        "ancho": 82,
+        "alto": 32,
+        "radio": "3px",
+        "fondo": "rgba(0, 0, 0, 0)",
+        "color": "rgb(230, 233, 238)",
+        "fuente": "11px/500",
+        "transicion": "transform, opacity, background-color, border-color, color, box-shadow"
+      },
+      {
+        "clase": "tab active",
+        "texto": "Fiat",
+        "ancho": 108,
+        "alto": 30,
+        "radio": "0px",
+        "fondo": "rgba(0, 0, 0, 0)",
+        "color": "rgb(217, 184, 118)",
+        "fuente": "11px/500",
+        "transicion": "transform, opacity, background-color, border-color, color, box-shadow"
+      },
+      {
+        "clase": "tab",
+        "texto": "Cripto",
+        "ancho": 108,
+        "alto": 30,
+        "radio": "0px",
+        "fondo": "rgba(0, 0, 0, 0)",
+        "color": "rgb(138, 148, 166)",
+        "fuente": "11px/500",
+        "transicion": "transform, opacity, background-color, border-color, color, box-shadow"
+      },
+      {
+        "clase": "tab",
+        "texto": "Simular",
+        "ancho": 108,
+        "alto": 30,
+        "radio": "0px",
+        "fondo": "rgba(0, 0, 0, 0)",
+        "color": "rgb(138, 148, 166)",
+        "fuente": "11px/500",
+        "transicion": "transform, opacity, background-color, border-color, color, box-shadow"
+      },
+      {
+        "clase": "tab",
+        "texto": "Exchanges",
+        "ancho": 108,
+        "alto": 30,
+        "radio": "0px",
+        "fondo": "rgba(0, 0, 0, 0)",
+        "color": "rgb(138, 148, 166)",
+        "fuente": "11px/500",
+        "transicion": "transform, opacity, background-color, border-color, color, box-shadow"
+      },
+      {
+        "clase": "filter-btn-footer active",
+        "texto": "Directas",
+        "ancho": 133,
+        "alto": 26,
+        "radio": "0px",
+        "fondo": "rgb(30, 38, 50)",
+        "color": "rgb(217, 184, 118)",
+        "fuente": "11px/500",
+        "transicion": "transform, opacity, background-color, border-color, color, box-shadow"
+      },
+      {
+        "clase": "filter-btn-footer",
+        "texto": "P2P",
+        "ancho": 133,
+        "alto": 26,
+        "radio": "0px",
+        "fondo": "rgb(10, 13, 18)",
+        "color": "rgb(138, 148, 166)",
+        "fuente": "11px/500",
+        "transicion": "transform, opacity, background-color, border-color, color, box-shadow"
+      },
+      {
+        "clase": "filter-btn-footer",
+        "texto": "Todas",
+        "ancho": 133,
+        "alto": 26,
+        "radio": "0px",
+        "fondo": "rgb(10, 13, 18)",
+        "color": "rgb(138, 148, 166)",
+        "fuente": "11px/500",
+        "transicion": "transform, opacity, background-color, border-color, color, box-shadow"
+      }
+    ],
+    "selects": [
+      {
+        "id": "crypto-filter",
+        "opciones": [
+          "Todas las criptos",
+          "Bitcoin (BTC)",
+          "Ethereum (ETH)",
+          "USD Coin (USDC)",
+          "DAI",
+          "Binance Coin (BNB)",
+          "Solana (SOL)",
+          "Cardano (ADA)"
+        ]
+      }
+    ],
+    "filtros": [
+      {
+        "clase": "footer-filters",
+        "texto": "Directas P2P Todas"
+      },
+      {
+        "clase": "filter-btn-footer active",
+        "texto": "Directas"
+      },
+      {
+        "clase": "filter-btn-footer",
+        "texto": "P2P"
+      },
+      {
+        "clase": "filter-btn-footer",
+        "texto": "Todas"
+      },
+      {
+        "clase": "sim-matrix-filters",
+        "texto": "Filtrar: % a %"
+      },
+      {
+        "clase": "sim-btn-filter",
+        "texto": ""
+      },
+      {
+        "clase": "sim-btn-filter-reset",
+        "texto": ""
+      },
+      {
+        "clase": "sim-filter-count",
+        "texto": "0 combinaciones"
+      }
+    ],
+    "secciones": [
+      {
+        "clase": "tab-content active",
+        "visible": true,
+        "alto": 1167
+      },
+      {
+        "clase": "tab-content",
+        "visible": false,
+        "alto": 0
+      },
+      {
+        "clase": "tab-content",
+        "visible": false,
+        "alto": 0
+      },
+      {
+        "clase": "tab-content",
+        "visible": false,
+        "alto": 0
+      }
+    ]
+  },
+  "estilos": {
+    "bodyFondo": "rgb(10, 13, 18)",
+    "bodyFuente": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", system-ui, \"Helvetica Neue\", Helvetica, Arial, sans-serif",
+    "bodyTamano": "13px",
+    "tabFondo": "rgba(0, 0, 0, 0)",
+    "tabRadio": "0px",
+    "tabActivaFondo": "rgba(0, 0, 0, 0)",
+    "tabActivaTexto": "rgb(217, 184, 118)",
+    "tabTransicion": "transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), color 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1)",
+    "botonFondo": "rgb(22, 28, 38)",
+    "botonRadio": "2px",
+    "keyframesEnUso": 65,
+    "hojas": [
+      "ui-components/design-system.css",
+      "inline",
+      "ui-components/animations-minimal.css",
+      "ui-components/header.css",
+      "ui-components/exchange-card.css",
+      "ui-components/arbitrage-panel.css",
+      "ui-components/tabs.css",
+      "ui-components/loading-states.css",
+      "ui-components/states-feedback.css",
+      "src/popup.css"
+    ]
+  },
+  "errores": []
+}

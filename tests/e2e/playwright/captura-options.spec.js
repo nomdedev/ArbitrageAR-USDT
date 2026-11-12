@@ -21,7 +21,7 @@ test('capturas de options.html', async () => {
     channel: 'chromium',
     headless: false,
     args: [`--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`],
-    viewport: { width: 1440, height: 950 },
+    viewport: { width: 1440, height: 950 }
   });
   try {
     let [sw] = context.serviceWorkers();
@@ -35,10 +35,11 @@ test('capturas de options.html', async () => {
     // Arriba de todo, sin tocar nada: así lo ve el usuario al abrir.
     await opt.screenshot({ path: path.join(SALIDA, `${PREFIJO}-01-arriba.png`) });
 
-    // Desplegar las que esten colapsadas (por defecto vienen todas abiertas).
-    const colapsadas = await opt.locator('.card-header[data-action="toggle-section"].collapsed').all();
-    for (const c of colapsadas) {
-      await c.click().catch(() => {});
+    // Desplegar las que esten colapsadas (por defecto queda abierta solo la primera).
+    // Siempre la primera que quede: al abrir una, el conjunto de colapsadas se achica.
+    const colapsadas = opt.locator('.card-header[data-action="toggle-section"].collapsed');
+    for (let n = await colapsadas.count(); n > 0; n = await colapsadas.count()) {
+      await colapsadas.first().click();
       await opt.waitForTimeout(150);
     }
     await opt.waitForTimeout(600);
@@ -89,11 +90,14 @@ test('capturas de options.html', async () => {
           } catch {
             return 'sin acceso';
           }
-        })(),
+        })()
       };
     });
     console.log('[metricas] ' + JSON.stringify(metricas, null, 2));
-    fs.writeFileSync(path.join(SALIDA, `${PREFIJO}-metricas.json`), JSON.stringify(metricas, null, 2));
+    fs.writeFileSync(
+      path.join(SALIDA, `${PREFIJO}-metricas.json`),
+      JSON.stringify(metricas, null, 2)
+    );
 
     console.log(`[capturas] ${SALIDA} con prefijo ${PREFIJO}`);
   } finally {

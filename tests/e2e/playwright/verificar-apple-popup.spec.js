@@ -22,7 +22,7 @@ test('metricas Apple en el popup en vivo', async () => {
     channel: 'chromium',
     headless: false,
     args: [`--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`],
-    viewport: { width: 420, height: 760 },
+    viewport: { width: 420, height: 760 }
   });
 
   try {
@@ -35,7 +35,7 @@ test('metricas Apple en el popup en vivo', async () => {
     await popup.waitForTimeout(8000); // esperar datos reales
 
     const m = await popup.evaluate(() => {
-      const cs = (sel) => {
+      const cs = sel => {
         const el = document.querySelector(sel);
         return el ? getComputedStyle(el) : null;
       };
@@ -46,7 +46,9 @@ test('metricas Apple en el popup en vivo', async () => {
       for (const hoja of document.styleSheets) {
         let reglas = '';
         try {
-          reglas = Array.from(hoja.cssRules || []).map((r) => r.cssText).join('\n');
+          reglas = Array.from(hoja.cssRules || [])
+            .map(r => r.cssText)
+            .join('\n');
         } catch {
           continue;
         }
@@ -72,10 +74,10 @@ test('metricas Apple en el popup en vivo', async () => {
         mainPaddingAbajo: main ? main.paddingBottom : '-',
         fuentesExternas: performance
           .getEntriesByType('resource')
-          .filter((r) => /fonts\.(googleapis|gstatic)/.test(r.name)).length,
+          .filter(r => /fonts\.(googleapis|gstatic)/.test(r.name)).length,
         azulTailwind,
         violeta,
-        verdeDoble,
+        verdeDoble
       };
     });
 
@@ -84,7 +86,10 @@ test('metricas Apple en el popup en vivo', async () => {
     console.log('==========================================\n');
 
     await popup.screenshot({ path: path.join(SALIDA, 'popup-despues-01-arriba.png') });
-    await popup.screenshot({ path: path.join(SALIDA, 'popup-despues-02-full.png'), fullPage: true });
+    await popup.screenshot({
+      path: path.join(SALIDA, 'popup-despues-02-full.png'),
+      fullPage: true
+    });
 
     // ── Aserciones del sistema Apple ──
     expect(m.htmlTamano).toBe('16px'); // la raiz ya no encoge los rem
@@ -97,8 +102,9 @@ test('metricas Apple en el popup en vivo', async () => {
     // Apple reserva el azul para la accion primaria: el segmento activo usa superficie elevada.
     // (Si se prefiere el azul lleno estilo iOS tab bar, es una linea en .tab.active y este
     //  assert pasa a esperar rgb(0, 113, 227).)
-    expect(m.tabActivoFondo).toBe('rgb(58, 58, 61)'); // #3a3a3d, segmento seleccionado
-    expect(m.tabsRadio).toBe('11px'); // control segmentado, no pestanas sueltas
+    // Diseño actual (mesa de operaciones): pestañas subrayadas, sin caja ni redondeo.
+    expect(m.tabActivoFondo).toBe('rgba(0, 0, 0, 0)');
+    expect(m.tabsRadio).toBe('0px');
     expect(parseFloat(m.tabTamano)).toBeGreaterThanOrEqual(12); // etiquetas legibles
     expect(m.azulTailwind).toBe(0);
     expect(m.violeta).toBe(0);

@@ -15,7 +15,13 @@
   padding: var(--space-4);
   border: var(--card-border);
   box-shadow: var(--shadow-md);
-  transition: transform var(--duration-normal) var(--ease-out-expo), opacity var(--duration-normal) var(--ease-out-expo), background-color var(--duration-normal) var(--ease-out-expo), border-color var(--duration-normal) var(--ease-out-expo), color var(--duration-normal) var(--ease-out-expo), box-shadow var(--duration-normal) var(--ease-out-expo);
+  transition:
+    transform var(--duration-normal) var(--ease-out-expo),
+    opacity var(--duration-normal) var(--ease-out-expo),
+    background-color var(--duration-normal) var(--ease-out-expo),
+    border-color var(--duration-normal) var(--ease-out-expo),
+    color var(--duration-normal) var(--ease-out-expo),
+    box-shadow var(--duration-normal) var(--ease-out-expo);
   overflow: hidden;
   animation: fadeInUp var(--duration-normal) var(--ease-out-expo) both;
 }
@@ -134,7 +140,7 @@
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  box-shadow: 0 0 12px rgba(48, 209, 88, 0.4);
+  box-shadow: 0 0 12px rgba(46, 189, 133, 0.4);
   /* Apple: sin bucles decorativos (era: animation: glowPulse 2s ease-in-out infinite;) */
 }
 /* ==========================================
@@ -149,7 +155,7 @@
 }
 
 .exchange-card[data-best='true']:hover {
-  box-shadow: 0 12px 40px rgba(48, 209, 88, 0.3);
+  box-shadow: 0 12px 40px rgba(46, 189, 133, 0.3);
 }
 
 /* Estado loading: skeleton shimmer */
@@ -161,7 +167,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(0, 113, 227, 0.1) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(201, 165, 92, 0.1) 50%, transparent 100%);
   animation: shimmer 1.5s ease-in-out infinite;
 }
 
@@ -214,10 +220,10 @@
 @keyframes glowPulse {
   0%,
   100% {
-    box-shadow: 0 0 12px rgba(48, 209, 88, 0.4);
+    box-shadow: 0 0 12px rgba(46, 189, 133, 0.4);
   }
   50% {
-    box-shadow: 0 0 20px rgba(48, 209, 88, 0.6);
+    box-shadow: 0 0 20px rgba(46, 189, 133, 0.6);
   }
 }
 .price-value.updated-down {
@@ -229,7 +235,7 @@
     background-color: transparent;
   }
   50% {
-    background-color: rgba(48, 209, 88, 0.2);
+    background-color: rgba(46, 189, 133, 0.2);
   }
   100% {
     background-color: transparent;
@@ -241,7 +247,7 @@
     background-color: transparent;
   }
   50% {
-    background-color: rgba(255, 69, 58, 0.2);
+    background-color: rgba(246, 70, 93, 0.2);
   }
   100% {
     background-color: transparent;
@@ -319,12 +325,12 @@
 }
 
 .volume-badge.high {
-  background: rgba(48, 209, 88, 0.15);
+  background: rgba(46, 189, 133, 0.15);
   color: var(--color-success);
 }
 
 .volume-badge.low {
-  background: rgba(255, 69, 58, 0.15);
+  background: rgba(246, 70, 93, 0.15);
   color: var(--color-danger);
 }
 
@@ -353,12 +359,12 @@
 }
 
 .spread-badge.tight {
-  background: rgba(48, 209, 88, 0.15);
+  background: rgba(46, 189, 133, 0.15);
   color: var(--color-success);
 }
 
 .spread-badge.wide {
-  background: rgba(255, 69, 58, 0.15);
+  background: rgba(246, 70, 93, 0.15);
   color: var(--color-danger);
 }
 
@@ -412,7 +418,7 @@
   transform: translateY(-2px);
   box-shadow:
     var(--shadow-md),
-    0 0 0 4px rgba(0, 113, 227, 0.2);
+    0 0 0 4px rgba(201, 165, 92, 0.2);
 }
 
 /* Estado focus con best price */
@@ -420,7 +426,7 @@
   outline-color: var(--color-success);
   box-shadow:
     var(--shadow-md),
-    0 0 0 4px rgba(48, 209, 88, 0.3);
+    0 0 0 4px rgba(46, 189, 133, 0.3);
 }
 
 /* ==========================================
