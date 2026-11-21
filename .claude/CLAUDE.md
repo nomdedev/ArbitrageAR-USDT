@@ -204,6 +204,7 @@ npm run test:e2e       # Tests E2E
 | `docs/BUENAS_PRACTICAS_Y_PATRONES.md` | Patrones de diseño |
 | `docs/SEGURIDAD_Y_VULNERABILIDADES.md` | Seguridad |
 | `docs/TESTING_INSTRUCTIONS.md` | Testing |
+| `GLOSSARY.md` | Glosario de dominio (raíz); se mantiene al día al cambiar un término |
 
 ---
 
